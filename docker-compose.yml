@@ -1,0 +1,30 @@
+services:
+  chirp-syncer:
+    build: .
+    container_name: chirp-syncer
+    environment:
+      PYTHONPATH: "/app"
+      TWITTER_API_KEY: "${TWITTER_API_KEY}"
+      TWITTER_API_SECRET: "${TWITTER_API_SECRET}"
+      TWITTER_ACCESS_TOKEN: "${TWITTER_ACCESS_TOKEN}"
+      TWITTER_ACCESS_SECRET: "${TWITTER_ACCESS_SECRET}"
+      BSKY_USERNAME: "${BSKY_USERNAME}"
+      BSKY_PASSWORD: "${BSKY_PASSWORD}"
+    volumes:
+      - ./app:/app
+      - ./data.db:/app/data.db
+    working_dir: /app
+    command: python main.py
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_LABEL_ENABLE: "true"
+    restart: unless-stopped

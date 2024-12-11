@@ -1,0 +1,7 @@
+-r requirements.txt
+pytest
+pytest-mock
+pre-commit
+black
+flake8
+pre-commit
