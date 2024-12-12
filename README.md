@@ -20,7 +20,7 @@ If you are using windows:
 2. Install make:
 ```bash
 choco install make
-```bash
+```
 
 ### 1. Python and pyenv
 Ensure you have Python (3.10.x) installed. Using **pyenv** is recommended to manage the Python version and virtual environments.
