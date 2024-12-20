@@ -72,10 +72,8 @@ Clone this repository to your local machine:
 Create a `.env` file in the root directory and add your API credentials:
 
  ```bash
-    TWITTER_API_KEY=your-twitter-api-key
-    TWITTER_API_SECRET=your-twitter-api-secret
-    TWITTER_ACCESS_TOKEN=your-twitter-access-token
-    TWITTER_ACCESS_SECRET=your-twitter-access-secret
+    TWITTER_USERNAME=your-twitter-username
+    TWITTER_PASSWORD=your-twitter-password
     BSKY_USERNAME=your-bluesky-username
     BSKY_PASSWORD=your-bluesky-app-password
  ```
