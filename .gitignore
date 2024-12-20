@@ -32,3 +32,5 @@ chirpsyncer-env/
 
 # VS Code settings
 .vscode/
+
+install-pyenv-win.ps1
