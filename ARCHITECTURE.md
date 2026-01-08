@@ -1,6 +1,7 @@
 # ChirpSyncer - Documentación Técnica Completa
 
 ## Índice
+
 1. [Resumen Ejecutivo](#resumen-ejecutivo)
 2. [Propósito del Proyecto](#propósito-del-proyecto)
 3. [Arquitectura del Sistema](#arquitectura-del-sistema)
@@ -23,6 +24,7 @@
 **ChirpSyncer** es una aplicación Python minimalista (177 LOC) que automatiza el cross-posting de tweets desde Twitter hacia Bluesky. Utiliza un patrón de arquitectura basado en handlers, persistencia SQLite para deduplicación, y polling cada 6 horas para sincronización.
 
 **Métricas Clave:**
+
 - **Lenguaje:** Python 3.10.8
 - **Líneas de Código:** 177 LOC (producción)
 - **Dependencias:** 2 principales (tweepy, atproto)
@@ -35,13 +37,17 @@
 ## 2. Propósito del Proyecto
 
 ### Problema que Resuelve
+
 Los usuarios activos en múltiples redes sociales necesitan publicar manualmente el mismo contenido en cada plataforma, lo cual es:
+
 - **Tedioso:** Copiar/pegar manualmente cada tweet
 - **Inconsistente:** Fácil olvidar publicar en una plataforma
 - **Ineficiente:** Tiempo desperdiciado en tareas repetitivas
 
 ### Solución Implementada
+
 ChirpSyncer automatiza completamente el proceso:
+
 1. Monitorea automáticamente los tweets del usuario
 2. Detecta tweets nuevos no sincronizados
 3. Publica automáticamente en Bluesky
@@ -49,6 +55,7 @@ ChirpSyncer automatiza completamente el proceso:
 5. Respeta rate limits de APIs
 
 ### Casos de Uso
+
 - **Creadores de contenido** que mantienen presencia en ambas plataformas
 - **Empresas/Marcas** que necesitan sincronización automática
 - **Usuarios migrando** de Twitter a Bluesky pero manteniendo ambas cuentas
@@ -89,6 +96,7 @@ ChirpSyncer automatiza completamente el proceso:
 ### Componentes Principales
 
 #### A. **Orquestador (main.py)** - 18 líneas
+
 - **Responsabilidad:** Coordinar el flujo de sincronización
 - **Ciclo de vida:**
   1. Inicialización de base de datos
@@ -97,6 +105,7 @@ ChirpSyncer automatiza completamente el proceso:
 - **Decisiones de diseño:** Simple, sin estado, fácil de entender
 
 #### B. **Configuration Manager (config.py)** - 14 líneas
+
 - **Responsabilidad:** Gestión centralizada de configuración
 - **Variables gestionadas:**
   - 4 credenciales de Twitter (API Key, Secret, Access Token, Access Secret)
@@ -105,6 +114,7 @@ ChirpSyncer automatiza completamente el proceso:
 - **Patrón:** Environment variables con `os.getenv()`
 
 #### C. **Twitter Handler (twitter_handler.py)** - 30 líneas
+
 - **Responsabilidad:** Interfaz con Twitter API v2
 - **Funciones:**
   - `fetch_tweets()`: Obtiene últimos 5 tweets filtrados
@@ -115,6 +125,7 @@ ChirpSyncer automatiza completamente el proceso:
 - **Manejo de estado:** Marca tweets como vistos inmediatamente
 
 #### D. **Bluesky Handler (bluesky_handler.py)** - 17 líneas
+
 - **Responsabilidad:** Interfaz con Bluesky AT Protocol
 - **Funciones:**
   - `login_to_bluesky()`: Autenticación explícita
@@ -123,6 +134,7 @@ ChirpSyncer automatiza completamente el proceso:
 - **Error handling:** Try/catch con logging de errores
 
 #### E. **Database Handler (db_handler.py)** - 54 líneas
+
 - **Responsabilidad:** Persistencia y deduplicación
 - **Tablas gestionadas:**
   - `seen_tweets`: IDs únicos de tweets procesados
@@ -138,6 +150,7 @@ ChirpSyncer automatiza completamente el proceso:
 ## 4. Stack Tecnológico
 
 ### Lenguaje Base
+
 - **Python 3.10.8**
   - Razón: Balance entre features modernas y estabilidad
   - Features usadas: Type hints (implícito), f-strings, context managers
@@ -145,6 +158,7 @@ ChirpSyncer automatiza completamente el proceso:
 ### Dependencias de Producción
 
 #### tweepy
+
 ```python
 # Cliente oficial de Twitter API v2
 # Versión: No especificada en requirements.txt (⚠️ PROBLEMA)
@@ -152,6 +166,7 @@ ChirpSyncer automatiza completamente el proceso:
 ```
 
 #### atproto
+
 ```python
 # Cliente oficial de Bluesky AT Protocol
 # Versión: No especificada en requirements.txt (⚠️ PROBLEMA)
@@ -160,15 +175,16 @@ ChirpSyncer automatiza completamente el proceso:
 
 ### Dependencias de Desarrollo
 
-| Paquete | Propósito | Uso en Proyecto |
-|---------|-----------|-----------------|
-| pytest | Testing framework | Tests unitarios |
-| pytest-mock | Mocking para tests | Mockeo de APIs |
-| black | Formateador de código | Pre-commit hook |
-| flake8 | Linter Python | Pre-commit hook |
-| pre-commit | Git hooks | Calidad de código |
+| Paquete     | Propósito             | Uso en Proyecto   |
+| ----------- | --------------------- | ----------------- |
+| pytest      | Testing framework     | Tests unitarios   |
+| pytest-mock | Mocking para tests    | Mockeo de APIs    |
+| black       | Formateador de código | Pre-commit hook   |
+| flake8      | Linter Python         | Pre-commit hook   |
+| pre-commit  | Git hooks             | Calidad de código |
 
 ### Base de Datos
+
 - **SQLite3** (integrada en Python)
   - **Ventajas:** Sin servidor, portátil, ligera
   - **Limitaciones:** No apta para alta concurrencia
@@ -177,17 +193,20 @@ ChirpSyncer automatiza completamente el proceso:
 ### Infraestructura
 
 #### Docker
+
 ```dockerfile
 FROM python:3.10-slim
 # Imagen oficial ligera (no alpine por compatibilidad)
 ```
 
 #### Docker Compose
+
 - 2 servicios: `chirp-syncer` + `watchtower`
 - Volúmenes: Código en vivo + BD persistente
 - Restart policy: `unless-stopped`
 
 #### CI/CD
+
 - **GitHub Actions** con Ubuntu latest
 - Trigger: Push/PR a branch `main`
 - Pipeline: Checkout → Setup Python → Install → Test
@@ -233,15 +252,15 @@ ChirpSyncer/
 
 ### Análisis de Complejidad
 
-| Archivo | LOC | Complejidad Ciclomática | Funciones | Comentario |
-|---------|-----|------------------------|-----------|------------|
-| main.py | 18 | Baja (1 loop) | 1 | Simple, bien estructurado |
-| config.py | 14 | Trivial | 0 | Solo variables |
-| db_handler.py | 54 | Media (4 funciones) | 4 | Bien modularizado |
-| twitter_handler.py | 30 | Media (2 funciones + init) | 2 | Manejo de API externa |
-| bluesky_handler.py | 17 | Baja (2 funciones + init) | 2 | Manejo de API externa |
+| Archivo            | LOC | Complejidad Ciclomática    | Funciones | Comentario                |
+| ------------------ | --- | -------------------------- | --------- | ------------------------- |
+| main.py            | 18  | Baja (1 loop)              | 1         | Simple, bien estructurado |
+| config.py          | 14  | Trivial                    | 0         | Solo variables            |
+| db_handler.py      | 54  | Media (4 funciones)        | 4         | Bien modularizado         |
+| twitter_handler.py | 30  | Media (2 funciones + init) | 2         | Manejo de API externa     |
+| bluesky_handler.py | 17  | Baja (2 funciones + init)  | 2         | Manejo de API externa     |
 
-**Total Producción:** 133 LOC (sin contar __init__.py)
+**Total Producción:** 133 LOC (sin contar **init**.py)
 
 ---
 
@@ -351,6 +370,7 @@ CREATE TABLE IF NOT EXISTS api_usage (
 ### Operaciones de BD
 
 #### Lectura: `is_tweet_seen(tweet_id)`
+
 ```python
 SELECT 1 FROM seen_tweets WHERE tweet_id = ?
 # Retorna True si fetchone() != None
@@ -358,6 +378,7 @@ SELECT 1 FROM seen_tweets WHERE tweet_id = ?
 ```
 
 #### Escritura: `mark_tweet_as_seen(tweet_id)`
+
 ```python
 INSERT OR IGNORE INTO seen_tweets (tweet_id) VALUES (?)
 # OR IGNORE previene errores de duplicados
@@ -365,6 +386,7 @@ INSERT OR IGNORE INTO seen_tweets (tweet_id) VALUES (?)
 ```
 
 #### Actualización: `store_api_rate_limit(remaining, reset)`
+
 ```python
 INSERT OR REPLACE INTO api_usage (id, remaining_reads, reset_time)
 VALUES (1, ?, ?)
@@ -380,18 +402,20 @@ DB_PATH: /home/user/ChirpSyncer/data.db
 
 # Docker
 Container: /app/data.db
-Host Volume: ./data.db:/app/data.db  # Persistencia
+Host Volume: ./data.db:/app/data.db # Persistencia
 ```
 
 ### Consideraciones de Persistencia
 
 **✓ Ventajas:**
+
 - No requiere servidor de BD
 - Portátil entre entornos
 - Atómico por defecto (ACID)
 - Perfecto para esta escala (~100 inserts/mes)
 
 **⚠️ Limitaciones:**
+
 - No apta para múltiples instancias concurrentes
 - Sin replicación automática
 - Backups manuales (no implementados)
@@ -403,6 +427,7 @@ Host Volume: ./data.db:/app/data.db  # Persistencia
 ### A. Twitter API v2
 
 #### Autenticación: OAuth 1.0a User Context
+
 ```python
 auth = OAuth1UserHandler(API_KEY, API_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
@@ -410,12 +435,14 @@ twitter_api = tweepy.API(auth)
 ```
 
 **Credenciales requeridas:**
+
 1. API Key (Consumer Key)
 2. API Secret (Consumer Secret)
 3. Access Token
 4. Access Token Secret
 
 **Cómo obtenerlas:**
+
 1. Crear cuenta en [Twitter Developer Portal](https://developer.twitter.com/)
 2. Crear App en Projects & Apps
 3. Generar tokens en "Keys and Tokens"
@@ -431,23 +458,26 @@ twitter_api.user_timeline(
 ```
 
 **Parámetros no usados (oportunidad de mejora):**
+
 - `since_id`: Tweets desde un ID específico
 - `max_id`: Tweets hasta un ID específico
 - `tweet_mode='extended'`: Tweets completos (>140 chars)
 
 #### Rate Limits
 
-| Endpoint | Límite | Ventana | Usado en Proyecto |
-|----------|--------|---------|-------------------|
-| `/statuses/user_timeline` | 100 requests | 24 horas | ✓ |
-| `/application/rate_limit_status` | Ilimitado | - | ✓ |
+| Endpoint                         | Límite       | Ventana  | Usado en Proyecto |
+| -------------------------------- | ------------ | -------- | ----------------- |
+| `/statuses/user_timeline`        | 100 requests | 24 horas | ✓                 |
+| `/application/rate_limit_status` | Ilimitado    | -        | ✓                 |
 
 **Cálculo de límite:**
+
 - Polling cada 6 horas = 4 requests/día
 - 4 requests/día × 30 días = 120 requests/mes
 - ⚠️ **PROBLEMA:** Excede el límite de 100/mes
 
 **Rate Limit Tracking:**
+
 ```python
 rate_limit = twitter_api.rate_limit_status()
 remaining = rate_limit['resources']['statuses']['/statuses/user_timeline']['remaining']
@@ -457,16 +487,19 @@ reset_timestamp = rate_limit['resources']['statuses']['/statuses/user_timeline']
 ### B. Bluesky AT Protocol
 
 #### Autenticación: Username + App Password
+
 ```python
 bsky_client = Client()
 bsky_client.login(BSKY_USERNAME, BSKY_PASSWORD)
 ```
 
 **Credenciales requeridas:**
+
 1. Username (handle de Bluesky, ej: `user.bsky.social`)
 2. App Password (generada en configuración de cuenta)
 
 **Cómo obtenerlas:**
+
 1. Crear cuenta en [Bluesky](https://bsky.app/)
 2. Ir a Settings → App Passwords
 3. Generar nueva App Password
@@ -481,6 +514,7 @@ bsky_client.post(content)
 ```
 
 **Features no implementadas:**
+
 - Imágenes/videos
 - Links embebidos
 - Mentions
@@ -490,6 +524,7 @@ bsky_client.post(content)
 #### Límites de Bluesky (no documentados oficialmente)
 
 Basado en observación de comunidad:
+
 - ~100 posts/hora (no confirmado)
 - Texto máximo: 300 caracteres
 - ⚠️ **PROBLEMA:** No hay validación de longitud antes de post
@@ -523,11 +558,13 @@ def test_db_operations():
 ```
 
 **✓ Fortalezas:**
+
 - Usa base de datos en memoria (rápido, aislado)
 - Prueba ciclo completo de operaciones
 - Sin dependencias externas
 
 **⚠️ Faltante:**
+
 - Test de `store_api_rate_limit()`
 - Test de condiciones de error (BD corrupta)
 - Test de duplicate inserts
@@ -547,11 +584,13 @@ def test_fetch_tweets(mock_auth, mock_twitter_api):
 ```
 
 **Problemas:**
+
 - No ejecuta la función bajo test
 - No valida comportamiento
 - Test incompleto (probablemente WIP)
 
 **Lo que debería hacer:**
+
 ```python
 tweets = fetch_tweets()
 assert len(tweets) == 1
@@ -573,11 +612,13 @@ def test_post_to_bluesky(mock_post, mock_login):
 ```
 
 **✓ Fortalezas:**
+
 - Mockea correctamente dependencias externas
 - Verifica que se llama al método correcto
 - Assertions adecuadas
 
 **⚠️ Faltante:**
+
 - Test de manejo de excepciones
 - Test de login fallido
 
@@ -590,31 +631,34 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
-      - id: trailing-whitespace      # Elimina espacios finales
-      - id: end-of-file-fixer        # Asegura newline al final
-      - id: check-yaml                # Valida YAML
+      - id: trailing-whitespace # Elimina espacios finales
+      - id: end-of-file-fixer # Asegura newline al final
+      - id: check-yaml # Valida YAML
 
   - repo: https://github.com/psf/black
     rev: 23.9.1
     hooks:
-      - id: black                     # Formatea código (PEP 8)
+      - id: black # Formatea código (PEP 8)
 
   - repo: https://github.com/pep8-naming/flake8
     rev: 6.1.0
     hooks:
-      - id: flake8                    # Linter de estilo
+      - id: flake8 # Linter de estilo
 ```
 
 **Ejecución:**
+
 - Automática: En cada `git commit`
 - Manual: `make pre-commit-run`
 
 #### Black (Formateador)
+
 - Configuración: Por defecto (88 chars/línea)
 - Cobertura: `app/` y `tests/`
 - Comando: `make lint`
 
 #### Flake8 (Linter)
+
 - Configuración: Por defecto
 - Cobertura: `app/` y `tests/`
 - Comando: `make lint`
@@ -642,6 +686,7 @@ jobs:
 ```
 
 **Variables de entorno mockeadas:**
+
 ```yaml
 env:
   TWITTER_API_KEY: "mock-twitter-api-key"
@@ -653,6 +698,7 @@ env:
 ```
 
 **⚠️ Limitaciones:**
+
 - No hay tests de integración con APIs reales
 - No hay linting en CI (solo tests)
 - No hay verificación de cobertura de código
@@ -676,6 +722,7 @@ CMD ["python", "app/main.py"]
 ```
 
 **Decisiones de diseño:**
+
 - `python:3.10-slim`: Balance tamaño/compatibilidad
   - Tamaño: ~125 MB (vs ~900 MB full, ~40 MB alpine)
   - Compatible con todas las librerías C
@@ -693,8 +740,8 @@ services:
       PYTHONPATH: "/app"
       # 6 variables de entorno desde .env
     volumes:
-      - ./app:/app              # Hot reload en desarrollo
-      - ./data.db:/app/data.db  # Persistencia de BD
+      - ./app:/app # Hot reload en desarrollo
+      - ./data.db:/app/data.db # Persistencia de BD
     command: python main.py
     restart: unless-stopped
     labels:
@@ -712,6 +759,7 @@ services:
 ```
 
 **Watchtower:** Auto-actualización de contenedores
+
 - Monitorea cambios en Docker Hub
 - Actualiza automáticamente imágenes taggeadas
 - Limpia imágenes antiguas (`WATCHTOWER_CLEANUP`)
@@ -721,26 +769,27 @@ services:
 
 ### Makefile (88 líneas) - Automatización Completa
 
-| Comando | Descripción | Uso |
-|---------|-------------|-----|
-| `make help` | Lista todos los comandos | Documentación |
-| `make pyenv-setup` | Instala Python 3.10.8 + venv | Setup inicial |
-| `make install` | Instala deps de producción | Desarrollo |
-| `make install-dev` | Instala deps + herramientas | Desarrollo |
-| `make lint` | black + flake8 | Control calidad |
-| `make test` | Ejecuta pytest | Testing |
-| `make run` | Ejecuta app localmente | Debugging |
-| `make clean` | Limpia __pycache__ | Mantenimiento |
-| `make docker-build` | Build imagen Docker | Deployment |
-| `make docker-up` | Inicia contenedores | Producción |
-| `make docker-down` | Detiene contenedores | Mantenimiento |
-| `make rebuild` | Rebuild + restart | Deploy cambios |
-| `make logs` | Monitorea logs real-time | Debugging |
-| `make db-reset` | Elimina data.db | Troubleshooting |
-| `make pre-commit-setup` | Instala git hooks | Setup dev |
-| `make pre-commit-run` | Ejecuta hooks manualmente | Testing |
+| Comando                 | Descripción                  | Uso             |
+| ----------------------- | ---------------------------- | --------------- |
+| `make help`             | Lista todos los comandos     | Documentación   |
+| `make pyenv-setup`      | Instala Python 3.10.8 + venv | Setup inicial   |
+| `make install`          | Instala deps de producción   | Desarrollo      |
+| `make install-dev`      | Instala deps + herramientas  | Desarrollo      |
+| `make lint`             | black + flake8               | Control calidad |
+| `make test`             | Ejecuta pytest               | Testing         |
+| `make run`              | Ejecuta app localmente       | Debugging       |
+| `make clean`            | Limpia **pycache**           | Mantenimiento   |
+| `make docker-build`     | Build imagen Docker          | Deployment      |
+| `make docker-up`        | Inicia contenedores          | Producción      |
+| `make docker-down`      | Detiene contenedores         | Mantenimiento   |
+| `make rebuild`          | Rebuild + restart            | Deploy cambios  |
+| `make logs`             | Monitorea logs real-time     | Debugging       |
+| `make db-reset`         | Elimina data.db              | Troubleshooting |
+| `make pre-commit-setup` | Instala git hooks            | Setup dev       |
+| `make pre-commit-run`   | Ejecuta hooks manualmente    | Testing         |
 
 **Features avanzadas del Makefile:**
+
 - Detección de SO (Windows/Linux/Mac)
 - Paths compatibles multiplataforma
 - Variables configurables (`PYTHON_VERSION`)
@@ -763,6 +812,7 @@ BSKY_PASSWORD=your-app-password-here
 ```
 
 **⚠️ PROBLEMAS:**
+
 - No hay .env.example en repositorio
 - No hay validación de credenciales al inicio
 - No hay fallback values
@@ -771,6 +821,7 @@ BSKY_PASSWORD=your-app-password-here
 ### Monitoreo y Logging
 
 **Logging actual:**
+
 ```python
 # app/main.py
 print("Polling for new tweets...")
@@ -782,6 +833,7 @@ print(f"Error posting to Bluesky: {e}")
 ```
 
 **⚠️ PROBLEMAS CRÍTICOS:**
+
 - Solo `print()`, no logging estructurado
 - Sin niveles de log (DEBUG, INFO, ERROR)
 - Sin timestamps
@@ -789,6 +841,7 @@ print(f"Error posting to Bluesky: {e}")
 - Difícil debuggear en producción
 
 **Recomendación:**
+
 ```python
 import logging
 logging.basicConfig(
@@ -806,6 +859,7 @@ logger.info("Polling for new tweets...")
 ### 🔴 CRÍTICAS (Impiden funcionamiento correcto)
 
 #### 1. Login de Bluesky nunca se ejecuta
+
 **Ubicación:** `app/bluesky_handler.py:8`
 
 ```python
@@ -818,6 +872,7 @@ def login_to_bluesky():
 **Impacto:** Todas las publicaciones a Bluesky fallarán con error de autenticación
 
 **Solución:**
+
 ```python
 # En app/main.py, línea 7:
 def main():
@@ -828,9 +883,11 @@ def main():
 ```
 
 #### 2. Rate Limit de Twitter excedido por diseño
+
 **Problema:** Polling cada 6 horas = 120 requests/mes, pero límite es 100
 
 **Cálculo:**
+
 ```
 24 horas ÷ 6 horas = 4 requests/día
 4 × 30 días = 120 requests/mes
@@ -839,11 +896,13 @@ Exceso = +20% sobre límite
 ```
 
 **Solución:** Aumentar intervalo a 7.2 horas (172,800 segundos)
+
 ```python
 POLL_INTERVAL = 7.2 * 60 * 60  # 100 requests/mes exactos
 ```
 
 #### 3. Sin manejo de reconexión cuando rate limit se alcanza
+
 **Ubicación:** `app/twitter_handler.py:15-17`
 
 ```python
@@ -853,11 +912,13 @@ if remaining_reads <= 0:
 ```
 
 **Problema:** Si se alcanza el límite:
+
 1. Retorna lista vacía
 2. Loop continúa cada 6 horas
 3. Desperdicia ciclos hasta reset
 
 **Solución:** Calcular tiempo hasta reset y dormir
+
 ```python
 if remaining_reads <= 0:
     wait_time = reset_time - time.time()
@@ -870,9 +931,11 @@ if remaining_reads <= 0:
 ### 🟡 IMPORTANTES (Mejoran robustez)
 
 #### 4. Sin validación de credenciales al inicio
+
 **Problema:** App inicia sin verificar credenciales, falla después
 
 **Solución:** Validar en initialize
+
 ```python
 def validate_credentials():
     if not all([TWITTER_API_KEY, TWITTER_API_SECRET, ...]):
@@ -892,14 +955,17 @@ def validate_credentials():
 ```
 
 #### 5. Sin logging estructurado
+
 **Problema:** Solo `print()`, difícil debuggear en producción
 
 **Solución:** Implementar logging.Logger en todos los módulos
 
 #### 6. Sin reintentos en fallos de API
+
 **Problema:** Un fallo temporal de red causa pérdida de sincronización
 
 **Solución:** Implementar retry con exponential backoff
+
 ```python
 from tenacity import retry, stop_after_attempt, wait_exponential
 
@@ -909,9 +975,11 @@ def post_to_bluesky(content):
 ```
 
 #### 7. Sin validación de longitud de texto
+
 **Problema:** Bluesky tiene límite de 300 caracteres
 
 **Solución:**
+
 ```python
 def post_to_bluesky(content):
     if len(content) > 300:
@@ -921,9 +989,11 @@ def post_to_bluesky(content):
 ```
 
 #### 8. Sin healthcheck en Docker
+
 **Problema:** Docker no sabe si app está funcionando
 
 **Solución:**
+
 ```dockerfile
 HEALTHCHECK --interval=1h --timeout=10s \
   CMD python -c "import sqlite3; conn = sqlite3.connect('data.db'); conn.close()" || exit 1
@@ -932,6 +1002,7 @@ HEALTHCHECK --interval=1h --timeout=10s \
 ### 🟢 DESEABLES (Mejoran experiencia)
 
 #### 9. Sin versionado de dependencias
+
 **Problema:** `requirements.txt` no especifica versiones
 
 ```txt
@@ -940,36 +1011,44 @@ atproto
 ```
 
 **Solución:**
+
 ```txt
 tweepy==4.14.0
 atproto==0.0.40
 ```
 
 #### 10. Sin sincronización de imágenes/videos
+
 **Problema:** Solo sincroniza texto, no multimedia
 
 **Solución:** Descargar media de Twitter y subirla a Bluesky
 
 #### 11. Sin soporte para threads
+
 **Problema:** Tweets enlazados se publican desconectados en Bluesky
 
 #### 12. Sin dashboard/UI
+
 **Problema:** No hay forma visual de monitorear estado
 
 **Solución:** Web UI simple con Flask/FastAPI mostrando:
+
 - Últimos tweets sincronizados
 - Estado de rate limits
 - Logs recientes
 
 #### 13. Sin .env.example
+
 **Problema:** Usuarios no saben qué variables configurar
 
 **Solución:** Crear `.env.example` con placeholders
 
 #### 14. Sin backups automáticos de BD
+
 **Problema:** Si `data.db` se corrompe, se pierden todos los registros
 
 **Solución:** Backup diario a S3/local
+
 ```python
 import shutil
 from datetime import datetime
@@ -986,11 +1065,14 @@ def backup_database():
 ### Categorización por Severidad
 
 #### Deuda Arquitectónica
+
 1. **Bloqueo en I/O de red:** Loop principal bloqueante
+
    - **Impacto:** Si Twitter API es lenta, bloquea todo
    - **Solución:** asyncio + aiohttp para concurrencia
 
 2. **Acoplamiento a Twitter timeline:** Solo soporta user_timeline
+
    - **Impacto:** No puede sincronizar mentions, likes, etc.
    - **Solución:** Patrón Strategy para múltiples fuentes
 
@@ -999,11 +1081,14 @@ def backup_database():
    - **Solución:** Introducir capa de repositorios
 
 #### Deuda de Testing
+
 1. **test_twitter_handler.py incompleto**
+
    - **Impacto:** Cambios en Twitter handler no validados
    - **Esfuerzo:** 1-2 horas
 
 2. **Sin tests de integración**
+
    - **Impacto:** No se valida flujo end-to-end
    - **Esfuerzo:** 4-8 horas
 
@@ -1012,7 +1097,9 @@ def backup_database():
    - **Esfuerzo:** 2-4 horas
 
 #### Deuda de Configuración
+
 1. **Sin validación de env vars**
+
    - **Impacto:** Errores crípticos en runtime
    - **Esfuerzo:** 1 hora
 
@@ -1021,10 +1108,13 @@ def backup_database():
    - **Solución:** Docker secrets, Vault, AWS Secrets Manager
 
 #### Deuda de Observabilidad
+
 1. **Sin metrics:** No hay métricas de performance
+
    - **Solución:** Prometheus + Grafana
 
 2. **Sin alerting:** No hay notificaciones de fallos
+
    - **Solución:** Integrar con Sentry, PagerDuty
 
 3. **Sin tracing:** Difícil debuggear issues distribuidos
@@ -1032,20 +1122,21 @@ def backup_database():
 
 ### Estimación de Esfuerzo
 
-| Área | Tareas | Esfuerzo | Prioridad |
-|------|--------|----------|-----------|
-| Bugs críticos | Items 1-3 | 4 horas | 🔴 ALTA |
-| Robustez | Items 4-8 | 16 horas | 🟡 MEDIA |
-| Features | Items 9-14 | 40 horas | 🟢 BAJA |
-| Testing | Completar suite | 8 horas | 🟡 MEDIA |
-| Refactoring | Arquitectura | 24 horas | 🟢 BAJA |
-| **TOTAL** | | **92 horas** | |
+| Área          | Tareas          | Esfuerzo     | Prioridad |
+| ------------- | --------------- | ------------ | --------- |
+| Bugs críticos | Items 1-3       | 4 horas      | 🔴 ALTA   |
+| Robustez      | Items 4-8       | 16 horas     | 🟡 MEDIA  |
+| Features      | Items 9-14      | 40 horas     | 🟢 BAJA   |
+| Testing       | Completar suite | 8 horas      | 🟡 MEDIA  |
+| Refactoring   | Arquitectura    | 24 horas     | 🟢 BAJA   |
+| **TOTAL**     |                 | **92 horas** |           |
 
 ---
 
 ## 13. Tareas Pendientes
 
 ### Sprint 1: Crítico (1 semana)
+
 - [ ] **BUG-001:** Llamar `login_to_bluesky()` en main.py
 - [ ] **BUG-002:** Ajustar `POLL_INTERVAL` a 7.2 horas
 - [ ] **BUG-003:** Implementar wait en rate limit reached
@@ -1054,6 +1145,7 @@ def backup_database():
 - [ ] **CONFIG-002:** Validación de credenciales al startup
 
 ### Sprint 2: Robustez (2 semanas)
+
 - [ ] **LOGGING-001:** Reemplazar print() por logging.Logger
 - [ ] **LOGGING-002:** Agregar timestamps y niveles de log
 - [ ] **ERROR-001:** Implementar retry con exponential backoff
@@ -1063,6 +1155,7 @@ def backup_database():
 - [ ] **TEST-002:** Aumentar cobertura de tests a >80%
 
 ### Sprint 3: Features (3 semanas)
+
 - [ ] **FEATURE-001:** Soporte para imágenes en sincronización
 - [ ] **FEATURE-002:** Soporte para threads de Twitter
 - [ ] **FEATURE-003:** Dashboard web con Flask
@@ -1072,6 +1165,7 @@ def backup_database():
 - [ ] **MONITORING-002:** Alerting con Sentry
 
 ### Sprint 4: Optimización (2 semanas)
+
 - [ ] **ARCH-001:** Migrar a asyncio para concurrencia
 - [ ] **ARCH-002:** Implementar patrón Repository
 - [ ] **ARCH-003:** Separar capas (API, Business Logic, Data)
@@ -1083,6 +1177,7 @@ def backup_database():
 ## 14. Roadmap Sugerido
 
 ### Q1 2026: Estabilización
+
 **Objetivo:** Hacer ChirpSyncer production-ready
 
 - ✓ Arreglar bugs críticos (Sprint 1)
@@ -1092,11 +1187,13 @@ def backup_database():
 - ✓ Documentación completa (README, ARCHITECTURE, API docs)
 
 **Entregables:**
+
 - v1.0.0: Release estable sin bugs conocidos
 - Docker image en Docker Hub
 - CI/CD completo con linting + tests
 
 ### Q2 2026: Features Avanzados
+
 **Objetivo:** Extender funcionalidad
 
 - ✓ Sincronización de multimedia (imágenes/videos)
@@ -1106,11 +1203,13 @@ def backup_database():
 - ✓ Webhooks para notificaciones
 
 **Entregables:**
+
 - v2.0.0: ChirpSyncer con multimedia
 - Web UI accesible en puerto 8080
 - Documentación de API REST
 
 ### Q3 2026: Escalabilidad
+
 **Objetivo:** Soportar múltiples usuarios
 
 - ✓ Arquitectura multi-tenant
@@ -1120,11 +1219,13 @@ def backup_database():
 - ✓ Rate limiting por usuario
 
 **Entregables:**
+
 - v3.0.0: ChirpSyncer as a Service
 - Desplegado en cloud (AWS/GCP/Heroku)
 - Pricing plan freemium
 
 ### Q4 2026: Innovación
+
 **Objetivo:** Features únicos
 
 - ✓ AI-powered content transformation (adaptar tono por plataforma)
@@ -1134,6 +1235,7 @@ def backup_database():
 - ✓ A/B testing de contenido
 
 **Entregables:**
+
 - v4.0.0: ChirpSyncer Pro
 - Modelo de ML para optimización de posts
 - Marketplace de plugins
@@ -1170,14 +1272,17 @@ El Sprint 1 ha sido completado exitosamente utilizando un **sistema de agentes p
 ### ✅ Tareas Completadas
 
 #### BUG-001: Login de Bluesky (RESUELTO)
+
 **Problema:** `login_to_bluesky()` nunca se llamaba, causando fallos de autenticación.
 
 **Solución implementada:**
+
 - Agregado `login_to_bluesky()` en `app/main.py:11` después de `initialize_db()`
 - Agregado import: `from bluesky_handler import post_to_bluesky, login_to_bluesky`
 - Test creado: `tests/test_main.py::test_login_to_bluesky_called_on_startup`
 
 **Archivos modificados:**
+
 - `app/main.py` (líneas 3, 11)
 - `tests/test_main.py` (creado, 40 líneas)
 
@@ -1186,19 +1291,23 @@ El Sprint 1 ha sido completado exitosamente utilizando un **sistema de agentes p
 ---
 
 #### BUG-002: Rate Limit Ajustado (RESUELTO)
+
 **Problema:** Polling cada 6 horas = 120 requests/mes, excediendo límite de 100.
 
 **Solución implementada:**
+
 - Modificado `POLL_INTERVAL` de 6.0 horas (21,600s) a 7.2 horas (25,920s)
 - Agregado comentario explicativo con cálculo de rate limit
 - Actualizado mensaje de log en `app/main.py` para mostrar formato decimal
 
 **Archivos modificados:**
+
 - `app/config.py` (líneas 13-15)
 - `app/main.py` (línea 15)
 - `tests/test_config.py` (creado, 48 líneas)
 
 **Cálculo verificado:**
+
 ```
 720 horas/mes ÷ 7.2 horas = 100 requests/mes ✅
 ```
@@ -1208,9 +1317,11 @@ El Sprint 1 ha sido completado exitosamente utilizando un **sistema de agentes p
 ---
 
 #### BUG-003: Wait en Rate Limit (RESUELTO)
+
 **Problema:** Cuando rate limit se alcanzaba, retornaba lista vacía sin esperar.
 
 **Solución implementada:**
+
 - Agregado `import time` en `app/twitter_handler.py`
 - Implementada lógica de wait:
   ```python
@@ -1223,6 +1334,7 @@ El Sprint 1 ha sido completado exitosamente utilizando un **sistema de agentes p
   ```
 
 **Archivos modificados:**
+
 - `app/twitter_handler.py` (líneas 1, 16-21)
 - `tests/test_twitter_handler.py` (actualizado con mocks de time)
 
@@ -1231,9 +1343,11 @@ El Sprint 1 ha sido completado exitosamente utilizando un **sistema de agentes p
 ---
 
 #### TEST-001: Tests de Twitter Completos (RESUELTO)
+
 **Problema:** `test_twitter_handler.py` estaba incompleto sin assertions.
 
 **Solución implementada:**
+
 - Completado test `test_fetch_tweets` con assertions completas
 - Agregados 4 nuevos tests:
   1. `test_fetch_tweets_with_rate_limit` - Verifica comportamiento con límite
@@ -1243,6 +1357,7 @@ El Sprint 1 ha sido completado exitosamente utilizando un **sistema de agentes p
 - Creado `tests/conftest.py` para mocking centralizado
 
 **Archivos modificados:**
+
 - `tests/test_twitter_handler.py` (11 LOC → 232 LOC)
 - `tests/conftest.py` (creado)
 
@@ -1253,9 +1368,11 @@ El Sprint 1 ha sido completado exitosamente utilizando un **sistema de agentes p
 ---
 
 #### CONFIG-001: .env.example Creado (RESUELTO)
+
 **Problema:** No había archivo de ejemplo para credenciales.
 
 **Solución implementada:**
+
 - Creado `.env.example` con:
   - Todas las 6 variables requeridas como placeholders
   - Comentarios explicativos para cada credencial
@@ -1263,6 +1380,7 @@ El Sprint 1 ha sido completado exitosamente utilizando un **sistema de agentes p
   - Instrucciones paso a paso para obtener credenciales
 
 **Archivos creados:**
+
 - `.env.example` (37 líneas con documentación completa)
 
 **Tests:** N/A (archivo de documentación)
@@ -1270,19 +1388,23 @@ El Sprint 1 ha sido completado exitosamente utilizando un **sistema de agentes p
 ---
 
 #### CONFIG-002: Validación de Credenciales (RESUELTO)
+
 **Problema:** App iniciaba sin validar credenciales, errores crípticos después.
 
 **Solución implementada:**
+
 - Creado nuevo módulo `app/validation.py` con función `validate_credentials()`
 - Validación de 6 variables requeridas (detecta None y strings vacíos)
 - Mensajes de error claros listando variables faltantes
 - Integrado en `app/main.py:9` antes de `initialize_db()`
 
 **Archivos creados:**
+
 - `app/validation.py` (29 líneas)
 - `tests/test_validation.py` (53 líneas, 3 tests)
 
 **Archivos modificados:**
+
 - `app/main.py` (línea 4, 9)
 - `tests/test_main.py` (agregados 2 tests de integración)
 
@@ -1292,19 +1414,20 @@ El Sprint 1 ha sido completado exitosamente utilizando un **sistema de agentes p
 
 ### 📊 Estadísticas del Sprint 1
 
-| Métrica | Antes | Después | Delta |
-|---------|-------|---------|-------|
-| **Bugs críticos** | 3 | 0 | -3 ✅ |
-| **LOC producción** | 177 | 235 | +58 (+32.8%) |
-| **LOC tests** | 44 | 404 | +360 (+818%) |
-| **Tests** | 2 | 14 | +12 ✅ |
-| **Cobertura tests** | ~40% | ~95% | +55% ✅ |
-| **Archivos nuevos** | - | 6 | +6 |
-| **Duración Sprint** | - | ~3 horas | - |
+| Métrica             | Antes | Después  | Delta        |
+| ------------------- | ----- | -------- | ------------ |
+| **Bugs críticos**   | 3     | 0        | -3 ✅        |
+| **LOC producción**  | 177   | 235      | +58 (+32.8%) |
+| **LOC tests**       | 44    | 404      | +360 (+818%) |
+| **Tests**           | 2     | 14       | +12 ✅       |
+| **Cobertura tests** | ~40%  | ~95%     | +55% ✅      |
+| **Archivos nuevos** | -     | 6        | +6           |
+| **Duración Sprint** | -     | ~3 horas | -            |
 
 ### 📁 Archivos Creados/Modificados
 
 #### Nuevos Archivos (6):
+
 1. `.env.example` - Template de configuración
 2. `app/validation.py` - Validación de credenciales
 3. `tests/test_main.py` - Tests del orquestador
@@ -1313,6 +1436,7 @@ El Sprint 1 ha sido completado exitosamente utilizando un **sistema de agentes p
 6. `tests/conftest.py` - Infraestructura de mocking
 
 #### Archivos Modificados (5):
+
 1. `app/main.py` - Login de Bluesky + validación
 2. `app/config.py` - POLL_INTERVAL ajustado
 3. `app/twitter_handler.py` - Wait logic en rate limit
@@ -1381,6 +1505,7 @@ Ahora que los bugs críticos están resueltos, el proyecto puede enfocarse en ro
 ### 🔴 Descubrimiento Crítico
 
 **La implementación actual NO FUNCIONA** porque:
+
 - Twitter API Free Tier eliminó el acceso de lectura en 2023
 - Solo permite 1,500 writes/mes (no reads)
 - Leer tweets requiere tier Basic ($100/mes)
@@ -1391,6 +1516,7 @@ Ahora que los bugs críticos están resueltos, el proyecto puede enfocarse en ro
 **Investigación completa en:** `SPRINT2_PLAN.md`
 
 **Por qué twscrape:**
+
 1. ✅ Completamente gratuito
 2. ✅ Activamente mantenido (2025/2026)
 3. ✅ Usa credenciales Twitter existentes
@@ -1401,18 +1527,22 @@ Ahora que los bugs críticos están resueltos, el proyecto puede enfocarse en ro
 ### Tareas del Sprint 2
 
 #### 🔴 Críticas (P0)
+
 1. **MIGRATE-001:** Migrar de tweepy a twscrape (4h)
    - Crear `app/twitter_scraper.py` con patrón Adapter
    - Implementar async wrapper para mantener compatibilidad
    - Actualizar tests con pytest-asyncio
 
 #### 🟡 Importantes (P1)
+
 2. **LOGGING-001:** Logging estructurado (2h)
+
    - Crear `app/logger.py` con configuración
    - Reemplazar todos los `print()` por `logger.info/error/warning()`
    - Rotación automática de logs
 
 3. **ERROR-001:** Retry con exponential backoff (2h)
+
    - Instalar `tenacity` library
    - Decorador `@retry` en todas las llamadas de API
    - Tests de fallos transitorios
@@ -1423,11 +1553,14 @@ Ahora que los bugs críticos están resueltos, el proyecto puede enfocarse en ro
    - Tests de truncamiento
 
 #### 🟢 Deseables (P2)
+
 5. **CONFIG-003:** Nuevas credenciales (30min)
+
    - Migrar de API keys a username/password/email
    - Actualizar `.env.example`
 
 6. **DEPS-001:** Pinear versiones (30min)
+
    - `twscrape==0.12.0`, `atproto==0.0.50`, `tenacity==8.2.3`
 
 7. **DOCKER-001:** HEALTHCHECK (30min)
@@ -1445,12 +1578,12 @@ app/
 
 ### Métricas Objetivo
 
-| Métrica | Sprint 1 | Sprint 2 Target |
-|---------|----------|-----------------|
-| **Costo/mes** | N/A (roto) | $0 |
-| **Tests** | 14 | 25+ |
-| **Coverage** | 95% | 98% |
-| **LOC** | 235 | ~350 |
+| Métrica       | Sprint 1   | Sprint 2 Target |
+| ------------- | ---------- | --------------- |
+| **Costo/mes** | N/A (roto) | $0              |
+| **Tests**     | 14         | 25+             |
+| **Coverage**  | 95%        | 98%             |
+| **LOC**       | 235        | ~350            |
 
 ### Estado: ✅ COMPLETADO (2026-01-08)
 
@@ -1465,7 +1598,9 @@ El Sprint 2 fue completado exitosamente utilizando **5 agentes paralelos con TDD
 ### 🎯 Resultados por Agente
 
 #### MIGRATE-001: Migración a twscrape ✅
+
 **Entregables:**
+
 - `app/twitter_scraper.py` (NUEVO) - 150 LOC con patrón Adapter
 - `tests/test_twitter_scraper.py` (NUEVO) - 8 tests completos
 - Async/await con sync wrapper para compatibilidad
@@ -1477,7 +1612,9 @@ El Sprint 2 fue completado exitosamente utilizando **5 agentes paralelos con TDD
 **Tests:** 8/8 pasando ✅
 
 #### LOGGING-001: Logging estructurado ✅
+
 **Entregables:**
+
 - `app/logger.py` (NUEVO) - Logger centralizado con rotación
 - `tests/test_logger.py` (NUEVO) - 6 tests de logging
 - Formato: `%(asctime)s - %(name)s - %(levelname)s - %(message)s`
@@ -1489,7 +1626,9 @@ El Sprint 2 fue completado exitosamente utilizando **5 agentes paralelos con TDD
 **Tests:** 6/6 pasando ✅
 
 #### ERROR-001: Retry logic con exponential backoff ✅
+
 **Entregables:**
+
 - `tests/test_retry_logic.py` (NUEVO) - 14 tests de retry
 - requirements.txt: +`tenacity==8.2.3`
 - Decorador @retry aplicado a:
@@ -1502,7 +1641,9 @@ El Sprint 2 fue completado exitosamente utilizando **5 agentes paralelos con TDD
 **Tests:** 14/14 pasando ✅
 
 #### ERROR-002: Validación de longitud Bluesky ✅
+
 **Entregables:**
+
 - `validate_and_truncate_text()` en bluesky_handler.py
 - Trunca posts > 300 chars a 297 + "..."
 - 13 tests de validación (edge cases + unicode)
@@ -1512,7 +1653,9 @@ El Sprint 2 fue completado exitosamente utilizando **5 agentes paralelos con TDD
 **Tests:** 13/13 pasando ✅
 
 #### CONFIG-003: Nuevas credenciales twscrape ✅
+
 **Entregables:**
+
 - config.py: Nuevas vars (USERNAME, PASSWORD, EMAIL, EMAIL_PASSWORD)
 - validation.py: Valida nuevas credenciales
 - .env.example: Documentación completa de migración
@@ -1525,17 +1668,17 @@ El Sprint 2 fue completado exitosamente utilizando **5 agentes paralelos con TDD
 
 ### 📊 Métricas del Sprint 2
 
-| Métrica | Sprint 1 | Sprint 2 | Delta |
-|---------|----------|----------|-------|
-| **Costo mensual** | N/A (roto) | **$0** | ✅ Gratis |
-| **Tests** | 14 | **59** | +45 (+321%) ✅ |
-| **Coverage** | 95% | **98%** | +3% ✅ |
-| **LOC producción** | 235 | **~520** | +285 (+121%) |
-| **LOC tests** | 404 | **~1,200** | +796 (+197%) |
-| **Rate limits** | 100/mes | **Ilimitado** | ✅ |
-| **Logging** | print() | **logger** | ✅ |
-| **Retry logic** | No | **Sí (automático)** | ✅ |
-| **Dependencias** | 2 | **4 (+tenacity, twscrape)** | ✅ |
+| Métrica            | Sprint 1   | Sprint 2                    | Delta          |
+| ------------------ | ---------- | --------------------------- | -------------- |
+| **Costo mensual**  | N/A (roto) | **$0**                      | ✅ Gratis      |
+| **Tests**          | 14         | **59**                      | +45 (+321%) ✅ |
+| **Coverage**       | 95%        | **98%**                     | +3% ✅         |
+| **LOC producción** | 235        | **~520**                    | +285 (+121%)   |
+| **LOC tests**      | 404        | **~1,200**                  | +796 (+197%)   |
+| **Rate limits**    | 100/mes    | **Ilimitado**               | ✅             |
+| **Logging**        | print()    | **logger**                  | ✅             |
+| **Retry logic**    | No         | **Sí (automático)**         | ✅             |
+| **Dependencias**   | 2          | **4 (+tenacity, twscrape)** | ✅             |
 
 ---
 
@@ -1627,6 +1770,7 @@ tests/
 ### 🚀 Beneficios de la Migración
 
 #### Antes (Twitter API)
+
 - ❌ Costo: Tier Basic requerido ($100/mes)
 - ❌ Rate limits: 100 requests/mes (tier free no lee)
 - ❌ Developer account: Requerido con aprobación
@@ -1635,6 +1779,7 @@ tests/
 - ❌ Validación: Sin verificación de longitud
 
 #### Después (twscrape)
+
 - ✅ Costo: $0 (completamente gratis)
 - ✅ Rate limits: Ilimitados
 - ✅ Setup: Solo credenciales de cuenta existente
@@ -1656,14 +1801,14 @@ tests/
 
 ### 📈 Comparativa Sprints
 
-| Aspecto | Sprint 1 | Sprint 2 | Total |
-|---------|----------|----------|-------|
-| **Duración** | 3 horas | 4 horas | 7 horas |
-| **Agentes** | 6 paralelos | 5 paralelos | 11 agentes |
-| **Tareas** | 6 críticas | 5 (1 crítica, 3 importantes, 1 config) | 11 tareas |
-| **Tests nuevos** | +12 | +45 | 57 tests |
-| **LOC producción** | +58 | +285 | +343 LOC |
-| **LOC tests** | +360 | +796 | +1,156 LOC |
+| Aspecto            | Sprint 1    | Sprint 2                               | Total      |
+| ------------------ | ----------- | -------------------------------------- | ---------- |
+| **Duración**       | 3 horas     | 4 horas                                | 7 horas    |
+| **Agentes**        | 6 paralelos | 5 paralelos                            | 11 agentes |
+| **Tareas**         | 6 críticas  | 5 (1 crítica, 3 importantes, 1 config) | 11 tareas  |
+| **Tests nuevos**   | +12         | +45                                    | 57 tests   |
+| **LOC producción** | +58         | +285                                   | +343 LOC   |
+| **LOC tests**      | +360        | +796                                   | +1,156 LOC |
 
 ---
 
@@ -1697,31 +1842,39 @@ Si se decide continuar mejorando:
 ### 🎯 Tareas Completadas
 
 #### 1. DOCKER-001: HEALTHCHECK para Dockerfile ✅
+
 **Status:** Completado en 15 minutos
 **Implementación:**
+
 - Agregado HEALTHCHECK al Dockerfile
 - Verifica existencia de `/app/data.db` como indicador de salud
 - Configuración: interval=1h, timeout=10s, retries=3
 - Comando: `test -f /app/data.db || exit 1`
 
 **Archivo modificado:**
+
 - `Dockerfile` - Línea 10-11
 
 #### 2. DEPS-001: Pinear todas las versiones ✅
+
 **Status:** Completado en 20 minutos
 **Implementación:**
+
 - 100% de dependencias ahora tienen versión exacta (==)
 - requirements.txt: tweepy==4.16.0, atproto==0.0.65
 - requirements-dev.txt: pytest==9.0.2, black==25.12.0, flake8==7.3.0, pre-commit==4.5.1, pytest-mock==3.15.1
 - Todos los tests siguen pasando (59 tests)
 
 **Archivos modificados:**
+
 - `requirements.txt` - Pinneadas 2 dependencias
 - `requirements-dev.txt` - Pinneadas 5 dependencias
 
 #### 3. FEATURE-002: Sincronización de threads de Twitter ✅
+
 **Status:** Completado en 2.5 horas (TDD estricto)
 **Implementación:**
+
 - Detección automática de threads (self-reply chain)
 - Fetching completo de threads con orden cronológico
 - Posting de threads a Bluesky manteniendo reply chain
@@ -1731,12 +1884,14 @@ Si se decide continuar mejorando:
 - Límite de 10 tweets por thread
 
 **Archivos modificados/creados:**
+
 - `app/twitter_scraper.py` - +150 LOC (is_thread, fetch_thread)
 - `app/bluesky_handler.py` - +120 LOC (post_thread_to_bluesky)
 - `app/main.py` - +35 LOC (integración thread detection)
 - `tests/test_thread_support.py` - NUEVO: 10 tests completos
 
 **Tests creados:**
+
 1. `test_detect_single_tweet_not_thread` - Tweets simples no son threads
 2. `test_detect_self_reply_is_thread` - Self-replies detectados
 3. `test_fetch_thread_returns_ordered_tweets` - Threads en orden correcto
@@ -1752,23 +1907,25 @@ Si se decide continuar mejorando:
 
 ### 📊 Métricas Sprint 3
 
-| Aspecto | Sprint 2 (Final) | Sprint 3 (Final) | Cambio |
-|---------|------------------|------------------|--------|
-| **Tests** | 59 | 69 | +10 ✅ |
-| **Cobertura** | 98% | 98%+ | Mantenida ✅ |
-| **Docker** | Sin HEALTHCHECK | HEALTHCHECK ✅ | Production-ready |
-| **Deps pinneadas** | 50% (2/4) | 100% (7/7) | +50% ✅ |
-| **Features** | Tweet simple | Tweet + Threads ✅ | +Thread support |
-| **LOC producción** | ~1,200 | ~1,500 | +300 LOC |
-| **LOC tests** | ~1,600 | ~2,021 | +421 LOC |
+| Aspecto            | Sprint 2 (Final) | Sprint 3 (Final)   | Cambio           |
+| ------------------ | ---------------- | ------------------ | ---------------- |
+| **Tests**          | 59               | 69                 | +10 ✅           |
+| **Cobertura**      | 98%              | 98%+               | Mantenida ✅     |
+| **Docker**         | Sin HEALTHCHECK  | HEALTHCHECK ✅     | Production-ready |
+| **Deps pinneadas** | 50% (2/4)        | 100% (7/7)         | +50% ✅          |
+| **Features**       | Tweet simple     | Tweet + Threads ✅ | +Thread support  |
+| **LOC producción** | ~1,200           | ~1,500             | +300 LOC         |
+| **LOC tests**      | ~1,600           | ~2,021             | +421 LOC         |
 
 ### 📁 Archivos Creados/Modificados
 
 #### Archivos Nuevos (2):
+
 1. `tests/test_thread_support.py` - 421 LOC, 10 tests completos
 2. `SPRINT3_PLAN.md` - Plan detallado del sprint
 
 #### Archivos Modificados (5):
+
 1. `Dockerfile` - HEALTHCHECK agregado
 2. `requirements.txt` - Versiones pinneadas
 3. `requirements-dev.txt` - Versiones pinneadas
@@ -1848,6 +2005,7 @@ SPRINT3_PLAN.md                # NUEVO: Plan detallado
 ### 🚀 Capacidades Post-Sprint 3
 
 #### Antes de Sprint 3
+
 - ✅ Sincronización de tweets simples
 - ❌ Sin soporte para threads
 - ❌ Sin Docker HEALTHCHECK
@@ -1855,6 +2013,7 @@ SPRINT3_PLAN.md                # NUEVO: Plan detallado
 - ❌ No reproducible
 
 #### Después de Sprint 3
+
 - ✅ Sincronización de tweets simples Y threads
 - ✅ Detección automática de threads
 - ✅ Threads manteniendo orden y reply chain
@@ -1876,15 +2035,15 @@ SPRINT3_PLAN.md                # NUEVO: Plan detallado
 
 ### 📈 Comparativa Completa de Sprints
 
-| Aspecto | Sprint 1 | Sprint 2 | Sprint 3 | Total |
-|---------|----------|----------|----------|-------|
-| **Duración** | 3 horas | 4 horas | 3 horas | 10 horas |
-| **Agentes** | 6 paralelos | 5 paralelos | 3 paralelos | 14 agentes |
-| **Tareas** | 6 críticas | 5 tareas | 3 tareas | 14 tareas |
-| **Tests nuevos** | +12 | +45 | +10 | 67 tests netos |
-| **LOC producción** | +58 | +285 | +305 | +648 LOC |
-| **LOC tests** | +360 | +796 | +421 | +1,577 LOC |
-| **Features** | Bugs fixes | Free Twitter | Threads | Complete |
+| Aspecto            | Sprint 1    | Sprint 2     | Sprint 3    | Total          |
+| ------------------ | ----------- | ------------ | ----------- | -------------- |
+| **Duración**       | 3 horas     | 4 horas      | 3 horas     | 10 horas       |
+| **Agentes**        | 6 paralelos | 5 paralelos  | 3 paralelos | 14 agentes     |
+| **Tareas**         | 6 críticas  | 5 tareas     | 3 tareas    | 14 tareas      |
+| **Tests nuevos**   | +12         | +45          | +10         | 67 tests netos |
+| **LOC producción** | +58         | +285         | +305        | +648 LOC       |
+| **LOC tests**      | +360        | +796         | +421        | +1,577 LOC     |
+| **Features**       | Bugs fixes  | Free Twitter | Threads     | Complete       |
 
 ---
 
@@ -1951,8 +2110,10 @@ v0.8.0 (Pre-Sprint 1)  → v0.9.0 (Sprint 1)  → v1.0.0 (Sprint 2)  → v1.1.0 
 ### 🎯 Tareas Completadas
 
 #### 1. BIDIR-003: Database Schema Migration ✅
+
 **Status:** Completado en 1 hora (Fase 1 - bloqueante)
 **Implementación:**
+
 - Nueva tabla `synced_posts` con metadata completa (twitter_id, bluesky_uri, source, content_hash, synced_to)
 - Migración automática desde `seen_tweets`
 - 4 índices para queries rápidas
@@ -1960,14 +2121,17 @@ v0.8.0 (Pre-Sprint 1)  → v0.9.0 (Sprint 1)  → v1.0.0 (Sprint 2)  → v1.1.0 
 - Utility: `compute_content_hash()` con normalización SHA256
 
 **Archivos creados:**
+
 - `app/utils.py` - Content hash computation
 - +8 tests en `tests/test_db_handler.py`
 
 **Tests:** 9/9 PASSED ✅
 
 #### 2. BIDIR-001: Bluesky Reader ✅
+
 **Status:** Completado en 3 horas (Fase 2 - paralelo)
 **Implementación:**
+
 - `fetch_posts_from_bluesky(username, count)` para leer posts de Bluesky
 - Filtra reposts/quotes, solo posts originales
 - Retry logic con exponential backoff (3 intentos)
@@ -1975,14 +2139,17 @@ v0.8.0 (Pre-Sprint 1)  → v0.9.0 (Sprint 1)  → v1.0.0 (Sprint 2)  → v1.1.0 
 - Retorna objetos Post con `.uri` y `.text`
 
 **Archivos modificados:**
+
 - `app/bluesky_handler.py` - +fetch_posts_from_bluesky()
 - +5 tests en `tests/test_bluesky_handler.py`
 
 **Tests:** 18/18 PASSED ✅
 
 #### 3. BIDIR-002: Twitter Writer ✅
+
 **Status:** Completado en 2 horas (Fase 2 - paralelo)
 **Implementación:**
+
 - `post_to_twitter(content)` para escribir a Twitter
 - Usa Twitter API v2 (tweepy.Client)
 - Truncamiento automático a 280 chars
@@ -1991,6 +2158,7 @@ v0.8.0 (Pre-Sprint 1)  → v0.9.0 (Sprint 1)  → v1.0.0 (Sprint 2)  → v1.1.0 
 - Validación actualizada para soportar modo unidireccional
 
 **Archivos modificados:**
+
 - `app/twitter_handler.py` - +post_to_twitter()
 - `app/validation.py` - API credentials opcionales
 - +6 tests en `tests/test_twitter_handler.py`
@@ -1998,8 +2166,10 @@ v0.8.0 (Pre-Sprint 1)  → v0.9.0 (Sprint 1)  → v1.0.0 (Sprint 2)  → v1.1.0 
 **Tests:** 11/11 PASSED ✅
 
 #### 4. BIDIR-004: Bidirectional Orchestration ✅
+
 **Status:** Completado en 2 horas (Fase 3 - paralelo)
 **Implementación:**
+
 - `sync_twitter_to_bluesky()` actualizado para usar nueva DB
 - `sync_bluesky_to_twitter()` NUEVO para sync inverso
 - `main()` ejecuta ambas direcciones en loop
@@ -2008,20 +2178,24 @@ v0.8.0 (Pre-Sprint 1)  → v0.9.0 (Sprint 1)  → v1.0.0 (Sprint 2)  → v1.1.0 
 - Mantiene soporte de threads (backward compatible)
 
 **Archivos modificados:**
+
 - `app/main.py` - Orquestación bidireccional completa
 - +7 tests en `tests/test_main.py`
 
 **Tests:** 10/10 PASSED ✅
 
 #### 5. BIDIR-005: Loop Prevention Verification ✅
+
 **Status:** Completado en 1 hora (Fase 3 - paralelo)
 **Implementación:**
+
 - Tests de integración end-to-end para PROBAR que loops son imposibles
 - Stress test con 100 posts bidireccionales
 - Edge cases: URLs normalizadas, contenido duplicado, timing
 - Verificación de triple capa: hash + twitter_id + bluesky_uri
 
 **Archivos creados:**
+
 - `tests/test_loop_prevention.py` - 7 tests completos (5 requeridos + 2 bonus)
 
 **Tests:** 7/7 PASSED ✅
@@ -2030,26 +2204,28 @@ v0.8.0 (Pre-Sprint 1)  → v0.9.0 (Sprint 1)  → v1.0.0 (Sprint 2)  → v1.1.0 
 
 ### 📊 Métricas Sprint 4
 
-| Aspecto | Sprint 3 (Final) | Sprint 4 (Final) | Cambio |
-|---------|------------------|------------------|--------|
-| **Tests** | 69 | 86 (core Sprint 4: 44) | +17 nuevos ✅ |
-| **Sync Direction** | Unidireccional (Twitter→Bluesky) | **Bidireccional** (Twitter↔Bluesky) ✅ | +Bidirectional |
-| **Loop Prevention** | N/A | **Triple-layer** (hash+ID+URI) ✅ | Mathematically proven |
-| **Twitter Write** | No soportado | Soportado (API v2) ✅ | +Twitter posting |
-| **Bluesky Read** | No soportado | Soportado (atproto) ✅ | +Bluesky reading |
-| **Database** | seen_tweets (simple) | synced_posts (metadata) ✅ | +Content tracking |
-| **Graceful Degradation** | No | Sí (opcional API creds) ✅ | +Flexibility |
-| **LOC producción** | ~1,500 | ~2,100 | +600 LOC |
-| **LOC tests** | ~2,021 | ~3,100 | +1,079 LOC |
+| Aspecto                  | Sprint 3 (Final)                 | Sprint 4 (Final)                       | Cambio                |
+| ------------------------ | -------------------------------- | -------------------------------------- | --------------------- |
+| **Tests**                | 69                               | 86 (core Sprint 4: 44)                 | +17 nuevos ✅         |
+| **Sync Direction**       | Unidireccional (Twitter→Bluesky) | **Bidireccional** (Twitter↔Bluesky) ✅ | +Bidirectional        |
+| **Loop Prevention**      | N/A                              | **Triple-layer** (hash+ID+URI) ✅      | Mathematically proven |
+| **Twitter Write**        | No soportado                     | Soportado (API v2) ✅                  | +Twitter posting      |
+| **Bluesky Read**         | No soportado                     | Soportado (atproto) ✅                 | +Bluesky reading      |
+| **Database**             | seen_tweets (simple)             | synced_posts (metadata) ✅             | +Content tracking     |
+| **Graceful Degradation** | No                               | Sí (opcional API creds) ✅             | +Flexibility          |
+| **LOC producción**       | ~1,500                           | ~2,100                                 | +600 LOC              |
+| **LOC tests**            | ~2,021                           | ~3,100                                 | +1,079 LOC            |
 
 ### 📁 Archivos Creados/Modificados
 
 #### Archivos Nuevos (4):
+
 1. `app/utils.py` - Content hash computation (21 LOC)
 2. `tests/test_loop_prevention.py` - Loop prevention tests (487 LOC, 7 tests)
 3. `SPRINT4_PLAN.md` - Plan detallado bidirectional sync
 
 #### Archivos Modificados (8):
+
 1. `app/db_handler.py` - +migrate_database(), +should_sync_post(), +save_synced_post()
 2. `app/bluesky_handler.py` - +fetch_posts_from_bluesky()
 3. `app/twitter_handler.py` - +post_to_twitter()
@@ -2065,6 +2241,7 @@ v0.8.0 (Pre-Sprint 1)  → v0.9.0 (Sprint 1)  → v1.0.0 (Sprint 2)  → v1.1.0 
 ### 🧪 Suite de Tests Sprint 4
 
 **Tests Core de Sprint 4** (44/44 PASSED ✅):
+
 ```bash
 tests/test_loop_prevention.py     7 tests PASSED
 tests/test_db_handler.py          9 tests PASSED (1 old + 8 new)
@@ -2122,18 +2299,22 @@ SPRINT4_PLAN.md                # NUEVO: Comprehensive bidirectional plan
 ### 🔄 Sincronización Bidireccional Explicada
 
 #### Modo Unidireccional (Solo scraping credentials):
+
 ```
 Twitter --[scrape]--> ChirpSyncer --[post]--> Bluesky
 ```
+
 - Lee tweets gratis con twscrape
 - Publica a Bluesky
 - **No requiere** Twitter API credentials
 
 #### Modo Bidireccional (Con API credentials):
+
 ```
 Twitter <--[API v2]--> ChirpSyncer <--[atproto]--> Bluesky
         --[scrape]-->              --[post]-->
 ```
+
 - Lee tweets gratis con twscrape
 - Lee posts de Bluesky con atproto
 - Publica a Twitter con API v2 (1,500/mes)
@@ -2141,6 +2322,7 @@ Twitter <--[API v2]--> ChirpSyncer <--[atproto]--> Bluesky
 - **Requiere** TWITTER_API_KEY, etc.
 
 #### Loop Prevention (Triple-Layer):
+
 ```
 1️⃣ Content Hash Check: SHA256 normalizado
    - Mismo contenido = mismo hash = SKIP
@@ -2163,6 +2345,7 @@ Twitter <--[API v2]--> ChirpSyncer <--[atproto]--> Bluesky
 ### 🚀 Capacidades Post-Sprint 4
 
 #### Antes de Sprint 4
+
 - ✅ Twitter → Bluesky (unidireccional)
 - ❌ Bluesky → Twitter (no soportado)
 - ❌ Sin protección contra loops
@@ -2170,6 +2353,7 @@ Twitter <--[API v2]--> ChirpSyncer <--[atproto]--> Bluesky
 - ❌ Sin content tracking
 
 #### Después de Sprint 4
+
 - ✅ Twitter ↔ Bluesky (bidireccional)
 - ✅ Loop prevention (triple-layer, mathematically proven)
 - ✅ Database con metadata (synced_posts)
@@ -2193,15 +2377,15 @@ Twitter <--[API v2]--> ChirpSyncer <--[atproto]--> Bluesky
 
 ### 📈 Comparativa Completa de Todos los Sprints
 
-| Aspecto | Sprint 1 | Sprint 2 | Sprint 3 | Sprint 4 | Total |
-|---------|----------|----------|----------|----------|-------|
-| **Duración** | 3 horas | 4 horas | 3 horas | 6 horas | 16 horas |
-| **Agentes** | 6 paralelos | 5 paralelos | 3 paralelos | 5 paralelos | 19 agentes |
-| **Tareas** | 6 críticas | 5 tareas | 3 tareas | 5 tareas | 19 tareas |
-| **Tests nuevos** | +12 | +45 | +10 | +30 | 97 tests |
-| **LOC producción** | +58 | +285 | +305 | +600 | +1,248 LOC |
-| **LOC tests** | +360 | +796 | +421 | +1,079 | +2,656 LOC |
-| **Features** | Bug fixes | Free API | Threads | Bidirectional | Complete System |
+| Aspecto            | Sprint 1    | Sprint 2    | Sprint 3    | Sprint 4      | Total           |
+| ------------------ | ----------- | ----------- | ----------- | ------------- | --------------- |
+| **Duración**       | 3 horas     | 4 horas     | 3 horas     | 6 horas       | 16 horas        |
+| **Agentes**        | 6 paralelos | 5 paralelos | 3 paralelos | 5 paralelos   | 19 agentes      |
+| **Tareas**         | 6 críticas  | 5 tareas    | 3 tareas    | 5 tareas      | 19 tareas       |
+| **Tests nuevos**   | +12         | +45         | +10         | +30           | 97 tests        |
+| **LOC producción** | +58         | +285        | +305        | +600          | +1,248 LOC      |
+| **LOC tests**      | +360        | +796        | +421        | +1,079        | +2,656 LOC      |
+| **Features**       | Bug fixes   | Free API    | Threads     | Bidirectional | Complete System |
 
 ---
 
@@ -2251,6 +2435,7 @@ Sprint 6 representa una **transformación arquitectónica fundamental** de Chirp
 ### 🏗️ Transformación Arquitectónica
 
 #### Antes de Sprint 6 (Single-User)
+
 ```
 ┌─────────────┐
 │   .env      │ → Credenciales en texto plano
@@ -2267,6 +2452,7 @@ Sprint 6 representa una **transformación arquitectónica fundamental** de Chirp
 ```
 
 #### Después de Sprint 6 (Multi-Tenant)
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │              Dashboard Web (Flask)                       │
@@ -2300,6 +2486,7 @@ Sprint 6 representa una **transformación arquitectónica fundamental** de Chirp
 ```
 
 **Cambios clave:**
+
 - **Antes:** 1 usuario, credenciales en `.env`, sync global
 - **Después:** N usuarios, credenciales encriptadas en DB, sync por usuario
 
@@ -2314,6 +2501,7 @@ Sprint 6 representa una **transformación arquitectónica fundamental** de Chirp
 Sistema completo de gestión de usuarios con autenticación segura.
 
 **Características:**
+
 - Autenticación con bcrypt (cost factor 12)
 - Gestión de sesiones con tokens seguros
 - CRUD completo de usuarios
@@ -2411,6 +2599,7 @@ user = user_manager.validate_session(token)
 ```
 
 **Tests:** 31 tests pasando (100%)
+
 - Creación de usuarios
 - Autenticación (correcta e incorrecta)
 - Validación de passwords débiles
@@ -2429,6 +2618,7 @@ user = user_manager.validate_session(token)
 Sistema de almacenamiento seguro de credenciales con encriptación AES-256-GCM.
 
 **Características:**
+
 - Encriptación AES-256-GCM (autenticada)
 - Soporte para múltiples plataformas (Twitter, Bluesky)
 - Múltiples tipos (scraping, API)
@@ -2484,30 +2674,33 @@ CREATE INDEX idx_credentials_owner ON user_credentials(owner_user_id);
 **Formato de Credenciales:**
 
 Twitter (scraping):
+
 ```json
 {
-    "username": "twitter_user",
-    "password": "twitter_pass",
-    "email": "email@example.com",
-    "email_password": "email_pass"
+  "username": "twitter_user",
+  "password": "twitter_pass",
+  "email": "email@example.com",
+  "email_password": "email_pass"
 }
 ```
 
 Twitter (API):
+
 ```json
 {
-    "api_key": "...",
-    "api_secret": "...",
-    "access_token": "...",
-    "access_secret": "..."
+  "api_key": "...",
+  "api_secret": "...",
+  "access_token": "...",
+  "access_secret": "..."
 }
 ```
 
 Bluesky:
+
 ```json
 {
-    "username": "user.bsky.social",
-    "password": "app_password"
+  "username": "user.bsky.social",
+  "password": "app_password"
 }
 ```
 
@@ -2574,6 +2767,7 @@ cred_manager.share_credentials(
 ```
 
 **Seguridad:**
+
 - ✅ AES-256-GCM (authenticated encryption)
 - ✅ IV único por credencial (12 bytes random)
 - ✅ Tag de autenticación (16 bytes)
@@ -2582,6 +2776,7 @@ cred_manager.share_credentials(
 - ✅ Detección de tampering automática
 
 **Tests:** 28 tests pasando (100%)
+
 - Encriptación/desencriptación
 - CRUD completo
 - Validación de plataformas
@@ -2599,6 +2794,7 @@ cred_manager.share_credentials(
 Dashboard web Flask con gestión completa de usuarios y credenciales.
 
 **Características:**
+
 - Sistema de autenticación completo
 - Gestión de usuarios (admin)
 - Gestión de credenciales (por usuario)
@@ -2610,6 +2806,7 @@ Dashboard web Flask con gestión completa de usuarios y credenciales.
 **Rutas Implementadas:**
 
 **Autenticación:**
+
 ```python
 @app.route('/login', methods=['GET', 'POST'])
 def login()
@@ -2625,6 +2822,7 @@ def check_auth()
 ```
 
 **Dashboard:**
+
 ```python
 @app.route('/')
 @require_auth
@@ -2632,6 +2830,7 @@ def dashboard()
 ```
 
 **Gestión de Usuarios:**
+
 ```python
 @app.route('/users')
 @require_admin
@@ -2651,6 +2850,7 @@ def user_delete(user_id)
 ```
 
 **Gestión de Credenciales:**
+
 ```python
 @app.route('/credentials')
 @require_auth
@@ -2688,6 +2888,7 @@ def credentials_share()
 7. **credentials_form.html** - Formulario de credenciales
 
 **Tests:** 30 tests pasando (100%)
+
 - Autenticación (login/logout)
 - Registro de usuarios
 - Rutas protegidas
@@ -2706,11 +2907,13 @@ Utilidades de seguridad centralizadas.
 **Características:**
 
 **A. Validación de Passwords:**
+
 ```python
 def validate_password(password: str) -> bool
 ```
 
 Requisitos:
+
 - ✅ Mínimo 8 caracteres
 - ✅ Al menos una mayúscula
 - ✅ Al menos una minúscula
@@ -2718,6 +2921,7 @@ Requisitos:
 - ✅ Al menos un carácter especial
 
 **B. Rate Limiting:**
+
 ```python
 class RateLimiter:
     def check_rate_limit(key: str, max_attempts: int,
@@ -2725,11 +2929,13 @@ class RateLimiter:
 ```
 
 Límites por defecto:
+
 - Login: 5 intentos / 15 minutos
 - API calls: 100 requests / minuto
 - Otros: 50 requests / minuto
 
 **C. Audit Logging:**
+
 ```python
 def log_audit(user_id: Optional[int], action: str, success: bool,
               resource_type: str = None, resource_id: int = None,
@@ -2761,6 +2967,7 @@ CREATE INDEX idx_audit_created ON audit_log(created_at);
 ```
 
 **Eventos Auditados:**
+
 - `user_created` - Creación de usuario
 - `login_success` / `login_failed` - Intentos de login
 - `credential_created` / `credential_updated` / `credential_deleted` - Gestión de credenciales
@@ -2990,20 +3197,20 @@ mv chirpsyncer.db.backup.1704812400 chirpsyncer.db
 
 ### 📊 Métricas Sprint 6
 
-| Aspecto | Sprint 4 (Final) | Sprint 6 (Final) | Cambio |
-|---------|------------------|------------------|--------|
-| **Tests** | 86 | 175 (Sprint 6: 89) | +89 nuevos ✅ |
-| **Usuarios** | 1 (hardcoded) | ∞ (multi-tenant) | ∞ ✅ |
-| **Credenciales** | .env (plaintext) | DB (AES-256-GCM) | Encrypted ✅ |
-| **Dashboard** | Básico | Multi-user completo | Enhanced ✅ |
-| **Seguridad** | Básica | Enterprise-grade | Advanced ✅ |
-| **Auth** | Ninguna | Bcrypt + Sessions | Implemented ✅ |
-| **Audit** | Ninguno | Audit log completo | Implemented ✅ |
-| **LOC producción** | ~1,800 | ~2,650 | +850 LOC |
-| **LOC tests** | ~3,200 | ~4,700 | +1,500 LOC |
-| **Archivos nuevos** | - | 7 módulos + 7 templates | +14 files |
-| **Tablas DB** | 6 | 11 | +5 tablas |
-| **Complejidad** | Media | Alta | Significativa |
+| Aspecto             | Sprint 4 (Final) | Sprint 6 (Final)        | Cambio         |
+| ------------------- | ---------------- | ----------------------- | -------------- |
+| **Tests**           | 86               | 175 (Sprint 6: 89)      | +89 nuevos ✅  |
+| **Usuarios**        | 1 (hardcoded)    | ∞ (multi-tenant)        | ∞ ✅           |
+| **Credenciales**    | .env (plaintext) | DB (AES-256-GCM)        | Encrypted ✅   |
+| **Dashboard**       | Básico           | Multi-user completo     | Enhanced ✅    |
+| **Seguridad**       | Básica           | Enterprise-grade        | Advanced ✅    |
+| **Auth**            | Ninguna          | Bcrypt + Sessions       | Implemented ✅ |
+| **Audit**           | Ninguno          | Audit log completo      | Implemented ✅ |
+| **LOC producción**  | ~1,800           | ~2,650                  | +850 LOC       |
+| **LOC tests**       | ~3,200           | ~4,700                  | +1,500 LOC     |
+| **Archivos nuevos** | -                | 7 módulos + 7 templates | +14 files      |
+| **Tablas DB**       | 6                | 11                      | +5 tablas      |
+| **Complejidad**     | Media            | Alta                    | Significativa  |
 
 ---
 
@@ -3149,6 +3356,7 @@ ChirpSyncer Multi-Tenant Architecture
 ```
 
 **Características clave:**
+
 - ✅ **Multi-tenant:** Aislamiento completo de datos por usuario
 - ✅ **Secure:** Credenciales encriptadas, passwords hasheados
 - ✅ **Scalable:** Soporta N usuarios simultáneos
@@ -3164,6 +3372,7 @@ ChirpSyncer Multi-Tenant Architecture
 #### ✅ Capacidades Implementadas
 
 **Gestión de Usuarios:**
+
 - ✅ Registro de usuarios con validación
 - ✅ Autenticación bcrypt (cost factor 12)
 - ✅ Gestión de sesiones (7 días)
@@ -3172,6 +3381,7 @@ ChirpSyncer Multi-Tenant Architecture
 - ✅ CRUD completo vía dashboard
 
 **Seguridad:**
+
 - ✅ Credenciales encriptadas (AES-256-GCM)
 - ✅ Passwords seguros (8+ chars, complejidad)
 - ✅ Rate limiting (login, API)
@@ -3181,6 +3391,7 @@ ChirpSyncer Multi-Tenant Architecture
 - ✅ Detección de tampering
 
 **Dashboard Web:**
+
 - ✅ Interfaz de login/registro
 - ✅ Dashboard multi-usuario
 - ✅ Gestión de usuarios (admin)
@@ -3189,6 +3400,7 @@ ChirpSyncer Multi-Tenant Architecture
 - ✅ 7 templates HTML
 
 **Multi-Tenancy:**
+
 - ✅ Aislamiento completo de datos
 - ✅ Sync por usuario
 - ✅ Credenciales por usuario
@@ -3196,6 +3408,7 @@ ChirpSyncer Multi-Tenant Architecture
 - ✅ Stats por usuario
 
 **Migration:**
+
 - ✅ Script de migración automática
 - ✅ Backup automático
 - ✅ Verificación de integridad
@@ -3206,6 +3419,7 @@ ChirpSyncer Multi-Tenant Architecture
 ### 🚀 Capacidades Post-Sprint 6
 
 #### Antes de Sprint 6
+
 - ❌ Single-user (1 usuario hardcoded)
 - ❌ Credenciales en .env (plaintext)
 - ❌ Sin autenticación
@@ -3213,6 +3427,7 @@ ChirpSyncer Multi-Tenant Architecture
 - ❌ No escalable
 
 #### Después de Sprint 6
+
 - ✅ Multi-tenant (usuarios ilimitados)
 - ✅ Credenciales encriptadas (AES-256-GCM)
 - ✅ Autenticación completa (bcrypt)
@@ -3231,26 +3446,31 @@ ChirpSyncer Multi-Tenant Architecture
 ### 🎓 Lecciones Aprendidas Sprint 6
 
 1. **Encriptación de credenciales es crítica:**
+
    - AES-256-GCM proporciona encryption + authentication
    - IV único por credencial evita ataques
    - Master key management es crucial
 
 2. **Bcrypt es el estándar para passwords:**
+
    - Cost factor 12 balancea seguridad/performance
    - Salt automático
    - Resistance to rainbow tables
 
 3. **Multi-tenancy requiere aislamiento estricto:**
+
    - user_id en todas las tablas
    - Verificación de permisos en cada operación
    - Foreign keys para integridad referencial
 
 4. **Audit logging es esencial:**
+
    - Trazabilidad completa de acciones
    - Debugging más fácil
    - Compliance requirements
 
 5. **Session management es complejo:**
+
    - Expiración automática
    - Cleanup de sesiones expiradas
    - Tokens seguros (32 bytes random)
@@ -3264,17 +3484,17 @@ ChirpSyncer Multi-Tenant Architecture
 
 ### 📈 Comparativa Completa de Todos los Sprints
 
-| Aspecto | Sprint 1 | Sprint 2 | Sprint 3 | Sprint 4 | Sprint 6 | Total |
-|---------|----------|----------|----------|----------|----------|-------|
-| **Bugs críticos** | 6 → 0 | 0 | 0 | 0 | 0 | 0 ✅ |
-| **Tests** | 14 | 59 | 69 | 86 | 175 | 175 tests ✅ |
-| **Tareas** | 6 críticas | 5 tareas | 3 tareas | 5 tareas | 6 tareas | 25 tareas |
-| **Tests nuevos** | +12 | +45 | +10 | +17 | +89 | 173 tests |
-| **LOC producción** | +58 | +285 | +305 | +600 | +850 | +2,098 LOC |
-| **LOC tests** | +360 | +796 | +421 | +1,079 | +1,500 | +4,156 LOC |
-| **Features** | Bug fixes | Free API | Threads | Bidirectional | Multi-User | Complete |
-| **Usuarios** | 1 | 1 | 1 | 1 | ∞ | Multi-tenant |
-| **Security** | Básica | Básica | Básica | Básica | Enterprise | Enterprise ✅ |
+| Aspecto            | Sprint 1   | Sprint 2 | Sprint 3 | Sprint 4      | Sprint 6   | Total         |
+| ------------------ | ---------- | -------- | -------- | ------------- | ---------- | ------------- |
+| **Bugs críticos**  | 6 → 0      | 0        | 0        | 0             | 0          | 0 ✅          |
+| **Tests**          | 14         | 59       | 69       | 86            | 175        | 175 tests ✅  |
+| **Tareas**         | 6 críticas | 5 tareas | 3 tareas | 5 tareas      | 6 tareas   | 25 tareas     |
+| **Tests nuevos**   | +12        | +45      | +10      | +17           | +89        | 173 tests     |
+| **LOC producción** | +58        | +285     | +305     | +600          | +850       | +2,098 LOC    |
+| **LOC tests**      | +360       | +796     | +421     | +1,079        | +1,500     | +4,156 LOC    |
+| **Features**       | Bug fixes  | Free API | Threads  | Bidirectional | Multi-User | Complete      |
+| **Usuarios**       | 1          | 1        | 1        | 1             | ∞          | Multi-tenant  |
+| **Security**       | Básica     | Básica   | Básica   | Básica        | Enterprise | Enterprise ✅ |
 
 ---
 
@@ -3321,6 +3541,7 @@ No auth  No auth  No auth  No auth  No auth  Bcrypt+Session
 ### Logros Finales v1.3.0
 
 #### Core Features
+
 🏆 **175 tests** con cobertura exhaustiva (100% passing)
 🏆 **$0/mes** costo operacional (completamente gratis)
 🏆 **Bidirectional sync** Twitter ↔ Bluesky
@@ -3331,6 +3552,7 @@ No auth  No auth  No auth  No auth  No auth  Bcrypt+Session
 🏆 **TDD estricto** aplicado a todas las features
 
 #### Sprint 6: Multi-Tenant Features
+
 🏆 **Multi-user support** (usuarios ilimitados)
 🏆 **Enterprise security** (AES-256-GCM + bcrypt)
 🏆 **Credential encryption** (AES-256-GCM con authenticated encryption)
@@ -3345,6 +3567,7 @@ No auth  No auth  No auth  No auth  No auth  Bcrypt+Session
 ### Capacidades Finales del Sistema
 
 #### Sincronización
+
 ✅ **Twitter → Bluesky**: Lectura ilimitada (twscrape) + posting
 ✅ **Bluesky → Twitter**: Lectura (atproto) + posting (1,500/mes API)
 ✅ **Threads**: Sincronización completa con reply chains
@@ -3353,6 +3576,7 @@ No auth  No auth  No auth  No auth  No auth  Bcrypt+Session
 ✅ **Graceful Degradation**: Modo unidireccional automático
 
 #### Multi-Tenancy & Security
+
 ✅ **User Management**: Registro, autenticación, CRUD completo
 ✅ **Credential Encryption**: AES-256-GCM con IV único
 ✅ **Password Security**: Bcrypt (cost factor 12)
@@ -3363,6 +3587,7 @@ No auth  No auth  No auth  No auth  No auth  Bcrypt+Session
 ✅ **Data Isolation**: Aislamiento estricto por usuario
 
 #### Dashboard & UX
+
 ✅ **Web Dashboard**: Interface multi-usuario completa
 ✅ **User Management**: Panel de administración
 ✅ **Credential Management**: Gestión visual de credenciales
@@ -3370,6 +3595,7 @@ No auth  No auth  No auth  No auth  No auth  Bcrypt+Session
 ✅ **Templates**: 7 páginas HTML profesionales
 
 #### Infrastructure
+
 ✅ **Docker**: HEALTHCHECK configurado
 ✅ **Logging**: Estructurado con rotación
 ✅ **Retry Logic**: Exponential backoff en todas las APIs
@@ -3379,18 +3605,18 @@ No auth  No auth  No auth  No auth  No auth  Bcrypt+Session
 
 ### Estadísticas Finales
 
-| Métrica | Valor | Descripción |
-|---------|-------|-------------|
-| **Tests** | 175 | 100% passing ✅ |
-| **LOC Producción** | ~2,650 | Código optimizado |
-| **LOC Tests** | ~4,700 | Cobertura exhaustiva |
-| **Módulos** | 20+ | Arquitectura modular |
-| **Templates** | 7 | Dashboard completo |
-| **Tablas DB** | 11 | Multi-tenant schema |
-| **Usuarios** | ∞ | Multi-tenant |
-| **Costo** | $0/mes | Gratis ✅ |
-| **Uptime** | 24/7 | Production-ready |
-| **Security** | Enterprise | AES-256-GCM + bcrypt |
+| Métrica            | Valor      | Descripción          |
+| ------------------ | ---------- | -------------------- |
+| **Tests**          | 175        | 100% passing ✅      |
+| **LOC Producción** | ~2,650     | Código optimizado    |
+| **LOC Tests**      | ~4,700     | Cobertura exhaustiva |
+| **Módulos**        | 20+        | Arquitectura modular |
+| **Templates**      | 7          | Dashboard completo   |
+| **Tablas DB**      | 11         | Multi-tenant schema  |
+| **Usuarios**       | ∞          | Multi-tenant         |
+| **Costo**          | $0/mes     | Gratis ✅            |
+| **Uptime**         | 24/7       | Production-ready     |
+| **Security**       | Enterprise | AES-256-GCM + bcrypt |
 
 **ChirpSyncer v1.3.0 es una plataforma multi-tenant enterprise-grade lista para producción.** 🚀
 
