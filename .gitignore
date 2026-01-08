@@ -32,3 +32,10 @@ chirpsyncer-env/
 
 # VS Code settings
 .vscode/
+
+# Test coverage
+.coverage
+.coverage.*
+htmlcov/
+*.cover
+.pytest_cache/

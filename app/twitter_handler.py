@@ -1,3 +1,4 @@
+import time
 import tweepy
 from tweepy import OAuth1UserHandler
 from db_handler import is_tweet_seen, mark_tweet_as_seen, store_api_rate_limit
@@ -13,7 +14,10 @@ twitter_api = tweepy.API(auth)
 def fetch_tweets():
     remaining_reads, reset_time = get_rate_limit_status()
     if remaining_reads <= 0:
-        print(f"Rate limit reached. Reset time: {reset_time}")
+        wait_time = reset_time - time.time()
+        if wait_time > 0:
+            print(f"Rate limit reached. Sleeping {wait_time:.0f} seconds until reset")
+            time.sleep(wait_time)
         return []
     tweets = twitter_api.user_timeline(count=5, exclude_replies=True, include_rts=False)
     unseen_tweets = [tweet for tweet in tweets if not is_tweet_seen(tweet.id)]
