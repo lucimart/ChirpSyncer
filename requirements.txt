@@ -1,2 +1,4 @@
-tweepy
-atproto
+atproto==0.0.65
+tenacity==8.2.3
+tweepy==4.16.0
+twscrape==0.12.0

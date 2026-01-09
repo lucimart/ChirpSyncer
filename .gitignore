@@ -17,6 +17,9 @@ build/
 docker-compose.override.yml
 .env.docker
 
+# Logs directory
+logs/
+
 # SQLite Database
 data.db
 
