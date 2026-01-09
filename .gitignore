@@ -42,3 +42,5 @@ chirpsyncer-env/
 htmlcov/
 *.cover
 .pytest_cache/
+flask_session/
+*.db

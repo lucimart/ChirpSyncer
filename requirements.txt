@@ -2,3 +2,17 @@ atproto==0.0.65
 tenacity==8.2.3
 tweepy==4.16.0
 twscrape==0.12.0
+
+# Sprint 5 Dependencies
+Flask==3.0.0
+aiohttp==3.9.1
+Pillow==10.1.0
+requests==2.31.0
+
+# Sprint 6 Dependencies - Multi-User Support
+bcrypt==4.1.2              # Password hashing
+cryptography==41.0.7       # AES encryption for credentials
+Flask-Session==0.5.0       # Server-side sessions
+Flask-Limiter==3.5.0       # Rate limiting
+Flask-WTF==1.2.1           # Forms with CSRF protection
+email-validator==2.1.0     # Email validation
