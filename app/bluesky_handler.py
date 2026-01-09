@@ -60,6 +60,80 @@ def post_to_bluesky(content):
         raise  # Re-raise to allow retry mechanism to work
 
 
+class Post:
+    """Simple Post class for Bluesky posts with text and URI."""
+    def __init__(self, uri: str, text: str):
+        self.uri = uri
+        self.text = text
+
+    def __repr__(self):
+        return f"Post(uri={self.uri[:30]}..., text={self.text[:50]}...)"
+
+
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    before_sleep=before_sleep_log(logger, logging.WARNING),
+    after=after_log(logger, logging.ERROR)
+)
+def fetch_posts_from_bluesky(username: str, count: int = 10) -> list:
+    """
+    Fetch recent posts from Bluesky user's feed.
+
+    Args:
+        username: Bluesky username (e.g., 'user.bsky.social')
+        count: Maximum number of posts to fetch (default 10)
+
+    Returns:
+        List of Post objects with .text and .uri attributes
+        Filters out reposts and quote posts, only returns original posts
+
+    Raises:
+        Exception on network errors (handled by retry decorator)
+    """
+    try:
+        logger.info(f"Fetching posts from Bluesky user: {username} (limit: {count})")
+
+        # Call Bluesky API to get author feed
+        response = bsky_client.app.bsky.feed.get_author_feed(
+            actor=username,
+            limit=count
+        )
+
+        # Extract posts from response
+        if not hasattr(response, 'feed') or not response.feed:
+            logger.info(f"No posts found for user: {username}")
+            return []
+
+        # Filter and process posts
+        posts = []
+        for item in response.feed:
+            # Stop if we've reached the requested count
+            if len(posts) >= count:
+                break
+
+            # Skip reposts (reason != None indicates repost)
+            if item.get('reason') is not None:
+                continue
+
+            # Extract post data
+            post_data = item.get('post', {})
+            record = post_data.get('record', {})
+            uri = post_data.get('uri', '')
+            text = record.get('text', '')
+
+            # Create Post object
+            if uri and text:
+                posts.append(Post(uri=uri, text=text))
+
+        logger.info(f"Fetched {len(posts)} original posts from {username}")
+        return posts
+
+    except Exception as e:
+        logger.error(f"Error fetching posts from Bluesky: {e}")
+        raise  # Re-raise to allow retry mechanism to work
+
+
 def post_thread_to_bluesky(tweets: list) -> list:
     """Post a thread to Bluesky maintaining reply chain.
 

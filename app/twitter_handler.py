@@ -46,3 +46,53 @@ def get_rate_limit_status():
     reset = rate_limit['resources']['statuses']['/statuses/user_timeline']['reset']
     store_api_rate_limit(remaining, reset)
     return remaining, reset
+
+
+# ===== BIDIR-002: Twitter Writer =====
+
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    retry=retry_if_exception_type((ConnectionError, TimeoutError)),
+    before_sleep=before_sleep_log(logger, logging.WARNING),
+    after=after_log(logger, logging.ERROR)
+)
+def post_to_twitter(content: str) -> str:
+    """
+    Post content to Twitter.
+
+    Args:
+        content: Text content to post (will be truncated to 280 chars if needed)
+
+    Returns:
+        Tweet ID as string
+
+    Raises:
+        tweepy.TooManyRequests: Rate limit exceeded
+        tweepy.Unauthorized: Authentication error
+        Exception: On persistent failures after retries
+    """
+    # Validate and truncate content to 280 chars
+    original_length = len(content)
+    if original_length > 280:
+        content = content[:277] + "..."
+        logger.warning(f"Tweet truncated from {original_length} to 280 chars")
+
+    # Initialize tweepy client with API v2
+    logger.info("Initializing Twitter API v2 client for posting")
+    client = tweepy.Client(
+        consumer_key=TWITTER_API_KEY,
+        consumer_secret=TWITTER_API_SECRET,
+        access_token=TWITTER_ACCESS_TOKEN,
+        access_token_secret=TWITTER_ACCESS_SECRET
+    )
+
+    # Post tweet using API v2
+    logger.info(f"Posting tweet to Twitter (length: {len(content)} chars)")
+    response = client.create_tweet(text=content)
+
+    # Extract tweet ID and return as string
+    tweet_id = str(response.data['id'])
+    logger.info(f"Successfully posted tweet with ID: {tweet_id}")
+
+    return tweet_id
