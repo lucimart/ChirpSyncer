@@ -1,6 +1,7 @@
 -r requirements.txt
 pytest
 pytest-mock
+pytest-asyncio==0.21.2
 pre-commit
 black
 flake8

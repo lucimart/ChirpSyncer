@@ -1,2 +1,4 @@
 tweepy
 atproto
+tenacity==8.2.3
+twscrape==0.12.0

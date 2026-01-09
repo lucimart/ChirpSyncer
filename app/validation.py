@@ -1,8 +1,8 @@
 from app.config import (
-    TWITTER_API_KEY,
-    TWITTER_API_SECRET,
-    TWITTER_ACCESS_TOKEN,
-    TWITTER_ACCESS_SECRET,
+    TWITTER_USERNAME,
+    TWITTER_PASSWORD,
+    TWITTER_EMAIL,
+    TWITTER_EMAIL_PASSWORD,
     BSKY_USERNAME,
     BSKY_PASSWORD
 )
@@ -16,10 +16,12 @@ def validate_credentials():
         ValueError: If any required environment variable is missing or empty.
     """
     required_vars = {
-        'TWITTER_API_KEY': TWITTER_API_KEY,
-        'TWITTER_API_SECRET': TWITTER_API_SECRET,
-        'TWITTER_ACCESS_TOKEN': TWITTER_ACCESS_TOKEN,
-        'TWITTER_ACCESS_SECRET': TWITTER_ACCESS_SECRET,
+        # Twitter scraping credentials (twscrape)
+        'TWITTER_USERNAME': TWITTER_USERNAME,
+        'TWITTER_PASSWORD': TWITTER_PASSWORD,
+        'TWITTER_EMAIL': TWITTER_EMAIL,
+        'TWITTER_EMAIL_PASSWORD': TWITTER_EMAIL_PASSWORD,
+        # Bluesky credentials
         'BSKY_USERNAME': BSKY_USERNAME,
         'BSKY_PASSWORD': BSKY_PASSWORD
     }
