@@ -2,6 +2,8 @@ from app.twitter_handler import fetch_tweets, get_rate_limit_status
 import pytest
 from unittest.mock import patch, MagicMock
 import time
+import tweepy
+from tweepy import TooManyRequests, Unauthorized
 
 
 @patch("app.twitter_handler.mark_tweet_as_seen")
@@ -230,3 +232,174 @@ def test_fetch_tweets_no_tweets_returned(mock_auth, mock_twitter_api,
     # 4. Result should be empty list
     assert len(result) == 0
     assert result == []
+
+
+# ===== BIDIR-002: Twitter Writer Tests =====
+
+@patch("tweepy.Client")
+def test_post_to_twitter_success(mock_client_class):
+    """Test successful post to Twitter returns tweet_id"""
+    # Import the function (will be implemented next)
+    from app.twitter_handler import post_to_twitter
+
+    # Setup mock
+    mock_client = MagicMock()
+    mock_client_class.return_value = mock_client
+
+    # Mock successful tweet creation
+    mock_response = MagicMock()
+    mock_response.data = {'id': 1234567890123456789}
+    mock_client.create_tweet.return_value = mock_response
+
+    # Call function
+    tweet_id = post_to_twitter("Hello Twitter!")
+
+    # Assertions
+    # 1. Client should be initialized with correct credentials
+    mock_client_class.assert_called_once()
+
+    # 2. create_tweet should be called with correct text
+    mock_client.create_tweet.assert_called_once_with(text="Hello Twitter!")
+
+    # 3. Should return tweet_id as string
+    assert tweet_id == "1234567890123456789"
+    assert isinstance(tweet_id, str)
+
+
+@patch("tweepy.Client")
+def test_post_to_twitter_truncates_long_text(mock_client_class):
+    """Test that text longer than 280 chars is truncated to 277 + '...'"""
+    from app.twitter_handler import post_to_twitter
+
+    # Setup mock
+    mock_client = MagicMock()
+    mock_client_class.return_value = mock_client
+
+    mock_response = MagicMock()
+    mock_response.data = {'id': 9876543210987654321}
+    mock_client.create_tweet.return_value = mock_response
+
+    # Create a text longer than 280 characters
+    long_text = "A" * 300  # 300 characters
+
+    # Call function
+    tweet_id = post_to_twitter(long_text)
+
+    # Assertions
+    # 1. create_tweet should be called with truncated text (277 chars + "...")
+    expected_text = "A" * 277 + "..."
+    mock_client.create_tweet.assert_called_once_with(text=expected_text)
+
+    # 2. Truncated text should be exactly 280 characters
+    call_args = mock_client.create_tweet.call_args[1]
+    assert len(call_args['text']) == 280
+
+    # 3. Should still return tweet_id
+    assert tweet_id == "9876543210987654321"
+
+
+@patch("tweepy.Client")
+def test_post_to_twitter_retry_on_network_error(mock_client_class):
+    """Test retry logic on transient network errors"""
+    from app.twitter_handler import post_to_twitter
+
+    # Setup mock
+    mock_client = MagicMock()
+    mock_client_class.return_value = mock_client
+
+    # Mock: fail twice with network errors, then succeed on third attempt
+    mock_response = MagicMock()
+    mock_response.data = {'id': 1111111111111111111}
+
+    mock_client.create_tweet.side_effect = [
+        ConnectionError("Network error"),
+        ConnectionError("Network error again"),
+        mock_response  # Success on third attempt
+    ]
+
+    # Call function (should retry and eventually succeed)
+    tweet_id = post_to_twitter("Retry test")
+
+    # Assertions
+    # 1. create_tweet should be called 3 times (2 failures + 1 success)
+    assert mock_client.create_tweet.call_count == 3
+
+    # 2. Should return tweet_id after successful retry
+    assert tweet_id == "1111111111111111111"
+
+
+def test_post_to_twitter_rate_limit_handling():
+    """Test graceful handling of rate limit errors - exceptions are propagated"""
+    from app.twitter_handler import post_to_twitter
+
+    with patch("tweepy.Client") as mock_client_class:
+        # Setup mock
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+
+        # Mock rate limit error - use a generic runtime error to simulate rate limiting
+        mock_client.create_tweet.side_effect = RuntimeError("429: Rate limit exceeded")
+
+        # Call function and expect exception to be raised (not caught by post_to_twitter)
+        with pytest.raises(RuntimeError) as exc_info:
+            post_to_twitter("Rate limit test")
+
+        # Assertions
+        # 1. create_tweet should be called (and fail)
+        mock_client.create_tweet.assert_called_once()
+
+        # 2. The exception should contain rate limit message
+        assert "Rate limit exceeded" in str(exc_info.value)
+
+
+def test_post_to_twitter_auth_error():
+    """Test handling of authentication errors - exceptions are propagated"""
+    from app.twitter_handler import post_to_twitter
+
+    with patch("tweepy.Client") as mock_client_class:
+        # Setup mock
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+
+        # Mock authentication error - use a generic permission error
+        mock_client.create_tweet.side_effect = PermissionError("401: Unauthorized")
+
+        # Call function and expect exception to be raised (not caught by post_to_twitter)
+        with pytest.raises(PermissionError) as exc_info:
+            post_to_twitter("Auth test")
+
+        # Assertions
+        # 1. create_tweet should be called (and fail)
+        mock_client.create_tweet.assert_called_once()
+
+        # 2. The exception should contain auth error message
+        assert "Unauthorized" in str(exc_info.value)
+
+
+@patch("tweepy.Client")
+def test_post_to_twitter_returns_valid_id(mock_client_class):
+    """Test that function returns numeric tweet ID as string"""
+    from app.twitter_handler import post_to_twitter
+
+    # Setup mock
+    mock_client = MagicMock()
+    mock_client_class.return_value = mock_client
+
+    # Mock response with numeric ID
+    mock_response = MagicMock()
+    mock_response.data = {'id': 1234567890123456789}
+    mock_client.create_tweet.return_value = mock_response
+
+    # Call function
+    tweet_id = post_to_twitter("Valid ID test")
+
+    # Assertions
+    # 1. Should return a string
+    assert isinstance(tweet_id, str)
+
+    # 2. String should be numeric
+    assert tweet_id.isdigit()
+
+    # 3. Should be a valid Twitter ID (19 digits for modern tweets)
+    assert len(tweet_id) >= 15  # Twitter IDs are at least 15 digits
+    assert tweet_id == "1234567890123456789"

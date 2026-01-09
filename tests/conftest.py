@@ -11,11 +11,17 @@ sys.modules['config'].TWITTER_API_KEY = 'test_key'
 sys.modules['config'].TWITTER_API_SECRET = 'test_secret'
 sys.modules['config'].TWITTER_ACCESS_TOKEN = 'test_token'
 sys.modules['config'].TWITTER_ACCESS_SECRET = 'test_secret_token'
+sys.modules['config'].BSKY_USERNAME = 'test_user'
+sys.modules['config'].BSKY_PASSWORD = 'test_password'
 
 # Mock tweepy before any imports
 mock_tweepy = MagicMock()
 sys.modules['tweepy'] = mock_tweepy
 sys.modules['tweepy.auth'] = MagicMock()
+
+# Mock atproto before any imports (for Bluesky)
+mock_atproto = MagicMock()
+sys.modules['atproto'] = mock_atproto
 
 # Mock db_handler before any imports
 mock_db_handler = MagicMock()

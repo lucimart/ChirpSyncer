@@ -1,5 +1,6 @@
 import os
 import sqlite3
+from app.utils import compute_content_hash
 
 # Define the database file path
 DB_PATH = os.path.join(os.getcwd(), "data.db")
@@ -53,3 +54,327 @@ def store_api_rate_limit(remaining_reads, reset_time, conn=None):
     VALUES (1, ?, ?)
     """, (remaining_reads, reset_time))
     conn.commit()
+
+
+# BIDIR-003: Database Schema Migration Functions
+
+def migrate_database(db_path=None):
+    """
+    Migrate from seen_tweets to synced_posts schema.
+
+    Creates new synced_posts table with full metadata tracking for bidirectional sync.
+    Handles migration gracefully - doesn't fail if old table doesn't exist.
+
+    Args:
+        db_path: Path to database file (defaults to DB_PATH)
+    """
+    resolved_path = db_path or DB_PATH
+    conn = sqlite3.connect(resolved_path)
+    cursor = conn.cursor()
+
+    # Check if old table exists
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='seen_tweets'")
+    old_table_exists = cursor.fetchone() is not None
+
+    # Create new synced_posts table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS synced_posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+        -- Identifiers
+        twitter_id TEXT,
+        bluesky_uri TEXT,
+
+        -- Metadata of origin
+        source TEXT NOT NULL,
+        content_hash TEXT NOT NULL UNIQUE,
+
+        -- Sync metadata
+        synced_to TEXT,
+        synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+        -- Original content
+        original_text TEXT NOT NULL,
+
+        -- Constraints
+        CHECK (source IN ('twitter', 'bluesky')),
+        CHECK (synced_to IN ('bluesky', 'twitter', 'both'))
+    )
+    """)
+
+    # Create indexes for fast queries
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_twitter_id ON synced_posts(twitter_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_bluesky_uri ON synced_posts(bluesky_uri)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_content_hash ON synced_posts(content_hash)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_source ON synced_posts(source)")
+
+    conn.commit()
+    conn.close()
+
+
+def should_sync_post(content: str, source: str, post_id: str, db_path=None) -> bool:
+    """
+    Check if post should be synced (not a duplicate).
+
+    Args:
+        content: Post text content
+        source: 'twitter' or 'bluesky'
+        post_id: Platform-specific ID (tweet_id or bluesky_uri)
+        db_path: Path to database file (defaults to DB_PATH)
+
+    Returns:
+        True if should sync, False if duplicate detected
+    """
+    resolved_path = db_path or DB_PATH
+    conn = sqlite3.connect(resolved_path)
+    cursor = conn.cursor()
+
+    # Compute content hash
+    content_hash = compute_content_hash(content)
+
+    # Check for duplicate hash (same content already synced)
+    cursor.execute("SELECT 1 FROM synced_posts WHERE content_hash = ?", (content_hash,))
+    if cursor.fetchone():
+        conn.close()
+        return False
+
+    # Check for duplicate ID based on source
+    if source == 'twitter':
+        cursor.execute("SELECT 1 FROM synced_posts WHERE twitter_id = ?", (post_id,))
+    else:  # bluesky
+        cursor.execute("SELECT 1 FROM synced_posts WHERE bluesky_uri = ?", (post_id,))
+
+    if cursor.fetchone():
+        conn.close()
+        return False
+
+    conn.close()
+    return True
+
+
+def save_synced_post(twitter_id=None, bluesky_uri=None, source=None,
+                     synced_to=None, content=None, db_path=None):
+    """
+    Save synced post to database with metadata.
+
+    Args:
+        twitter_id: Twitter tweet ID (optional)
+        bluesky_uri: Bluesky post URI (optional)
+        source: 'twitter' or 'bluesky'
+        synced_to: 'bluesky', 'twitter', or 'both'
+        content: Original post text content
+        db_path: Path to database file (defaults to DB_PATH)
+    """
+    resolved_path = db_path or DB_PATH
+    conn = sqlite3.connect(resolved_path)
+    cursor = conn.cursor()
+
+    # Compute content hash
+    content_hash = compute_content_hash(content)
+
+    # Insert into synced_posts
+    cursor.execute("""
+    INSERT INTO synced_posts (twitter_id, bluesky_uri, source, content_hash, synced_to, original_text)
+    VALUES (?, ?, ?, ?, ?, ?)
+    """, (twitter_id, bluesky_uri, source, content_hash, synced_to, content))
+
+    conn.commit()
+    conn.close()
+
+
+def get_post_by_hash(content_hash: str, db_path=None):
+    """
+    Get post by content hash.
+
+    Args:
+        content_hash: SHA256 hash of content
+        db_path: Path to database file (defaults to DB_PATH)
+
+    Returns:
+        Tuple of post data or None if not found
+    """
+    resolved_path = db_path or DB_PATH
+    conn = sqlite3.connect(resolved_path)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM synced_posts WHERE content_hash = ?", (content_hash,))
+    result = cursor.fetchone()
+
+    conn.close()
+    return result
+
+
+# STATS-001: Statistics Tracking Database Migration
+
+def add_stats_tables(db_path=None):
+    """
+    Add statistics tracking tables to database.
+
+    Creates sync_stats and hourly_stats tables for tracking synchronization
+    statistics, errors, and performance metrics.
+
+    Args:
+        db_path: Path to database file (defaults to DB_PATH)
+    """
+    resolved_path = db_path or DB_PATH
+    conn = sqlite3.connect(resolved_path)
+    cursor = conn.cursor()
+
+    # Create sync_stats table for detailed sync tracking
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS sync_stats (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp INTEGER NOT NULL,
+        source TEXT NOT NULL,
+        target TEXT NOT NULL,
+        success INTEGER NOT NULL,
+        media_count INTEGER DEFAULT 0,
+        is_thread INTEGER DEFAULT 0,
+        error_type TEXT,
+        error_message TEXT,
+        duration_ms INTEGER
+    )
+    """)
+
+    # Create index on timestamp for fast time-based queries
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_sync_stats_timestamp ON sync_stats(timestamp)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_sync_stats_source_target ON sync_stats(source, target)")
+
+    # Create hourly_stats table for aggregated statistics
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS hourly_stats (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        hour_timestamp INTEGER NOT NULL UNIQUE,
+        twitter_to_bluesky_count INTEGER DEFAULT 0,
+        bluesky_to_twitter_count INTEGER DEFAULT 0,
+        success_count INTEGER DEFAULT 0,
+        failure_count INTEGER DEFAULT 0,
+        media_synced INTEGER DEFAULT 0,
+        threads_synced INTEGER DEFAULT 0
+    )
+    """)
+
+    # Create index on hour_timestamp for fast queries
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_hourly_stats_hour ON hourly_stats(hour_timestamp)")
+
+    conn.commit()
+    conn.close()
+
+
+# MONITORING-001: Dashboard Helper Functions
+
+def get_recent_syncs(limit=50, db_path=None):
+    """
+    Get recent synced posts from database.
+
+    Args:
+        limit: Maximum number of posts to retrieve (default: 50)
+        db_path: Path to database file (defaults to DB_PATH)
+
+    Returns:
+        List of dictionaries containing sync details:
+            - id: Post ID
+            - source: Source platform ('twitter' or 'bluesky')
+            - synced_to: Target platform
+            - content: Original post text
+            - synced_at: Timestamp when synced
+            - twitter_id: Twitter ID (if applicable)
+            - bluesky_uri: Bluesky URI (if applicable)
+    """
+    resolved_path = db_path or DB_PATH
+
+    try:
+        conn = sqlite3.connect(resolved_path)
+        cursor = conn.cursor()
+
+        # Check if table exists
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='synced_posts'")
+        if not cursor.fetchone():
+            conn.close()
+            return []
+
+        cursor.execute("""
+        SELECT id, source, synced_to, original_text, synced_at, twitter_id, bluesky_uri
+        FROM synced_posts
+        ORDER BY synced_at DESC
+        LIMIT ?
+        """, (limit,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        # Convert to list of dictionaries
+        syncs = []
+        for row in rows:
+            syncs.append({
+                'id': row[0],
+                'source': row[1],
+                'synced_to': row[2],
+                'content': row[3],
+                'synced_at': row[4],
+                'twitter_id': row[5],
+                'bluesky_uri': row[6]
+            })
+
+        return syncs
+
+    except Exception as e:
+        # Return empty list on error
+        return []
+
+
+def get_system_stats(db_path=None):
+    """
+    Get system statistics about database.
+
+    Args:
+        db_path: Path to database file (defaults to DB_PATH)
+
+    Returns:
+        Dictionary containing:
+            - db_size: Database file size (formatted string)
+            - total_posts: Total number of synced posts
+    """
+    resolved_path = db_path or DB_PATH
+
+    try:
+        # Get database file size
+        if os.path.exists(resolved_path):
+            size_bytes = os.path.getsize(resolved_path)
+            # Format size
+            if size_bytes < 1024:
+                size_str = f"{size_bytes} B"
+            elif size_bytes < 1024 * 1024:
+                size_str = f"{size_bytes / 1024:.2f} KB"
+            elif size_bytes < 1024 * 1024 * 1024:
+                size_str = f"{size_bytes / (1024 * 1024):.2f} MB"
+            else:
+                size_str = f"{size_bytes / (1024 * 1024 * 1024):.2f} GB"
+        else:
+            size_str = "0 B"
+
+        # Get total posts count
+        conn = sqlite3.connect(resolved_path)
+        cursor = conn.cursor()
+
+        # Check if table exists
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='synced_posts'")
+        if cursor.fetchone():
+            cursor.execute("SELECT COUNT(*) FROM synced_posts")
+            total_posts = cursor.fetchone()[0]
+        else:
+            total_posts = 0
+
+        conn.close()
+
+        return {
+            'db_size': size_str,
+            'total_posts': total_posts
+        }
+
+    except Exception as e:
+        # Return default values on error
+        return {
+            'db_size': "0 B",
+            'total_posts': 0
+        }

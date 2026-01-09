@@ -1,10 +1,18 @@
 import os
 
-# Twitter API credentials
-TWITTER_API_KEY = os.getenv("TWITTER_API_KEY")
-TWITTER_API_SECRET = os.getenv("TWITTER_API_SECRET")
-TWITTER_ACCESS_TOKEN = os.getenv("TWITTER_ACCESS_TOKEN")
-TWITTER_ACCESS_SECRET = os.getenv("TWITTER_ACCESS_SECRET")
+# NEW: Twitter scraping credentials (for twscrape)
+# These are required for scraping Twitter without using the official API
+TWITTER_USERNAME = os.getenv("TWITTER_USERNAME")
+TWITTER_PASSWORD = os.getenv("TWITTER_PASSWORD")
+TWITTER_EMAIL = os.getenv("TWITTER_EMAIL")
+TWITTER_EMAIL_PASSWORD = os.getenv("TWITTER_EMAIL_PASSWORD")
+
+# DEPRECATED: Old Twitter API credentials (kept for backward compatibility)
+# These can be removed after migration to twscrape is complete
+TWITTER_API_KEY = os.getenv("TWITTER_API_KEY")  # deprecated
+TWITTER_API_SECRET = os.getenv("TWITTER_API_SECRET")  # deprecated
+TWITTER_ACCESS_TOKEN = os.getenv("TWITTER_ACCESS_TOKEN")  # deprecated
+TWITTER_ACCESS_SECRET = os.getenv("TWITTER_ACCESS_SECRET")  # deprecated
 
 # Bluesky API credentials
 BSKY_USERNAME = os.getenv("BSKY_USERNAME")

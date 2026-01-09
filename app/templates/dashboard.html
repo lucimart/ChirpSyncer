@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChirpSyncer Dashboard</title>
+
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        .status-active {
+            background-color: #10b981;
+        }
+
+        .status-error {
+            background-color: #ef4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .card {
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-gray-100" x-data="dashboard()">
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">ChirpSyncer Dashboard</h1>
+                    <p class="text-gray-600 text-sm mt-1">Monitoring Twitter ↔ Bluesky Sync</p>
+                </div>
+                <div class="text-right">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="status-indicator" :class="stats.active_errors > 0 ? 'status-error' : 'status-active'"></span>
+                        <span class="text-sm font-semibold" :class="stats.active_errors > 0 ? 'text-red-600' : 'text-green-600'" x-text="stats.active_errors > 0 ? 'Errors Detected' : 'System Healthy'"></span>
+                    </div>
+                    <p class="text-xs text-gray-500" x-text="'Updated ' + lastUpdated + ' ago'"></p>
+                    <p class="text-xs text-gray-500" x-text="'Uptime: ' + status.uptime"></p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Syncs Card -->
+            <div class="card bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Total Syncs</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-2" x-text="stats.total_syncs.toLocaleString()">0</p>
+                        <p class="text-xs text-gray-400 mt-1">All time</p>
+                    </div>
+                    <div class="bg-blue-100 rounded-full p-3">
+                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Syncs Today Card -->
+            <div class="card bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Syncs Today</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-2" x-text="stats.syncs_today.toLocaleString()">0</p>
+                        <p class="text-xs text-gray-400 mt-1">Last 24 hours</p>
+                    </div>
+                    <div class="bg-green-100 rounded-full p-3">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Rate Card -->
+            <div class="card bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Success Rate</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-2" x-text="stats.success_rate_24h.toFixed(1) + '%'">0%</p>
+                        <p class="text-xs text-gray-400 mt-1">Last 24 hours</p>
+                    </div>
+                    <div class="bg-purple-100 rounded-full p-3">
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Errors Card -->
+            <div class="card bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Active Errors</p>
+                        <p class="text-3xl font-bold mt-2" :class="stats.active_errors > 0 ? 'text-red-600' : 'text-gray-800'" x-text="stats.active_errors">0</p>
+                        <p class="text-xs text-gray-400 mt-1">Last 24 hours</p>
+                    </div>
+                    <div :class="stats.active_errors > 0 ? 'bg-red-100' : 'bg-gray-100'" class="rounded-full p-3">
+                        <svg class="w-8 h-8" :class="stats.active_errors > 0 ? 'text-red-600' : 'text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Syncs Over Time Chart -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Syncs Over Last 24 Hours</h2>
+                <div class="h-64">
+                    <canvas id="hourlyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Success vs Failures Chart -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Success vs Failures (24h)</h2>
+                <div class="h-64">
+                    <canvas id="successChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Direction Chart -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Sync Direction (24h)</h2>
+                <div class="h-64">
+                    <canvas id="directionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- System Info -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">System Information</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center py-3 border-b">
+                        <span class="text-gray-600">Database Size</span>
+                        <span class="font-semibold text-gray-800" x-text="status.db_size">-</span>
+                    </div>
+                    <div class="flex justify-between items-center py-3 border-b">
+                        <span class="text-gray-600">Total Posts</span>
+                        <span class="font-semibold text-gray-800" x-text="status.total_posts.toLocaleString()">0</span>
+                    </div>
+                    <div class="flex justify-between items-center py-3 border-b">
+                        <span class="text-gray-600">Uptime</span>
+                        <span class="font-semibold text-gray-800" x-text="status.uptime">-</span>
+                    </div>
+                    <div class="flex justify-between items-center py-3">
+                        <span class="text-gray-600">Media Synced (24h)</span>
+                        <span class="font-semibold text-gray-800" x-text="stats.stats_24h.total_media || 0">0</span>
+                    </div>
+                    <div class="flex justify-between items-center py-3">
+                        <span class="text-gray-600">Threads Synced (24h)</span>
+                        <span class="font-semibold text-gray-800" x-text="stats.stats_24h.total_threads || 0">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Table -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Direction</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Content</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <template x-for="sync in recent" :key="sync.id">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="formatTime(sync.synced_at)">-</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                          :class="sync.source === 'twitter' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'">
+                                        <span x-text="sync.source === 'twitter' ? '𝕏' : '🦋'"></span>
+                                        <span class="mx-1">→</span>
+                                        <span x-text="sync.synced_to === 'twitter' ? '𝕏' : '🦋'"></span>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-900 max-w-md truncate" x-text="sync.content">-</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-400 font-mono" x-text="(sync.twitter_id || sync.bluesky_uri || '').substring(0, 20) + '...'">-</td>
+                            </tr>
+                        </template>
+                        <template x-if="recent.length === 0">
+                            <tr>
+                                <td colspan="4" class="px-6 py-4 text-center text-gray-500">No recent activity</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Error Log Table -->
+        <div class="bg-white rounded-lg shadow-md p-6" x-show="errors.length > 0">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Error Log</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Direction</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Error Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <template x-for="error in errors" :key="error.timestamp">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="formatTimestamp(error.timestamp)">-</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="text-sm text-gray-700" x-text="error.source + ' → ' + error.target">-</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800" x-text="error.error_type">-</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-900 max-w-md truncate" x-text="error.error_message">-</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function dashboard() {
+            return {
+                stats: {
+                    total_syncs: 0,
+                    syncs_today: 0,
+                    success_rate_24h: 0,
+                    active_errors: 0,
+                    stats_24h: {},
+                    hourly_data: []
+                },
+                recent: [],
+                errors: [],
+                status: {
+                    uptime: '-',
+                    db_size: '-',
+                    total_posts: 0
+                },
+                lastUpdated: '0s',
+                lastUpdateTime: Date.now(),
+                charts: {},
+
+                init() {
+                    this.fetchData();
+
+                    // Auto-refresh every 30 seconds
+                    setInterval(() => {
+                        this.fetchData();
+                    }, 30000);
+
+                    // Update "last updated" every second
+                    setInterval(() => {
+                        this.updateLastUpdated();
+                    }, 1000);
+                },
+
+                async fetchData() {
+                    try {
+                        // Fetch all data in parallel
+                        const [statsRes, recentRes, errorsRes, statusRes] = await Promise.all([
+                            fetch('/api/stats'),
+                            fetch('/api/recent?limit=20'),
+                            fetch('/api/errors?limit=10'),
+                            fetch('/api/status')
+                        ]);
+
+                        this.stats = await statsRes.json();
+                        this.recent = await recentRes.json();
+                        this.errors = await errorsRes.json();
+                        this.status = await statusRes.json();
+
+                        this.lastUpdateTime = Date.now();
+                        this.lastUpdated = '0s';
+
+                        // Update charts
+                        this.$nextTick(() => {
+                            this.updateCharts();
+                        });
+
+                    } catch (error) {
+                        console.error('Error fetching data:', error);
+                    }
+                },
+
+                updateCharts() {
+                    this.createHourlyChart();
+                    this.createSuccessChart();
+                    this.createDirectionChart();
+                },
+
+                createHourlyChart() {
+                    const ctx = document.getElementById('hourlyChart');
+                    if (!ctx) return;
+
+                    if (this.charts.hourly) {
+                        this.charts.hourly.destroy();
+                    }
+
+                    const labels = this.stats.hourly_data?.map(d => d.hour) || [];
+                    const data = this.stats.hourly_data?.map(d => d.count) || [];
+
+                    this.charts.hourly = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Syncs per Hour',
+                                data: data,
+                                borderColor: 'rgb(59, 130, 246)',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1
+                                    }
+                                }
+                            }
+                        }
+                    });
+                },
+
+                createSuccessChart() {
+                    const ctx = document.getElementById('successChart');
+                    if (!ctx) return;
+
+                    if (this.charts.success) {
+                        this.charts.success.destroy();
+                    }
+
+                    const successful = this.stats.stats_24h?.successful_syncs || 0;
+                    const failed = this.stats.stats_24h?.failed_syncs || 0;
+
+                    this.charts.success = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Success', 'Failed'],
+                            datasets: [{
+                                data: [successful, failed],
+                                backgroundColor: [
+                                    'rgb(16, 185, 129)',
+                                    'rgb(239, 68, 68)'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+                },
+
+                createDirectionChart() {
+                    const ctx = document.getElementById('directionChart');
+                    if (!ctx) return;
+
+                    if (this.charts.direction) {
+                        this.charts.direction.destroy();
+                    }
+
+                    const twitterToBluesky = this.stats.stats_24h?.twitter_to_bluesky || 0;
+                    const blueskyToTwitter = this.stats.stats_24h?.bluesky_to_twitter || 0;
+
+                    this.charts.direction = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['𝕏 → Bluesky', 'Bluesky → 𝕏'],
+                            datasets: [{
+                                label: 'Syncs',
+                                data: [twitterToBluesky, blueskyToTwitter],
+                                backgroundColor: [
+                                    'rgb(59, 130, 246)',
+                                    'rgb(168, 85, 247)'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1
+                                    }
+                                }
+                            }
+                        }
+                    });
+                },
+
+                formatTime(timestamp) {
+                    if (!timestamp) return '-';
+                    const date = new Date(timestamp);
+                    const now = new Date();
+                    const diff = Math.floor((now - date) / 1000);
+
+                    if (diff < 60) return `${diff}s ago`;
+                    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+                    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+                    return `${Math.floor(diff / 86400)}d ago`;
+                },
+
+                formatTimestamp(timestamp) {
+                    if (!timestamp) return '-';
+                    const date = new Date(timestamp * 1000);
+                    const now = new Date();
+                    const diff = Math.floor((now - date) / 1000);
+
+                    if (diff < 60) return `${diff}s ago`;
+                    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+                    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+                    return `${Math.floor(diff / 86400)}d ago`;
+                },
+
+                updateLastUpdated() {
+                    const diff = Math.floor((Date.now() - this.lastUpdateTime) / 1000);
+                    if (diff < 60) {
+                        this.lastUpdated = `${diff}s`;
+                    } else {
+                        this.lastUpdated = `${Math.floor(diff / 60)}m`;
+                    }
+                }
+            };
+        }
+    </script>
+</body>
+</html>
