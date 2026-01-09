@@ -26,3 +26,19 @@ sys.modules['atproto'] = mock_atproto
 # Mock db_handler before any imports
 mock_db_handler = MagicMock()
 sys.modules['db_handler'] = mock_db_handler
+
+# Mock tenacity before any imports
+# Create a pass-through decorator that doesn't actually do retries
+def passthrough_decorator(*args, **kwargs):
+    def decorator(func):
+        return func
+    return decorator
+
+mock_tenacity = MagicMock()
+mock_tenacity.retry = passthrough_decorator
+mock_tenacity.stop_after_attempt = MagicMock(return_value=None)
+mock_tenacity.wait_exponential = MagicMock(return_value=None)
+mock_tenacity.retry_if_exception_type = MagicMock(return_value=None)
+mock_tenacity.before_sleep_log = MagicMock(return_value=None)
+mock_tenacity.after_log = MagicMock(return_value=None)
+sys.modules['tenacity'] = mock_tenacity

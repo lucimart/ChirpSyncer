@@ -202,3 +202,116 @@ def get_post_by_hash(content_hash: str, db_path=None):
 
     conn.close()
     return result
+
+
+# THREAD-BIDIR-003: Database Schema for Threads
+
+def migrate_database_v2(db_path=None):
+    """
+    Migración v2: Agregar soporte para threads.
+
+    Cambios:
+    - Agregar columna thread_id (nullable)
+    - Agregar columna thread_position (nullable, 0-indexed)
+    - Crear índice en thread_id
+
+    thread_id format: "{platform}_{original_post_id}"
+    Ejemplo: "twitter_12345" para thread iniciado en Twitter
+
+    thread_position:
+    - 0: Primer post del thread
+    - 1: Segundo post
+    - N: N-ésimo post
+
+    Args:
+        db_path: Path to database file (defaults to DB_PATH)
+    """
+    resolved_path = db_path or DB_PATH
+    conn = sqlite3.connect(resolved_path)
+    cursor = conn.cursor()
+
+    # Check if columns already exist
+    cursor.execute("PRAGMA table_info(synced_posts)")
+    columns = cursor.fetchall()
+    column_names = [col[1] for col in columns]
+
+    # Add thread_id column if not exists
+    if 'thread_id' not in column_names:
+        cursor.execute("ALTER TABLE synced_posts ADD COLUMN thread_id TEXT")
+
+    # Add thread_position column if not exists
+    if 'thread_position' not in column_names:
+        cursor.execute("ALTER TABLE synced_posts ADD COLUMN thread_position INTEGER")
+
+    # Create index on thread_id
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_thread_id ON synced_posts(thread_id)")
+
+    conn.commit()
+    conn.close()
+
+
+def save_synced_thread(posts: list, source: str, synced_to: str,
+                       thread_id: str, db_path=None):
+    """
+    Guarda un thread completo con metadatos.
+
+    Args:
+        posts: Lista de dicts con {twitter_id, bluesky_uri, content}
+        source: 'twitter' o 'bluesky'
+        synced_to: 'twitter' o 'bluesky'
+        thread_id: ID único del thread
+
+    Ejemplo:
+        posts = [
+            {'twitter_id': 'tw1', 'bluesky_uri': 'bs1', 'content': 'First'},
+            {'twitter_id': 'tw2', 'bluesky_uri': 'bs2', 'content': 'Second'}
+        ]
+        save_synced_thread(posts, 'twitter', 'bluesky', 'twitter_tw1')
+    """
+    resolved_path = db_path or DB_PATH
+    conn = sqlite3.connect(resolved_path)
+    cursor = conn.cursor()
+
+    # Save each post with thread metadata
+    for position, post in enumerate(posts):
+        content_hash = compute_content_hash(post['content'])
+
+        cursor.execute("""
+        INSERT INTO synced_posts
+        (twitter_id, bluesky_uri, source, content_hash, synced_to, original_text, thread_id, thread_position)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            post.get('twitter_id'),
+            post.get('bluesky_uri'),
+            source,
+            content_hash,
+            synced_to,
+            post['content'],
+            thread_id,
+            position  # 0-indexed position
+        ))
+
+    conn.commit()
+    conn.close()
+
+
+def is_thread_synced(thread_id: str, db_path=None) -> bool:
+    """
+    Verifica si un thread ya fue sincronizado.
+
+    Args:
+        thread_id: ID único del thread
+        db_path: Path to database file (defaults to DB_PATH)
+
+    Returns:
+        bool: True si el thread_id existe en la base de datos
+    """
+    resolved_path = db_path or DB_PATH
+    conn = sqlite3.connect(resolved_path)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT 1 FROM synced_posts WHERE thread_id = ? LIMIT 1", (thread_id,))
+    result = cursor.fetchone()
+
+    conn.close()
+    return result is not None

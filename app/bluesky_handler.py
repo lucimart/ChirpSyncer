@@ -210,3 +210,153 @@ def post_thread_to_bluesky(tweets: list) -> list:
 
     logger.info(f"Posted thread: {len(posted_uris)}/{len(tweets)} tweets successful")
     return posted_uris
+
+
+def is_bluesky_thread(post) -> bool:
+    """
+    Detecta si un post de Bluesky es parte de un thread.
+
+    Un post es parte de thread si:
+    - Tiene campo 'reply' en el record
+    - El post padre (parent) es del mismo autor
+
+    Args:
+        post: Post object from Bluesky API (dict with 'record' and 'author')
+
+    Returns:
+        bool: True si es parte de un thread del mismo autor
+    """
+    try:
+        # Check if post has reply field in record
+        record = post.get('record', {})
+        reply = record.get('reply')
+
+        if not reply:
+            # No reply field = not a thread
+            return False
+
+        # Get parent URI
+        parent_ref = reply.get('parent', {})
+        parent_uri = parent_ref.get('uri')
+
+        if not parent_uri:
+            logger.warning("Reply field exists but no parent URI found")
+            return False
+
+        # Fetch parent post to check author
+        try:
+            parent_response = bsky_client.app.bsky.feed.get_posts(uris=[parent_uri])
+
+            if not hasattr(parent_response, 'posts') or not parent_response.posts:
+                logger.warning(f"Parent post not found: {parent_uri}")
+                return False
+
+            parent_post = parent_response.posts[0]
+
+            # Compare author DIDs
+            current_author_did = post.get('author', {}).get('did')
+            parent_author_did = parent_post.get('author', {}).get('did')
+
+            # It's a thread if the parent is from the same author
+            return current_author_did == parent_author_did
+
+        except Exception as e:
+            logger.error(f"Error fetching parent post: {e}")
+            return False
+
+    except Exception as e:
+        logger.error(f"Error in is_bluesky_thread: {e}")
+        return False
+
+
+async def fetch_bluesky_thread(post_uri: str, username: str) -> list:
+    """
+    Recupera todos los posts de un thread de Bluesky.
+
+    Args:
+        post_uri: URI del post inicial
+        username: Handle del usuario (@handle.bsky.social)
+
+    Returns:
+        list: Posts del thread en orden cronológico
+
+    Algoritmo:
+    1. Obtener post actual
+    2. Buscar post raíz (root) del thread
+    3. Recuperar todos los replies del mismo autor
+    4. Ordenar cronológicamente
+    """
+    try:
+        logger.info(f"Fetching thread starting from: {post_uri}")
+
+        # Step 1: Get the initial post
+        initial_response = bsky_client.app.bsky.feed.get_posts(uris=[post_uri])
+
+        if not hasattr(initial_response, 'posts') or not initial_response.posts:
+            logger.warning(f"Post not found: {post_uri}")
+            return []
+
+        initial_post = initial_response.posts[0]
+
+        # Step 2: Find the root of the thread
+        root_uri = post_uri
+        record = initial_post.get('record', {})
+        reply = record.get('reply')
+
+        if reply:
+            root_ref = reply.get('root', {})
+            root_uri = root_ref.get('uri', post_uri)
+
+        logger.info(f"Thread root: {root_uri}")
+
+        # Step 3: Fetch all posts from the user
+        author_feed_response = bsky_client.app.bsky.feed.get_author_feed(
+            actor=username,
+            limit=50  # Fetch more posts to capture full thread
+        )
+
+        if not hasattr(author_feed_response, 'feed') or not author_feed_response.feed:
+            logger.warning(f"No posts found for user: {username}")
+            return []
+
+        # Step 4: Filter posts that belong to this thread
+        thread_posts = []
+        author_did = initial_post.get('author', {}).get('did')
+
+        for item in author_feed_response.feed:
+            # Skip reposts
+            if item.get('reason') is not None:
+                continue
+
+            post = item.get('post', {})
+            post_record = post.get('record', {})
+            post_reply = post_record.get('reply')
+
+            # Check if this post is part of the thread
+            # A post is part of the thread if:
+            # 1. It's the root post (no reply field and URI matches)
+            # 2. It has a reply field with the same root URI
+
+            is_root = (post.get('uri') == root_uri)
+            has_matching_root = False
+
+            if post_reply:
+                post_root_ref = post_reply.get('root', {})
+                post_root_uri = post_root_ref.get('uri')
+                has_matching_root = (post_root_uri == root_uri)
+
+            # Add to thread if it's the root or has matching root
+            if is_root or has_matching_root:
+                # Verify it's from the same author
+                if post.get('author', {}).get('did') == author_did:
+                    thread_posts.append(post)
+
+        # Step 5: Sort by timestamp (chronological order)
+        thread_posts.sort(key=lambda p: p.get('record', {}).get('createdAt', ''))
+
+        logger.info(f"Fetched {len(thread_posts)} posts in thread")
+        return thread_posts
+
+    except Exception as e:
+        logger.error(f"Error fetching Bluesky thread: {e}")
+        return []

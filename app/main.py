@@ -1,10 +1,23 @@
 import time
 import asyncio
 from twitter_scraper import fetch_tweets, is_thread, fetch_thread
-from bluesky_handler import post_to_bluesky, post_thread_to_bluesky, login_to_bluesky, fetch_posts_from_bluesky
-from twitter_handler import post_to_twitter
+from bluesky_handler import (
+    post_to_bluesky,
+    post_thread_to_bluesky,
+    login_to_bluesky,
+    fetch_posts_from_bluesky,
+    is_bluesky_thread,
+    fetch_bluesky_thread
+)
+from twitter_handler import post_to_twitter, post_thread_to_twitter
 from config import POLL_INTERVAL, TWITTER_USERNAME, BSKY_USERNAME, TWITTER_API_KEY
-from db_handler import migrate_database, should_sync_post, save_synced_post
+from db_handler import (
+    migrate_database,
+    should_sync_post,
+    save_synced_post,
+    save_synced_thread,
+    is_thread_synced
+)
 from validation import validate_credentials
 from logger import setup_logger
 
@@ -13,11 +26,10 @@ logger = setup_logger(__name__)
 
 def sync_twitter_to_bluesky():
     """
-    Sync Twitter → Bluesky using new DB schema.
+    Sync Twitter → Bluesky with bidirectional thread support.
 
     Fetches recent tweets and syncs them to Bluesky if not already synced.
-    Uses should_sync_post() to check for duplicates and save_synced_post() to track.
-    Supports thread detection and posting.
+    Supports both single posts and threads with deduplication.
     """
     logger.info("Starting Twitter → Bluesky sync...")
     tweets = fetch_tweets()
@@ -26,42 +38,48 @@ def sync_twitter_to_bluesky():
     skipped_count = 0
 
     for tweet in tweets:
-        # Check if should sync using new DB function
-        if should_sync_post(tweet.text, 'twitter', tweet.id):
-            # Handle threads
-            try:
-                is_thread_result = asyncio.run(is_thread(tweet._tweet))
+        try:
+            # Detect if tweet is part of a thread
+            is_thread_result = asyncio.run(is_thread(tweet._tweet))
 
-                if is_thread_result:
-                    logger.info(f"Thread detected for tweet {tweet.id}, fetching full thread...")
-                    # Fetch the complete thread
-                    thread = asyncio.run(fetch_thread(str(tweet.id), TWITTER_USERNAME))
+            if is_thread_result:
+                # Handle thread
+                logger.info(f"Thread detected for tweet {tweet.id}, fetching full thread...")
+                thread = asyncio.run(fetch_thread(str(tweet.id), TWITTER_USERNAME))
 
-                    if thread and len(thread) > 0:
-                        logger.info(f"Posting thread with {len(thread)} tweets to Bluesky...")
-                        # Post entire thread to Bluesky
-                        from twitter_scraper import TweetAdapter
-                        adapted_thread = [TweetAdapter(t) for t in thread]
-                        bluesky_uris = post_thread_to_bluesky(adapted_thread)
+                if thread and len(thread) > 0:
+                    # Create thread_id from first tweet
+                    thread_id = f"twitter_{thread[0].id}"
 
-                        # Save each tweet in thread
-                        for t, uri in zip(thread, bluesky_uris):
-                            # Get text from thread tweet
-                            tweet_text = t.text if hasattr(t, 'text') else str(t)
-                            tweet_id = t.id if hasattr(t, 'id') else str(t)
+                    # Check if thread already synced
+                    if is_thread_synced(thread_id):
+                        logger.info(f"Thread {thread_id} already synced, skipping")
+                        skipped_count += len(thread)
+                        continue
 
-                            save_synced_post(
-                                twitter_id=str(tweet_id),
-                                bluesky_uri=uri,
-                                source='twitter',
-                                synced_to='bluesky',
-                                content=tweet_text
-                            )
-                        synced_count += len(thread)
-                        logger.info(f"Synced thread ({len(thread)} tweets) to Bluesky")
-                    else:
-                        logger.warning(f"Could not fetch thread for tweet {tweet.id}, posting as single tweet")
-                        # Fallback to single tweet
+                    # Sync thread completo
+                    logger.info(f"Syncing thread {thread_id} ({len(thread)} tweets)")
+                    from twitter_scraper import TweetAdapter
+                    adapted_thread = [TweetAdapter(t) for t in thread]
+                    bluesky_uris = post_thread_to_bluesky(adapted_thread)
+
+                    # Save thread to DB
+                    posts = [
+                        {
+                            'twitter_id': str(t.id),
+                            'bluesky_uri': uri,
+                            'content': t.text if hasattr(t, 'text') else t.rawContent
+                        }
+                        for t, uri in zip(thread, bluesky_uris)
+                    ]
+                    save_synced_thread(posts, 'twitter', 'bluesky', thread_id)
+
+                    synced_count += len(thread)
+                    logger.info(f"Synced thread ({len(thread)} tweets) to Bluesky")
+                else:
+                    logger.warning(f"Could not fetch thread for tweet {tweet.id}, posting as single tweet")
+                    # Fallback to single tweet
+                    if should_sync_post(tweet.text, 'twitter', tweet.id):
                         bluesky_uri = post_to_bluesky(tweet.text)
                         save_synced_post(
                             twitter_id=tweet.id,
@@ -71,9 +89,12 @@ def sync_twitter_to_bluesky():
                             content=tweet.text
                         )
                         synced_count += 1
-                        logger.info(f"Synced tweet {tweet.id} to Bluesky")
-                else:
-                    # Single tweet: post normally
+                        logger.info(f"Synced tweet {tweet.id} to Bluesky (fallback)")
+                    else:
+                        skipped_count += 1
+            else:
+                # Single tweet: post normally
+                if should_sync_post(tweet.text, 'twitter', tweet.id):
                     bluesky_uri = post_to_bluesky(tweet.text)
                     save_synced_post(
                         twitter_id=tweet.id,
@@ -84,11 +105,15 @@ def sync_twitter_to_bluesky():
                     )
                     synced_count += 1
                     logger.info(f"Synced tweet {tweet.id} to Bluesky")
+                else:
+                    skipped_count += 1
+                    logger.debug(f"Skipped tweet {tweet.id} (already synced or duplicate content)")
 
-            except Exception as e:
-                logger.error(f"Error processing tweet {tweet.id}: {e}")
-                # Fallback: post as single tweet
-                try:
+        except Exception as e:
+            logger.error(f"Error processing tweet {tweet.id}: {e}")
+            # Fallback: try to post as single tweet
+            try:
+                if should_sync_post(tweet.text, 'twitter', tweet.id):
                     bluesky_uri = post_to_bluesky(tweet.text)
                     save_synced_post(
                         twitter_id=tweet.id,
@@ -99,24 +124,21 @@ def sync_twitter_to_bluesky():
                     )
                     synced_count += 1
                     logger.info(f"Synced tweet {tweet.id} to Bluesky (fallback)")
-                except Exception as post_error:
-                    logger.error(f"Failed to post tweet {tweet.id}: {post_error}")
-        else:
-            skipped_count += 1
-            logger.debug(f"Skipped tweet {tweet.id} (already synced or duplicate content)")
+            except Exception as post_error:
+                logger.error(f"Failed to post tweet {tweet.id}: {post_error}")
 
     logger.info(f"Twitter → Bluesky sync complete: {synced_count} synced, {skipped_count} skipped")
 
 
 def sync_bluesky_to_twitter():
     """
-    Sync Bluesky → Twitter (NEW function for bidirectional sync).
+    Sync Bluesky → Twitter with bidirectional thread support.
 
     Fetches recent Bluesky posts and syncs them to Twitter if:
     1. Twitter API credentials are available
-    2. Post not already synced (checked via should_sync_post)
+    2. Post not already synced (checked via should_sync_post or is_thread_synced)
 
-    Gracefully skips if Twitter API credentials are missing.
+    Supports both single posts and threads with deduplication.
     """
     # Check if Twitter API credentials are available
     if not TWITTER_API_KEY:
@@ -130,29 +152,90 @@ def sync_bluesky_to_twitter():
     skipped_count = 0
 
     for post in posts:
-        # Check if should sync
-        if should_sync_post(post.text, 'bluesky', post.uri):
+        try:
+            # Detect if post is part of a thread
+            if is_bluesky_thread(post):
+                # Handle thread
+                logger.info(f"Thread detected for post {post.uri}, fetching full thread...")
+                thread_posts = asyncio.run(fetch_bluesky_thread(post.uri, BSKY_USERNAME))
+
+                if thread_posts and len(thread_posts) > 0:
+                    # Create thread_id from first post URI
+                    thread_id = f"bluesky_{thread_posts[0].uri}"
+
+                    # Check if thread already synced
+                    if is_thread_synced(thread_id):
+                        logger.info(f"Thread {thread_id} already synced, skipping")
+                        skipped_count += len(thread_posts)
+                        continue
+
+                    # Sync thread completo
+                    logger.info(f"Syncing thread {thread_id} ({len(thread_posts)} posts)")
+                    tweet_ids = post_thread_to_twitter([p.text for p in thread_posts])
+
+                    # Save thread to DB
+                    posts_data = [
+                        {
+                            'twitter_id': tid,
+                            'bluesky_uri': p.uri,
+                            'content': p.text
+                        }
+                        for p, tid in zip(thread_posts, tweet_ids)
+                    ]
+                    save_synced_thread(posts_data, 'bluesky', 'twitter', thread_id)
+
+                    synced_count += len(thread_posts)
+                    logger.info(f"Synced thread ({len(thread_posts)} posts) to Twitter")
+                else:
+                    logger.warning(f"Could not fetch thread for post {post.uri}, posting as single post")
+                    # Fallback to single post
+                    if should_sync_post(post.text, 'bluesky', post.uri):
+                        tweet_id = post_to_twitter(post.text)
+                        save_synced_post(
+                            twitter_id=tweet_id,
+                            bluesky_uri=post.uri,
+                            source='bluesky',
+                            synced_to='twitter',
+                            content=post.text
+                        )
+                        synced_count += 1
+                        logger.info(f"Synced Bluesky post {post.uri} to Twitter (fallback)")
+                    else:
+                        skipped_count += 1
+            else:
+                # Single post: post normally
+                if should_sync_post(post.text, 'bluesky', post.uri):
+                    tweet_id = post_to_twitter(post.text)
+                    save_synced_post(
+                        twitter_id=tweet_id,
+                        bluesky_uri=post.uri,
+                        source='bluesky',
+                        synced_to='twitter',
+                        content=post.text
+                    )
+                    synced_count += 1
+                    logger.info(f"Synced Bluesky post {post.uri} to Twitter (tweet ID: {tweet_id})")
+                else:
+                    skipped_count += 1
+                    logger.debug(f"Skipped Bluesky post {post.uri} (already synced or duplicate content)")
+
+        except Exception as e:
+            logger.error(f"Error processing Bluesky post {post.uri}: {e}")
+            # Fallback: try to post as single post
             try:
-                # Post to Twitter
-                tweet_id = post_to_twitter(post.text)
-
-                # Save to DB
-                save_synced_post(
-                    twitter_id=tweet_id,
-                    bluesky_uri=post.uri,
-                    source='bluesky',
-                    synced_to='twitter',
-                    content=post.text
-                )
-
-                synced_count += 1
-                logger.info(f"Synced Bluesky post {post.uri} to Twitter (tweet ID: {tweet_id})")
-
-            except Exception as e:
-                logger.error(f"Failed to sync Bluesky post {post.uri} to Twitter: {e}")
-        else:
-            skipped_count += 1
-            logger.debug(f"Skipped Bluesky post {post.uri} (already synced or duplicate content)")
+                if should_sync_post(post.text, 'bluesky', post.uri):
+                    tweet_id = post_to_twitter(post.text)
+                    save_synced_post(
+                        twitter_id=tweet_id,
+                        bluesky_uri=post.uri,
+                        source='bluesky',
+                        synced_to='twitter',
+                        content=post.text
+                    )
+                    synced_count += 1
+                    logger.info(f"Synced Bluesky post {post.uri} to Twitter (fallback)")
+            except Exception as post_error:
+                logger.error(f"Failed to sync Bluesky post {post.uri}: {post_error}")
 
     logger.info(f"Bluesky → Twitter sync complete: {synced_count} synced, {skipped_count} skipped")
 
