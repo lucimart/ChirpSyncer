@@ -2,3 +2,7 @@ atproto==0.0.65
 tenacity==8.2.3
 tweepy==4.16.0
 twscrape==0.12.0
+aiohttp==3.9.1
+requests==2.31.0
+Pillow==10.1.0
+Flask==3.0.0
