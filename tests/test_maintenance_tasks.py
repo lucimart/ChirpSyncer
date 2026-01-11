@@ -71,14 +71,13 @@ def setup_db(temp_db):
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS daily_stats (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
             date TEXT NOT NULL,
+            user_id INTEGER,
             total_syncs INTEGER DEFAULT 0,
             successful_syncs INTEGER DEFAULT 0,
             failed_syncs INTEGER DEFAULT 0,
-            total_posts INTEGER DEFAULT 0,
-            created_at INTEGER NOT NULL,
-            UNIQUE(user_id, date)
+            total_duration_ms INTEGER DEFAULT 0,
+            UNIQUE(date, user_id)
         )
     ''')
 
@@ -486,24 +485,24 @@ class TestAggregateDailyStats:
 
     def test_aggregate_daily_stats_creates_summary(self, setup_db):
         """Test that daily stats are aggregated"""
-        # Create sync stats for today
+        # Create sync stats for yesterday
         conn = sqlite3.connect(setup_db)
         cursor = conn.cursor()
 
-        today_start = int(time.time()) - (int(time.time()) % 86400)  # Start of today
+        yesterday = int(time.time()) - 86400  # Yesterday's timestamp
 
         # Insert some sync stats
         for i in range(5):
             cursor.execute('''
-                INSERT INTO sync_stats (user_id, sync_type, success, posts_synced, errors, created_at)
+                INSERT INTO sync_stats (user_id, source, target, success, media_count, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?)
-            ''', (1, 'twitter_to_bluesky', 1, 10, 0, today_start + i * 100))
+            ''', (1, 'twitter', 'bluesky', 1, 10, yesterday + i * 100))
 
         # Insert failed sync
         cursor.execute('''
-            INSERT INTO sync_stats (user_id, sync_type, success, posts_synced, errors, created_at)
+            INSERT INTO sync_stats (user_id, source, target, success, media_count, timestamp)
             VALUES (?, ?, ?, ?, ?, ?)
-        ''', (1, 'twitter_to_bluesky', 0, 0, 5, today_start + 500))
+        ''', (1, 'twitter', 'bluesky', 0, 0, yesterday + 500))
 
         conn.commit()
         conn.close()
@@ -534,15 +533,15 @@ class TestAggregateDailyStats:
         # 3 successful syncs, 2 failed, 30 total posts
         for i in range(3):
             cursor.execute('''
-                INSERT INTO sync_stats (user_id, sync_type, success, posts_synced, errors, created_at)
+                INSERT INTO sync_stats (user_id, source, target, success, media_count, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?)
-            ''', (1, 'twitter_to_bluesky', 1, 10, 0, yesterday + i))
+            ''', (1, 'twitter', 'bluesky', 1, 10, yesterday + i))
 
         for i in range(2):
             cursor.execute('''
-                INSERT INTO sync_stats (user_id, sync_type, success, posts_synced, errors, created_at)
+                INSERT INTO sync_stats (user_id, source, target, success, media_count, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?)
-            ''', (1, 'twitter_to_bluesky', 0, 0, 3, yesterday + 100 + i))
+            ''', (1, 'twitter', 'bluesky', 0, 0, yesterday + 100 + i))
 
         conn.commit()
         conn.close()
@@ -561,7 +560,6 @@ class TestAggregateDailyStats:
         assert row['total_syncs'] == 5
         assert row['successful_syncs'] == 3
         assert row['failed_syncs'] == 2
-        assert row['total_posts'] == 30
 
 
 class TestCleanupErrorLogs:

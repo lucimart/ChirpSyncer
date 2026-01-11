@@ -378,3 +378,99 @@ class SavedContentManager:
 
         finally:
             conn.close()
+
+    def search_saved(
+        self,
+        user_id: int,
+        query: str,
+        collection_id: Optional[int] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Search within user's saved tweets.
+
+        Args:
+            user_id: User ID
+            query: Search query string (searches in notes and tweet_id)
+            collection_id: Optional collection ID to search within
+
+        Returns:
+            List of matching saved tweets with metadata
+        """
+        conn = self._get_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        try:
+            sql = '''
+                SELECT st.id, st.user_id, st.tweet_id, st.collection_id,
+                       st.notes, st.saved_at, c.name as collection_name
+                FROM saved_tweets st
+                LEFT JOIN collections c ON st.collection_id = c.id
+                WHERE st.user_id = ?
+                AND (st.notes LIKE ? OR st.tweet_id LIKE ?)
+            '''
+            params = [user_id, f'%{query}%', f'%{query}%']
+
+            if collection_id is not None:
+                sql += ' AND st.collection_id = ?'
+                params.append(collection_id)
+
+            sql += ' ORDER BY st.saved_at DESC'
+
+            cursor.execute(sql, params)
+            rows = cursor.fetchall()
+
+            return [dict(row) for row in rows]
+
+        except Exception as e:
+            print(f"Error searching saved tweets: {e}")
+            return []
+
+        finally:
+            conn.close()
+
+    def export_to_json(
+        self,
+        user_id: int,
+        collection_id: Optional[int] = None
+    ) -> str:
+        """
+        Export saved tweets to JSON format.
+
+        Args:
+            user_id: User ID
+            collection_id: Optional collection ID to export
+
+        Returns:
+            JSON string of saved tweets
+        """
+        import json
+        tweets = self.get_saved_tweets(user_id, collection_id)
+        return json.dumps(tweets, indent=2)
+
+    def export_to_csv(
+        self,
+        user_id: int,
+        collection_id: Optional[int] = None
+    ) -> str:
+        """
+        Export saved tweets to CSV format.
+
+        Args:
+            user_id: User ID
+            collection_id: Optional collection ID to export
+
+        Returns:
+            CSV string of saved tweets
+        """
+        import csv
+        import io
+        tweets = self.get_saved_tweets(user_id, collection_id)
+
+        output = io.StringIO()
+        if tweets:
+            writer = csv.DictWriter(output, fieldnames=tweets[0].keys())
+            writer.writeheader()
+            writer.writerows(tweets)
+
+        return output.getvalue()

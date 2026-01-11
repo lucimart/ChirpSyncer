@@ -46,7 +46,7 @@ class AnalyticsTracker:
                 replies INTEGER DEFAULT 0,
                 engagements INTEGER DEFAULT 0,
                 engagement_rate REAL DEFAULT 0.0,
-                UNIQUE(tweet_id, timestamp)
+                UNIQUE(tweet_id, user_id, timestamp)
             )
         ''')
 
@@ -132,10 +132,10 @@ class AnalyticsTracker:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
 
-            # Check if tweet already has metrics
+            # Check if tweet already has metrics for this user
             cursor.execute(
-                'SELECT id FROM tweet_metrics WHERE tweet_id = ? ORDER BY timestamp DESC LIMIT 1',
-                (tweet_id,)
+                'SELECT id FROM tweet_metrics WHERE tweet_id = ? AND user_id = ? ORDER BY timestamp DESC LIMIT 1',
+                (tweet_id, user_id)
             )
             existing = cursor.fetchone()
 

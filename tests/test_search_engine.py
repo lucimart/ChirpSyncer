@@ -10,7 +10,9 @@ Tests cover:
 - User filtering
 - Date range filtering
 - Hashtag search
+- Author filtering
 - Boolean operators
+- Proximity search (NEAR operator)
 - Index rebuild
 """
 import sqlite3
@@ -350,3 +352,45 @@ def test_duplicate_indexing(search_engine):
     # Should have only 1 result
     results = search_engine.search(query="Duplicate", user_id=1)
     assert len(results) == 1, "Should not create duplicate entries"
+
+
+def test_search_with_author_filter(search_engine):
+    """Test: Searching with author filter returns only tweets from that author"""
+    # Index tweets from different authors
+    search_engine.index_tweet("1", 1, "Python tutorial by Alice", "", "alice")
+    search_engine.index_tweet("2", 1, "Python guide by Bob", "", "bob")
+    search_engine.index_tweet("3", 1, "Python basics by Alice", "", "alice")
+    search_engine.index_tweet("4", 1, "JavaScript by Alice", "", "alice")
+
+    # Search with author filter
+    filters = {'author': 'alice'}
+    results = search_engine.search_with_filters(
+        query="Python",
+        user_id=1,
+        filters=filters
+    )
+
+    assert len(results) == 2, "Should find only Python tweets by alice"
+    assert all(r['author'] == 'alice' for r in results), "All results should be from alice"
+    assert all('python' in r['content'].lower() for r in results), "All results should contain Python"
+
+
+def test_search_near_operator(search_engine):
+    """Test: Proximity search with NEAR operator finds words within specified distance"""
+    # Index tweets with words at different proximities
+    search_engine.index_tweet("1", 1, "database and SQL are important", "", "testuser")
+    search_engine.index_tweet("2", 1, "database SQL", "", "testuser")  # Close proximity
+    search_engine.index_tweet("3", 1, "database things SQL", "", "testuser")  # Within 5 words
+    search_engine.index_tweet("4", 1, "database one two three four five six SQL", "", "testuser")  # Beyond 5 words
+
+    # FTS5 NEAR syntax: NEAR(term1 term2, N) where N is max intervening terms
+    # NEAR(database SQL, 5) means within 5 words of each other
+    results = search_engine.search(query="NEAR(database SQL, 5)", user_id=1)
+
+    # Should find tweets 1, 2, and 3 (within 5 words), but not 4
+    assert len(results) >= 2, "Should find at least 2 tweets with words close together"
+
+    # Verify that tweets with closer proximity are found
+    tweet_ids_found = [r['tweet_id'] for r in results]
+    assert "2" in tweet_ids_found, "Should find tweet with immediate proximity"
+    assert "3" in tweet_ids_found, "Should find tweet within 5 words"

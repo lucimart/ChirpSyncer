@@ -466,3 +466,165 @@ def test_collection_created_at_timestamp(manager, user1_id):
     created_at = collections[0]['created_at']
     assert created_at >= before
     assert created_at <= after
+
+
+# ============================================================================
+# TEST 23: Search saved tweets
+# ============================================================================
+def test_search_saved(manager, user1_id):
+    """Test searching within saved tweets"""
+    # Create collection for organization
+    collection_id = manager.create_collection(user1_id, 'Tech')
+
+    # Save tweets with different notes
+    manager.save_tweet(user1_id, 'tweet1', notes='Python tutorial on decorators')
+    manager.save_tweet(user1_id, 'tweet2', notes='JavaScript guide for beginners')
+    manager.save_tweet(user1_id, 'tweet3', collection_id=collection_id, notes='Python best practices')
+    manager.save_tweet(user1_id, 'tweet4', notes='Machine learning basics')
+
+    # Search for "Python" in notes
+    results = manager.search_saved(user1_id, 'Python')
+    assert len(results) == 2
+    assert all('Python' in r['notes'] for r in results)
+
+    # Search for "JavaScript"
+    results = manager.search_saved(user1_id, 'JavaScript')
+    assert len(results) == 1
+    assert 'JavaScript' in results[0]['notes']
+
+    # Search by tweet_id
+    results = manager.search_saved(user1_id, 'tweet1')
+    assert len(results) == 1
+    assert results[0]['tweet_id'] == 'tweet1'
+
+
+# ============================================================================
+# TEST 24: Search saved tweets within specific collection
+# ============================================================================
+def test_search_saved_with_collection_filter(manager, user1_id):
+    """Test searching within a specific collection"""
+    # Create collections
+    collection1_id = manager.create_collection(user1_id, 'Collection 1')
+    collection2_id = manager.create_collection(user1_id, 'Collection 2')
+
+    # Save tweets
+    manager.save_tweet(user1_id, 'tweet1', collection_id=collection1_id, notes='Python in collection 1')
+    manager.save_tweet(user1_id, 'tweet2', collection_id=collection2_id, notes='Python in collection 2')
+    manager.save_tweet(user1_id, 'tweet3', notes='Python uncategorized')
+
+    # Search for "Python" only in collection 1
+    results = manager.search_saved(user1_id, 'Python', collection_id=collection1_id)
+    assert len(results) == 1
+    assert results[0]['collection_id'] == collection1_id
+    assert results[0]['collection_name'] == 'Collection 1'
+
+
+# ============================================================================
+# TEST 25: Export to JSON
+# ============================================================================
+def test_export_json(manager, user1_id):
+    """Test exporting saved tweets to JSON format"""
+    import json
+
+    # Save some tweets
+    manager.save_tweet(user1_id, 'tweet1', notes='Test tweet 1')
+    manager.save_tweet(user1_id, 'tweet2', notes='Test tweet 2')
+
+    # Export to JSON
+    json_str = manager.export_to_json(user1_id)
+
+    # Verify it's valid JSON
+    data = json.loads(json_str)
+    assert isinstance(data, list)
+    assert len(data) == 2
+
+    # Verify content
+    assert any(t['tweet_id'] == 'tweet1' for t in data)
+    assert any(t['tweet_id'] == 'tweet2' for t in data)
+
+
+# ============================================================================
+# TEST 26: Export specific collection to JSON
+# ============================================================================
+def test_export_json_with_collection(manager, user1_id):
+    """Test exporting specific collection to JSON"""
+    import json
+
+    # Create collection
+    collection_id = manager.create_collection(user1_id, 'Export Test')
+
+    # Save tweets
+    manager.save_tweet(user1_id, 'tweet1', collection_id=collection_id, notes='In collection')
+    manager.save_tweet(user1_id, 'tweet2', notes='Not in collection')
+
+    # Export only the collection
+    json_str = manager.export_to_json(user1_id, collection_id=collection_id)
+    data = json.loads(json_str)
+
+    # Should only have one tweet
+    assert len(data) == 1
+    assert data[0]['tweet_id'] == 'tweet1'
+
+
+# ============================================================================
+# TEST 27: Export to CSV
+# ============================================================================
+def test_export_csv(manager, user1_id):
+    """Test exporting saved tweets to CSV format"""
+    # Save some tweets
+    manager.save_tweet(user1_id, 'tweet1', notes='Test tweet 1')
+    manager.save_tweet(user1_id, 'tweet2', notes='Test tweet 2')
+
+    # Export to CSV
+    csv_str = manager.export_to_csv(user1_id)
+
+    # Verify CSV structure
+    lines = csv_str.strip().split('\n')
+    assert len(lines) == 3  # Header + 2 data rows
+
+    # Check header
+    assert 'tweet_id' in lines[0]
+    assert 'notes' in lines[0]
+
+    # Check content
+    assert 'tweet1' in csv_str
+    assert 'tweet2' in csv_str
+
+
+# ============================================================================
+# TEST 28: Export specific collection to CSV
+# ============================================================================
+def test_export_csv_with_collection(manager, user1_id):
+    """Test exporting specific collection to CSV"""
+    # Create collection
+    collection_id = manager.create_collection(user1_id, 'CSV Export')
+
+    # Save tweets
+    manager.save_tweet(user1_id, 'tweet1', collection_id=collection_id, notes='In collection')
+    manager.save_tweet(user1_id, 'tweet2', notes='Not in collection')
+
+    # Export only the collection
+    csv_str = manager.export_to_csv(user1_id, collection_id=collection_id)
+    lines = csv_str.strip().split('\n')
+
+    # Should only have header + 1 data row
+    assert len(lines) == 2
+    assert 'tweet1' in csv_str
+    assert 'tweet2' not in csv_str
+
+
+# ============================================================================
+# TEST 29: Export empty collection
+# ============================================================================
+def test_export_empty_collection(manager, user1_id):
+    """Test exporting when there are no saved tweets"""
+    import json
+
+    # Export JSON - should be empty array
+    json_str = manager.export_to_json(user1_id)
+    data = json.loads(json_str)
+    assert data == []
+
+    # Export CSV - should be empty string
+    csv_str = manager.export_to_csv(user1_id)
+    assert csv_str == ''

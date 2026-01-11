@@ -575,3 +575,88 @@ class TestGrowthReport:
         if data['first_period_tweets'] > 0 and data['second_period_tweets'] > 0:
             expected_change = data['second_period_tweets'] - data['first_period_tweets']
             assert data['tweets_change'] == expected_change
+
+
+class TestEmailDelivery:
+    """Test email delivery integration"""
+
+    def test_email_report_integration(self, report_gen):
+        """Test email delivery integration"""
+        from unittest.mock import patch, MagicMock
+
+        # Mock NotificationService at the source module
+        with patch('app.notification_service.NotificationService') as mock_ns:
+            mock_instance = MagicMock()
+            mock_instance.send_email.return_value = {'email_id': '12345'}
+            mock_ns.return_value = mock_instance
+
+            # Generate and email report
+            result = report_gen.generate_and_email_engagement_report(
+                user_id=1,
+                period='week',
+                format='html',
+                recipient_email='test@example.com'
+            )
+
+            assert result['success'] is True
+            assert 'test@example.com' in result['message']
+            assert result['email_id'] == '12345'
+            mock_instance.send_email.assert_called_once()
+
+    def test_email_growth_report(self, report_gen):
+        """Test emailing growth report"""
+        from unittest.mock import patch, MagicMock
+
+        with patch('app.notification_service.NotificationService') as mock_ns:
+            mock_instance = MagicMock()
+            mock_instance.send_email.return_value = {'email_id': '67890'}
+            mock_ns.return_value = mock_instance
+
+            result = report_gen.generate_and_email_growth_report(
+                user_id=1,
+                format='json',
+                recipient_email='growth@example.com'
+            )
+
+            assert result['success'] is True
+            assert 'growth@example.com' in result['message']
+
+    def test_email_top_tweets_report(self, report_gen):
+        """Test emailing top tweets report"""
+        from unittest.mock import patch, MagicMock
+
+        with patch('app.notification_service.NotificationService') as mock_ns:
+            mock_instance = MagicMock()
+            mock_instance.send_email.return_value = {'email_id': 'abc123'}
+            mock_ns.return_value = mock_instance
+
+            result = report_gen.generate_and_email_top_tweets_report(
+                user_id=1,
+                limit=10,
+                format='csv',
+                recipient_email='tweets@example.com'
+            )
+
+            assert result['success'] is True
+            assert 'tweets@example.com' in result['message']
+
+    def test_email_report_error_handling(self, report_gen):
+        """Test error handling in email delivery"""
+        from unittest.mock import patch, MagicMock
+
+        with patch('app.notification_service.NotificationService') as mock_ns:
+            # Make send_email raise an exception
+            mock_instance = MagicMock()
+            mock_instance.send_email.side_effect = Exception('SMTP connection failed')
+            mock_ns.return_value = mock_instance
+
+            result = report_gen.generate_and_email_engagement_report(
+                user_id=1,
+                period='week',
+                format='html',
+                recipient_email='test@example.com'
+            )
+
+            assert result['success'] is False
+            assert 'error' in result
+            assert 'SMTP connection failed' in result['error']
