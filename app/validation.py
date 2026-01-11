@@ -1,4 +1,4 @@
-from app.config import (
+from app.core.config import (
     TWITTER_USERNAME,
     TWITTER_PASSWORD,
     TWITTER_EMAIL,
@@ -10,7 +10,7 @@ from app.config import (
     BSKY_USERNAME,
     BSKY_PASSWORD
 )
-from app.logger import setup_logger
+from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
 

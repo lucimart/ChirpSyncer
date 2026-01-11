@@ -11,8 +11,8 @@ import tempfile
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from app.credential_manager import CredentialManager
-from app.user_manager import UserManager
+from app.auth.credential_manager import CredentialManager
+from app.auth.user_manager import UserManager
 
 
 @pytest.fixture

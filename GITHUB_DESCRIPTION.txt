@@ -1,0 +1,5 @@
+ChirpSyncer - Multi-Platform Social Media Sync & Management
+
+Bi-directional synchronization between Twitter (X) and Bluesky with advanced scheduling, search, analytics, and cleanup automation. Self-host for free or use our managed hosting for $2/month. Production-ready with 100% test coverage.
+
+Topics: twitter, bluesky, social-media, automation, scheduler, analytics, self-hosted, python, flask, sqlite

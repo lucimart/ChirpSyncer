@@ -21,7 +21,7 @@ def db_path(tmp_path):
 @pytest.fixture
 def analytics_tracker(db_path):
     """Create AnalyticsTracker instance for testing"""
-    from app.analytics_tracker import AnalyticsTracker
+    from app.features.analytics_tracker import AnalyticsTracker
     tracker = AnalyticsTracker(db_path)
     tracker.init_db()
     return tracker
@@ -42,7 +42,7 @@ def sample_metrics():
 @pytest.fixture
 def user_manager(db_path):
     """Create user for testing"""
-    from app.user_manager import UserManager
+    from app.auth.user_manager import UserManager
     manager = UserManager(db_path)
     manager.init_db()
     # Create test users
@@ -56,7 +56,7 @@ class TestAnalyticsTrackerInit:
 
     def test_init_creates_database_tables(self, db_path):
         """Test that init_db creates required tables"""
-        from app.analytics_tracker import AnalyticsTracker
+        from app.features.analytics_tracker import AnalyticsTracker
         tracker = AnalyticsTracker(db_path)
         tracker.init_db()
 
@@ -75,7 +75,7 @@ class TestAnalyticsTrackerInit:
 
     def test_init_creates_indexes(self, db_path):
         """Test that init_db creates performance indexes"""
-        from app.analytics_tracker import AnalyticsTracker
+        from app.features.analytics_tracker import AnalyticsTracker
         tracker = AnalyticsTracker(db_path)
         tracker.init_db()
 

@@ -20,7 +20,7 @@ import os
 import tempfile
 import time
 import pytest
-from app.search_engine import SearchEngine
+from app.features.search_engine import SearchEngine
 
 
 @pytest.fixture

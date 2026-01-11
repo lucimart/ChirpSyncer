@@ -8,7 +8,7 @@ Provides authentication and authorization decorators for Flask routes:
 """
 from functools import wraps
 from flask import session, redirect, url_for, abort, current_app
-from app.user_manager import UserManager
+from app.auth.user_manager import UserManager
 
 
 def _get_user_manager():

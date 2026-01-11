@@ -25,13 +25,13 @@ def mock_tweet_data():
     return [mock_tweet1, mock_tweet2, mock_tweet3]
 
 
-@patch("app.twitter_scraper.mark_tweet_as_seen")
-@patch("app.twitter_scraper.is_tweet_seen")
-@patch("app.twitter_scraper.API")
+@patch("app.integrations.twitter_scraper.mark_tweet_as_seen")
+@patch("app.integrations.twitter_scraper.is_tweet_seen")
+@patch("app.integrations.twitter_scraper.API")
 def test_fetch_tweets_returns_list(mock_api_class, mock_is_tweet_seen,
                                    mock_mark_tweet_as_seen, mock_tweet_data):
     """Test that fetch_tweets returns a list of tweet objects"""
-    from app.twitter_scraper import fetch_tweets
+    from app.integrations.twitter_scraper import fetch_tweets
 
     # Setup mock API instance
     mock_api = AsyncMock()
@@ -63,13 +63,13 @@ def test_fetch_tweets_returns_list(mock_api_class, mock_is_tweet_seen,
     assert mock_mark_tweet_as_seen.call_count == 3
 
 
-@patch("app.twitter_scraper.mark_tweet_as_seen")
-@patch("app.twitter_scraper.is_tweet_seen")
-@patch("app.twitter_scraper.API")
+@patch("app.integrations.twitter_scraper.mark_tweet_as_seen")
+@patch("app.integrations.twitter_scraper.is_tweet_seen")
+@patch("app.integrations.twitter_scraper.API")
 def test_fetch_tweets_with_count(mock_api_class, mock_is_tweet_seen,
                                  mock_mark_tweet_as_seen, mock_tweet_data):
     """Test that fetch_tweets respects the count parameter"""
-    from app.twitter_scraper import fetch_tweets
+    from app.integrations.twitter_scraper import fetch_tweets
 
     # Setup mock API instance
     mock_api = AsyncMock()
@@ -95,13 +95,13 @@ def test_fetch_tweets_with_count(mock_api_class, mock_is_tweet_seen,
     assert len(result) == 2, "Should return 2 tweets when count=2"
 
 
-@patch("app.twitter_scraper.mark_tweet_as_seen")
-@patch("app.twitter_scraper.is_tweet_seen")
-@patch("app.twitter_scraper.API")
+@patch("app.integrations.twitter_scraper.mark_tweet_as_seen")
+@patch("app.integrations.twitter_scraper.is_tweet_seen")
+@patch("app.integrations.twitter_scraper.API")
 def test_async_wrapper_works(mock_api_class, mock_is_tweet_seen,
                              mock_mark_tweet_as_seen, mock_tweet_data):
     """Test that the sync wrapper properly calls the async function"""
-    from app.twitter_scraper import fetch_tweets
+    from app.integrations.twitter_scraper import fetch_tweets
 
     # Setup mock API instance
     mock_api = AsyncMock()
@@ -126,13 +126,13 @@ def test_async_wrapper_works(mock_api_class, mock_is_tweet_seen,
     assert isinstance(result, list), "Should return a list"
 
 
-@patch("app.twitter_scraper.mark_tweet_as_seen")
-@patch("app.twitter_scraper.is_tweet_seen")
-@patch("app.twitter_scraper.API")
+@patch("app.integrations.twitter_scraper.mark_tweet_as_seen")
+@patch("app.integrations.twitter_scraper.is_tweet_seen")
+@patch("app.integrations.twitter_scraper.API")
 def test_tweet_format_matches_expected(mock_api_class, mock_is_tweet_seen,
                                        mock_mark_tweet_as_seen, mock_tweet_data):
     """Test that tweet objects have the expected format (id and text attributes)"""
-    from app.twitter_scraper import fetch_tweets
+    from app.integrations.twitter_scraper import fetch_tweets
 
     # Setup mock API instance
     mock_api = AsyncMock()
@@ -163,13 +163,13 @@ def test_tweet_format_matches_expected(mock_api_class, mock_is_tweet_seen,
     assert tweet.text == "First tweet from twscrape"
 
 
-@patch("app.twitter_scraper.mark_tweet_as_seen")
-@patch("app.twitter_scraper.is_tweet_seen")
-@patch("app.twitter_scraper.API")
+@patch("app.integrations.twitter_scraper.mark_tweet_as_seen")
+@patch("app.integrations.twitter_scraper.is_tweet_seen")
+@patch("app.integrations.twitter_scraper.API")
 def test_fetch_tweets_filters_seen_tweets(mock_api_class, mock_is_tweet_seen,
                                           mock_mark_tweet_as_seen, mock_tweet_data):
     """Test that fetch_tweets filters out already seen tweets"""
-    from app.twitter_scraper import fetch_tweets
+    from app.integrations.twitter_scraper import fetch_tweets
 
     # Setup mock API instance
     mock_api = AsyncMock()
@@ -203,13 +203,13 @@ def test_fetch_tweets_filters_seen_tweets(mock_api_class, mock_is_tweet_seen,
     assert 987654321 not in result_ids
 
 
-@patch("app.twitter_scraper.mark_tweet_as_seen")
-@patch("app.twitter_scraper.is_tweet_seen")
-@patch("app.twitter_scraper.API")
+@patch("app.integrations.twitter_scraper.mark_tweet_as_seen")
+@patch("app.integrations.twitter_scraper.is_tweet_seen")
+@patch("app.integrations.twitter_scraper.API")
 def test_fetch_tweets_all_seen(mock_api_class, mock_is_tweet_seen,
                                mock_mark_tweet_as_seen, mock_tweet_data):
     """Test fetch_tweets when all tweets have already been seen"""
-    from app.twitter_scraper import fetch_tweets
+    from app.integrations.twitter_scraper import fetch_tweets
 
     # Setup mock API instance
     mock_api = AsyncMock()
@@ -238,13 +238,13 @@ def test_fetch_tweets_all_seen(mock_api_class, mock_is_tweet_seen,
     mock_mark_tweet_as_seen.assert_not_called()
 
 
-@patch("app.twitter_scraper.mark_tweet_as_seen")
-@patch("app.twitter_scraper.is_tweet_seen")
-@patch("app.twitter_scraper.API")
+@patch("app.integrations.twitter_scraper.mark_tweet_as_seen")
+@patch("app.integrations.twitter_scraper.is_tweet_seen")
+@patch("app.integrations.twitter_scraper.API")
 def test_fetch_tweets_no_tweets_returned(mock_api_class, mock_is_tweet_seen,
                                          mock_mark_tweet_as_seen):
     """Test fetch_tweets when API returns no tweets"""
-    from app.twitter_scraper import fetch_tweets
+    from app.integrations.twitter_scraper import fetch_tweets
 
     # Setup mock API instance
     mock_api = AsyncMock()
@@ -269,10 +269,10 @@ def test_fetch_tweets_no_tweets_returned(mock_api_class, mock_is_tweet_seen,
     mock_mark_tweet_as_seen.assert_not_called()
 
 
-@patch("app.twitter_scraper.API")
+@patch("app.integrations.twitter_scraper.API")
 def test_fetch_tweets_uses_correct_username(mock_api_class, mock_tweet_data):
     """Test that fetch_tweets uses the correct Twitter username from config"""
-    from app.twitter_scraper import fetch_tweets
+    from app.integrations.twitter_scraper import fetch_tweets
 
     # Setup mock API instance
     mock_api = AsyncMock()
@@ -289,8 +289,8 @@ def test_fetch_tweets_uses_correct_username(mock_api_class, mock_tweet_data):
     mock_api.search = mock_search
 
     # Call the function
-    with patch("app.twitter_scraper.is_tweet_seen", return_value=False):
-        with patch("app.twitter_scraper.mark_tweet_as_seen"):
+    with patch("app.integrations.twitter_scraper.is_tweet_seen", return_value=False):
+        with patch("app.integrations.twitter_scraper.mark_tweet_as_seen"):
             fetch_tweets(count=1)
 
     # Verify search was called with a query containing username

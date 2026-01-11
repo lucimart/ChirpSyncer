@@ -27,8 +27,8 @@ mock_atproto.Client = MagicMock
 sys.modules['atproto'] = mock_atproto
 
 # Import modules after mocking dependencies
-from app.bluesky_handler import post_thread_to_bluesky
-from app.twitter_scraper import TweetAdapter, is_thread, fetch_thread
+from app.integrations.bluesky_handler import post_thread_to_bluesky
+from app.integrations.twitter_scraper import TweetAdapter, is_thread, fetch_thread
 
 
 @pytest.fixture
@@ -100,7 +100,7 @@ def test_detect_self_reply_is_thread(mock_self_reply_tweet):
 
 
 # TEST 3: Thread fetching returns tweets in order
-@patch("app.twitter_scraper.API")
+@patch("app.integrations.twitter_scraper.API")
 def test_fetch_thread_returns_ordered_tweets(mock_api_class, mock_thread_tweets):
     """Test that fetch_thread returns all tweets in chronological order"""
     # Setup mock API
@@ -149,10 +149,10 @@ def test_fetch_thread_returns_ordered_tweets(mock_api_class, mock_thread_tweets)
 
 
 # TEST 4: Handle missing/deleted tweets in thread
-@patch("app.twitter_scraper.API")
+@patch("app.integrations.twitter_scraper.API")
 def test_fetch_thread_handles_missing_tweets(mock_api_class, mock_thread_tweets):
     """Test that fetch_thread handles deleted tweets gracefully"""
-    from app.twitter_scraper import fetch_thread
+    from app.integrations.twitter_scraper import fetch_thread
 
     # Setup mock API
     mock_api = MagicMock()
@@ -199,7 +199,7 @@ def test_fetch_thread_handles_missing_tweets(mock_api_class, mock_thread_tweets)
 
 
 # TEST 5: Post thread to Bluesky
-@patch("app.bluesky_handler.bsky_client.send_post")
+@patch("app.integrations.bluesky_handler.bsky_client.send_post")
 def test_post_thread_to_bluesky(mock_send_post, mock_thread_tweets):
     """Test that a thread is posted correctly to Bluesky"""
     # Setup mock client responses
@@ -230,11 +230,11 @@ def test_post_thread_to_bluesky(mock_send_post, mock_thread_tweets):
 
 
 # TEST 6: Thread order is maintained in Bluesky
-@patch("app.bluesky_handler.bsky_client.send_post")
+@patch("app.integrations.bluesky_handler.bsky_client.send_post")
 def test_post_thread_maintains_order(mock_send_post, mock_thread_tweets):
     """Test that thread order is maintained when posting to Bluesky"""
-    from app.bluesky_handler import post_thread_to_bluesky
-    from app.twitter_scraper import TweetAdapter
+    from app.integrations.bluesky_handler import post_thread_to_bluesky
+    from app.integrations.twitter_scraper import TweetAdapter
 
     # Setup mock client
     mock_response = MagicMock()
@@ -263,12 +263,12 @@ def test_post_thread_maintains_order(mock_send_post, mock_thread_tweets):
 
 
 # TEST 7: Handle partial failure when posting thread
-@patch("app.bluesky_handler.bsky_client.send_post")
-@patch("app.bluesky_handler.logger")
+@patch("app.integrations.bluesky_handler.bsky_client.send_post")
+@patch("app.integrations.bluesky_handler.logger")
 def test_post_thread_handles_partial_failure(mock_logger, mock_send_post, mock_thread_tweets):
     """Test that partial failures in thread posting are handled gracefully"""
-    from app.bluesky_handler import post_thread_to_bluesky
-    from app.twitter_scraper import TweetAdapter
+    from app.integrations.bluesky_handler import post_thread_to_bluesky
+    from app.integrations.twitter_scraper import TweetAdapter
 
     # Setup mock client: first succeeds, second fails, third succeeds
     mock_response1 = MagicMock()
@@ -296,10 +296,10 @@ def test_post_thread_handles_partial_failure(mock_logger, mock_send_post, mock_t
 
 
 # TEST 8: Thread deduplication
-@patch("app.db_handler.is_tweet_seen")
+@patch("app.core.db_handler.is_tweet_seen")
 def test_thread_deduplication(mock_is_tweet_seen, mock_thread_tweets):
     """Test that already-synced threads are not duplicated"""
-    from app.twitter_scraper import TweetAdapter
+    from app.integrations.twitter_scraper import TweetAdapter
 
     # Mock: first tweet already seen (thread already synced)
     mock_is_tweet_seen.return_value = True
@@ -315,12 +315,12 @@ def test_thread_deduplication(mock_is_tweet_seen, mock_thread_tweets):
 
 
 # TEST 9: Long thread rate limiting
-@patch("app.bluesky_handler.bsky_client.send_post")
-@patch("app.bluesky_handler.time.sleep")
+@patch("app.integrations.bluesky_handler.bsky_client.send_post")
+@patch("app.integrations.bluesky_handler.time.sleep")
 def test_long_thread_rate_limiting(mock_sleep, mock_send_post):
     """Test that rate limiting is applied for long threads"""
-    from app.bluesky_handler import post_thread_to_bluesky
-    from app.twitter_scraper import TweetAdapter
+    from app.integrations.bluesky_handler import post_thread_to_bluesky
+    from app.integrations.twitter_scraper import TweetAdapter
 
     # Create a long thread (5 tweets)
     long_thread = []
@@ -351,16 +351,16 @@ def test_long_thread_rate_limiting(mock_sleep, mock_send_post):
 
 
 # TEST 10: Integration test - sync thread end-to-end
-@patch("app.bluesky_handler.bsky_client.send_post")
-@patch("app.twitter_scraper.API")
-@patch("app.db_handler.is_tweet_seen")
-@patch("app.db_handler.mark_tweet_as_seen")
+@patch("app.integrations.bluesky_handler.bsky_client.send_post")
+@patch("app.integrations.twitter_scraper.API")
+@patch("app.core.db_handler.is_tweet_seen")
+@patch("app.core.db_handler.mark_tweet_as_seen")
 def test_integration_sync_thread_end_to_end(
     mock_mark_seen, mock_is_seen, mock_api_class, mock_send_post, mock_thread_tweets
 ):
     """Integration test: detect thread, fetch it, and post to Bluesky"""
-    from app.twitter_scraper import is_thread, fetch_thread, TweetAdapter
-    from app.bluesky_handler import post_thread_to_bluesky
+    from app.integrations.twitter_scraper import is_thread, fetch_thread, TweetAdapter
+    from app.integrations.bluesky_handler import post_thread_to_bluesky
 
     # Setup: thread not seen yet
     mock_is_seen.return_value = False

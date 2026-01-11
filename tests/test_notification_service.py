@@ -13,7 +13,7 @@ import sys
 # Add parent directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), 'app'))
 
-from notification_service import NotificationService
+from app.services.notification_service import NotificationService
 
 
 class TestNotificationService(unittest.TestCase):
@@ -62,7 +62,7 @@ class TestNotificationService(unittest.TestCase):
             service = NotificationService()
             self.assertFalse(service.smtp_config['enabled'])
 
-    @patch('notification_service.smtplib.SMTP')
+    @patch('app.services.notification_service.smtplib.SMTP')
     def test_smtp_connection_success(self, mock_smtp_class):
         """Test successful SMTP connection"""
         mock_smtp = MagicMock()
@@ -77,7 +77,7 @@ class TestNotificationService(unittest.TestCase):
         mock_smtp.starttls.assert_called_once()
         mock_smtp.login.assert_called_once_with('test@test.com', 'testpass123')
 
-    @patch('notification_service.smtplib.SMTP')
+    @patch('app.services.notification_service.smtplib.SMTP')
     def test_smtp_connection_failure(self, mock_smtp_class):
         """Test SMTP connection failure handling"""
         mock_smtp_class.side_effect = smtplib.SMTPException("Connection failed")
@@ -87,7 +87,7 @@ class TestNotificationService(unittest.TestCase):
 
         self.assertFalse(result)
 
-    @patch('notification_service.smtplib.SMTP')
+    @patch('app.services.notification_service.smtplib.SMTP')
     def test_send_email_plain_text(self, mock_smtp_class):
         """Test sending plain text email"""
         mock_smtp = MagicMock()
@@ -107,7 +107,7 @@ class TestNotificationService(unittest.TestCase):
         mock_smtp.starttls.assert_called_once()
         mock_smtp.login.assert_called_once()
 
-    @patch('notification_service.smtplib.SMTP')
+    @patch('app.services.notification_service.smtplib.SMTP')
     def test_send_email_html(self, mock_smtp_class):
         """Test sending HTML email"""
         mock_smtp = MagicMock()
@@ -125,7 +125,7 @@ class TestNotificationService(unittest.TestCase):
         self.assertTrue(result)
         mock_smtp.send_message.assert_called_once()
 
-    @patch('notification_service.smtplib.SMTP')
+    @patch('app.services.notification_service.smtplib.SMTP')
     def test_send_email_smtp_failure(self, mock_smtp_class):
         """Test email sending failure handling"""
         mock_smtp = MagicMock()
@@ -142,7 +142,7 @@ class TestNotificationService(unittest.TestCase):
 
         self.assertFalse(result)
 
-    @patch('notification_service.smtplib.SMTP')
+    @patch('app.services.notification_service.smtplib.SMTP')
     def test_send_email_when_disabled(self, mock_smtp_class):
         """Test that emails are not sent when SMTP is disabled"""
         config = self.smtp_config.copy()
@@ -276,7 +276,7 @@ class TestNotificationService(unittest.TestCase):
         self.assertIn('45', html)
         self.assertIn('90', html)
 
-    @patch('notification_service.smtplib.SMTP')
+    @patch('app.services.notification_service.smtplib.SMTP')
     def test_rate_limiting(self, mock_smtp_class):
         """Test that rate limiting prevents spam (basic implementation test)"""
         mock_smtp = MagicMock()

@@ -13,7 +13,7 @@ import shutil
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from app.maintenance_tasks import (
+from app.features.maintenance_tasks import (
     cleanup_expired_sessions,
     archive_audit_logs,
     backup_database,
@@ -21,9 +21,9 @@ from app.maintenance_tasks import (
     aggregate_daily_stats,
     cleanup_error_logs
 )
-from app.user_manager import UserManager
-from app.credential_manager import CredentialManager
-from app.security_utils import log_audit
+from app.auth.user_manager import UserManager
+from app.auth.credential_manager import CredentialManager
+from app.auth.security_utils import log_audit
 
 
 @pytest.fixture

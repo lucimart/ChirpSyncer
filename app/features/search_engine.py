@@ -16,7 +16,7 @@ Features:
 import sqlite3
 import time
 from typing import List, Dict, Optional, Any
-from app.logger import setup_logger
+from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
 

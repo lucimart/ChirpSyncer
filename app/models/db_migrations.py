@@ -111,9 +111,9 @@ def init_all_tables(db_path: str = 'chirpsyncer.db'):
     Args:
         db_path: Path to SQLite database
     """
-    from app.user_manager import UserManager
-    from app.credential_manager import CredentialManager
-    from app.user_settings import UserSettings
+    from app.auth.user_manager import UserManager
+    from app.auth.credential_manager import CredentialManager
+    from app.services.user_settings import UserSettings
     import os
 
     # Get master key

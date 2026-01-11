@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from app.utils import compute_content_hash
+from app.core.utils import compute_content_hash
 
 # Define the database file path
 DB_PATH = os.path.join(os.getcwd(), "data.db")

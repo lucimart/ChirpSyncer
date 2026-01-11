@@ -12,8 +12,8 @@ from unittest.mock import patch, MagicMock
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from app.user_manager import UserManager, User
-from app.security_utils import RateLimiter
+from app.auth.user_manager import UserManager, User
+from app.auth.security_utils import RateLimiter
 
 
 @pytest.fixture

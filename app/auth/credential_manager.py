@@ -11,7 +11,7 @@ import json
 import time
 from typing import Optional, List, Dict
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from app.security_utils import log_audit
+from app.auth.security_utils import log_audit
 
 
 # Valid platforms and credential types

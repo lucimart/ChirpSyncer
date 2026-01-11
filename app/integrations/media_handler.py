@@ -17,7 +17,7 @@ import asyncio
 import io
 import mimetypes
 from typing import Optional
-from logger import setup_logger
+from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
 

@@ -12,7 +12,7 @@ import tempfile
 import sqlite3
 import time
 from datetime import datetime, timedelta
-from app.report_generator import ReportGenerator
+from app.features.report_generator import ReportGenerator
 
 
 @pytest.fixture
@@ -585,7 +585,7 @@ class TestEmailDelivery:
         from unittest.mock import patch, MagicMock
 
         # Mock NotificationService at the source module
-        with patch('app.notification_service.NotificationService') as mock_ns:
+        with patch('app.services.notification_service.NotificationService') as mock_ns:
             mock_instance = MagicMock()
             mock_instance.send_email.return_value = {'email_id': '12345'}
             mock_ns.return_value = mock_instance
@@ -607,7 +607,7 @@ class TestEmailDelivery:
         """Test emailing growth report"""
         from unittest.mock import patch, MagicMock
 
-        with patch('app.notification_service.NotificationService') as mock_ns:
+        with patch('app.services.notification_service.NotificationService') as mock_ns:
             mock_instance = MagicMock()
             mock_instance.send_email.return_value = {'email_id': '67890'}
             mock_ns.return_value = mock_instance
@@ -625,7 +625,7 @@ class TestEmailDelivery:
         """Test emailing top tweets report"""
         from unittest.mock import patch, MagicMock
 
-        with patch('app.notification_service.NotificationService') as mock_ns:
+        with patch('app.services.notification_service.NotificationService') as mock_ns:
             mock_instance = MagicMock()
             mock_instance.send_email.return_value = {'email_id': 'abc123'}
             mock_ns.return_value = mock_instance
@@ -644,7 +644,7 @@ class TestEmailDelivery:
         """Test error handling in email delivery"""
         from unittest.mock import patch, MagicMock
 
-        with patch('app.notification_service.NotificationService') as mock_ns:
+        with patch('app.services.notification_service.NotificationService') as mock_ns:
             # Make send_email raise an exception
             mock_instance = MagicMock()
             mock_instance.send_email.side_effect = Exception('SMTP connection failed')

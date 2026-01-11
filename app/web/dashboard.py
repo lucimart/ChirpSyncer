@@ -16,11 +16,11 @@ from flask import (
 )
 from flask_session import Session
 from werkzeug.security import safe_join
-from app.user_manager import UserManager
-from app.credential_manager import CredentialManager
-from app.auth_decorators import require_auth, require_admin, require_self_or_admin
-from app.security_utils import validate_password
-from app.analytics_tracker import AnalyticsTracker
+from app.auth.user_manager import UserManager
+from app.auth.credential_manager import CredentialManager
+from app.auth.auth_decorators import require_auth, require_admin, require_self_or_admin
+from app.auth.security_utils import validate_password
+from app.features.analytics_tracker import AnalyticsTracker
 
 
 def create_app(db_path='chirpsyncer.db', master_key=None):

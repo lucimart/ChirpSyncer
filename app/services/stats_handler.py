@@ -1,7 +1,7 @@
 import sqlite3
 import time
 import os
-from app.logger import setup_logger
+from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
 

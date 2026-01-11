@@ -20,7 +20,7 @@ from datetime import datetime, timedelta
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 
-from app.tweet_scheduler import TweetScheduler
+from app.features.tweet_scheduler import TweetScheduler
 
 
 @pytest.fixture
