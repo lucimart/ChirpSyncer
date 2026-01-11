@@ -112,6 +112,59 @@ def migrate_database(db_path=None):
     conn.close()
 
 
+def add_stats_tables(db_path=None):
+    """
+    Create sync_stats and hourly_stats tables for tracking synchronization metrics.
+
+    Args:
+        db_path: Path to database file (defaults to DB_PATH)
+    """
+    resolved_path = db_path or DB_PATH
+    conn = sqlite3.connect(resolved_path)
+    cursor = conn.cursor()
+
+    # Create sync_stats table for detailed sync tracking
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS sync_stats (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp INTEGER NOT NULL,
+        source TEXT NOT NULL,
+        target TEXT NOT NULL,
+        success INTEGER NOT NULL,
+        media_count INTEGER DEFAULT 0,
+        is_thread INTEGER DEFAULT 0,
+        error_type TEXT,
+        error_message TEXT,
+        duration_ms INTEGER,
+        user_id INTEGER
+    )
+    """)
+
+    # Create hourly_stats table for aggregated hourly metrics
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS hourly_stats (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        hour_timestamp INTEGER NOT NULL UNIQUE,
+        total_syncs INTEGER DEFAULT 0,
+        successful_syncs INTEGER DEFAULT 0,
+        failed_syncs INTEGER DEFAULT 0,
+        twitter_to_bluesky INTEGER DEFAULT 0,
+        bluesky_to_twitter INTEGER DEFAULT 0,
+        total_media INTEGER DEFAULT 0,
+        total_threads INTEGER DEFAULT 0,
+        avg_duration_ms REAL DEFAULT 0
+    )
+    """)
+
+    # Create indexes for efficient queries
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_sync_stats_timestamp ON sync_stats(timestamp)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_sync_stats_success ON sync_stats(success)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_hourly_stats_timestamp ON hourly_stats(hour_timestamp)")
+
+    conn.commit()
+    conn.close()
+
+
 def should_sync_post(content: str, source: str, post_id: str, db_path=None) -> bool:
     """
     Check if post should be synced (not a duplicate).

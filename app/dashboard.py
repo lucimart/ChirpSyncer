@@ -20,6 +20,7 @@ from app.user_manager import UserManager
 from app.credential_manager import CredentialManager
 from app.auth_decorators import require_auth, require_admin, require_self_or_admin
 from app.security_utils import validate_password
+from app.analytics_tracker import AnalyticsTracker
 
 
 def create_app(db_path='chirpsyncer.db', master_key=None):
@@ -606,6 +607,116 @@ def create_app(db_path='chirpsyncer.db', master_key=None):
             })
         except Exception as e:
             return jsonify({'error': str(e)}), 500
+
+    # ========================================================================
+    # ANALYTICS ROUTES (Sprint 7 - ANALYTICS-001)
+    # ========================================================================
+
+    @app.route('/analytics')
+    @require_auth
+    def analytics_dashboard():
+        """Analytics dashboard page"""
+        return render_template('analytics.html',
+                             username=session.get('username'),
+                             is_admin=session.get('is_admin', False))
+
+    @app.route('/api/analytics/overview')
+    @require_auth
+    def analytics_overview():
+        """Get analytics overview (JSON API)"""
+        try:
+            analytics_tracker = AnalyticsTracker(app.config['DB_PATH'])
+            user_id = session['user_id']
+
+            # Get analytics for different periods
+            daily = analytics_tracker.get_user_analytics(user_id, 'daily')
+            weekly = analytics_tracker.get_user_analytics(user_id, 'weekly')
+            monthly = analytics_tracker.get_user_analytics(user_id, 'monthly')
+
+            # Get top tweet
+            top_tweets = analytics_tracker.get_top_tweets(user_id, metric='engagement_rate', limit=1)
+            top_tweet = top_tweets[0] if top_tweets else None
+
+            return jsonify({
+                'success': True,
+                'daily': daily,
+                'weekly': weekly,
+                'monthly': monthly,
+                'top_tweet': top_tweet
+            })
+
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+
+    @app.route('/api/analytics/top-tweets')
+    @require_auth
+    def analytics_top_tweets():
+        """Get top performing tweets (JSON API)"""
+        try:
+            analytics_tracker = AnalyticsTracker(app.config['DB_PATH'])
+            user_id = session['user_id']
+
+            # Get parameters from query string
+            metric = request.args.get('metric', 'engagement_rate')
+            limit = int(request.args.get('limit', 10))
+
+            top_tweets = analytics_tracker.get_top_tweets(user_id, metric=metric, limit=limit)
+
+            return jsonify({
+                'success': True,
+                'tweets': top_tweets,
+                'metric': metric,
+                'count': len(top_tweets)
+            })
+
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+
+    @app.route('/api/analytics/record-metrics', methods=['POST'])
+    @require_auth
+    def analytics_record_metrics():
+        """Record metrics for a tweet (JSON API)"""
+        try:
+            analytics_tracker = AnalyticsTracker(app.config['DB_PATH'])
+            user_id = session['user_id']
+
+            data = request.get_json()
+            tweet_id = data.get('tweet_id')
+            metrics = data.get('metrics', {})
+
+            if not tweet_id:
+                return jsonify({'success': False, 'error': 'tweet_id is required'}), 400
+
+            result = analytics_tracker.record_metrics(tweet_id, user_id, metrics)
+
+            return jsonify({
+                'success': result,
+                'tweet_id': tweet_id
+            })
+
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+
+    @app.route('/api/analytics/create-snapshot', methods=['POST'])
+    @require_auth
+    def analytics_create_snapshot():
+        """Create analytics snapshot (JSON API)"""
+        try:
+            analytics_tracker = AnalyticsTracker(app.config['DB_PATH'])
+            user_id = session['user_id']
+
+            data = request.get_json() or {}
+            period = data.get('period', 'daily')
+
+            result = analytics_tracker.create_snapshot(user_id, period)
+
+            return jsonify({
+                'success': result,
+                'period': period
+            })
+
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
 
     return app
 
