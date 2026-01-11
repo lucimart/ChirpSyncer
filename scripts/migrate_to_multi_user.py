@@ -127,29 +127,38 @@ def update_database_schema(db_path: str = 'chirpsyncer.db'):
     cursor = conn.cursor()
 
     try:
-        # Add user_id to synced_posts if not exists
-        try:
-            cursor.execute('ALTER TABLE synced_posts ADD COLUMN user_id INTEGER REFERENCES users(id)')
-            print("  ✓ Added user_id to synced_posts")
-        except sqlite3.OperationalError as e:
-            if 'duplicate column' in str(e).lower():
-                print("  ℹ️  user_id already exists in synced_posts")
-            else:
-                raise
+        # Check which tables exist
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        existing_tables = [row[0] for row in cursor.fetchall()]
 
-        # Add user_id to sync_stats if not exists
-        try:
-            cursor.execute('ALTER TABLE sync_stats ADD COLUMN user_id INTEGER REFERENCES users(id)')
-            print("  ✓ Added user_id to sync_stats")
-        except sqlite3.OperationalError as e:
-            if 'duplicate column' in str(e).lower():
-                print("  ℹ️  user_id already exists in sync_stats")
-            else:
-                raise
+        # Add user_id to synced_posts if table exists
+        if 'synced_posts' in existing_tables:
+            try:
+                cursor.execute('ALTER TABLE synced_posts ADD COLUMN user_id INTEGER REFERENCES users(id)')
+                print("  ✓ Added user_id to synced_posts")
+            except sqlite3.OperationalError as e:
+                if 'duplicate column' in str(e).lower():
+                    print("  ℹ️  user_id already exists in synced_posts")
+                else:
+                    raise
+        else:
+            print("  ℹ️  synced_posts table doesn't exist yet (will be created by app)")
 
-        # Add user_id to hourly_stats if exists
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='hourly_stats'")
-        if cursor.fetchone():
+        # Add user_id to sync_stats if table exists
+        if 'sync_stats' in existing_tables:
+            try:
+                cursor.execute('ALTER TABLE sync_stats ADD COLUMN user_id INTEGER REFERENCES users(id)')
+                print("  ✓ Added user_id to sync_stats")
+            except sqlite3.OperationalError as e:
+                if 'duplicate column' in str(e).lower():
+                    print("  ℹ️  user_id already exists in sync_stats")
+                else:
+                    raise
+        else:
+            print("  ℹ️  sync_stats table doesn't exist yet (will be created by app)")
+
+        # Add user_id to hourly_stats if table exists
+        if 'hourly_stats' in existing_tables:
             try:
                 cursor.execute('ALTER TABLE hourly_stats ADD COLUMN user_id INTEGER REFERENCES users(id)')
                 print("  ✓ Added user_id to hourly_stats")
@@ -158,15 +167,17 @@ def update_database_schema(db_path: str = 'chirpsyncer.db'):
                     print("  ℹ️  user_id already exists in hourly_stats")
                 else:
                     raise
+        else:
+            print("  ℹ️  hourly_stats table doesn't exist yet (will be created by app)")
 
-        # Create indexes
-        try:
+        # Create indexes only for existing tables
+        if 'synced_posts' in existing_tables:
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_synced_posts_user ON synced_posts(user_id)')
+        if 'sync_stats' in existing_tables:
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_sync_stats_user ON sync_stats(user_id)')
+        if 'hourly_stats' in existing_tables:
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_hourly_stats_user ON hourly_stats(user_id)')
-            print("  ✓ Created indexes on user_id columns")
-        except Exception as e:
-            print(f"  ⚠️  Index creation warning: {e}")
+        print("  ✓ Created indexes on user_id columns (for existing tables)")
 
         conn.commit()
         print("  ✓ Database schema updated")
@@ -187,22 +198,33 @@ def assign_existing_data_to_admin(admin_id: int, db_path: str = 'chirpsyncer.db'
     cursor = conn.cursor()
 
     try:
-        # Update synced_posts
-        cursor.execute('UPDATE synced_posts SET user_id = ? WHERE user_id IS NULL', (admin_id,))
-        posts_updated = cursor.rowcount
-        print(f"  ✓ Assigned {posts_updated} posts to admin")
+        # Check which tables exist
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        existing_tables = [row[0] for row in cursor.fetchall()]
 
-        # Update sync_stats
-        cursor.execute('UPDATE sync_stats SET user_id = ? WHERE user_id IS NULL', (admin_id,))
-        stats_updated = cursor.rowcount
-        print(f"  ✓ Assigned {stats_updated} sync stats to admin")
+        # Update synced_posts if exists
+        if 'synced_posts' in existing_tables:
+            cursor.execute('UPDATE synced_posts SET user_id = ? WHERE user_id IS NULL', (admin_id,))
+            posts_updated = cursor.rowcount
+            print(f"  ✓ Assigned {posts_updated} posts to admin")
+        else:
+            print("  ℹ️  No synced_posts to assign (table doesn't exist yet)")
+
+        # Update sync_stats if exists
+        if 'sync_stats' in existing_tables:
+            cursor.execute('UPDATE sync_stats SET user_id = ? WHERE user_id IS NULL', (admin_id,))
+            stats_updated = cursor.rowcount
+            print(f"  ✓ Assigned {stats_updated} sync stats to admin")
+        else:
+            print("  ℹ️  No sync_stats to assign (table doesn't exist yet)")
 
         # Update hourly_stats if exists
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='hourly_stats'")
-        if cursor.fetchone():
+        if 'hourly_stats' in existing_tables:
             cursor.execute('UPDATE hourly_stats SET user_id = ? WHERE user_id IS NULL', (admin_id,))
             hourly_updated = cursor.rowcount
             print(f"  ✓ Assigned {hourly_updated} hourly stats to admin")
+        else:
+            print("  ℹ️  No hourly_stats to assign (table doesn't exist yet)")
 
         conn.commit()
         print("  ✓ Data assignment complete")
@@ -235,20 +257,29 @@ def verify_migration(admin_id: int, db_path: str = 'chirpsyncer.db'):
         cred_count = cursor.fetchone()[0]
         print(f"  ✓ Found {cred_count} credentials for admin")
 
-        # Check data assignment
-        cursor.execute('SELECT COUNT(*) FROM synced_posts WHERE user_id = ?', (admin_id,))
-        posts = cursor.fetchone()[0]
-        print(f"  ✓ Admin owns {posts} synced posts")
+        # Check which tables exist
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        existing_tables = [row[0] for row in cursor.fetchall()]
 
-        cursor.execute('SELECT COUNT(*) FROM sync_stats WHERE user_id = ?', (admin_id,))
-        stats = cursor.fetchone()[0]
-        print(f"  ✓ Admin owns {stats} sync stats")
+        # Check data assignment only for existing tables
+        if 'synced_posts' in existing_tables:
+            cursor.execute('SELECT COUNT(*) FROM synced_posts WHERE user_id = ?', (admin_id,))
+            posts = cursor.fetchone()[0]
+            print(f"  ✓ Admin owns {posts} synced posts")
 
-        # Check for orphaned data
-        cursor.execute('SELECT COUNT(*) FROM synced_posts WHERE user_id IS NULL')
-        orphaned_posts = cursor.fetchone()[0]
-        if orphaned_posts > 0:
-            print(f"  ⚠️  Warning: {orphaned_posts} posts without user_id")
+            cursor.execute('SELECT COUNT(*) FROM synced_posts WHERE user_id IS NULL')
+            orphaned_posts = cursor.fetchone()[0]
+            if orphaned_posts > 0:
+                print(f"  ⚠️  Warning: {orphaned_posts} posts without user_id")
+        else:
+            print("  ℹ️  No synced_posts table to verify (will be created by app)")
+
+        if 'sync_stats' in existing_tables:
+            cursor.execute('SELECT COUNT(*) FROM sync_stats WHERE user_id = ?', (admin_id,))
+            stats = cursor.fetchone()[0]
+            print(f"  ✓ Admin owns {stats} sync stats")
+        else:
+            print("  ℹ️  No sync_stats table to verify (will be created by app)")
 
         print("  ✓ Migration verification complete")
 

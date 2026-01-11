@@ -446,6 +446,167 @@ def create_app(db_path='chirpsyncer.db', master_key=None):
 
         return redirect(url_for('credentials_list'))
 
+    # ========================================================================
+    # TASK MANAGEMENT ROUTES (Sprint 6 - TASK-003)
+    # ========================================================================
+
+    def _get_scheduler():
+        """Get TaskScheduler instance (mock-aware for testing)"""
+        if 'TASK_SCHEDULER' in app.config:
+            return app.config['TASK_SCHEDULER']
+        # In production, get from app context or singleton
+        # For now, return None if not configured
+        return None
+
+    @app.route('/tasks')
+    @require_auth
+    def tasks_list():
+        """List all scheduled tasks with status"""
+        scheduler = _get_scheduler()
+
+        if not scheduler:
+            flash('Task scheduler not available', 'error')
+            return render_template('tasks_list.html',
+                                 tasks=[],
+                                 is_admin=session.get('is_admin', False))
+
+        try:
+            tasks = scheduler.get_all_tasks()
+            return render_template('tasks_list.html',
+                                 tasks=tasks,
+                                 is_admin=session.get('is_admin', False),
+                                 username=session.get('username'))
+        except Exception as e:
+            flash(f'Error loading tasks: {str(e)}', 'error')
+            return render_template('tasks_list.html',
+                                 tasks=[],
+                                 is_admin=session.get('is_admin', False),
+                                 username=session.get('username'))
+
+    @app.route('/tasks/<task_name>')
+    @require_auth
+    def task_detail(task_name):
+        """Show task execution history and details"""
+        scheduler = _get_scheduler()
+
+        if not scheduler:
+            abort(404)
+
+        try:
+            task_status = scheduler.get_task_status(task_name)
+            if not task_status:
+                abort(404)
+
+            task_history = scheduler.get_task_history(task_name, limit=50)
+
+            return render_template('task_detail.html',
+                                 task=task_status,
+                                 history=task_history,
+                                 is_admin=session.get('is_admin', False),
+                                 username=session.get('username'))
+        except Exception as e:
+            flash(f'Error loading task details: {str(e)}', 'error')
+            abort(404)
+
+    @app.route('/tasks/<task_name>/trigger', methods=['POST'])
+    @require_admin
+    def task_trigger(task_name):
+        """Manually trigger a task now (admin only)"""
+        scheduler = _get_scheduler()
+
+        if not scheduler:
+            flash('Task scheduler not available', 'error')
+            return redirect(url_for('tasks_list'))
+
+        try:
+            success = scheduler.trigger_task_now(task_name)
+            if success:
+                flash(f'Task "{task_name}" triggered successfully', 'success')
+            else:
+                flash(f'Failed to trigger task "{task_name}"', 'error')
+        except Exception as e:
+            flash(f'Error triggering task: {str(e)}', 'error')
+
+        return redirect(url_for('task_detail', task_name=task_name))
+
+    @app.route('/tasks/<task_name>/toggle', methods=['POST'])
+    @require_admin
+    def task_toggle(task_name):
+        """Enable or disable a task (admin only)"""
+        scheduler = _get_scheduler()
+
+        if not scheduler:
+            return jsonify({'success': False, 'error': 'Scheduler not available'}), 500
+
+        try:
+            task_status = scheduler.get_task_status(task_name)
+            if not task_status:
+                return jsonify({'success': False, 'error': 'Task not found'}), 404
+
+            # Toggle based on current state
+            if task_status.get('enabled'):
+                success = scheduler.pause_task(task_name)
+                action = 'paused'
+            else:
+                success = scheduler.resume_task(task_name)
+                action = 'resumed'
+
+            if success:
+                return jsonify({'success': True, 'action': action})
+            else:
+                return jsonify({'success': False, 'error': f'Failed to {action} task'}), 500
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+
+    @app.route('/tasks/<task_name>/configure', methods=['POST'])
+    @require_admin
+    def task_configure(task_name):
+        """Update task schedule (admin only)"""
+        scheduler = _get_scheduler()
+
+        if not scheduler:
+            flash('Task scheduler not available', 'error')
+            return redirect(url_for('tasks_list'))
+
+        try:
+            schedule = request.form.get('schedule')
+            if not schedule:
+                flash('Schedule is required', 'error')
+                return redirect(url_for('task_detail', task_name=task_name))
+
+            # Update task schedule
+            if hasattr(scheduler, 'update_task_schedule'):
+                success = scheduler.update_task_schedule(task_name, schedule)
+                if success:
+                    flash(f'Task "{task_name}" schedule updated successfully', 'success')
+                else:
+                    flash(f'Failed to update task schedule', 'error')
+            else:
+                flash('Schedule update not supported', 'error')
+
+        except Exception as e:
+            flash(f'Error updating schedule: {str(e)}', 'error')
+
+        return redirect(url_for('task_detail', task_name=task_name))
+
+    @app.route('/api/tasks/status')
+    @require_auth
+    def api_tasks_status():
+        """Get current task status (JSON API)"""
+        scheduler = _get_scheduler()
+
+        if not scheduler:
+            return jsonify({'error': 'Scheduler not available'}), 500
+
+        try:
+            tasks = scheduler.get_all_tasks()
+            return jsonify({
+                'tasks': tasks,
+                'count': len(tasks)
+            })
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
     return app
 
 
