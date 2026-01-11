@@ -45,7 +45,7 @@ def archive_audit_logs(days_old: int = 90, db_path: str = DB_PATH) -> Dict:
     try:
         # Create archive table if not exists
         cursor.execute('''
-            CREATE TABLE IF NOT EXISTS audit_log_archive (
+            CREATE TABLE IF NOT EXISTS archived_audit_logs (
                 id INTEGER PRIMARY KEY,
                 user_id INTEGER,
                 action TEXT,
@@ -65,7 +65,7 @@ def archive_audit_logs(days_old: int = 90, db_path: str = DB_PATH) -> Dict:
 
         # Move old logs to archive
         cursor.execute('''
-            INSERT INTO audit_log_archive
+            INSERT INTO archived_audit_logs
             SELECT *, ? as archived_at FROM audit_log
             WHERE created_at < ?
         ''', (int(time.time()), cutoff))
