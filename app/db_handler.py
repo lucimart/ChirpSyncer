@@ -202,3 +202,179 @@ def get_post_by_hash(content_hash: str, db_path=None):
 
     conn.close()
     return result
+
+
+# STATS-001: Statistics Tracking Database Migration
+
+def add_stats_tables(db_path=None):
+    """
+    Add statistics tracking tables to database.
+
+    Creates sync_stats and hourly_stats tables for tracking synchronization
+    statistics, errors, and performance metrics.
+
+    Args:
+        db_path: Path to database file (defaults to DB_PATH)
+    """
+    resolved_path = db_path or DB_PATH
+    conn = sqlite3.connect(resolved_path)
+    cursor = conn.cursor()
+
+    # Create sync_stats table for detailed sync tracking
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS sync_stats (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp INTEGER NOT NULL,
+        source TEXT NOT NULL,
+        target TEXT NOT NULL,
+        success INTEGER NOT NULL,
+        media_count INTEGER DEFAULT 0,
+        is_thread INTEGER DEFAULT 0,
+        error_type TEXT,
+        error_message TEXT,
+        duration_ms INTEGER
+    )
+    """)
+
+    # Create index on timestamp for fast time-based queries
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_sync_stats_timestamp ON sync_stats(timestamp)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_sync_stats_source_target ON sync_stats(source, target)")
+
+    # Create hourly_stats table for aggregated statistics
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS hourly_stats (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        hour_timestamp INTEGER NOT NULL UNIQUE,
+        twitter_to_bluesky_count INTEGER DEFAULT 0,
+        bluesky_to_twitter_count INTEGER DEFAULT 0,
+        success_count INTEGER DEFAULT 0,
+        failure_count INTEGER DEFAULT 0,
+        media_synced INTEGER DEFAULT 0,
+        threads_synced INTEGER DEFAULT 0
+    )
+    """)
+
+    # Create index on hour_timestamp for fast queries
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_hourly_stats_hour ON hourly_stats(hour_timestamp)")
+
+    conn.commit()
+    conn.close()
+
+
+# MONITORING-001: Dashboard Helper Functions
+
+def get_recent_syncs(limit=50, db_path=None):
+    """
+    Get recent synced posts from database.
+
+    Args:
+        limit: Maximum number of posts to retrieve (default: 50)
+        db_path: Path to database file (defaults to DB_PATH)
+
+    Returns:
+        List of dictionaries containing sync details:
+            - id: Post ID
+            - source: Source platform ('twitter' or 'bluesky')
+            - synced_to: Target platform
+            - content: Original post text
+            - synced_at: Timestamp when synced
+            - twitter_id: Twitter ID (if applicable)
+            - bluesky_uri: Bluesky URI (if applicable)
+    """
+    resolved_path = db_path or DB_PATH
+
+    try:
+        conn = sqlite3.connect(resolved_path)
+        cursor = conn.cursor()
+
+        # Check if table exists
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='synced_posts'")
+        if not cursor.fetchone():
+            conn.close()
+            return []
+
+        cursor.execute("""
+        SELECT id, source, synced_to, original_text, synced_at, twitter_id, bluesky_uri
+        FROM synced_posts
+        ORDER BY synced_at DESC
+        LIMIT ?
+        """, (limit,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        # Convert to list of dictionaries
+        syncs = []
+        for row in rows:
+            syncs.append({
+                'id': row[0],
+                'source': row[1],
+                'synced_to': row[2],
+                'content': row[3],
+                'synced_at': row[4],
+                'twitter_id': row[5],
+                'bluesky_uri': row[6]
+            })
+
+        return syncs
+
+    except Exception as e:
+        # Return empty list on error
+        return []
+
+
+def get_system_stats(db_path=None):
+    """
+    Get system statistics about database.
+
+    Args:
+        db_path: Path to database file (defaults to DB_PATH)
+
+    Returns:
+        Dictionary containing:
+            - db_size: Database file size (formatted string)
+            - total_posts: Total number of synced posts
+    """
+    resolved_path = db_path or DB_PATH
+
+    try:
+        # Get database file size
+        if os.path.exists(resolved_path):
+            size_bytes = os.path.getsize(resolved_path)
+            # Format size
+            if size_bytes < 1024:
+                size_str = f"{size_bytes} B"
+            elif size_bytes < 1024 * 1024:
+                size_str = f"{size_bytes / 1024:.2f} KB"
+            elif size_bytes < 1024 * 1024 * 1024:
+                size_str = f"{size_bytes / (1024 * 1024):.2f} MB"
+            else:
+                size_str = f"{size_bytes / (1024 * 1024 * 1024):.2f} GB"
+        else:
+            size_str = "0 B"
+
+        # Get total posts count
+        conn = sqlite3.connect(resolved_path)
+        cursor = conn.cursor()
+
+        # Check if table exists
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='synced_posts'")
+        if cursor.fetchone():
+            cursor.execute("SELECT COUNT(*) FROM synced_posts")
+            total_posts = cursor.fetchone()[0]
+        else:
+            total_posts = 0
+
+        conn.close()
+
+        return {
+            'db_size': size_str,
+            'total_posts': total_posts
+        }
+
+    except Exception as e:
+        # Return default values on error
+        return {
+            'db_size': "0 B",
+            'total_posts': 0
+        }
