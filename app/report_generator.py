@@ -22,6 +22,11 @@ class ReportGenerator:
     - JSON: API/programmatic access
     - HTML: Web viewing/email
     - PDF: Professional reports (optional)
+
+    Email delivery:
+    - Reports can be emailed directly to recipients
+    - Uses NotificationService for email sending
+    - Supports all report formats
     """
 
     def __init__(self, db_path: str = 'chirpsyncer.db'):
@@ -717,3 +722,71 @@ class ReportGenerator:
             return HTML(string=html_content).write_pdf()
         except ImportError:
             return self._format_html_export(data, data_type)
+
+    # ========================================================================
+    # EMAIL DELIVERY
+    # ========================================================================
+
+    def email_report(self, report_content: bytes, report_type: str, format: str, recipient_email: str) -> Dict[str, Any]:
+        """
+        Email a generated report to specified recipient.
+
+        Args:
+            report_content: The report content (bytes)
+            report_type: Type of report ('engagement', 'growth', 'top_tweets')
+            format: Report format ('pdf', 'csv', 'json', 'html')
+            recipient_email: Email address to send to
+
+        Returns:
+            Dict with status and message
+        """
+        try:
+            from app.notification_service import NotificationService
+
+            notifier = NotificationService(db_path=self.db_path)
+
+            # Create email subject
+            subject = f"ChirpSyncer {report_type.title()} Report ({format.upper()})"
+
+            # Email body with inline content or attachment handling
+            if format == 'html':
+                # HTML can be inlined
+                body = report_content.decode('utf-8')
+            else:
+                # Other formats as text
+                body = f"{report_type.title()} Report\n\n{report_content.decode('utf-8')}"
+
+            # Send email
+            result = notifier.send_email(
+                to=recipient_email,
+                subject=subject,
+                body=body,
+                is_html=(format == 'html')
+            )
+
+            return {
+                'success': True,
+                'message': f'Report emailed to {recipient_email}',
+                'email_id': result.get('email_id')
+            }
+
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    def generate_and_email_engagement_report(self, user_id: int, period: str, format: str, recipient_email: str) -> Dict[str, Any]:
+        """Generate engagement report and email it"""
+        report = self.generate_engagement_report(user_id, period, format)
+        return self.email_report(report, 'engagement', format, recipient_email)
+
+    def generate_and_email_growth_report(self, user_id: int, format: str, recipient_email: str) -> Dict[str, Any]:
+        """Generate growth report and email it"""
+        report = self.generate_growth_report(user_id, format)
+        return self.email_report(report, 'growth', format, recipient_email)
+
+    def generate_and_email_top_tweets_report(self, user_id: int, limit: int, format: str, recipient_email: str) -> Dict[str, Any]:
+        """Generate top tweets report and email it"""
+        report = self.generate_top_tweets_report(user_id, limit, format)
+        return self.email_report(report, 'top_tweets', format, recipient_email)

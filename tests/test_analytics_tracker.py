@@ -356,6 +356,31 @@ class TestUserIsolation:
         assert len(top_tweets2) == 2
         assert all(tweet['user_id'] == user2_id for tweet in top_tweets2)
 
+    def test_same_tweet_id_different_users_isolation(self, analytics_tracker, user_manager):
+        """Test that two users can track the same tweet_id without data loss (CRITICAL BUG FIX)"""
+        _, user1_id, user2_id = user_manager
+
+        # Both users record metrics for the same tweet_id='shared_123'
+        analytics_tracker.record_metrics('shared_123', user1_id,
+            {'impressions': 1000, 'likes': 50, 'retweets': 10, 'replies': 5, 'engagements': 65})
+        analytics_tracker.record_metrics('shared_123', user2_id,
+            {'impressions': 2000, 'likes': 100, 'retweets': 20, 'replies': 10, 'engagements': 130})
+
+        # Verify both records exist and are not overwritten
+        # Note: get_metrics doesn't filter by user_id, so we need to check via get_user_analytics
+        analytics1 = analytics_tracker.get_user_analytics(user1_id, period='daily')
+        analytics2 = analytics_tracker.get_user_analytics(user2_id, period='daily')
+
+        # Each user should have at least 1 tweet in their analytics
+        assert analytics1['total_tweets'] >= 1
+        assert analytics2['total_tweets'] >= 1
+
+        # Check total impressions to verify data isn't lost
+        # User 1 should have 1000 impressions from their tweet
+        # User 2 should have 2000 impressions from their tweet
+        assert analytics1['total_impressions'] >= 1000
+        assert analytics2['total_impressions'] >= 2000
+
 
 class TestPeriodAggregations:
     """Test period-based aggregations"""

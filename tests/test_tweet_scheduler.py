@@ -254,9 +254,20 @@ class TestQueueProcessing:
 
     def test_process_queue_posts_due_tweets(self, scheduler):
         """Test that process_queue posts tweets that are due"""
-        # Schedule a tweet that's already due
-        past_time = datetime.now() - timedelta(minutes=5)
-        tweet_id = scheduler.schedule_tweet(1, "Due tweet", past_time, [])
+        # Schedule a FUTURE tweet first (to bypass validation)
+        future_time = datetime.now() + timedelta(minutes=5)
+        tweet_id = scheduler.schedule_tweet(1, "Due tweet", future_time, [])
+
+        # Manually update DB to make it past due
+        conn = sqlite3.connect(scheduler.db_path)
+        cursor = conn.cursor()
+        past_timestamp = int(time.time()) - 300  # 5 minutes ago
+        cursor.execute(
+            'UPDATE scheduled_tweets SET scheduled_time = ? WHERE id = ?',
+            (past_timestamp, tweet_id)
+        )
+        conn.commit()
+        conn.close()
 
         # Mock Twitter posting
         with patch.object(scheduler, '_post_to_twitter', return_value='tw123456'):
@@ -289,9 +300,20 @@ class TestQueueProcessing:
 
     def test_process_queue_handles_errors(self, scheduler):
         """Test that process_queue handles posting errors gracefully"""
-        # Schedule a due tweet
-        past_time = datetime.now() - timedelta(minutes=5)
-        tweet_id = scheduler.schedule_tweet(1, "Tweet to fail", past_time, [])
+        # Schedule a FUTURE tweet first (to bypass validation)
+        future_time = datetime.now() + timedelta(minutes=5)
+        tweet_id = scheduler.schedule_tweet(1, "Tweet to fail", future_time, [])
+
+        # Manually update DB to make it past due
+        conn = sqlite3.connect(scheduler.db_path)
+        cursor = conn.cursor()
+        past_timestamp = int(time.time()) - 300  # 5 minutes ago
+        cursor.execute(
+            'UPDATE scheduled_tweets SET scheduled_time = ? WHERE id = ?',
+            (past_timestamp, tweet_id)
+        )
+        conn.commit()
+        conn.close()
 
         # Mock Twitter posting to fail
         with patch.object(scheduler, '_post_to_twitter', side_effect=Exception("API Error")):

@@ -6,9 +6,11 @@ Features:
 - Full-text search with ranking
 - Phrase queries with quotes
 - Boolean operators (AND, OR)
+- Proximity search with NEAR operator
 - User filtering
 - Date range filtering
 - Hashtag search
+- Author filtering
 - Index rebuild functionality
 """
 import sqlite3
@@ -25,9 +27,10 @@ class SearchEngine:
 
     Provides fast, ranked search across synced tweets with support for:
     - Full-text queries with relevance ranking
-    - Phrase searches
-    - Boolean operators
-    - Multiple filter criteria
+    - Phrase searches (use quotes: "exact phrase")
+    - Boolean operators (AND, OR)
+    - Proximity search (NEAR operator: NEAR(term1 term2, N))
+    - Multiple filter criteria (date, hashtag, author)
     """
 
     def __init__(self, db_path: str = 'chirpsyncer.db'):
@@ -178,7 +181,10 @@ class SearchEngine:
         Search tweets with full-text query.
 
         Args:
-            query: Search query (supports FTS5 syntax)
+            query: Search query (supports FTS5 syntax including:
+                   - Phrase search: "exact phrase"
+                   - Boolean: term1 AND term2, term1 OR term2
+                   - Proximity: NEAR(term1 term2, N) for words within N positions)
             user_id: Filter by user ID (optional)
             limit: Maximum number of results (default: 50)
 
@@ -251,12 +257,13 @@ class SearchEngine:
         Search with additional filters.
 
         Args:
-            query: Search query
+            query: Search query (supports FTS5 syntax including NEAR operator)
             user_id: User ID to filter by
             filters: Dictionary of filters:
                 - date_from: Unix timestamp (minimum date)
                 - date_to: Unix timestamp (maximum date)
                 - hashtags: List of hashtags to filter by
+                - author: Filter by tweet author username
                 - has_media: Boolean (not implemented in FTS, placeholder)
                 - min_likes: Minimum likes (not implemented in FTS, placeholder)
 
@@ -294,6 +301,11 @@ class SearchEngine:
                     hashtag_conditions.append("hashtags LIKE ?")
                     params.append(f"%{tag}%")
                 where_clauses.append(f"({' OR '.join(hashtag_conditions)})")
+
+            # Author filter
+            if 'author' in filters and filters['author']:
+                where_clauses.append("author = ?")
+                params.append(filters['author'])
 
             where_sql = " AND ".join(where_clauses)
 

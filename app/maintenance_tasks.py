@@ -18,10 +18,10 @@ def cleanup_expired_sessions(db_path: str = DB_PATH) -> Dict:
     """Delete sessions with expires_at < current time"""
     start = time.time()
 
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-
     try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+
         now = int(time.time())
         cursor.execute('DELETE FROM user_sessions WHERE expires_at < ?', (now,))
         deleted = cursor.rowcount
@@ -31,8 +31,15 @@ def cleanup_expired_sessions(db_path: str = DB_PATH) -> Dict:
             'deleted': deleted,
             'duration_ms': int((time.time() - start) * 1000)
         }
+    except Exception as e:
+        return {
+            'error': str(e),
+            'deleted': 0,
+            'duration_ms': int((time.time() - start) * 1000)
+        }
     finally:
-        conn.close()
+        if 'conn' in locals():
+            conn.close()
 
 
 def archive_audit_logs(days_old: int = 90, db_path: str = DB_PATH) -> Dict:
