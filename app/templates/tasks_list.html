@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduled Tasks - ChirpSyncer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">ChirpSyncer</h1>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('dashboard') }}" class="hover:text-blue-200">Dashboard</a>
+                <a href="{{ url_for('credentials_list') }}" class="hover:text-blue-200">Credentials</a>
+                <a href="{{ url_for('tasks_list') }}" class="hover:text-blue-200 font-semibold">Tasks</a>
+                {% if is_admin %}
+                <a href="{{ url_for('users_list') }}" class="hover:text-blue-200">Users</a>
+                {% endif %}
+                <span class="text-sm">{{ username }}</span>
+                <form method="POST" action="{{ url_for('logout') }}" class="inline">
+                    <button type="submit" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm">
+                        Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto mt-8 p-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-4 p-4 rounded {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Scheduled Tasks</h2>
+                <span class="text-sm text-gray-500">Total: {{ tasks|length }} tasks</span>
+            </div>
+
+            {% if tasks %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left py-3 px-2">Task Name</th>
+                            <th class="text-left py-3 px-2">Type</th>
+                            <th class="text-left py-3 px-2">Schedule</th>
+                            <th class="text-left py-3 px-2">Status</th>
+                            <th class="text-left py-3 px-2">Last Run</th>
+                            <th class="text-left py-3 px-2">Next Run</th>
+                            <th class="text-left py-3 px-2">Success Rate</th>
+                            {% if is_admin %}
+                            <th class="text-left py-3 px-2">Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-2">
+                                <a href="{{ url_for('task_detail', task_name=task.task_name) }}"
+                                   class="text-blue-600 hover:text-blue-800 font-medium">
+                                    {{ task.task_name }}
+                                </a>
+                            </td>
+                            <td class="py-3 px-2">
+                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                    {{ task.task_type }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-2">
+                                <code class="text-xs bg-gray-100 px-2 py-1 rounded">{{ task.schedule }}</code>
+                            </td>
+                            <td class="py-3 px-2">
+                                {% if task.enabled %}
+                                    <span class="flex items-center">
+                                        <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                                        <span class="text-green-600 text-sm">Enabled</span>
+                                    </span>
+                                {% else %}
+                                    <span class="flex items-center">
+                                        <span class="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
+                                        <span class="text-gray-600 text-sm">Disabled</span>
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-2">
+                                {% if task.last_run %}
+                                    <span class="text-sm text-gray-600">
+                                        <script>
+                                            document.write(new Date({{ task.last_run * 1000 }}).toLocaleString());
+                                        </script>
+                                    </span>
+                                {% else %}
+                                    <span class="text-sm text-gray-400">Never</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-2">
+                                {% if task.next_run and task.enabled %}
+                                    <span class="text-sm text-gray-600">
+                                        <script>
+                                            document.write(new Date({{ task.next_run * 1000 }}).toLocaleString());
+                                        </script>
+                                    </span>
+                                {% else %}
+                                    <span class="text-sm text-gray-400">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-2">
+                                {% if task.run_count > 0 %}
+                                    {% set success_rate = (task.success_count / task.run_count * 100)|int %}
+                                    <div class="flex items-center">
+                                        <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                            <div class="h-2 rounded-full {% if success_rate >= 90 %}bg-green-500{% elif success_rate >= 70 %}bg-yellow-500{% else %}bg-red-500{% endif %}"
+                                                 style="width: {{ success_rate }}%"></div>
+                                        </div>
+                                        <span class="text-sm {% if success_rate >= 90 %}text-green-600{% elif success_rate >= 70 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                                            {{ success_rate }}%
+                                        </span>
+                                    </div>
+                                    <span class="text-xs text-gray-500">
+                                        {{ task.success_count }}/{{ task.run_count }} runs
+                                    </span>
+                                {% else %}
+                                    <span class="text-sm text-gray-400">No runs yet</span>
+                                {% endif %}
+                            </td>
+                            {% if is_admin %}
+                            <td class="py-3 px-2">
+                                <div class="flex space-x-2">
+                                    <button onclick="toggleTask('{{ task.task_name }}', {{ 'true' if task.enabled else 'false' }})"
+                                            class="text-xs px-2 py-1 rounded {% if task.enabled %}bg-yellow-100 text-yellow-700 hover:bg-yellow-200{% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %}">
+                                        {% if task.enabled %}Pause{% else %}Resume{% endif %}
+                                    </button>
+                                    <form method="POST" action="{{ url_for('task_trigger', task_name=task.task_name) }}" class="inline">
+                                        <button type="submit"
+                                                class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200">
+                                            Trigger Now
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-8 text-gray-500">
+                <p>No scheduled tasks found.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Task Statistics -->
+        {% if tasks %}
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <h3 class="text-sm font-semibold text-gray-600 mb-2">Total Tasks</h3>
+                <p class="text-2xl font-bold text-blue-600">{{ tasks|length }}</p>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <h3 class="text-sm font-semibold text-gray-600 mb-2">Enabled</h3>
+                <p class="text-2xl font-bold text-green-600">{{ tasks|selectattr('enabled')|list|length }}</p>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <h3 class="text-sm font-semibold text-gray-600 mb-2">Total Runs</h3>
+                <p class="text-2xl font-bold text-gray-700">{{ tasks|sum(attribute='run_count') }}</p>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <h3 class="text-sm font-semibold text-gray-600 mb-2">Success Rate</h3>
+                {% set total_runs = tasks|sum(attribute='run_count') %}
+                {% set total_success = tasks|sum(attribute='success_count') %}
+                {% if total_runs > 0 %}
+                    {% set overall_rate = (total_success / total_runs * 100)|int %}
+                    <p class="text-2xl font-bold {% if overall_rate >= 90 %}text-green-600{% elif overall_rate >= 70 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                        {{ overall_rate }}%
+                    </p>
+                {% else %}
+                    <p class="text-2xl font-bold text-gray-400">N/A</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- JavaScript for task toggle -->
+    {% if is_admin %}
+    <script>
+        async function toggleTask(taskName, isEnabled) {
+            try {
+                const response = await fetch(`/tasks/${taskName}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Reload page to show updated status
+                    window.location.reload();
+                } else {
+                    alert('Failed to toggle task: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error toggling task: ' + error.message);
+            }
+        }
+    </script>
+    {% endif %}
+</body>
+</html>

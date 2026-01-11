@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task: {{ task.task_name }} - ChirpSyncer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">ChirpSyncer</h1>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('dashboard') }}" class="hover:text-blue-200">Dashboard</a>
+                <a href="{{ url_for('credentials_list') }}" class="hover:text-blue-200">Credentials</a>
+                <a href="{{ url_for('tasks_list') }}" class="hover:text-blue-200 font-semibold">Tasks</a>
+                {% if is_admin %}
+                <a href="{{ url_for('users_list') }}" class="hover:text-blue-200">Users</a>
+                {% endif %}
+                <span class="text-sm">{{ username }}</span>
+                <form method="POST" action="{{ url_for('logout') }}" class="inline">
+                    <button type="submit" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm">
+                        Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto mt-8 p-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-4 p-4 rounded {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Back button -->
+        <div class="mb-4">
+            <a href="{{ url_for('tasks_list') }}" class="text-blue-600 hover:text-blue-800">
+                &larr; Back to Tasks
+            </a>
+        </div>
+
+        <!-- Task Configuration -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">{{ task.task_name }}</h2>
+                <div class="flex items-center space-x-2">
+                    {% if task.enabled %}
+                        <span class="flex items-center bg-green-100 text-green-700 px-3 py-1 rounded">
+                            <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                            Enabled
+                        </span>
+                    {% else %}
+                        <span class="flex items-center bg-gray-100 text-gray-700 px-3 py-1 rounded">
+                            <span class="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
+                            Disabled
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Task Details Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-600 mb-2">Schedule Type</h3>
+                    <p class="text-lg">
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded">{{ task.task_type }}</span>
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-600 mb-2">Schedule Expression</h3>
+                    <p class="text-lg">
+                        <code class="bg-gray-100 px-3 py-1 rounded">{{ task.schedule }}</code>
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-600 mb-2">Last Run</h3>
+                    {% if task.last_run %}
+                        <p class="text-lg text-gray-700">
+                            <script>
+                                document.write(new Date({{ task.last_run * 1000 }}).toLocaleString());
+                            </script>
+                        </p>
+                    {% else %}
+                        <p class="text-lg text-gray-400">Never</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-600 mb-2">Next Run</h3>
+                    {% if task.next_run and task.enabled %}
+                        <p class="text-lg text-gray-700">
+                            <script>
+                                document.write(new Date({{ task.next_run * 1000 }}).toLocaleString());
+                            </script>
+                        </p>
+                    {% else %}
+                        <p class="text-lg text-gray-400">Not scheduled</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="text-sm font-semibold text-gray-600 mb-1">Total Runs</h3>
+                    <p class="text-2xl font-bold text-gray-700">{{ task.run_count }}</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="text-sm font-semibold text-gray-600 mb-1">Successful</h3>
+                    <p class="text-2xl font-bold text-green-600">{{ task.success_count }}</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="text-sm font-semibold text-gray-600 mb-1">Failed</h3>
+                    <p class="text-2xl font-bold text-red-600">{{ task.failure_count }}</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="text-sm font-semibold text-gray-600 mb-1">Success Rate</h3>
+                    {% if task.run_count > 0 %}
+                        {% set success_rate = (task.success_count / task.run_count * 100)|int %}
+                        <p class="text-2xl font-bold {% if success_rate >= 90 %}text-green-600{% elif success_rate >= 70 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                            {{ success_rate }}%
+                        </p>
+                    {% else %}
+                        <p class="text-2xl font-bold text-gray-400">N/A</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Admin Actions -->
+            {% if is_admin %}
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-semibold mb-4">Admin Actions</h3>
+                <div class="flex space-x-4">
+                    <form method="POST" action="{{ url_for('task_trigger', task_name=task.task_name) }}" class="inline">
+                        <button type="submit"
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                            Trigger Now
+                        </button>
+                    </form>
+                    <button onclick="toggleTaskStatus()"
+                            class="{% if task.enabled %}bg-yellow-500 hover:bg-yellow-600{% else %}bg-green-500 hover:bg-green-600{% endif %} text-white px-4 py-2 rounded">
+                        {% if task.enabled %}Pause Task{% else %}Resume Task{% endif %}
+                    </button>
+                    <button onclick="showConfigureModal()"
+                            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+                        Configure Schedule
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Execution History -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold mb-6">Execution History</h2>
+
+            {% if history %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left py-3 px-2">ID</th>
+                            <th class="text-left py-3 px-2">Started At</th>
+                            <th class="text-left py-3 px-2">Duration</th>
+                            <th class="text-left py-3 px-2">Status</th>
+                            <th class="text-left py-3 px-2">Output</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for execution in history %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-2 text-sm text-gray-600">#{{ execution.id }}</td>
+                            <td class="py-3 px-2">
+                                <span class="text-sm text-gray-700">
+                                    <script>
+                                        document.write(new Date({{ execution.started_at * 1000 }}).toLocaleString());
+                                    </script>
+                                </span>
+                            </td>
+                            <td class="py-3 px-2">
+                                {% if execution.duration_ms %}
+                                    <span class="text-sm text-gray-700">{{ (execution.duration_ms / 1000)|round(2) }}s</span>
+                                {% else %}
+                                    <span class="text-sm text-gray-400">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-2">
+                                {% if execution.status == 'success' %}
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                                        Success
+                                    </span>
+                                {% elif execution.status == 'failed' %}
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">
+                                        Failed
+                                    </span>
+                                {% elif execution.status == 'running' %}
+                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                                        Running
+                                    </span>
+                                {% else %}
+                                    <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-medium">
+                                        {{ execution.status }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-2">
+                                {% if execution.output %}
+                                    <details>
+                                        <summary class="cursor-pointer text-blue-600 hover:text-blue-800 text-sm">
+                                            View output
+                                        </summary>
+                                        <pre class="mt-2 text-xs bg-gray-50 p-2 rounded overflow-x-auto">{{ execution.output }}</pre>
+                                    </details>
+                                {% elif execution.error %}
+                                    <details>
+                                        <summary class="cursor-pointer text-red-600 hover:text-red-800 text-sm">
+                                            View error
+                                        </summary>
+                                        <pre class="mt-2 text-xs bg-red-50 text-red-700 p-2 rounded overflow-x-auto">{{ execution.error }}</pre>
+                                    </details>
+                                {% else %}
+                                    <span class="text-sm text-gray-400">No output</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-8 text-gray-500">
+                <p>No execution history available.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Configure Schedule Modal -->
+    {% if is_admin %}
+    <div id="configureModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 class="text-xl font-bold mb-4">Configure Schedule</h3>
+            <form method="POST" action="{{ url_for('task_configure', task_name=task.task_name) }}">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        Schedule Expression
+                    </label>
+                    <input type="text"
+                           name="schedule"
+                           value="{{ task.schedule }}"
+                           class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="0 * * * *"
+                           required>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Cron format: minute hour day month weekday
+                    </p>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button"
+                            onclick="hideConfigureModal()"
+                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                        Update Schedule
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showConfigureModal() {
+            document.getElementById('configureModal').classList.remove('hidden');
+        }
+
+        function hideConfigureModal() {
+            document.getElementById('configureModal').classList.add('hidden');
+        }
+
+        async function toggleTaskStatus() {
+            try {
+                const response = await fetch(`/tasks/{{ task.task_name }}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to toggle task: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error toggling task: ' + error.message);
+            }
+        }
+    </script>
+    {% endif %}
+</body>
+</html>
