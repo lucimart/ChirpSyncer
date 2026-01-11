@@ -11,7 +11,7 @@ import secrets
 import time
 from typing import Optional, List
 from dataclasses import dataclass
-from app.security_utils import validate_password, log_audit
+from app.auth.security_utils import validate_password, log_audit
 
 
 @dataclass

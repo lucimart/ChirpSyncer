@@ -9,13 +9,13 @@ platforms forever.
 import sqlite3
 import os
 import tempfile
-from app.db_handler import (
+from app.core.db_handler import (
     migrate_database,
     should_sync_post,
     save_synced_post,
     get_post_by_hash
 )
-from app.utils import compute_content_hash
+from app.core.utils import compute_content_hash
 
 
 def test_no_loop_twitter_to_bluesky_to_twitter():

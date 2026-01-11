@@ -13,7 +13,7 @@ Comprehensive test suite for SavedContentManager with 15+ tests covering:
 import pytest
 import os
 import time
-from app.saved_content import SavedContentManager
+from app.features.saved_content import SavedContentManager
 
 
 @pytest.fixture

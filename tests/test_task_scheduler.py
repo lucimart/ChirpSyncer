@@ -14,7 +14,7 @@ from unittest.mock import Mock, patch
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from app.task_scheduler import TaskScheduler
+from app.services.task_scheduler import TaskScheduler
 
 
 @pytest.fixture

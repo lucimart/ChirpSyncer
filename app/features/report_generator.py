@@ -741,7 +741,7 @@ class ReportGenerator:
             Dict with status and message
         """
         try:
-            from app.notification_service import NotificationService
+            from app.services.notification_service import NotificationService
 
             notifier = NotificationService(db_path=self.db_path)
 

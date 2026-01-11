@@ -16,7 +16,7 @@ from typing import List
 from twscrape import API, gather
 from db_handler import is_tweet_seen, mark_tweet_as_seen
 from config import TWITTER_USERNAME
-from logger import setup_logger
+from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
 

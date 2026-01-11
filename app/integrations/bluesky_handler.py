@@ -3,7 +3,7 @@ import logging
 from atproto import Client, models
 from tenacity import retry, stop_after_attempt, wait_exponential, before_sleep_log, after_log
 from config import BSKY_USERNAME, BSKY_PASSWORD
-from logger import setup_logger
+from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
 

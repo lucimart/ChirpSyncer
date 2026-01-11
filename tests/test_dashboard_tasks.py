@@ -110,7 +110,7 @@ def mock_scheduler():
 def test_app(db_path, master_key, mock_scheduler):
     """Create test Flask app with dashboard routes"""
     # First, create the app without scheduler
-    from app.dashboard import create_app
+    from app.web.dashboard import create_app
     app = create_app(db_path=db_path, master_key=master_key)
     app.config['TESTING'] = True
     app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF for testing
@@ -130,7 +130,7 @@ def client(test_app):
 @pytest.fixture
 def user_manager(db_path):
     """Create UserManager with test database"""
-    from app.user_manager import UserManager
+    from app.auth.user_manager import UserManager
     um = UserManager(db_path)
     um.init_db()
     return um

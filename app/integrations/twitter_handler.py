@@ -5,7 +5,7 @@ from tweepy import OAuth1UserHandler
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type, before_sleep_log, after_log
 from db_handler import is_tweet_seen, mark_tweet_as_seen, store_api_rate_limit
 from config import TWITTER_API_KEY, TWITTER_API_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_SECRET
-from logger import setup_logger
+from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
 

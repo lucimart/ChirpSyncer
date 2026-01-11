@@ -1,4 +1,4 @@
-from app.bluesky_handler import post_to_bluesky, validate_and_truncate_text
+from app.integrations.bluesky_handler import post_to_bluesky, validate_and_truncate_text
 from unittest.mock import patch
 import pytest
 
@@ -72,7 +72,7 @@ def test_custom_max_length():
     assert result == ("a" * 47) + "..."
 
 
-@patch("app.bluesky_handler.logger")
+@patch("app.integrations.bluesky_handler.logger")
 def test_warning_logged_when_truncating(mock_logger):
     """Test that warning is logged when text is truncated."""
     text = "a" * 400
@@ -85,7 +85,7 @@ def test_warning_logged_when_truncating(mock_logger):
     assert "truncated" in call_args.lower()
 
 
-@patch("app.bluesky_handler.logger")
+@patch("app.integrations.bluesky_handler.logger")
 def test_no_warning_when_not_truncating(mock_logger):
     """Test that no warning is logged when text is not truncated."""
     text = "Short text"
@@ -94,8 +94,8 @@ def test_no_warning_when_not_truncating(mock_logger):
 
 
 # Tests for post_to_bluesky with validation
-@patch("app.bluesky_handler.bsky_client.login")
-@patch("app.bluesky_handler.bsky_client.post")
+@patch("app.integrations.bluesky_handler.bsky_client.login")
+@patch("app.integrations.bluesky_handler.bsky_client.post")
 def test_post_to_bluesky(mock_post, mock_login):
     """Test basic posting functionality."""
     # Mock the behavior of login
@@ -110,8 +110,8 @@ def test_post_to_bluesky(mock_post, mock_login):
     mock_post.assert_called_once_with("Test Post")
 
 
-@patch("app.bluesky_handler.bsky_client.post")
-@patch("app.bluesky_handler.logger")
+@patch("app.integrations.bluesky_handler.bsky_client.post")
+@patch("app.integrations.bluesky_handler.logger")
 def test_post_to_bluesky_validates_length(mock_logger, mock_post):
     """Test that post_to_bluesky validates and truncates long text."""
     long_text = "a" * 400
@@ -128,8 +128,8 @@ def test_post_to_bluesky_validates_length(mock_logger, mock_post):
     mock_logger.warning.assert_called_once()
 
 
-@patch("app.bluesky_handler.bsky_client.post")
-@patch("app.bluesky_handler.logger")
+@patch("app.integrations.bluesky_handler.bsky_client.post")
+@patch("app.integrations.bluesky_handler.logger")
 def test_post_to_bluesky_short_text_unchanged(mock_logger, mock_post):
     """Test that short text is posted unchanged."""
     short_text = "Short tweet"
@@ -146,10 +146,10 @@ def test_post_to_bluesky_short_text_unchanged(mock_logger, mock_post):
 
 
 # Tests for fetch_posts_from_bluesky function (BIDIR-001)
-@patch("app.bluesky_handler.bsky_client")
+@patch("app.integrations.bluesky_handler.bsky_client")
 def test_fetch_posts_from_bluesky_success(mock_client):
     """Test successful fetch returns posts."""
-    from app.bluesky_handler import fetch_posts_from_bluesky
+    from app.integrations.bluesky_handler import fetch_posts_from_bluesky
 
     # Mock the API response
     mock_response = type('obj', (object,), {
@@ -202,10 +202,10 @@ def test_fetch_posts_from_bluesky_success(mock_client):
     )
 
 
-@patch("app.bluesky_handler.bsky_client")
+@patch("app.integrations.bluesky_handler.bsky_client")
 def test_fetch_posts_from_bluesky_empty(mock_client):
     """Test handling of user with no posts."""
-    from app.bluesky_handler import fetch_posts_from_bluesky
+    from app.integrations.bluesky_handler import fetch_posts_from_bluesky
 
     # Mock empty response
     mock_response = type('obj', (object,), {
@@ -222,10 +222,10 @@ def test_fetch_posts_from_bluesky_empty(mock_client):
     assert len(posts) == 0
 
 
-@patch("app.bluesky_handler.bsky_client")
+@patch("app.integrations.bluesky_handler.bsky_client")
 def test_fetch_posts_from_bluesky_filters_reposts(mock_client):
     """Test that reposts and quote posts are filtered out."""
-    from app.bluesky_handler import fetch_posts_from_bluesky
+    from app.integrations.bluesky_handler import fetch_posts_from_bluesky
 
     # Mock response with mix of original posts and reposts
     mock_response = type('obj', (object,), {
@@ -285,11 +285,11 @@ def test_fetch_posts_from_bluesky_filters_reposts(mock_client):
     assert not any('Someone elses post' in post.text for post in posts)
 
 
-@patch("app.bluesky_handler.bsky_client")
-@patch("app.bluesky_handler.logger")
+@patch("app.integrations.bluesky_handler.bsky_client")
+@patch("app.integrations.bluesky_handler.logger")
 def test_fetch_posts_from_bluesky_network_error(mock_logger, mock_client):
     """Test retry behavior on network errors."""
-    from app.bluesky_handler import fetch_posts_from_bluesky
+    from app.integrations.bluesky_handler import fetch_posts_from_bluesky
 
     # Mock network error on first 2 calls, then success
     mock_client.app.bsky.feed.get_author_feed.side_effect = [
@@ -325,10 +325,10 @@ def test_fetch_posts_from_bluesky_network_error(mock_logger, mock_client):
     assert mock_client.app.bsky.feed.get_author_feed.call_count == 3
 
 
-@patch("app.bluesky_handler.bsky_client")
+@patch("app.integrations.bluesky_handler.bsky_client")
 def test_fetch_posts_from_bluesky_respects_count_limit(mock_client):
     """Test that function returns maximum 'count' posts."""
-    from app.bluesky_handler import fetch_posts_from_bluesky
+    from app.integrations.bluesky_handler import fetch_posts_from_bluesky
 
     # Mock response with 10 posts
     feed_items = []
