@@ -609,10 +609,21 @@ pytest tests/ -v
 
 ## 📚 Documentation
 
+### Architecture & Planning
 - [Architecture](ARCHITECTURE.md) - System architecture
 - [Sprint 6 Summary](SPRINT6_SUMMARY.md) - Multi-user platform
 - [Sprint 7 Summary](SPRINT7_SUMMARY.md) - Advanced features
 - [Sprint 7 ADR](SPRINT7_ARCHITECTURE_DECISIONS.md) - Architecture decisions
+- [Sprint 7 Fixes](SPRINT7_FIXES_SUMMARY.md) - Bug fixes and feature completion
+- [Sprint 7 Review](SPRINT7_COMPONENT_REVIEW.md) - Component analysis
+
+### Deployment Guides
+- [NAS Deployment Guide](docs/NAS_DEPLOYMENT_GUIDE.md) - Deploy to NAS on local network
+- [SMTP Setup Guide](docs/SMTP_SETUP_GUIDE.md) - Configure email notifications
+- [Admin Setup Guide](docs/ADMIN_SETUP_GUIDE.md) - Create and manage admin users
+- [Monitoring Guide](docs/MONITORING_GUIDE.md) - Monitor and alert setup
+
+### Technical Reference
 - [API Documentation](docs/API.md) - REST API reference
 - [Database Schema](docs/DATABASE.md) - Database design
 
