@@ -179,10 +179,10 @@ class TestNotificationService(unittest.TestCase):
 
         # Verify the call arguments
         call_args = mock_send_email.call_args
-        self.assertEqual(call_args[1]['to'], 'admin@test.com')
-        self.assertIn('sync_twitter_to_bluesky', call_args[1]['subject'])
-        self.assertIn('completed', call_args[1]['subject'].lower())
-        self.assertTrue(call_args[1]['html'])
+        self.assertEqual(call_args.args[0], 'admin@test.com')
+        self.assertIn('sync_twitter_to_bluesky', call_args.args[1])
+        self.assertIn('completed', call_args.args[1].lower())
+        self.assertTrue(call_args.kwargs['html'])
 
     @patch.object(NotificationService, 'send_email')
     def test_notify_task_failure(self, mock_send_email):
@@ -202,8 +202,8 @@ class TestNotificationService(unittest.TestCase):
 
         # Verify failure in subject
         for call in mock_send_email.call_args_list:
-            self.assertIn('failed', call[1]['subject'].lower())
-            self.assertIn('sync_bluesky_to_twitter', call[1]['subject'])
+            self.assertIn('failed', call.args[1].lower())
+            self.assertIn('sync_bluesky_to_twitter', call.args[1])
 
     @patch.object(NotificationService, 'send_email')
     def test_send_weekly_report(self, mock_send_email):
@@ -219,8 +219,8 @@ class TestNotificationService(unittest.TestCase):
         mock_send_email.assert_called_once()
 
         call_args = mock_send_email.call_args
-        self.assertIn('weekly', call_args[1]['subject'].lower())
-        self.assertTrue(call_args[1]['html'])
+        self.assertIn('weekly', call_args.args[1].lower())
+        self.assertTrue(call_args.kwargs['html'])
 
     def test_email_template_rendering_task_completion(self):
         """Test email template rendering for task completion"""
