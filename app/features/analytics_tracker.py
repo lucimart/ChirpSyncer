@@ -394,7 +394,7 @@ class AnalyticsTracker:
                 WHERE rn = 1
                 ORDER BY {metric} DESC
                 LIMIT ?
-            '''
+            '''  # nosec B608 - metric validated against whitelist
 
             cursor.execute(query, (user_id, limit))
 

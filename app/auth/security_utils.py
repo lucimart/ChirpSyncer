@@ -212,7 +212,7 @@ def get_audit_log(user_id: Optional[int] = None, limit: int = 100,
             if log_entry.get('details'):
                 try:
                     log_entry['details'] = json.loads(log_entry['details'])
-                except:
+                except (json.JSONDecodeError, TypeError, ValueError):
                     pass
             logs.append(log_entry)
 

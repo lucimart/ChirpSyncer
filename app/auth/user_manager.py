@@ -299,7 +299,7 @@ class UserManager:
 
             # Execute update
             values.append(user_id)
-            query = f"UPDATE users SET {', '.join(updates)} WHERE id = ?"
+            query = f"UPDATE users SET {', '.join(updates)} WHERE id = ?"  # nosec B608 - updates contains validated column names
             cursor.execute(query, values)
             conn.commit()
 

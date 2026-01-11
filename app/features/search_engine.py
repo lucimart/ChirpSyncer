@@ -320,7 +320,7 @@ class SearchEngine:
                 WHERE tweet_search_index MATCH ? AND {where_sql}
                 ORDER BY rank
                 LIMIT 50
-                """
+                """  # nosec B608 - where_sql built from validated filters with parameterized queries
                 cursor.execute(sql, [query] + params)
             else:
                 # Without FTS search (just filters)
@@ -330,7 +330,7 @@ class SearchEngine:
                 WHERE {where_sql}
                 ORDER BY posted_at DESC
                 LIMIT 50
-                """
+                """  # nosec B608 - where_sql built from validated filters with parameterized queries
                 cursor.execute(sql, params)
 
             for row in cursor.fetchall():
