@@ -1,0 +1,28 @@
+# Code Owners for ChirpSyncer
+# These owners will be automatically requested for review when someone opens a PR
+
+# Global owners (all files)
+* @lucimart
+
+# Core infrastructure
+/app/core/ @lucimart
+/app/models/ @lucimart
+
+# Authentication & Security (critical - require review)
+/app/auth/ @lucimart
+/app/core/security_utils.py @lucimart
+
+# CI/CD & Deployment (critical)
+/.github/workflows/ @lucimart
+/scripts/ @lucimart
+/Dockerfile @lucimart
+/docker-compose.yml @lucimart
+
+# Documentation
+/docs/ @lucimart
+/*.md @lucimart
+
+# Configuration files (critical)
+/.github/ @lucimart
+/.env.example @lucimart
+/requirements.txt @lucimart

@@ -1,0 +1,35 @@
+# Bandit configuration file
+# Security linting for Python code
+
+[bandit]
+# Paths to exclude from scanning
+exclude_dirs = [
+    '/tests',
+    '/venv',
+    '/.venv',
+    '/env',
+    '__pycache__',
+    '.git',
+    '.pytest_cache'
+]
+
+# Specific tests to skip
+# B101: assert_used - We use asserts in tests
+# B601: paramiko_calls - Not using paramiko
+# B602: subprocess_popen_with_shell_equals_true - Reviewed and safe usage
+skips = ['B101', 'B601']
+
+# Severity level threshold
+# Options: LOW, MEDIUM, HIGH
+level = 'MEDIUM'
+
+# Confidence level threshold
+# Options: LOW, MEDIUM, HIGH
+confidence = 'MEDIUM'
+
+# Format output
+# Options: csv, json, txt, html, screen, yaml
+format = 'screen'
+
+# Show only issues with the specified severity level or higher
+severity = 'MEDIUM'
