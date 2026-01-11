@@ -656,15 +656,15 @@ def main():
     logger.info("ChirpSyncer - Twitter ↔ Bluesky Sync")
     logger.info("=" * 80)
 
-    # Migrate database schema (always needed)
-    migrate_database(db_path=DB_PATH)
-
     # Check if multi-user mode is enabled
     if MULTI_USER_ENABLED:
         logger.info("MULTI-USER MODE ENABLED")
         logger.info("=" * 80)
 
         try:
+            # Migrate database schema
+            migrate_database(db_path=DB_PATH)
+
             # Initialize multi-user system
             init_multi_user_system()
 
@@ -704,6 +704,9 @@ def main():
 
         # Validate credentials from .env
         validate_credentials()
+
+        # Migrate database schema
+        migrate_database(db_path=DB_PATH)
 
         # Login to Bluesky
         login_to_bluesky()
