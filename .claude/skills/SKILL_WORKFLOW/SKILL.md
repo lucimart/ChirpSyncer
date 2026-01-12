@@ -1,8 +1,6 @@
 ---
 name: Skill Workflow
 description: Master document defining how skills interact, trigger, and flow together
-category: meta
-version: "1.0"
 ---
 
 # Skill Workflow & Orchestration
@@ -250,34 +248,3 @@ If skill updated, increment version in metadata.
 Every skill must have this metadata block:
 
 ```yaml
----
-name: [Descriptive Name]
-description: [One-line purpose - shown in listings]
-category: [architecture|api|frontend|testing|integration|database|vision|meta]
-triggers:
-  - [keyword that should activate this skill]
-  - [another keyword]
-auto_trigger: [after_schema_change|after_api_change|after_sprint|after_significant_changes|false]
-dependencies:
-  - [file or skill this depends on]
-version: "X.Y"
-sprint_relevant: [8-9|10-13|14-15|16-18|19-21|22-26|all]
----
-```
-
-## Integration with Session Workflow
-
-```
-docs/SESSION_WORKFLOW.md
-    │
-    ├── Defines HOW to work
-    │
-    └── SKILL_WORKFLOW.md
-        │
-        └── Defines WHAT skills to use WHEN
-```
-
-When starting a session:
-1. Read `SESSION_WORKFLOW.md` for process
-2. Consult `SKILL_WORKFLOW.md` for which skills apply
-3. Load relevant skills based on task type

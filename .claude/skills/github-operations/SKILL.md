@@ -1,28 +1,6 @@
 ---
 name: GitHub Operations
 description: PR management, repo hygiene, CI/CD, and repository health
-category: devops
-triggers:
-  - create PR
-  - pull request
-  - merge
-  - CI failed
-  - pipeline
-  - github action
-  - gitignore
-  - readme
-  - commit
-  - branch
-  - repo organization
-auto_trigger: before_pr_create,after_ci_failure,after_feature_complete
-dependencies:
-  - mcp__github__*
-  - .github/workflows/
-  - .gitignore
-  - README.md
-  - docs/
-version: "1.0"
-sprint_relevant: all
 ---
 
 # Skill: GitHub Operations

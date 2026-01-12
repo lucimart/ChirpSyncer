@@ -1,29 +1,6 @@
 ---
 name: Security Assessment
 description: Code security review, vulnerability detection, and secure coding practices
-category: security
-triggers:
-  - security review
-  - vulnerability
-  - OWASP
-  - injection
-  - XSS
-  - CSRF
-  - authentication
-  - authorization
-  - encryption
-  - credential
-  - secret
-  - sanitize
-  - validate input
-auto_trigger: before_pr_create,after_auth_change,after_api_change
-dependencies:
-  - app/auth/
-  - app/web/dashboard.py
-  - app/core/security.py
-  - chirp-api-design.md
-version: "1.0"
-sprint_relevant: all
 ---
 
 # Skill: Security Assessment

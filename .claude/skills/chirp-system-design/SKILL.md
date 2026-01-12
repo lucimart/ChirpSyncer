@@ -1,20 +1,6 @@
 ---
 name: ChirpSyncer System Design
 description: Complete system architecture, component mapping, configuration, and improvement suggestions
-category: architecture
-triggers:
-  - system design
-  - component analysis
-  - architecture review
-  - dependency mapping
-  - configuration
-  - improvement suggestions
-dependencies:
-  - app/
-  - docs/MASTER_ROADMAP.md
-  - .claude/skills/chirp-architecture.md
-version: "1.0"
-auto_analyze: true
 ---
 
 # Skill: ChirpSyncer System Design

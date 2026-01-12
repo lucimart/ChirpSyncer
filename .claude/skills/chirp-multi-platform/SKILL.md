@@ -1,24 +1,6 @@
 ---
 name: ChirpSyncer Multi-Platform
 description: Capabilities-first platform abstraction for Twitter, Bluesky, and future platforms
-category: integration
-triggers:
-  - new platform integration
-  - platform capabilities
-  - multi-platform support
-  - Instagram
-  - LinkedIn
-  - Mastodon
-  - add platform
-  - platform handler
-  - capabilities
-auto_trigger: false
-dependencies:
-  - app/integrations/
-  - docs/architecture/
-  - chirp-connector-framework.md
-version: "1.1"
-sprint_relevant: 16-18
 ---
 
 # Skill: ChirpSyncer Multi-Platform Support

@@ -1,21 +1,6 @@
 ---
 name: Documentation Brain
 description: Central knowledge base - auto-reviews, documents changes, maintains context across sessions
-category: meta
-triggers:
-  - documentation review
-  - update docs
-  - what changed
-  - document this
-  - knowledge base
-  - context refresh
-  - after implementation
-dependencies:
-  - docs/
-  - .claude/skills/
-  - CLAUDE.md
-version: "1.1"
-auto_trigger: after_significant_changes
 ---
 
 # Skill: Documentation Brain

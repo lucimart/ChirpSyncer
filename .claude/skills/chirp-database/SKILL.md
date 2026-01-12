@@ -1,24 +1,6 @@
 ---
 name: ChirpSyncer Database
 description: Database schema design, migrations, and query optimization
-category: database
-triggers:
-  - schema changes
-  - new table
-  - migration
-  - query optimization
-  - FTS5 search
-  - CREATE TABLE
-  - ALTER TABLE
-  - index strategy
-  - multi-tenant
-auto_trigger: after_schema_change
-dependencies:
-  - app/core/db_handler.py
-  - chirpsyncer.db
-  - chirp-architecture.md
-version: "1.1"
-sprint_relevant: all
 ---
 
 # Skill: ChirpSyncer Database Design

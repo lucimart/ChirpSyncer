@@ -1,26 +1,6 @@
 ---
 name: ChirpSyncer Next.js Migration
 description: Flask to Next.js dashboard migration guide and patterns
-category: migration
-triggers:
-  - Next.js development
-  - dashboard migration
-  - frontend architecture
-  - React components
-  - styled-components
-  - App Router
-  - server components
-  - TanStack Query
-  - provider
-auto_trigger: false
-dependencies:
-  - docs/migration/CHIRP_NEXT_DASHBOARD_SPEC.md
-  - docs/migration/STATUS.md
-  - dashboard/
-  - chirp-design-system.md
-  - chirp-api-contracts.md
-version: "1.2"
-sprint_relevant: 10-13
 ---
 
 # Skill: ChirpSyncer Next.js Dashboard Migration v1.1
