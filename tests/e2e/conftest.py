@@ -181,6 +181,8 @@ def e2e_app(temp_db_path) -> Generator:
     app.config["SECRET_KEY"] = TEST_SECRET_KEY
     app.config["SESSION_TYPE"] = "filesystem"
     app.config["PROPAGATE_EXCEPTIONS"] = True
+    app.config["DB_PATH"] = temp_db_path
+    app.config["MASTER_KEY"] = TEST_MASTER_KEY
 
     # Disable CSRF for testing
     app.config["WTF_CSRF_ENABLED"] = False
@@ -422,6 +424,56 @@ def db_manager(e2e_app) -> UserManager:
             assert len(users) == len(TEST_USERS)
     """
     return UserManager(db_path=e2e_app.config["DB_PATH"])
+
+
+@pytest.fixture(scope="function")
+def user_manager(e2e_app) -> UserManager:
+    """
+    Provide UserManager instance for user management operations in tests.
+
+    Alias for db_manager to maintain consistency with test naming conventions.
+
+    Args:
+        e2e_app: Flask application fixture
+
+    Returns:
+        UserManager: Instance for user management operations
+
+    Example:
+        def test_create_user(user_manager):
+            user_id = user_manager.create_user('testuser', 'test@example.com', 'Password123!')
+            assert user_id is not None
+    """
+    um = UserManager(db_path=e2e_app.config["DB_PATH"])
+    um.init_db()
+    return um
+
+
+@pytest.fixture(scope="function")
+def analytics_tracker(e2e_app):
+    """
+    Provide AnalyticsTracker instance for analytics operations in tests.
+
+    Allows direct manipulation and verification of analytics data
+    in tests without going through the HTTP client.
+
+    Args:
+        e2e_app: Flask application fixture
+
+    Returns:
+        AnalyticsTracker: Instance for analytics operations
+
+    Example:
+        def test_record_metrics(analytics_tracker):
+            analytics_tracker.record_metrics(user_id=1, tweet_id='123', metrics={...})
+            top_tweets = analytics_tracker.get_top_tweets(user_id=1, metric='likes')
+            assert len(top_tweets) > 0
+    """
+    from app.features.analytics_tracker import AnalyticsTracker
+
+    at = AnalyticsTracker(db_path=e2e_app.config["DB_PATH"])
+    at.init_db()
+    return at
 
 
 @pytest.fixture(scope="function")
