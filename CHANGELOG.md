@@ -315,6 +315,9294 @@ Benefits:
 - README rewritten for clarity
 
 ### Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
+- resolve XSS vulnerabilities in task templates
+
+Fixed 5 Semgrep XSS findings by removing inline JavaScript with
+template variables. Replaced with data attributes and DOM manipulation.
+
+Changes:
+- app/web/templates/task_detail.html: 3 XSS issues fixed
+  * Last Run timestamp (line 88)
+  * Next Run timestamp (line 100)
+  * Execution history timestamps (line 183)
+- app/web/templates/tasks_list.html: 2 XSS issues fixed
+  * Last Run timestamp (line 100)
+  * Next Run timestamp (line 111)
+
+Solution: Used data-timestamp attributes with DOMContentLoaded event
+handler to safely format timestamps client-side, preventing injection.
+
+Semgrep: generic.html-templates.security.var-in-script-tag ✓ Fixed
 - resolve SQL parsing error in get_top_tweets
 
 Fixed SQL syntax error where a Python comment was incorrectly placed
