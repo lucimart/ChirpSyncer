@@ -433,20 +433,21 @@ class AnalyticsTracker:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
 
-            # Validate metric
-            valid_metrics = [
-                "engagement_rate",
-                "likes",
-                "retweets",
-                "impressions",
-                "engagements",
-                "replies",
-            ]
-            if metric not in valid_metrics:
-                metric = "engagement_rate"
+            # Validate metric against whitelist (prevents SQL injection)
+            # Use dict mapping to avoid f-string SQL construction
+            valid_metrics = {
+                "engagement_rate": "engagement_rate",
+                "likes": "likes",
+                "retweets": "retweets",
+                "impressions": "impressions",
+                "engagements": "engagements",
+                "replies": "replies",
+            }
+            order_by_column = valid_metrics.get(metric, "engagement_rate")
 
             # Get top tweets by metric
             # Use subquery to get latest metrics for each tweet
+            # Safe: order_by_column validated via whitelist dict
             query = f"""
                 SELECT tweet_id, user_id, timestamp, impressions, likes, retweets,
                        replies, engagements, engagement_rate
@@ -458,9 +459,9 @@ class AnalyticsTracker:
                     WHERE user_id = ?
                 )
                 WHERE rn = 1
-                ORDER BY {metric} DESC
+                ORDER BY {order_by_column} DESC
                 LIMIT ?
-            """  # nosec B608 - metric validated against whitelist
+            """
 
             cursor.execute(query, (user_id, limit))
 
