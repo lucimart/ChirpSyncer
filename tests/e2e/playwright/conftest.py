@@ -25,6 +25,9 @@ from contextlib import closing
 
 import pytest
 
+# Enable pytest-playwright plugin
+pytest_plugins = ["pytest_playwright.pytest_playwright"]
+
 # Add app directory to path for imports
 sys.path.insert(
     0,
@@ -451,45 +454,54 @@ def app_server(flask_app, test_db_path):
 
 
 @pytest.fixture(scope="function")
-def browser_context(app_server, playwright):
+def browser(app_server, playwright):
     """
-    Create a Playwright browser context for E2E testing.
+    Create a Playwright browser for E2E testing.
 
-    Creates a browser context with proper configuration for testing.
-    Automatically starts the Flask server before providing the context.
+    Ensures Flask app server is running before browser launch.
 
     Args:
         app_server: Flask application server fixture (ensures server is running)
-        playwright: pytest-playwright's playwright fixture
+        playwright: pytest-playwright's playwright fixture (provided by plugin)
 
     Yields:
-        BrowserContext: Playwright browser context
+        Browser: Playwright browser instance
     """
-    # Launch browser
-    browser = playwright.chromium.launch()
-    context = browser.new_context()
-
-    yield context
-
-    # Cleanup
-    context.close()
+    browser = playwright.chromium.launch(headless=True)
+    yield browser
     browser.close()
 
 
 @pytest.fixture(scope="function")
-def page(browser_context):
+def context(browser):
+    """
+    Create a Playwright browser context.
+
+    Args:
+        browser: Browser fixture
+
+    Yields:
+        BrowserContext: Playwright browser context
+    """
+    context = browser.new_context(
+        base_url="http://localhost:5000",
+        viewport={"width": 1280, "height": 720},
+    )
+    yield context
+    context.close()
+
+
+@pytest.fixture(scope="function")
+def page(context):
     """
     Create a Playwright page for E2E testing.
 
-    Creates a new page within a browser context. This page is automatically
-    configured with the base URL from playwright.config.js.
-
     Args:
-        browser_context: Browser context fixture
+        context: Browser context fixture
 
     Yields:
         Page: Playwright page object for interacting with the app
     """
-    page = browser_context.new_page()
+    page = context.new_page()
     yield page
     page.close()
