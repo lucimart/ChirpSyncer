@@ -254,6 +254,7 @@ Benefits:
 - README rewritten for clarity
 
 ### Fixed
+- add test_app fixture alias for backwards compatibility
 - add missing fixtures and fix analytics tests
 
 - Add user_manager and analytics_tracker fixtures to e2e/conftest.py
