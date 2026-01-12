@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import {
   Plus,
@@ -12,6 +13,7 @@ import {
   Calendar,
   MessageSquare,
   ThumbsUp,
+  Eye,
 } from 'lucide-react';
 import { Button, Card, Modal, Input } from '@/components/ui';
 
@@ -192,6 +194,7 @@ interface CleanupRule {
 }
 
 export default function CleanupPage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ruleName, setRuleName] = useState('');
@@ -304,6 +307,13 @@ export default function CleanupPage() {
                   <StatusBadge $enabled={rule.is_enabled}>
                     {rule.is_enabled ? 'Enabled' : 'Disabled'}
                   </StatusBadge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => router.push(`/dashboard/cleanup/${rule.id}`)}
+                  >
+                    <Eye size={16} />
+                  </Button>
                   <Button variant="ghost" size="sm">
                     {rule.is_enabled ? <Pause size={16} /> : <Play size={16} />}
                   </Button>
