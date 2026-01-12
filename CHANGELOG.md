@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - README rewritten for clarity
 
 ### Fixed
+- correct awk logic to only update Unreleased section
+
+- Fixed hook to stop at first version marker
+- Prevents duplicate entries in historical versions
+- Restored clean CHANGELOG.md state
+- Hook now properly scopes changes to Unreleased only
 - RuntimeWarning about unawaited coroutine in E2E tests
 - Database error handling in analytics tracker
 - User manager bcrypt and update error handling
