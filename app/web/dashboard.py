@@ -399,21 +399,31 @@ def create_app(db_path='chirpsyncer.db', master_key=None):
             session['user_id'], cred['platform'], cred['credential_type']
         )
 
-        # NOTE: This endpoint verifies that credentials are stored and can be decrypted,
-        # but does not test authentication against Twitter/Bluesky APIs to avoid
-        # rate limiting and unnecessary API calls. For full credential validation,
-        # use the sync operations which will report authentication errors.
-        if data:
-            return jsonify({
-                'success': True,
-                'message': 'Credentials loaded successfully',
-                'platform': cred['platform'],
-                'credential_type': cred['credential_type']
-            })
-        else:
+        if not data:
             return jsonify({
                 'success': False,
                 'error': 'Failed to load credentials'
+            })
+
+        # Test credentials against actual API
+        from app.integrations.credential_validator import validate_credentials
+        try:
+            success, message = validate_credentials(
+                cred['platform'],
+                cred['credential_type'],
+                data
+            )
+
+            return jsonify({
+                'success': success,
+                'message': message,
+                'platform': cred['platform'],
+                'credential_type': cred['credential_type']
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': f'Validation failed: {str(e)}'
             })
 
     @app.route('/credentials/share', methods=['POST'])

@@ -24,14 +24,17 @@ class TweetScheduler:
     - Media attachment support
     """
 
-    def __init__(self, db_path: str = 'chirpsyncer.db'):
+    def __init__(self, db_path: str = 'chirpsyncer.db', master_key: bytes = None):
         """
         Initialize TweetScheduler.
 
         Args:
             db_path: Path to SQLite database
+            master_key: Optional 32-byte master key for credential encryption
+                       (required for posting tweets with user credentials)
         """
         self.db_path = db_path
+        self.master_key = master_key
         self.init_db()
 
     def init_db(self):
@@ -304,10 +307,32 @@ class TweetScheduler:
             media_paths = json.loads(tweet_data['media_paths'])
 
         try:
-            # Post the tweet using Twitter API
-            # This will be implemented to use user-specific credentials
-            tweet_id = self._post_to_twitter(
+            # Get user's Twitter API credentials
+            if not self.master_key:
+                raise ValueError(
+                    "Master key not configured. TweetScheduler requires master_key "
+                    "to decrypt user credentials for posting tweets."
+                )
+
+            from app.auth.credential_manager import CredentialManager
+            cred_manager = CredentialManager(self.master_key, self.db_path)
+
+            # Get Twitter API credentials for the user
+            credentials = cred_manager.get_credentials(
                 tweet_data['user_id'],
+                'twitter',
+                'api'
+            )
+
+            if not credentials:
+                raise ValueError(
+                    f"No Twitter API credentials found for user {tweet_data['user_id']}. "
+                    "User must add Twitter API credentials before scheduling tweets."
+                )
+
+            # Post the tweet using Twitter API
+            tweet_id = self._post_to_twitter(
+                credentials,
                 tweet_data['content'],
                 media_paths
             )
@@ -322,37 +347,33 @@ class TweetScheduler:
             self.update_status(scheduled_tweet_id, 'failed', error=error_msg)
             return False
 
-    def _post_to_twitter(self, user_id: int, content: str, media_paths: List[str]) -> str:
+    def _post_to_twitter(self, credentials: Dict[str, str], content: str,
+                        media_paths: Optional[List[str]] = None) -> str:
         """
-        Post tweet to Twitter using user's credentials.
+        Post tweet to Twitter using provided credentials.
 
         Args:
-            user_id: User ID
-            content: Tweet content
-            media_paths: List of media file paths
+            credentials: Dictionary with Twitter API credentials (api_key, api_secret,
+                        access_token, access_secret)
+            content: Tweet content (max 280 characters)
+            media_paths: Optional list of media file paths to attach
 
         Returns:
             Tweet ID from Twitter
 
         Raises:
+            ValueError: If credentials are invalid or content too long
             Exception: If posting fails
         """
-        # PLANNED FEATURE: Direct Twitter posting from scheduled tweets
-        # This feature is planned but not yet implemented. Implementation will require:
-        # 1. Get user's Twitter credentials from credential_manager
-        # 2. Initialize Twitter API client with user-specific authentication
-        # 3. Upload media if present (handle rate limits and file size constraints)
-        # 4. Post tweet with proper error handling and retry logic
-        # 5. Return tweet ID and update scheduled tweet status
-        #
-        # Current workaround: Users can schedule tweets in the database and manually
-        # post them, or use the bidirectional sync feature to sync from one platform
-        # to another instead of direct posting.
+        from app.integrations.twitter_api_handler import post_tweet_with_credentials
 
-        raise NotImplementedError(
-            "Direct Twitter posting from scheduler not yet implemented. "
-            "Use bidirectional sync or manual posting as alternatives."
-        )
+        try:
+            # Post tweet using Twitter API
+            tweet_id = post_tweet_with_credentials(credentials, content, media_paths)
+            return tweet_id
+
+        except Exception as e:
+            raise Exception(f"Failed to post tweet to Twitter: {str(e)}") from e
 
     def update_status(self, scheduled_tweet_id: int, status: str,
                      tweet_id: str = None, error: str = None) -> bool:
