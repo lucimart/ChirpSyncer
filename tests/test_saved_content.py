@@ -646,8 +646,6 @@ def test_save_tweet_database_error(manager, user1_id, monkeypatch):
     from unittest.mock import Mock, patch
 
     # Mock _get_connection to raise a database error
-    original_get_connection = manager._get_connection
-
     def mock_get_connection():
         conn = Mock()
         cursor = Mock()
@@ -668,8 +666,6 @@ def test_save_tweet_database_error(manager, user1_id, monkeypatch):
 def test_unsave_tweet_database_error(manager, user1_id, monkeypatch):
     """Test unsave_tweet handles generic database errors gracefully"""
     from unittest.mock import Mock
-
-    original_get_connection = manager._get_connection
 
     def mock_get_connection():
         conn = Mock()

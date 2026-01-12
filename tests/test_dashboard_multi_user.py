@@ -12,7 +12,6 @@ Minimum 15 tests covering:
 import pytest
 import json
 import os
-from flask import Flask
 from app.auth.user_manager import UserManager
 from app.auth.credential_manager import CredentialManager
 
@@ -142,7 +141,7 @@ def test_register_get(client):
 # Test 6: POST /register creates new user
 def test_register_post_success(client, user_manager):
     """Test POST /register creates new user"""
-    response = client.post('/register', data={
+    client.post('/register', data={
         'username': 'newuser',
         'email': 'new@example.com',
         'password': 'NewPass123!@#',
@@ -222,7 +221,7 @@ def test_user_edit_self(client, regular_user, user_manager):
     with client.session_transaction() as sess:
         sess['user_id'] = regular_user.id
 
-    response = client.post(f'/users/{regular_user.id}/edit', data={
+    client.post(f'/users/{regular_user.id}/edit', data={
         'email': 'newemail@example.com'
     }, follow_redirects=True)
 
@@ -247,7 +246,7 @@ def test_user_delete_admin(client, admin_user, regular_user, user_manager):
     with client.session_transaction() as sess:
         sess['user_id'] = admin_user.id
 
-    response = client.post(f'/users/{regular_user.id}/delete', follow_redirects=True)
+    client.post(f'/users/{regular_user.id}/delete', follow_redirects=True)
 
     # Check user was deleted
     deleted_user = user_manager.get_user_by_id(regular_user.id)
@@ -290,7 +289,7 @@ def test_credentials_add(client, regular_user, credential_manager):
     with client.session_transaction() as sess:
         sess['user_id'] = regular_user.id
 
-    response = client.post('/credentials/add', data={
+    client.post('/credentials/add', data={
         'platform': 'bluesky',
         'credential_type': 'api',
         'username': 'user.bsky.social',
@@ -319,7 +318,7 @@ def test_credentials_edit(client, regular_user, credential_manager):
     with client.session_transaction() as sess:
         sess['user_id'] = regular_user.id
 
-    response = client.post(f'/credentials/{cred_id}/edit', data={
+    client.post(f'/credentials/{cred_id}/edit', data={
         'username': 'newuser',
         'password': 'newpass'
     }, follow_redirects=True)
@@ -345,7 +344,7 @@ def test_credentials_delete(client, regular_user, credential_manager):
     with client.session_transaction() as sess:
         sess['user_id'] = regular_user.id
 
-    response = client.post(f'/credentials/{cred_id}/delete', follow_redirects=True)
+    client.post(f'/credentials/{cred_id}/delete', follow_redirects=True)
 
     # Check credentials were deleted
     deleted_creds = credential_manager.get_credentials(regular_user.id, 'twitter', 'scraping')
@@ -391,7 +390,7 @@ def test_credentials_share(client, admin_user, regular_user, credential_manager)
     with client.session_transaction() as sess:
         sess['user_id'] = admin_user.id
 
-    response = client.post('/credentials/share', data={
+    client.post('/credentials/share', data={
         'credential_id': cred_id,
         'user_ids': str(regular_user.id)
     }, follow_redirects=True)

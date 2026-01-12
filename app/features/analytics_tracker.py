@@ -8,8 +8,7 @@ Provides comprehensive analytics including top tweets, engagement rates, and per
 import sqlite3
 import time
 from typing import Optional, List, Dict
-from datetime import datetime, timedelta
-import json
+from datetime import datetime
 
 
 class AnalyticsTracker:

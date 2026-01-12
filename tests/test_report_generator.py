@@ -682,9 +682,9 @@ class TestEmailDelivery:
             assert 'email_id' in result
             mock_instance.send_email.assert_called_once()
 
-            # Verify the call was made with is_html=True
+            # Verify the call was made with html=True
             call_args = mock_instance.send_email.call_args
-            assert call_args[1]['is_html'] is True
+            assert call_args[1]['html'] is True
 
     def test_email_report_csv_format(self, report_gen):
         """Test email_report with CSV format (non-HTML)"""
@@ -704,7 +704,7 @@ class TestEmailDelivery:
 
             assert result['success'] is True
             call_args = mock_instance.send_email.call_args
-            assert call_args[1]['is_html'] is False
+            assert call_args[1]['html'] is False
 
     def test_email_report_exception_handling(self, report_gen):
         """Test email_report exception handling when NotificationService fails"""

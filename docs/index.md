@@ -302,6 +302,8 @@ ChirpSyncer is built with production-ready technologies:
 
 ## 📖 Documentation
 
+> **📚 [Complete Documentation Index](https://github.com/lucimart/ChirpSyncer/blob/main/docs/README.md)** - Browse all documentation organized by topic
+
 ### Getting Started
 - [Installation Guide](https://github.com/lucimart/ChirpSyncer#installation)
 - [Quick Start Tutorial](https://github.com/lucimart/ChirpSyncer#quick-start)
@@ -313,10 +315,15 @@ ChirpSyncer is built with production-ready technologies:
 - [Admin Setup Guide](https://github.com/lucimart/ChirpSyncer/blob/main/docs/ADMIN_SETUP_GUIDE.md)
 - [Monitoring Guide](https://github.com/lucimart/ChirpSyncer/blob/main/docs/MONITORING_GUIDE.md)
 
-### Architecture
+### Technical Reference
+- [API Documentation](https://github.com/lucimart/ChirpSyncer/blob/main/docs/API.md)
+- [Database Schema](https://github.com/lucimart/ChirpSyncer/blob/main/docs/DATABASE.md)
+
+### Architecture & Development
 - [System Architecture](https://github.com/lucimart/ChirpSyncer/blob/main/docs/architecture/ARCHITECTURE.md)
 - [Architecture Decisions](https://github.com/lucimart/ChirpSyncer/blob/main/docs/architecture/decisions/SPRINT7_ARCHITECTURE_DECISIONS.md)
 - [Sprint Documentation](https://github.com/lucimart/ChirpSyncer/tree/main/docs/sprints)
+- [Testing Guide](https://github.com/lucimart/ChirpSyncer/blob/main/docs/testing/RUNNING_E2E_TESTS.md)
 
 ---
 

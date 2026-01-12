@@ -91,13 +91,13 @@ async def download_media(url: str, media_type: str) -> bytes:
         raise
 
 
-async def upload_media_to_bluesky(media_data: bytes, mime_type: str, alt_text: str = '') -> dict:
+async def upload_media_to_bluesky(media_data: bytes, mime_type: str, _alt_text: str = '') -> dict:
     """Upload media to Bluesky and return blob reference.
 
     Args:
         media_data: Binary media data
         mime_type: MIME type (e.g., 'image/jpeg', 'video/mp4')
-        alt_text: Alternative text description for accessibility (optional)
+        _alt_text: Alternative text description for accessibility (optional, reserved for future use)
 
     Returns:
         dict: Blob reference with metadata from Bluesky
