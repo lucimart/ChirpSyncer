@@ -6,6 +6,10 @@ env:
   TWITTER_PASSWORD: "mock-twitter-password"
   TWITTER_EMAIL: "mock@example.com"
   TWITTER_EMAIL_PASSWORD: "mock-email-password"
+  TWITTER_API_KEY: "mock-twitter-api-key"
+  TWITTER_API_SECRET: "mock-twitter-api-secret"
+  TWITTER_ACCESS_TOKEN: "mock-twitter-access-token"
+  TWITTER_ACCESS_SECRET: "mock-twitter-access-secret"
   BSKY_USERNAME: "mock-bsky-username"
   BSKY_PASSWORD: "mock-bsky-password"
   # Multi-user mode disabled for basic tests
@@ -22,6 +26,7 @@ on:
       - main
 
 jobs:
+  # Comprehensive test suite combining unit, integration, and e2e tests
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -48,17 +53,48 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
-        pip install pytest pytest-cov pytest-asyncio
+
+    - name: Install Playwright browsers
+      run: |
+        python -m playwright install chromium firefox --with-deps
 
     - name: Clean up test databases
       run: |
         rm -f data.db test.db chirpsyncer.db *.db
 
-    - name: Run tests with coverage
+    - name: Run all tests with coverage (unit + integration + e2e)
       run: |
-        pytest -v --cov=app --cov-report=xml --cov-report=term-missing tests/
+        pytest -v \
+          --cov=app \
+          --cov-report=xml \
+          --cov-report=html \
+          --cov-report=term-missing \
+          tests/
+      env:
+        PYTHONPATH: ${{ github.workspace }}
 
-    - name: Upload coverage reports
+    - name: Generate coverage badge
+      run: |
+        python -c "
+        import xml.etree.ElementTree as ET
+        tree = ET.parse('coverage.xml')
+        root = tree.getroot()
+        coverage = float(root.attrib['line-rate']) * 100
+        print(f'Coverage: {coverage:.1f}%')
+        " | tee coverage-summary.txt
+
+    - name: Upload coverage artifact
+      uses: actions/upload-artifact@v4
+      if: matrix.python-version == '3.11'
+      with:
+        name: coverage-reports
+        path: |
+          coverage.xml
+          htmlcov/
+          coverage-summary.txt
+        retention-days: 7
+
+    - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4
       if: matrix.python-version == '3.11'
       with:
@@ -70,6 +106,10 @@ jobs:
       run: |
         echo "## Test Results" >> $GITHUB_STEP_SUMMARY
         echo "Python Version: ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Test Coverage" >> $GITHUB_STEP_SUMMARY
+        cat coverage-summary.txt >> $GITHUB_STEP_SUMMARY || true
+        echo "" >> $GITHUB_STEP_SUMMARY
         pytest tests/ --tb=no -q >> $GITHUB_STEP_SUMMARY || true
 
   lint:

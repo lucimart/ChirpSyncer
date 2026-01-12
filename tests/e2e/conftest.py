@@ -25,7 +25,7 @@ from typing import Generator, Tuple
 import hashlib
 
 # Add app to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../"))
 
 from app.web.dashboard import create_app
 from app.auth.user_manager import UserManager
@@ -36,63 +36,63 @@ from app.auth.credential_manager import CredentialManager
 # TEST CONSTANTS
 # ============================================================================
 
-TEST_SECRET_KEY = 'test-secret-key-for-e2e-tests'
-TEST_MASTER_KEY = hashlib.sha256('test-master-key'.encode()).digest()
+TEST_SECRET_KEY = "test-secret-key-for-e2e-tests"
+TEST_MASTER_KEY = hashlib.sha256("test-master-key".encode()).digest()
 
 # Test user credentials (passwords meet security requirements)
-TEST_USER_PASSWORD = 'TestPassword123!@#'
-TEST_ADMIN_PASSWORD = 'AdminPassword456!@#'
+TEST_USER_PASSWORD = "TestPassword123!@#"
+TEST_ADMIN_PASSWORD = "AdminPassword456!@#"
 
 # Test user data
 TEST_USERS = {
-    'regular': {
-        'username': 'testuser',
-        'email': 'testuser@example.com',
-        'password': TEST_USER_PASSWORD,
-        'is_admin': False,
+    "regular": {
+        "username": "testuser",
+        "email": "testuser@example.com",
+        "password": TEST_USER_PASSWORD,
+        "is_admin": False,
     },
-    'admin': {
-        'username': 'adminuser',
-        'email': 'admin@example.com',
-        'password': TEST_ADMIN_PASSWORD,
-        'is_admin': True,
+    "admin": {
+        "username": "adminuser",
+        "email": "admin@example.com",
+        "password": TEST_ADMIN_PASSWORD,
+        "is_admin": True,
     },
-    'secondary': {
-        'username': 'secondaryuser',
-        'email': 'secondary@example.com',
-        'password': TEST_USER_PASSWORD,
-        'is_admin': False,
+    "secondary": {
+        "username": "secondaryuser",
+        "email": "secondary@example.com",
+        "password": TEST_USER_PASSWORD,
+        "is_admin": False,
     },
 }
 
 # Test credentials for platforms
 TEST_CREDENTIALS = {
-    'twitter_scraping': {
-        'platform': 'twitter',
-        'credential_type': 'scraping',
-        'data': {
-            'username': 'test_twitter_user',
-            'password': 'TestTwitterPassword123!',
-            'email': 'twitter@example.com',
-            'email_password': 'TestEmailPassword123!',
+    "twitter_scraping": {
+        "platform": "twitter",
+        "credential_type": "scraping",
+        "data": {
+            "username": "test_twitter_user",
+            "password": "TestTwitterPassword123!",
+            "email": "twitter@example.com",
+            "email_password": "TestEmailPassword123!",
         },
     },
-    'twitter_api': {
-        'platform': 'twitter',
-        'credential_type': 'api',
-        'data': {
-            'api_key': 'test_api_key_12345678',
-            'api_secret': 'test_api_secret_abcdefgh',
-            'access_token': 'test_access_token_ijklmnop',
-            'access_secret': 'test_access_secret_qrstuvwx',
+    "twitter_api": {
+        "platform": "twitter",
+        "credential_type": "api",
+        "data": {
+            "api_key": "test_api_key_12345678",
+            "api_secret": "test_api_secret_abcdefgh",
+            "access_token": "test_access_token_ijklmnop",
+            "access_secret": "test_access_secret_qrstuvwx",
         },
     },
-    'bluesky_api': {
-        'platform': 'bluesky',
-        'credential_type': 'api',
-        'data': {
-            'username': 'test.bsky.social',
-            'password': 'TestBlueskyPassword123!',
+    "bluesky_api": {
+        "platform": "bluesky",
+        "credential_type": "api",
+        "data": {
+            "username": "test.bsky.social",
+            "password": "TestBlueskyPassword123!",
         },
     },
 }
@@ -100,22 +100,22 @@ TEST_CREDENTIALS = {
 # Test posts/content data
 TEST_POSTS = [
     {
-        'id': 'post_001',
-        'content': 'Test post from Twitter #testing',
-        'source': 'twitter',
-        'created_at': 1704067200,
+        "id": "post_001",
+        "content": "Test post from Twitter #testing",
+        "source": "twitter",
+        "created_at": 1704067200,
     },
     {
-        'id': 'post_002',
-        'content': 'Another test post #e2e',
-        'source': 'twitter',
-        'created_at': 1704153600,
+        "id": "post_002",
+        "content": "Another test post #e2e",
+        "source": "twitter",
+        "created_at": 1704153600,
     },
     {
-        'id': 'post_003',
-        'content': 'Test post from Bluesky',
-        'source': 'bluesky',
-        'created_at': 1704240000,
+        "id": "post_003",
+        "content": "Test post from Bluesky",
+        "source": "bluesky",
+        "created_at": 1704240000,
     },
 ]
 
@@ -125,7 +125,7 @@ TEST_POSTS = [
 # ============================================================================
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def temp_db_path() -> Generator[str, None, None]:
     """
     Create temporary database file for testing.
@@ -140,7 +140,7 @@ def temp_db_path() -> Generator[str, None, None]:
             assert os.path.exists(temp_db_path)
     """
     # Create temporary file
-    fd, db_path = tempfile.mkstemp(suffix='.db', prefix='test_e2e_')
+    fd, db_path = tempfile.mkstemp(suffix=".db", prefix="test_e2e_")
     os.close(fd)
 
     yield db_path
@@ -153,7 +153,7 @@ def temp_db_path() -> Generator[str, None, None]:
             pass
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def e2e_app(temp_db_path) -> Generator:
     """
     Create Flask application with test configuration.
@@ -177,18 +177,18 @@ def e2e_app(temp_db_path) -> Generator:
     app = create_app(db_path=temp_db_path, master_key=TEST_MASTER_KEY)
 
     # Override configuration for testing
-    app.config['TESTING'] = True
-    app.config['SECRET_KEY'] = TEST_SECRET_KEY
-    app.config['SESSION_TYPE'] = 'filesystem'
-    app.config['PROPAGATE_EXCEPTIONS'] = True
+    app.config["TESTING"] = True
+    app.config["SECRET_KEY"] = TEST_SECRET_KEY
+    app.config["SESSION_TYPE"] = "filesystem"
+    app.config["PROPAGATE_EXCEPTIONS"] = True
 
     # Disable CSRF for testing
-    app.config['WTF_CSRF_ENABLED'] = False
+    app.config["WTF_CSRF_ENABLED"] = False
 
     yield app
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def client(e2e_app):
     """
     Create Flask test client for HTTP requests.
@@ -211,7 +211,7 @@ def client(e2e_app):
     yield e2e_app.test_client()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def test_data(e2e_app) -> dict:
     """
     Seed database with test users, credentials, and posts.
@@ -239,13 +239,13 @@ def test_data(e2e_app) -> dict:
             assert user.username == 'testuser'
     """
     data = {
-        'users': {},
-        'credentials': {},
-        'posts': [],
+        "users": {},
+        "credentials": {},
+        "posts": [],
     }
 
-    db_path = e2e_app.config['DB_PATH']
-    master_key = e2e_app.config['MASTER_KEY']
+    db_path = e2e_app.config["DB_PATH"]
+    master_key = e2e_app.config["MASTER_KEY"]
 
     # Initialize managers
     user_manager = UserManager(db_path=db_path)
@@ -255,34 +255,34 @@ def test_data(e2e_app) -> dict:
     for role, user_info in TEST_USERS.items():
         try:
             user_id = user_manager.create_user(
-                username=user_info['username'],
-                email=user_info['email'],
-                password=user_info['password'],
-                is_admin=user_info['is_admin'],
+                username=user_info["username"],
+                email=user_info["email"],
+                password=user_info["password"],
+                is_admin=user_info["is_admin"],
             )
 
             # Retrieve created user
             user = user_manager.get_user_by_id(user_id)
-            data['users'][role] = user
+            data["users"][role] = user
 
         except ValueError as e:
             pytest.fail(f"Failed to create test user {role}: {e}")
 
     # Create test credentials for each user
-    regular_user_id = data['users']['regular'].id
-    admin_user_id = data['users']['admin'].id
+    regular_user_id = data["users"]["regular"].id
+    admin_user_id = data["users"]["admin"].id
 
     # Add Twitter scraping credentials to regular user
     try:
         cred_manager.save_credentials(
             user_id=regular_user_id,
-            platform=TEST_CREDENTIALS['twitter_scraping']['platform'],
-            credential_type=TEST_CREDENTIALS['twitter_scraping']['credential_type'],
-            data=TEST_CREDENTIALS['twitter_scraping']['data'],
+            platform=TEST_CREDENTIALS["twitter_scraping"]["platform"],
+            credential_type=TEST_CREDENTIALS["twitter_scraping"]["credential_type"],
+            data=TEST_CREDENTIALS["twitter_scraping"]["data"],
         )
-        data['credentials']['twitter_scraping_regular'] = {
-            'user_id': regular_user_id,
-            **TEST_CREDENTIALS['twitter_scraping'],
+        data["credentials"]["twitter_scraping_regular"] = {
+            "user_id": regular_user_id,
+            **TEST_CREDENTIALS["twitter_scraping"],
         }
     except Exception as e:
         pytest.fail(f"Failed to save Twitter scraping credentials: {e}")
@@ -291,40 +291,43 @@ def test_data(e2e_app) -> dict:
     try:
         cred_manager.save_credentials(
             user_id=admin_user_id,
-            platform=TEST_CREDENTIALS['twitter_api']['platform'],
-            credential_type=TEST_CREDENTIALS['twitter_api']['credential_type'],
-            data=TEST_CREDENTIALS['twitter_api']['data'],
+            platform=TEST_CREDENTIALS["twitter_api"]["platform"],
+            credential_type=TEST_CREDENTIALS["twitter_api"]["credential_type"],
+            data=TEST_CREDENTIALS["twitter_api"]["data"],
         )
-        data['credentials']['twitter_api_admin'] = {
-            'user_id': admin_user_id,
-            **TEST_CREDENTIALS['twitter_api'],
+        data["credentials"]["twitter_api_admin"] = {
+            "user_id": admin_user_id,
+            **TEST_CREDENTIALS["twitter_api"],
         }
     except Exception as e:
         pytest.fail(f"Failed to save Twitter API credentials: {e}")
 
     # Add Bluesky credentials to both users
-    for user_role, user_id_key in [('regular', regular_user_id), ('admin', admin_user_id)]:
+    for user_role, user_id_key in [
+        ("regular", regular_user_id),
+        ("admin", admin_user_id),
+    ]:
         try:
             cred_manager.save_credentials(
                 user_id=user_id_key,
-                platform=TEST_CREDENTIALS['bluesky_api']['platform'],
-                credential_type=TEST_CREDENTIALS['bluesky_api']['credential_type'],
-                data=TEST_CREDENTIALS['bluesky_api']['data'],
+                platform=TEST_CREDENTIALS["bluesky_api"]["platform"],
+                credential_type=TEST_CREDENTIALS["bluesky_api"]["credential_type"],
+                data=TEST_CREDENTIALS["bluesky_api"]["data"],
             )
-            data['credentials'][f'bluesky_{user_role}'] = {
-                'user_id': user_id_key,
-                **TEST_CREDENTIALS['bluesky_api'],
+            data["credentials"][f"bluesky_{user_role}"] = {
+                "user_id": user_id_key,
+                **TEST_CREDENTIALS["bluesky_api"],
             }
         except Exception as e:
             pytest.fail(f"Failed to save Bluesky credentials for {user_role}: {e}")
 
     # Store test posts
-    data['posts'] = TEST_POSTS.copy()
+    data["posts"] = TEST_POSTS.copy()
 
     return data
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def authenticated_client(client, test_data) -> Tuple:
     """
     Create pre-authenticated test client for regular user.
@@ -347,18 +350,18 @@ def authenticated_client(client, test_data) -> Tuple:
             response = client.get('/dashboard')
             assert response.status_code == 200
     """
-    user = test_data['users']['regular']
+    user = test_data["users"]["regular"]
 
     # Create a session for the authenticated user
     with client.session_transaction() as sess:
-        sess['user_id'] = user.id
-        sess['username'] = user.username
-        sess['is_admin'] = user.is_admin
+        sess["user_id"] = user.id
+        sess["username"] = user.username
+        sess["is_admin"] = user.is_admin
 
     yield client, user
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def admin_client(client, test_data) -> Tuple:
     """
     Create pre-authenticated test client for admin user.
@@ -383,13 +386,13 @@ def admin_client(client, test_data) -> Tuple:
             assert response.status_code == 200
             assert admin_user.is_admin is True
     """
-    user = test_data['users']['admin']
+    user = test_data["users"]["admin"]
 
     # Create a session for the admin user
     with client.session_transaction() as sess:
-        sess['user_id'] = user.id
-        sess['username'] = user.username
-        sess['is_admin'] = user.is_admin
+        sess["user_id"] = user.id
+        sess["username"] = user.username
+        sess["is_admin"] = user.is_admin
 
     yield client, user
 
@@ -399,7 +402,7 @@ def admin_client(client, test_data) -> Tuple:
 # ============================================================================
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def db_manager(e2e_app) -> UserManager:
     """
     Provide UserManager instance for direct database access in tests.
@@ -418,10 +421,10 @@ def db_manager(e2e_app) -> UserManager:
             users = db_manager.list_users()
             assert len(users) == len(TEST_USERS)
     """
-    return UserManager(db_path=e2e_app.config['DB_PATH'])
+    return UserManager(db_path=e2e_app.config["DB_PATH"])
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def credential_manager(e2e_app) -> CredentialManager:
     """
     Provide CredentialManager instance for credential operations in tests.
@@ -445,12 +448,12 @@ def credential_manager(e2e_app) -> CredentialManager:
             assert creds['username'] == 'test_twitter_user'
     """
     return CredentialManager(
-        master_key=e2e_app.config['MASTER_KEY'],
-        db_path=e2e_app.config['DB_PATH'],
+        master_key=e2e_app.config["MASTER_KEY"],
+        db_path=e2e_app.config["DB_PATH"],
     )
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def db_connection(e2e_app) -> Generator[sqlite3.Connection, None, None]:
     """
     Provide direct SQLite database connection for raw SQL queries in tests.
@@ -471,7 +474,7 @@ def db_connection(e2e_app) -> Generator[sqlite3.Connection, None, None]:
             schema = cursor.fetchone()
             assert 'username' in schema[0]
     """
-    conn = sqlite3.connect(e2e_app.config['DB_PATH'])
+    conn = sqlite3.connect(e2e_app.config["DB_PATH"])
     conn.row_factory = sqlite3.Row
 
     yield conn
@@ -498,11 +501,13 @@ def pytest_configure(config):
     Args:
         config: Pytest config object
     """
-    config.addinivalue_line('markers', 'e2e: End-to-end tests')
-    config.addinivalue_line('markers', 'authentication: Authentication flow tests')
-    config.addinivalue_line('markers', 'authorization: Authorization and permission tests')
-    config.addinivalue_line('markers', 'credentials: Credential management tests')
-    config.addinivalue_line('markers', 'integration: Integration tests')
+    config.addinivalue_line("markers", "e2e: End-to-end tests")
+    config.addinivalue_line("markers", "authentication: Authentication flow tests")
+    config.addinivalue_line(
+        "markers", "authorization: Authorization and permission tests"
+    )
+    config.addinivalue_line("markers", "credentials: Credential management tests")
+    config.addinivalue_line("markers", "integration: Integration tests")
 
 
 @pytest.fixture(autouse=True)
@@ -535,7 +540,7 @@ def pytest_runtest_logreport(report):
     Args:
         report: Pytest report object
     """
-    if report.when == 'call':
-        if hasattr(report, 'markers') and 'e2e' in [m.name for m in report.markers]:
+    if report.when == "call":
+        if hasattr(report, "markers") and "e2e" in [m.name for m in report.markers]:
             # Could add custom logging here
             pass
