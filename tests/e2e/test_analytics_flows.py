@@ -335,9 +335,6 @@ class TestAnalyticsSnapshot:
     Test analytics snapshot functionality.
     """
 
-    @pytest.mark.skip(
-        reason="Snapshots API endpoint /api/analytics/snapshots not yet implemented"
-    )
     def test_create_analytics_snapshot(self, client, user_manager):
         """
         Test: Analytics snapshots can be created and retrieved.
@@ -411,10 +408,9 @@ class TestAnalyticsCSVExport:
     Test CSV export functionality.
     """
 
-    @pytest.mark.skip(
-        reason="CSV export API endpoint /api/analytics/export not yet implemented"
-    )
-    def test_csv_export_contains_correct_data(self, client, user_manager):
+    def test_csv_export_contains_correct_data(
+        self, client, user_manager, analytics_tracker
+    ):
         """
         Test: CSV export contains all expected fields and data.
 
@@ -481,10 +477,7 @@ class TestAnalyticsCSVExport:
             if tid
         )
 
-    @pytest.mark.skip(
-        reason="CSV export API endpoint /api/analytics/export not yet implemented"
-    )
-    def test_csv_export_with_date_range(self, client, user_manager):
+    def test_csv_export_with_date_range(self, client, user_manager, analytics_tracker):
         """
         Test: CSV export can be filtered by date range.
 
