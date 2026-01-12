@@ -68,6 +68,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Build
+- remove claude/** from push trigger to avoid duplicate runs
+
+- Feature branches only trigger on PR now
+- Push trigger only for main branch
+- Cuts CI runs by 50% for feature branches with open PRs
 - remove Python 3.10 from test matrix
 
 - Testing only on Python 3.11 (newer version)
