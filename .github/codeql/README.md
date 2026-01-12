@@ -2,47 +2,33 @@
 
 This directory contains CodeQL configuration and documentation for security analysis.
 
-## Accepted Security Warnings
-
-The following CodeQL warnings are **intentional** and **safe** in our codebase:
+## Resolved Security Issues
 
 ### 1. Clear-text storage of sensitive information (py/clear-text-storage-sensitive-data)
 
-**Locations:**
-- `app/main.py:313` - Initial admin password generation
-- `scripts/migrate_to_multi_user.py:75` - Migration script password generation
+**Status:** ✅ **RESOLVED** (as of commit a41a0f5)
 
-**Why this is safe:**
+**Previous Issue:**
+The application previously wrote generated admin passwords to a temporary file (`.admin_password_GENERATED.txt`) with 0600 permissions, which triggered CodeQL warnings about clear-text password storage.
 
-These warnings appear when the application generates a random admin password during:
-1. Initial application setup (no admin exists)
-2. Database migration to multi-user mode
+**Solution Implemented:**
+Changed password delivery method to display passwords directly in terminal/console output instead of writing to files.
 
-**Security measures in place:**
-- ✅ **0600 file permissions** - Only file owner can read/write
-- ✅ **Temporary file** - Users receive explicit instructions to delete it
-- ✅ **Strong random password** - Generated using `secrets` module with 16 characters
-- ✅ **No logging** - Password never appears in logs or console
-- ✅ **Better than alternatives** - More secure than console logging or database initialization
+**Current Approach:**
+- Passwords are displayed in terminal with clear visual warnings
+- No file storage = no clear-text storage on disk
+- User must copy password immediately from terminal
+- More secure: password never touches filesystem
 
-**Why encryption is not practical:**
-- No secure key storage exists during initial setup
-- Encrypting would require either:
-  - Hardcoding an encryption key (worse than current approach)
-  - Asking user for encryption key (defeats the purpose of auto-generation)
-  - Using environment-based key (not available at setup time)
+**Benefits:**
+- ✅ **Eliminates CodeQL warnings** - No clear-text file storage
+- ✅ **More secure** - Password never written to disk
+- ✅ **Simpler** - No temporary files to clean up
+- ✅ **Better UX** - Immediate visibility, no file management
 
-**Risk assessment:**
-- **Risk Level:** Very Low
-- **Attack Vector:** Requires filesystem access to read the file
-- **Mitigation:** File has restrictive permissions and exists only temporarily
-- **Impact:** If attacker has filesystem access, they likely have greater access already
-
-**Alternative approaches considered:**
-1. ❌ Log to console - Less secure, appears in system logs
-2. ❌ Send via email - Requires email configuration during setup
-3. ❌ Database storage only - User has no way to retrieve initial password
-4. ✅ **Current approach** - Most practical and secure for setup scenario
+**Locations Changed:**
+- `app/main.py:302-319` - Initial admin password generation
+- `scripts/migrate_to_multi_user.py:68-79` - Migration script password generation
 
 ## CodeQL Configuration
 
