@@ -84,9 +84,7 @@
                     <h3 class="text-sm font-semibold text-gray-600 mb-2">Last Run</h3>
                     {% if task.last_run %}
                         <p class="text-lg text-gray-700">
-                            <script>
-                                document.write(new Date({{ task.last_run * 1000 }}).toLocaleString());
-                            </script>
+                            <span class="timestamp-display" data-timestamp="{{ task.last_run }}"></span>
                         </p>
                     {% else %}
                         <p class="text-lg text-gray-400">Never</p>
@@ -96,9 +94,7 @@
                     <h3 class="text-sm font-semibold text-gray-600 mb-2">Next Run</h3>
                     {% if task.next_run and task.enabled %}
                         <p class="text-lg text-gray-700">
-                            <script>
-                                document.write(new Date({{ task.next_run * 1000 }}).toLocaleString());
-                            </script>
+                            <span class="timestamp-display" data-timestamp="{{ task.next_run }}"></span>
                         </p>
                     {% else %}
                         <p class="text-lg text-gray-400">Not scheduled</p>
@@ -178,11 +174,7 @@
                         <tr class="border-b hover:bg-gray-50">
                             <td class="py-3 px-2 text-sm text-gray-600">#{{ execution.id }}</td>
                             <td class="py-3 px-2">
-                                <span class="text-sm text-gray-700">
-                                    <script>
-                                        document.write(new Date({{ execution.started_at * 1000 }}).toLocaleString());
-                                    </script>
-                                </span>
+                                <span class="text-sm text-gray-700 timestamp-display" data-timestamp="{{ execution.started_at }}"></span>
                             </td>
                             <td class="py-3 px-2">
                                 {% if execution.duration_ms %}
@@ -278,6 +270,16 @@
     </div>
 
     <script>
+        // Format all timestamps on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.timestamp-display').forEach(function(element) {
+                const timestamp = parseInt(element.getAttribute('data-timestamp'));
+                if (timestamp && !isNaN(timestamp)) {
+                    element.textContent = new Date(timestamp * 1000).toLocaleString();
+                }
+            });
+        });
+
         function showConfigureModal() {
             document.getElementById('configureModal').classList.remove('hidden');
         }

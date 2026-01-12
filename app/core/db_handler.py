@@ -72,10 +72,6 @@ def migrate_database(db_path=None):
     conn = sqlite3.connect(resolved_path)
     cursor = conn.cursor()
 
-    # Check if old table exists
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='seen_tweets'")
-    old_table_exists = cursor.fetchone() is not None
-
     # Create new synced_posts table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS synced_posts (

@@ -27,7 +27,6 @@ import sqlite3
 import time
 import json
 import tempfile
-import hashlib
 import asyncio
 from unittest.mock import MagicMock, patch, AsyncMock, call, Mock
 from typing import Dict, Optional, Tuple

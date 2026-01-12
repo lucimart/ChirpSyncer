@@ -13,7 +13,7 @@ Key features:
 
 import asyncio
 from typing import List
-from twscrape import API, gather
+from twscrape import API
 from db_handler import is_tweet_seen, mark_tweet_as_seen
 from config import TWITTER_USERNAME
 from app.core.logger import setup_logger
@@ -218,9 +218,6 @@ async def fetch_thread(tweet_id: str, username: str) -> list:
 
         # Now follow forward to get any replies after the initial tweet
         # Search for replies to the root tweet
-        root_id = thread_tweets[0].id
-        last_id = thread_tweets[-1].id
-
         # Fetch potential replies using search
         query = f"from:{username} to:{username}"
         reply_count = 0

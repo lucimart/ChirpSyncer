@@ -14,8 +14,7 @@ Minimum 10 tests covering:
 import pytest
 import json
 import os
-from unittest.mock import Mock, patch, MagicMock
-from flask import Flask
+from unittest.mock import Mock
 
 
 @pytest.fixture
@@ -290,9 +289,6 @@ def test_task_configure_requires_admin(client, regular_user):
 def test_task_configure_admin_success(client, admin_user, mock_scheduler):
     """Test POST /tasks/<task_name>/configure allows admin to update schedule"""
     login_as_user(client, 'admin', 'Admin123!@#')
-
-    # Add update_task_schedule method to mock
-    mock_scheduler.update_task_schedule = Mock(return_value=True)
 
     response = client.post('/tasks/cleanup_sessions/configure',
                           data={'schedule': '0 */2 * * *'},

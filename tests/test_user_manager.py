@@ -5,15 +5,13 @@ Comprehensive tests for user management system with bcrypt authentication.
 Tests cover user creation, authentication, sessions, permissions, and rate limiting.
 """
 import pytest
-import time
 import os
 import tempfile
-from unittest.mock import patch, MagicMock
 import sys
+import time
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from app.auth.user_manager import UserManager, User
-from app.auth.security_utils import RateLimiter
 
 
 @pytest.fixture

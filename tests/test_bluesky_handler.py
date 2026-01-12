@@ -1,6 +1,5 @@
-from app.integrations.bluesky_handler import post_to_bluesky, validate_and_truncate_text
+from app.integrations.bluesky_handler import post_to_bluesky, validate_and_truncate_text, fetch_posts_from_bluesky
 from unittest.mock import patch
-import pytest
 
 
 # Tests for validate_and_truncate_text function
@@ -149,8 +148,6 @@ def test_post_to_bluesky_short_text_unchanged(mock_logger, mock_post):
 @patch("app.integrations.bluesky_handler.bsky_client")
 def test_fetch_posts_from_bluesky_success(mock_client):
     """Test successful fetch returns posts."""
-    from app.integrations.bluesky_handler import fetch_posts_from_bluesky
-
     # Mock the API response
     mock_response = type('obj', (object,), {
         'feed': [
@@ -205,8 +202,6 @@ def test_fetch_posts_from_bluesky_success(mock_client):
 @patch("app.integrations.bluesky_handler.bsky_client")
 def test_fetch_posts_from_bluesky_empty(mock_client):
     """Test handling of user with no posts."""
-    from app.integrations.bluesky_handler import fetch_posts_from_bluesky
-
     # Mock empty response
     mock_response = type('obj', (object,), {
         'feed': []
@@ -225,8 +220,6 @@ def test_fetch_posts_from_bluesky_empty(mock_client):
 @patch("app.integrations.bluesky_handler.bsky_client")
 def test_fetch_posts_from_bluesky_filters_reposts(mock_client):
     """Test that reposts and quote posts are filtered out."""
-    from app.integrations.bluesky_handler import fetch_posts_from_bluesky
-
     # Mock response with mix of original posts and reposts
     mock_response = type('obj', (object,), {
         'feed': [
@@ -289,8 +282,6 @@ def test_fetch_posts_from_bluesky_filters_reposts(mock_client):
 @patch("app.integrations.bluesky_handler.logger")
 def test_fetch_posts_from_bluesky_network_error(mock_logger, mock_client):
     """Test retry behavior on network errors."""
-    from app.integrations.bluesky_handler import fetch_posts_from_bluesky
-
     # Mock network error on first 2 calls, then success
     mock_client.app.bsky.feed.get_author_feed.side_effect = [
         Exception("Network error"),
@@ -328,8 +319,6 @@ def test_fetch_posts_from_bluesky_network_error(mock_logger, mock_client):
 @patch("app.integrations.bluesky_handler.bsky_client")
 def test_fetch_posts_from_bluesky_respects_count_limit(mock_client):
     """Test that function returns maximum 'count' posts."""
-    from app.integrations.bluesky_handler import fetch_posts_from_bluesky
-
     # Mock response with 10 posts
     feed_items = []
     for i in range(10):

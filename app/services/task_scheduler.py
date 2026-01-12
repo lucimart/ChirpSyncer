@@ -13,7 +13,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.date import DateTrigger
-from apscheduler.job import Job
 
 
 class TaskScheduler:
@@ -382,7 +381,8 @@ class TaskScheduler:
             job = self.scheduler.get_job(name)
             if job and job.next_run_time:
                 status['next_run'] = int(job.next_run_time.timestamp())
-        except:
+        except Exception:
+            # Catch all exceptions from scheduler (JobLookupError, etc.)
             status['next_run'] = None
 
         conn.close()
@@ -410,7 +410,8 @@ class TaskScheduler:
                 job = self.scheduler.get_job(task['task_name'])
                 if job and job.next_run_time:
                     task['next_run'] = int(job.next_run_time.timestamp())
-            except:
+            except Exception:
+                # Catch all exceptions from scheduler (JobLookupError, etc.)
                 task['next_run'] = None
 
         conn.close()

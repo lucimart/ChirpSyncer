@@ -31,6 +31,8 @@ backups/
 *.backup
 *_backup_*.db
 chirpsyncer_*.db
+chirpsyncer.db.backup.*
+accounts.db
 
 # System files
 .DS_Store

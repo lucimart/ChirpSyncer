@@ -18,11 +18,9 @@ Usage:
     pytest tests/integration/test_media_integration.py -m "integration" -v
 """
 
-import io
 import pytest
 import asyncio
 from unittest.mock import MagicMock, patch, AsyncMock, Mock
-from pathlib import Path
 
 # Import media handler functions
 from app.integrations.media_handler import (

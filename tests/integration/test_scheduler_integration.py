@@ -14,11 +14,11 @@ APScheduler backend and SQLite persistence.
 
 import os
 import sqlite3
+import shutil
 import tempfile
 import time
 import threading
 from datetime import datetime, timedelta
-from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 import pytest
@@ -304,10 +304,7 @@ class TestTaskExecution:
         """Test that tasks are tracked when executed."""
         scheduler = TaskScheduler(db_path=test_db_path)
 
-        execution_called = []
-
         def test_task():
-            execution_called.append(True)
             return "Task result"
 
         # Add and trigger task
@@ -691,7 +688,6 @@ class TestBackupDatabaseTask:
         finally:
             # Cleanup
             if os.path.exists(backup_dir):
-                import shutil
                 shutil.rmtree(backup_dir)
 
     def test_backup_database_returns_stats(self, test_db_path):
@@ -708,7 +704,6 @@ class TestBackupDatabaseTask:
 
         finally:
             if os.path.exists(backup_dir):
-                import shutil
                 shutil.rmtree(backup_dir)
 
     def test_backup_database_creates_unique_files(self, test_db_path):
@@ -734,7 +729,6 @@ class TestBackupDatabaseTask:
 
         finally:
             if os.path.exists(backup_dir):
-                import shutil
                 shutil.rmtree(backup_dir)
 
 
