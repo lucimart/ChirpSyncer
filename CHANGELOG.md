@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- add services and dashboard integration tests
+
+Phase 4: Services Integration (32 tests)
+- Notification service: email config, SMTP connection, batch sending (12 tests)
+- User settings: CRUD operations, multi-user isolation, type handling (9 tests)
+- Stats handler: recording, aggregation, success rates, rollup (9 tests)
+- Cross-service integration workflows (2 tests)
+- Coverage: 80.07% of services modules (241/301 statements)
+
+Phase 5: Dashboard Routes Integration (45 tests)
+- Authentication routes: login, register, logout, session management (10 tests)
+- Dashboard routes: main page, analytics rendering (4 tests)
+- User management: list, view, edit, delete with RBAC (6 tests)
+- Credential management: add, edit, delete, test validation (8 tests)
+- Task management routes: list, trigger, status (5 tests)
+- Analytics API routes: overview, top-tweets, metrics, snapshots (4 tests)
+- Error handling: 404, 403, error pages (4 tests)
+- Session persistence and workflows (4 tests)
+- Coverage: 65.49% of dashboard module (260/397 statements)
+
+Total: 77 new integration tests with real Flask/DB integration
+All tests passing with comprehensive route coverage
 - add comprehensive integration tests for auth, scheduler, cleanup, and platform modules
 
 Phase 1: Authentication Integration (32 tests)
