@@ -190,27 +190,28 @@ def get_mime_type(url: str) -> str:
     # Convert to lowercase for case-insensitive matching
     url_lower = url_without_params.lower()
 
-    # Try to guess MIME type from extension
+    # Handle known extensions with explicit MIME types first
+    # (mimetypes.guess_type can return inconsistent results across platforms)
+    extension_map = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+        '.mp4': 'video/mp4',
+        '.mov': 'video/quicktime',
+        '.avi': 'video/x-msvideo',
+    }
+
+    for ext, mime in extension_map.items():
+        if url_lower.endswith(ext):
+            return mime
+
+    # Try to guess MIME type from extension for other types
     mime_type, _ = mimetypes.guess_type(url_lower)
 
     if mime_type:
         return mime_type
-
-    # Fallback to common extensions
-    if url_lower.endswith('.jpg') or url_lower.endswith('.jpeg'):
-        return 'image/jpeg'
-    elif url_lower.endswith('.png'):
-        return 'image/png'
-    elif url_lower.endswith('.gif'):
-        return 'image/gif'
-    elif url_lower.endswith('.webp'):
-        return 'image/webp'
-    elif url_lower.endswith('.mp4'):
-        return 'video/mp4'
-    elif url_lower.endswith('.mov'):
-        return 'video/quicktime'
-    elif url_lower.endswith('.avi'):
-        return 'video/x-msvideo'
 
     # Default fallback
     logger.warning(f"Could not determine MIME type for {url}, using default")
