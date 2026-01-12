@@ -315,6 +315,24 @@ Benefits:
 - README rewritten for clarity
 
 ### Fixed
+- resolve SQL parsing error in get_top_tweets
+
+Fixed SQL syntax error where a Python comment was incorrectly placed
+inside the SQL f-string, causing SQLite to see an unrecognized '#' token.
+
+Root cause: The comment "# nosec B608" was on the same line as the
+f-string opening, making it part of the SQL query instead of a Python
+comment. SQLite uses '--' for comments, not '#'.
+
+Solution: Moved the comment to a separate line before the f-string.
+
+This fixes 12 failing tests:
+- tests/e2e/test_analytics_flows.py (2 tests)
+- tests/e2e/test_dashboard_flows.py (1 test)
+- tests/integration/test_analytics_integration.py (6 tests)
+- tests/test_analytics_tracker.py (3 tests)
+
+All analytics tests now pass (59/59).
 - prevent information exposure and fix test failures
 
 Deployed 3 specialized agents to fix security vulnerabilities and test failures:
