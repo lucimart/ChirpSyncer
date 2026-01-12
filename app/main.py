@@ -9,13 +9,13 @@ from config import POLL_INTERVAL, TWITTER_USERNAME, BSKY_USERNAME, TWITTER_API_K
 from config import TWITTER_PASSWORD, TWITTER_EMAIL, TWITTER_EMAIL_PASSWORD, BSKY_PASSWORD
 from db_handler import migrate_database, should_sync_post, save_synced_post
 from validation import validate_credentials
-from logger import setup_logger
+from app.core.logger import setup_logger
 
 # Sprint 6: Multi-user support imports
-from app.user_manager import UserManager
-from app.credential_manager import CredentialManager
-from app.user_settings import UserSettings
-from app.security_utils import log_audit
+from app.auth.user_manager import UserManager
+from app.auth.credential_manager import CredentialManager
+from app.services.user_settings import UserSettings
+from app.auth.security_utils import log_audit
 
 logger = setup_logger(__name__)
 
@@ -352,7 +352,7 @@ def sync_user_twitter_to_bluesky(user, twitter_creds: dict, bluesky_creds: dict)
 
     # Temporarily override global config with user's credentials
     # (This is a workaround until we refactor the entire codebase to be credential-aware)
-    import app.config as config_module
+    import app.core.config as config_module
     original_twitter_username = config_module.TWITTER_USERNAME
     original_bsky_username = config_module.BSKY_USERNAME
     original_bsky_password = config_module.BSKY_PASSWORD
@@ -476,7 +476,7 @@ def sync_user_bluesky_to_twitter(user, twitter_api_creds: dict, bluesky_creds: d
         return
 
     # Temporarily override global config with user's credentials
-    import app.config as config_module
+    import app.core.config as config_module
     original_bsky_username = config_module.BSKY_USERNAME
     original_twitter_api_key = config_module.TWITTER_API_KEY
 

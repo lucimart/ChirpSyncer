@@ -1,0 +1,17 @@
+#!/bin/bash
+# Pre-push checks: quick validation before pushing
+
+set -e
+
+# Disabled by default - full test suite is handled by CI
+# Running 850+ tests locally before every push is excessive
+# Uncomment to enable if needed
+
+# echo "Running pre-push checks..."
+# echo "Running quick tests..."
+# python -m pytest tests/unit/ -x --tb=short -q || {
+#     echo "ERROR: Unit tests failed"
+#     exit 1
+# }
+
+exit 0

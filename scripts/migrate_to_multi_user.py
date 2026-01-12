@@ -18,9 +18,9 @@ from pathlib import Path
 # Add app directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from app.user_manager import UserManager
-from app.credential_manager import CredentialManager
-from app.user_settings import UserSettings
+from app.auth.user_manager import UserManager
+from app.auth.credential_manager import CredentialManager
+from app.services.user_settings import UserSettings
 from dotenv import load_dotenv
 
 

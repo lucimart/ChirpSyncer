@@ -22,6 +22,15 @@ logs/
 
 # SQLite Database
 data.db
+*.db
+*.db-shm
+*.db-wal
+
+# Database backups
+backups/
+*.backup
+*_backup_*.db
+chirpsyncer_*.db
 
 # System files
 .DS_Store
@@ -43,4 +52,3 @@ htmlcov/
 *.cover
 .pytest_cache/
 flask_session/
-*.db

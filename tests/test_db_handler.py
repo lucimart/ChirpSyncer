@@ -1,7 +1,7 @@
 import sqlite3
 import os
 import tempfile
-from app.db_handler import (
+from app.core.db_handler import (
     initialize_db,
     is_tweet_seen,
     mark_tweet_as_seen,
@@ -290,7 +290,7 @@ def test_get_post_by_hash():
         )
 
         # Get content hash (we'll need utils.py for this)
-        from app.utils import compute_content_hash
+        from app.core.utils import compute_content_hash
         content_hash = compute_content_hash(content)
 
         # Query by hash

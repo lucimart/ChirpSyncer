@@ -8,8 +8,8 @@ Tests authentication decorators:
 """
 import pytest
 from flask import Flask, session
-from app.auth_decorators import require_auth, require_admin, require_self_or_admin
-from app.user_manager import UserManager
+from app.auth.auth_decorators import require_auth, require_admin, require_self_or_admin
+from app.auth.user_manager import UserManager
 
 
 @pytest.fixture

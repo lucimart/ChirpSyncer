@@ -13,8 +13,8 @@ import pytest
 import json
 import os
 from flask import Flask
-from app.user_manager import UserManager
-from app.credential_manager import CredentialManager
+from app.auth.user_manager import UserManager
+from app.auth.credential_manager import CredentialManager
 
 
 @pytest.fixture
@@ -48,7 +48,7 @@ def credential_manager(db_path, master_key):
 @pytest.fixture
 def test_app(db_path, master_key):
     """Create test Flask app with dashboard routes"""
-    from app.dashboard import create_app
+    from app.web.dashboard import create_app
     app = create_app(db_path=db_path, master_key=master_key)
     app.config['TESTING'] = True
     app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF for testing

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/lucimart/ChirpSyncer/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 📚 Documentation
+    url: https://lucimart.github.io/ChirpSyncer/
+    about: Read the comprehensive documentation
+  - name: 🔒 Security Vulnerability
+    url: https://github.com/lucimart/ChirpSyncer/security/advisories/new
+    about: Report a security vulnerability privately

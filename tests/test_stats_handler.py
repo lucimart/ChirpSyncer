@@ -2,8 +2,8 @@ import sqlite3
 import os
 import tempfile
 import time
-from app.stats_handler import StatsTracker
-from app.db_handler import add_stats_tables
+from app.services.stats_handler import StatsTracker
+from app.core.db_handler import add_stats_tables
 
 
 def test_record_successful_sync():

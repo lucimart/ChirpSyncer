@@ -14,7 +14,7 @@ from unittest.mock import Mock, patch, MagicMock
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from app.cleanup_engine import CleanupEngine
+from app.features.cleanup_engine import CleanupEngine
 
 
 @pytest.fixture
