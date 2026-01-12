@@ -27,6 +27,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - README rewritten for clarity
 
 ### Fixed
+- fix broken documentation links
+
+- Update placeholder URL in API.md to actual repository
+- Fix relative link path in SPRINT7_SUMMARY.md
+- Configure link checker to ignore pre-release links:
+  - GitHub releases/tags (will exist once created)
+  - GitHub Pages site (will exist once set up)
+  - Main branch file links (will exist after merge)
 - make documentation checks fail on errors
 
 - Removed continue-on-error from TODO/FIXME check
