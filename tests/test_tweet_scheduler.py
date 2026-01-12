@@ -12,6 +12,7 @@ Minimum 12 tests covering:
 - Error handling
 - Past time rejection
 """
+
 import os
 import sqlite3
 import tempfile
@@ -26,13 +27,14 @@ from app.features.tweet_scheduler import TweetScheduler
 @pytest.fixture
 def temp_db():
     """Create temporary database for testing"""
-    fd, db_path = tempfile.mkstemp(suffix='.db')
+    fd, db_path = tempfile.mkstemp(suffix=".db")
     os.close(fd)
 
     # Initialize database with users table (required for foreign key)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute('''
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
@@ -42,12 +44,17 @@ def temp_db():
             is_active INTEGER DEFAULT 1,
             created_at INTEGER NOT NULL
         )
-    ''')
+    """
+    )
     # Insert test users
-    cursor.execute('INSERT INTO users (username, email, password_hash, created_at) VALUES (?, ?, ?, ?)',
-                   ('user1', 'user1@test.com', 'hash1', int(time.time())))
-    cursor.execute('INSERT INTO users (username, email, password_hash, created_at) VALUES (?, ?, ?, ?)',
-                   ('user2', 'user2@test.com', 'hash2', int(time.time())))
+    cursor.execute(
+        "INSERT INTO users (username, email, password_hash, created_at) VALUES (?, ?, ?, ?)",
+        ("user1", "user1@test.com", "hash1", int(time.time())),
+    )
+    cursor.execute(
+        "INSERT INTO users (username, email, password_hash, created_at) VALUES (?, ?, ?, ?)",
+        ("user2", "user2@test.com", "hash2", int(time.time())),
+    )
     conn.commit()
     conn.close()
 
@@ -59,9 +66,15 @@ def temp_db():
 
 
 @pytest.fixture
-def scheduler(temp_db):
+def master_key():
+    """Generate a test master key for credential encryption"""
+    return os.urandom(32)
+
+
+@pytest.fixture
+def scheduler(temp_db, master_key):
     """Create TweetScheduler instance"""
-    return TweetScheduler(temp_db)
+    return TweetScheduler(temp_db, master_key=master_key)
 
 
 class TestScheduleCreation:
@@ -72,37 +85,34 @@ class TestScheduleCreation:
         scheduled_time = datetime.now() + timedelta(hours=1)
 
         tweet_id = scheduler.schedule_tweet(
-            user_id=1,
-            content="Test tweet",
-            scheduled_time=scheduled_time,
-            media=[]
+            user_id=1, content="Test tweet", scheduled_time=scheduled_time, media=[]
         )
 
         assert tweet_id > 0
 
         # Verify in database
-        tweets = scheduler.get_scheduled_tweets(1, status='pending')
+        tweets = scheduler.get_scheduled_tweets(1, status="pending")
         assert len(tweets) == 1
-        assert tweets[0]['content'] == "Test tweet"
-        assert tweets[0]['status'] == 'pending'
+        assert tweets[0]["content"] == "Test tweet"
+        assert tweets[0]["status"] == "pending"
 
     def test_schedule_tweet_with_media(self, scheduler):
         """Test scheduling tweet with media"""
         scheduled_time = datetime.now() + timedelta(hours=1)
-        media_paths = ['/path/to/image1.jpg', '/path/to/image2.jpg']
+        media_paths = ["/path/to/image1.jpg", "/path/to/image2.jpg"]
 
         tweet_id = scheduler.schedule_tweet(
             user_id=1,
             content="Tweet with images",
             scheduled_time=scheduled_time,
-            media=media_paths
+            media=media_paths,
         )
 
         assert tweet_id > 0
 
         tweets = scheduler.get_scheduled_tweets(1)
         assert len(tweets) == 1
-        assert tweets[0]['media_paths'] == media_paths
+        assert tweets[0]["media_paths"] == media_paths
 
     def test_reject_past_time(self, scheduler):
         """Test rejection of scheduling tweets in the past"""
@@ -110,10 +120,7 @@ class TestScheduleCreation:
 
         with pytest.raises(ValueError, match="cannot be in the past"):
             scheduler.schedule_tweet(
-                user_id=1,
-                content="Past tweet",
-                scheduled_time=past_time,
-                media=[]
+                user_id=1, content="Past tweet", scheduled_time=past_time, media=[]
             )
 
     def test_schedule_multiple_tweets(self, scheduler):
@@ -123,13 +130,10 @@ class TestScheduleCreation:
         for i in range(3):
             scheduled_time = base_time + timedelta(minutes=i * 10)
             scheduler.schedule_tweet(
-                user_id=1,
-                content=f"Tweet {i}",
-                scheduled_time=scheduled_time,
-                media=[]
+                user_id=1, content=f"Tweet {i}", scheduled_time=scheduled_time, media=[]
             )
 
-        tweets = scheduler.get_scheduled_tweets(1, status='pending')
+        tweets = scheduler.get_scheduled_tweets(1, status="pending")
         assert len(tweets) == 3
 
 
@@ -152,8 +156,8 @@ class TestUserIsolation:
 
         assert len(user1_tweets) == 1
         assert len(user2_tweets) == 1
-        assert user1_tweets[0]['content'] == "User 1 tweet"
-        assert user2_tweets[0]['content'] == "User 2 tweet"
+        assert user1_tweets[0]["content"] == "User 1 tweet"
+        assert user2_tweets[0]["content"] == "User 2 tweet"
 
     def test_cancel_only_own_tweets(self, scheduler):
         """Test that users can only cancel their own tweets"""
@@ -184,12 +188,12 @@ class TestCancellation:
         assert result is True
 
         # Verify status changed to cancelled
-        tweets = scheduler.get_scheduled_tweets(1, status='cancelled')
+        tweets = scheduler.get_scheduled_tweets(1, status="cancelled")
         assert len(tweets) == 1
-        assert tweets[0]['status'] == 'cancelled'
+        assert tweets[0]["status"] == "cancelled"
 
         # Should not appear in pending
-        pending = scheduler.get_scheduled_tweets(1, status='pending')
+        pending = scheduler.get_scheduled_tweets(1, status="pending")
         assert len(pending) == 0
 
     def test_cancel_nonexistent_tweet(self, scheduler):
@@ -203,7 +207,7 @@ class TestCancellation:
         tweet_id = scheduler.schedule_tweet(1, "Test tweet", scheduled_time, [])
 
         # Mark as posted
-        scheduler.update_status(tweet_id, 'posted', tweet_id='tw123')
+        scheduler.update_status(tweet_id, "posted", tweet_id="tw123")
 
         # Try to cancel
         result = scheduler.cancel_scheduled_tweet(tweet_id, user_id=1)
@@ -218,15 +222,15 @@ class TestStatusUpdates:
         scheduled_time = datetime.now() + timedelta(hours=1)
         tweet_id = scheduler.schedule_tweet(1, "Test tweet", scheduled_time, [])
 
-        result = scheduler.update_status(tweet_id, 'posted', tweet_id='tw123')
+        result = scheduler.update_status(tweet_id, "posted", tweet_id="tw123")
         assert result is True
 
         # Verify status and tweet_id
-        tweets = scheduler.get_scheduled_tweets(1, status='posted')
+        tweets = scheduler.get_scheduled_tweets(1, status="posted")
         assert len(tweets) == 1
-        assert tweets[0]['status'] == 'posted'
-        assert tweets[0]['tweet_id'] == 'tw123'
-        assert tweets[0]['posted_at'] is not None
+        assert tweets[0]["status"] == "posted"
+        assert tweets[0]["tweet_id"] == "tw123"
+        assert tweets[0]["posted_at"] is not None
 
     def test_update_status_to_failed(self, scheduler):
         """Test updating status to failed with error"""
@@ -234,18 +238,18 @@ class TestStatusUpdates:
         tweet_id = scheduler.schedule_tweet(1, "Test tweet", scheduled_time, [])
 
         error_msg = "Rate limit exceeded"
-        result = scheduler.update_status(tweet_id, 'failed', error=error_msg)
+        result = scheduler.update_status(tweet_id, "failed", error=error_msg)
         assert result is True
 
         # Verify error is stored
-        tweets = scheduler.get_scheduled_tweets(1, status='failed')
+        tweets = scheduler.get_scheduled_tweets(1, status="failed")
         assert len(tweets) == 1
-        assert tweets[0]['status'] == 'failed'
-        assert tweets[0]['error'] == error_msg
+        assert tweets[0]["status"] == "failed"
+        assert tweets[0]["error"] == error_msg
 
     def test_update_invalid_tweet(self, scheduler):
         """Test updating status of nonexistent tweet"""
-        result = scheduler.update_status(9999, 'posted')
+        result = scheduler.update_status(9999, "posted")
         assert result is False
 
 
@@ -263,23 +267,33 @@ class TestQueueProcessing:
         cursor = conn.cursor()
         past_timestamp = int(time.time()) - 300  # 5 minutes ago
         cursor.execute(
-            'UPDATE scheduled_tweets SET scheduled_time = ? WHERE id = ?',
-            (past_timestamp, tweet_id)
+            "UPDATE scheduled_tweets SET scheduled_time = ? WHERE id = ?",
+            (past_timestamp, tweet_id),
         )
         conn.commit()
         conn.close()
 
-        # Mock Twitter posting
-        with patch.object(scheduler, '_post_to_twitter', return_value='tw123456'):
-            # Process queue
-            result = scheduler.process_queue()
+        # Mock credential manager and Twitter posting
+        with patch("app.auth.credential_manager.CredentialManager") as mock_cred_mgr:
+            mock_instance = MagicMock()
+            mock_instance.get_credentials.return_value = {
+                "api_key": "test_key",
+                "api_secret": "test_secret",
+                "access_token": "test_token",
+                "access_secret": "test_secret",
+            }
+            mock_cred_mgr.return_value = mock_instance
+
+            with patch.object(scheduler, "_post_to_twitter", return_value="tw123456"):
+                # Process queue
+                result = scheduler.process_queue()
 
         # Verify tweet was processed
-        assert result['processed'] >= 1
-        assert result['successful'] >= 1
+        assert result["processed"] >= 1
+        assert result["successful"] >= 1
 
         # Verify status updated
-        tweets = scheduler.get_scheduled_tweets(1, status='posted')
+        tweets = scheduler.get_scheduled_tweets(1, status="posted")
         assert len(tweets) == 1
 
     def test_process_queue_skips_future_tweets(self, scheduler):
@@ -292,10 +306,10 @@ class TestQueueProcessing:
         result = scheduler.process_queue()
 
         # Should not process future tweets
-        assert result['processed'] == 0
+        assert result["processed"] == 0
 
         # Tweet should still be pending
-        tweets = scheduler.get_scheduled_tweets(1, status='pending')
+        tweets = scheduler.get_scheduled_tweets(1, status="pending")
         assert len(tweets) == 1
 
     def test_process_queue_handles_errors(self, scheduler):
@@ -309,25 +323,37 @@ class TestQueueProcessing:
         cursor = conn.cursor()
         past_timestamp = int(time.time()) - 300  # 5 minutes ago
         cursor.execute(
-            'UPDATE scheduled_tweets SET scheduled_time = ? WHERE id = ?',
-            (past_timestamp, tweet_id)
+            "UPDATE scheduled_tweets SET scheduled_time = ? WHERE id = ?",
+            (past_timestamp, tweet_id),
         )
         conn.commit()
         conn.close()
 
-        # Mock Twitter posting to fail
-        with patch.object(scheduler, '_post_to_twitter', side_effect=Exception("API Error")):
-            # Process queue
-            result = scheduler.process_queue()
+        # Mock credential manager and Twitter posting to fail
+        with patch("app.auth.credential_manager.CredentialManager") as mock_cred_mgr:
+            mock_instance = MagicMock()
+            mock_instance.get_credentials.return_value = {
+                "api_key": "test_key",
+                "api_secret": "test_secret",
+                "access_token": "test_token",
+                "access_secret": "test_secret",
+            }
+            mock_cred_mgr.return_value = mock_instance
+
+            with patch.object(
+                scheduler, "_post_to_twitter", side_effect=Exception("API Error")
+            ):
+                # Process queue
+                result = scheduler.process_queue()
 
         # Verify error was handled
-        assert result['processed'] >= 1
-        assert result['failed'] >= 1
+        assert result["processed"] >= 1
+        assert result["failed"] >= 1
 
         # Verify status is failed
-        tweets = scheduler.get_scheduled_tweets(1, status='failed')
+        tweets = scheduler.get_scheduled_tweets(1, status="failed")
         assert len(tweets) == 1
-        assert 'API Error' in tweets[0]['error']
+        assert "API Error" in tweets[0]["error"]
 
 
 class TestPostScheduledTweet:
@@ -338,50 +364,86 @@ class TestPostScheduledTweet:
         scheduled_time = datetime.now() + timedelta(hours=1)
         tweet_id = scheduler.schedule_tweet(1, "Test tweet", scheduled_time, [])
 
-        # Mock Twitter posting
-        with patch.object(scheduler, '_post_to_twitter', return_value='tw789'):
-            # Post the tweet
-            result = scheduler.post_scheduled_tweet(tweet_id)
-            assert result is True
+        # Mock credential manager and Twitter posting
+        with patch("app.auth.credential_manager.CredentialManager") as mock_cred_mgr:
+            mock_instance = MagicMock()
+            mock_instance.get_credentials.return_value = {
+                "api_key": "test_key",
+                "api_secret": "test_secret",
+                "access_token": "test_token",
+                "access_secret": "test_secret",
+            }
+            mock_cred_mgr.return_value = mock_instance
+
+            with patch.object(scheduler, "_post_to_twitter", return_value="tw789"):
+                # Post the tweet
+                result = scheduler.post_scheduled_tweet(tweet_id)
+                assert result is True
 
         # Verify it was posted
-        tweets = scheduler.get_scheduled_tweets(1, status='posted')
+        tweets = scheduler.get_scheduled_tweets(1, status="posted")
         assert len(tweets) == 1
-        assert tweets[0]['tweet_id'] == 'tw789'
+        assert tweets[0]["tweet_id"] == "tw789"
 
     def test_post_scheduled_tweet_with_media(self, scheduler):
         """Test posting tweet with media"""
         scheduled_time = datetime.now() + timedelta(hours=1)
-        media_paths = ['/path/to/image.jpg']
-        tweet_id = scheduler.schedule_tweet(1, "Tweet with media", scheduled_time, media_paths)
+        media_paths = ["/path/to/image.jpg"]
+        tweet_id = scheduler.schedule_tweet(
+            1, "Tweet with media", scheduled_time, media_paths
+        )
 
-        # Mock Twitter posting
-        with patch.object(scheduler, '_post_to_twitter', return_value='tw999') as mock_post:
-            # Post the tweet
-            result = scheduler.post_scheduled_tweet(tweet_id)
-            assert result is True
+        # Mock credential manager and Twitter posting
+        with patch("app.auth.credential_manager.CredentialManager") as mock_cred_mgr:
+            mock_instance = MagicMock()
+            mock_instance.get_credentials.return_value = {
+                "api_key": "test_key",
+                "api_secret": "test_secret",
+                "access_token": "test_token",
+                "access_secret": "test_secret",
+            }
+            mock_cred_mgr.return_value = mock_instance
 
-            # Verify media was passed to _post_to_twitter
-            mock_post.assert_called_once()
-            call_args = mock_post.call_args
-            # Check that media_paths were passed (third argument)
-            assert call_args[0][2] == media_paths
+            with patch.object(
+                scheduler, "_post_to_twitter", return_value="tw999"
+            ) as mock_post:
+                # Post the tweet
+                result = scheduler.post_scheduled_tweet(tweet_id)
+                assert result is True
+
+                # Verify media was passed to _post_to_twitter
+                mock_post.assert_called_once()
+                call_args = mock_post.call_args
+                # Check that media_paths were passed (third argument)
+                assert call_args[0][2] == media_paths
 
     def test_post_scheduled_tweet_failure(self, scheduler):
         """Test handling of posting failure"""
         scheduled_time = datetime.now() + timedelta(hours=1)
         tweet_id = scheduler.schedule_tweet(1, "Test tweet", scheduled_time, [])
 
-        # Mock Twitter posting to fail
-        with patch.object(scheduler, '_post_to_twitter', side_effect=Exception("Network error")):
-            # Post the tweet
-            result = scheduler.post_scheduled_tweet(tweet_id)
-            assert result is False
+        # Mock credential manager and Twitter posting to fail
+        with patch("app.auth.credential_manager.CredentialManager") as mock_cred_mgr:
+            mock_instance = MagicMock()
+            mock_instance.get_credentials.return_value = {
+                "api_key": "test_key",
+                "api_secret": "test_secret",
+                "access_token": "test_token",
+                "access_secret": "test_secret",
+            }
+            mock_cred_mgr.return_value = mock_instance
+
+            with patch.object(
+                scheduler, "_post_to_twitter", side_effect=Exception("Network error")
+            ):
+                # Post the tweet
+                result = scheduler.post_scheduled_tweet(tweet_id)
+                assert result is False
 
         # Verify status is failed
-        tweets = scheduler.get_scheduled_tweets(1, status='failed')
+        tweets = scheduler.get_scheduled_tweets(1, status="failed")
         assert len(tweets) == 1
-        assert 'Network error' in tweets[0]['error']
+        assert "Network error" in tweets[0]["error"]
 
 
 class TestGetScheduledTweets:
@@ -393,10 +455,14 @@ class TestGetScheduledTweets:
 
         # Create tweets with different statuses
         id1 = scheduler.schedule_tweet(1, "Pending 1", base_time, [])
-        id2 = scheduler.schedule_tweet(1, "Pending 2", base_time + timedelta(hours=1), [])
-        id3 = scheduler.schedule_tweet(1, "To be posted", base_time + timedelta(hours=2), [])
+        id2 = scheduler.schedule_tweet(
+            1, "Pending 2", base_time + timedelta(hours=1), []
+        )
+        id3 = scheduler.schedule_tweet(
+            1, "To be posted", base_time + timedelta(hours=2), []
+        )
 
-        scheduler.update_status(id3, 'posted', tweet_id='tw123')
+        scheduler.update_status(id3, "posted", tweet_id="tw123")
 
         # Get all tweets
         all_tweets = scheduler.get_scheduled_tweets(1)
@@ -410,21 +476,21 @@ class TestGetScheduledTweets:
         id2 = scheduler.schedule_tweet(1, "Posted", base_time, [])
         id3 = scheduler.schedule_tweet(1, "Failed", base_time, [])
 
-        scheduler.update_status(id2, 'posted', tweet_id='tw123')
-        scheduler.update_status(id3, 'failed', error='Error')
+        scheduler.update_status(id2, "posted", tweet_id="tw123")
+        scheduler.update_status(id3, "failed", error="Error")
 
         # Test filtering
-        pending = scheduler.get_scheduled_tweets(1, status='pending')
+        pending = scheduler.get_scheduled_tweets(1, status="pending")
         assert len(pending) == 1
-        assert pending[0]['status'] == 'pending'
+        assert pending[0]["status"] == "pending"
 
-        posted = scheduler.get_scheduled_tweets(1, status='posted')
+        posted = scheduler.get_scheduled_tweets(1, status="posted")
         assert len(posted) == 1
-        assert posted[0]['status'] == 'posted'
+        assert posted[0]["status"] == "posted"
 
-        failed = scheduler.get_scheduled_tweets(1, status='failed')
+        failed = scheduler.get_scheduled_tweets(1, status="failed")
         assert len(failed) == 1
-        assert failed[0]['status'] == 'failed'
+        assert failed[0]["status"] == "failed"
 
     def test_get_scheduled_tweets_empty(self, scheduler):
         """Test getting scheduled tweets when none exist"""
@@ -435,30 +501,32 @@ class TestGetScheduledTweets:
 class TestDatabasePersistence:
     """Test database persistence and integrity"""
 
-    def test_scheduled_tweet_persists(self, temp_db):
+    def test_scheduled_tweet_persists(self, temp_db, master_key):
         """Test that scheduled tweets persist across instances"""
         scheduled_time = datetime.now() + timedelta(hours=1)
 
         # Create scheduler and schedule tweet
-        scheduler1 = TweetScheduler(temp_db)
+        scheduler1 = TweetScheduler(temp_db, master_key=master_key)
         tweet_id = scheduler1.schedule_tweet(1, "Persistent tweet", scheduled_time, [])
 
         # Create new scheduler instance
-        scheduler2 = TweetScheduler(temp_db)
+        scheduler2 = TweetScheduler(temp_db, master_key=master_key)
         tweets = scheduler2.get_scheduled_tweets(1)
 
         assert len(tweets) == 1
-        assert tweets[0]['content'] == "Persistent tweet"
+        assert tweets[0]["content"] == "Persistent tweet"
 
-    def test_database_schema_created(self, temp_db):
+    def test_database_schema_created(self, temp_db, master_key):
         """Test that database schema is properly created"""
-        scheduler = TweetScheduler(temp_db)
+        scheduler = TweetScheduler(temp_db, master_key=master_key)
 
         conn = sqlite3.connect(temp_db)
         cursor = conn.cursor()
 
         # Check table exists
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='scheduled_tweets'")
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='scheduled_tweets'"
+        )
         assert cursor.fetchone() is not None
 
         # Check required columns exist
@@ -466,8 +534,16 @@ class TestDatabasePersistence:
         columns = {row[1] for row in cursor.fetchall()}
 
         required_columns = {
-            'id', 'user_id', 'content', 'media_paths', 'scheduled_time',
-            'status', 'posted_at', 'tweet_id', 'error', 'created_at'
+            "id",
+            "user_id",
+            "content",
+            "media_paths",
+            "scheduled_time",
+            "status",
+            "posted_at",
+            "tweet_id",
+            "error",
+            "created_at",
         }
 
         assert required_columns.issubset(columns)
@@ -503,9 +579,9 @@ class TestEdgeCases:
         """Test that process_queue returns proper statistics"""
         result = scheduler.process_queue()
 
-        assert 'processed' in result
-        assert 'successful' in result
-        assert 'failed' in result
-        assert isinstance(result['processed'], int)
-        assert isinstance(result['successful'], int)
-        assert isinstance(result['failed'], int)
+        assert "processed" in result
+        assert "successful" in result
+        assert "failed" in result
+        assert isinstance(result["processed"], int)
+        assert isinstance(result["successful"], int)
+        assert isinstance(result["failed"], int)
