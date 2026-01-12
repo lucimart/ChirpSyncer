@@ -68,6 +68,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Build
+- remove Python 3.10 from test matrix
+
+- Testing only on Python 3.11 (newer version)
+- Reduces CI test runs by 50%
+- Updated README badge
 - lower coverage threshold from 95% to 90%
 
 - Updated PR checks to require 90% coverage instead of 95%
