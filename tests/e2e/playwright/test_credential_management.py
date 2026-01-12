@@ -34,7 +34,7 @@ class TestCredentialManagement:
         login_page.login_user(test_user["username"], test_user["password"])
 
     @pytest.mark.e2e
-    @pytest.mark.skip(reason="UI implementation pending - Flask templates not complete")
+    @pytest.mark.skip(reason="Requires pytest-playwright: pip install pytest-playwright && playwright install")
     def test_add_twitter_credential(self, page, app_server, test_user, test_db):
         """
         Test adding a Twitter API credential.
@@ -116,7 +116,7 @@ class TestCredentialManagement:
         ), "Credential data should be encrypted, not plaintext"
 
     @pytest.mark.e2e
-    @pytest.mark.skip(reason="UI implementation pending - Flask templates not complete")
+    @pytest.mark.skip(reason="Requires pytest-playwright: pip install pytest-playwright && playwright install")
     def test_credential_encryption(
         self, page, app_server, test_user, test_db, master_encryption_key
     ):
@@ -184,7 +184,7 @@ class TestCredentialManagement:
         assert len(encrypted_data) > 20, "Encrypted data should be substantial"
 
     @pytest.mark.e2e
-    @pytest.mark.skip(reason="UI implementation pending - Flask templates not complete")
+    @pytest.mark.skip(reason="Requires pytest-playwright: pip install pytest-playwright && playwright install")
     def test_delete_credential(self, page, app_server, test_user, test_db):
         """
         Test deleting a credential.
@@ -250,7 +250,7 @@ class TestCredentialManagement:
         assert row is None, "Credential should be removed from database"
 
     @pytest.mark.e2e
-    @pytest.mark.skip(reason="UI implementation pending - Flask templates not complete")
+    @pytest.mark.skip(reason="Requires pytest-playwright: pip install pytest-playwright && playwright install")
     def test_add_multiple_credentials(self, page, app_server, test_user, test_db):
         """
         Test adding multiple credentials for different platforms.

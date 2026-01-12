@@ -107,7 +107,7 @@ def test_db(test_db_path):
     """
     )
 
-    # Create user_credentials table for encrypted credentials storage
+    # Create user_credentials table for encrypted credentials storage (AES-256-GCM)
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS user_credentials (
@@ -115,9 +115,13 @@ def test_db(test_db_path):
             user_id INTEGER NOT NULL,
             platform TEXT NOT NULL,
             credential_type TEXT NOT NULL,
-            encrypted_data TEXT NOT NULL,
+            encrypted_data BLOB NOT NULL,
+            encryption_iv BLOB NOT NULL,
+            encryption_tag BLOB NOT NULL,
             created_at INTEGER NOT NULL,
             updated_at INTEGER NOT NULL,
+            last_used INTEGER,
+            is_active INTEGER DEFAULT 1,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             UNIQUE(user_id, platform, credential_type)
         )
