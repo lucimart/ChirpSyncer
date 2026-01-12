@@ -2,7 +2,7 @@
 
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/lucimart/ChirpSyncer/ci.yml?branch=main)
 ![GitHub License](https://img.shields.io/github/license/lucimart/ChirpSyncer)
-![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11-blue)
+![Python Version](https://img.shields.io/badge/python-3.11-blue)
 ![Code Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)
 ![GitHub Issues](https://img.shields.io/github/issues/lucimart/ChirpSyncer)
 ![GitHub Stars](https://img.shields.io/github/stars/lucimart/ChirpSyncer?style=social)
