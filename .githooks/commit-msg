@@ -1,0 +1,60 @@
+#!/bin/bash
+# Validate commit message format (conventional commits)
+# Ensures changelog automation works correctly
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Skip merge commits
+if [[ $COMMIT_MSG =~ ^Merge ]]; then
+    exit 0
+fi
+
+# Skip revert commits
+if [[ $COMMIT_MSG =~ ^Revert ]]; then
+    exit 0
+fi
+
+# Conventional commit pattern: type(scope): description
+# type: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert
+# scope: optional
+# description: required
+PATTERN='^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\([a-zA-Z0-9_-]+\))?!?: .{1,}'
+
+if ! [[ $COMMIT_MSG =~ $PATTERN ]]; then
+    echo "ERROR: Commit message does not follow conventional commits format"
+    echo ""
+    echo "Format: <type>[(scope)]: <description>"
+    echo ""
+    echo "Valid types:"
+    echo "  feat     - New feature"
+    echo "  fix      - Bug fix"
+    echo "  docs     - Documentation changes"
+    echo "  style    - Code style (formatting, semicolons, etc.)"
+    echo "  refactor - Code refactoring"
+    echo "  test     - Adding/updating tests"
+    echo "  chore    - Maintenance tasks"
+    echo "  perf     - Performance improvements"
+    echo "  ci       - CI/CD changes"
+    echo "  build    - Build system changes"
+    echo "  revert   - Revert previous commit"
+    echo ""
+    echo "Examples:"
+    echo "  feat(auth): add OAuth2 support"
+    echo "  fix(sync): handle rate limit errors"
+    echo "  docs: update API documentation"
+    echo "  test(user): add password validation tests"
+    echo ""
+    echo "Your message:"
+    echo "  $COMMIT_MSG"
+    exit 1
+fi
+
+# Check description length (max 72 chars for first line)
+FIRST_LINE=$(echo "$COMMIT_MSG" | head -n 1)
+if [ ${#FIRST_LINE} -gt 72 ]; then
+    echo "WARNING: First line of commit message exceeds 72 characters (${#FIRST_LINE})"
+    echo "Consider shortening for better readability in git log"
+fi
+
+exit 0

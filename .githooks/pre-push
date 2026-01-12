@@ -1,0 +1,41 @@
+#!/bin/bash
+# Pre-push checks: run full test suite before pushing
+
+set -e
+
+echo "Running pre-push checks..."
+
+# Check if we're in the project root
+if [ ! -f "requirements.txt" ]; then
+    echo "ERROR: Must run from project root"
+    exit 1
+fi
+
+# Optional: Skip on specific branches
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [[ $CURRENT_BRANCH =~ ^(wip/|draft/) ]]; then
+    echo "Skipping pre-push checks for WIP branch"
+    exit 0
+fi
+
+# Run full test suite
+echo "Running full test suite..."
+if ! python -m pytest tests/ -x --tb=short -q; then
+    echo ""
+    echo "ERROR: Tests failed"
+    echo "Fix failing tests before pushing"
+    echo ""
+    echo "To skip this check (not recommended):"
+    echo "  git push --no-verify"
+    exit 1
+fi
+
+# Optional: Check coverage threshold
+# echo "Checking test coverage..."
+# python -m pytest --cov=app --cov-report=term --cov-fail-under=85 tests/ -q || {
+#     echo "ERROR: Coverage below 85%"
+#     exit 1
+# }
+
+echo "Pre-push checks passed"
+exit 0

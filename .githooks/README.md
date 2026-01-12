@@ -1,6 +1,6 @@
 # Git Hooks
 
-Custom git hooks for ChirpSyncer project automation.
+Project automation hooks for ChirpSyncer.
 
 ## Setup
 
@@ -8,37 +8,96 @@ Custom git hooks for ChirpSyncer project automation.
 git config core.hooksPath .githooks
 ```
 
-## Hooks
+## Active Hooks
 
-### post-commit
+### commit-msg
+Validates commit message format (conventional commits).
 
-Automatically updates `CHANGELOG.md` based on conventional commit messages.
+**Required format:** `type(scope): description`
 
-**Supported commit types:**
-- `feat`: New features (Added)
-- `fix`: Bug fixes (Fixed)
-- `docs`: Documentation changes
-- `refactor`: Code refactoring (Changed)
-- `perf`: Performance improvements (Changed)
-- `test`: Test additions/changes
-- `ci`: CI/CD changes
-- `build`: Build system changes
-
-**Format:** `type(scope): description`
+**Valid types:**
+- `feat` - New features
+- `fix` - Bug fixes
+- `docs` - Documentation
+- `style` - Code formatting
+- `refactor` - Code refactoring
+- `test` - Tests
+- `chore` - Maintenance
+- `perf` - Performance
+- `ci` - CI/CD
+- `build` - Build system
+- `revert` - Revert commits
 
 **Examples:**
-```
+```bash
 feat(auth): add OAuth2 support
 fix(sync): handle rate limit errors
-docs(api): update authentication examples
+docs: update API documentation
 ```
 
-The hook parses the commit message and adds an entry to the Unreleased section of CHANGELOG.md under the appropriate category.
+### pre-commit
+Code quality checks before commit.
 
-### prepare-commit-msg
+**Checks:**
+- Black formatting
+- isort import ordering
+- Python syntax
+- Potential secrets scan
 
-Currently a placeholder for future commit message validation.
+**Skip:** `git commit --no-verify`
 
-## Manual Changelog Updates
+### pre-push
+Full test suite before pushing.
 
-For multi-line commit messages or complex changes, manually edit CHANGELOG.md following the Keep a Changelog format.
+**Runs:** All tests in `tests/`
+
+**Skip:** `git push --no-verify` (not recommended)
+
+### post-commit
+Automatically updates `CHANGELOG.md` in Unreleased section.
+
+**Maps types to categories:**
+- `feat` → Added
+- `fix` → Fixed
+- `docs` → Documentation
+- `refactor/perf` → Changed
+- `test` → Testing
+- `ci/build` → Build
+
+**Skips:** `chore` commits and changelog-related commits
+
+## Hook Configuration
+
+### Disable specific hooks
+Comment out checks in hook files.
+
+### Adjust strictness
+Edit validation patterns and thresholds in hook scripts.
+
+### Enable optional checks
+Uncomment sections in hooks:
+- `pre-commit`: Unit tests
+- `pre-push`: Coverage threshold
+
+## Troubleshooting
+
+**Hook not running:**
+```bash
+git config core.hooksPath .githooks
+chmod +x .githooks/*
+```
+
+**Tests too slow:**
+```bash
+# Skip pre-push for this push only
+git push --no-verify
+```
+
+**Format failures:**
+```bash
+# Auto-fix formatting
+black app/ tests/
+isort app/ tests/
+git add -u
+git commit
+```

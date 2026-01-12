@@ -1,0 +1,74 @@
+#!/bin/bash
+# Pre-commit checks: code quality and quick tests
+
+set -e
+
+echo "Running pre-commit checks..."
+
+# Check if we're in the project root
+if [ ! -f "requirements.txt" ]; then
+    echo "ERROR: Must run from project root"
+    exit 1
+fi
+
+# Get list of staged Python files
+STAGED_PY_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py$' || true)
+
+if [ -z "$STAGED_PY_FILES" ]; then
+    echo "No Python files staged, skipping checks"
+    exit 0
+fi
+
+# Check 1: Black formatting
+if command -v black &> /dev/null; then
+    echo "Checking code formatting with black..."
+    black --check $STAGED_PY_FILES || {
+        echo "ERROR: Code formatting issues found"
+        echo "Run: black $STAGED_PY_FILES"
+        exit 1
+    }
+else
+    echo "WARNING: black not installed, skipping format check"
+fi
+
+# Check 2: isort imports
+if command -v isort &> /dev/null; then
+    echo "Checking import ordering with isort..."
+    isort --check-only $STAGED_PY_FILES || {
+        echo "ERROR: Import ordering issues found"
+        echo "Run: isort $STAGED_PY_FILES"
+        exit 1
+    }
+else
+    echo "WARNING: isort not installed, skipping import check"
+fi
+
+# Check 3: Basic syntax check
+echo "Checking Python syntax..."
+for file in $STAGED_PY_FILES; do
+    python -m py_compile "$file" || {
+        echo "ERROR: Syntax error in $file"
+        exit 1
+    }
+done
+
+# Check 4: Don't commit secrets/credentials
+echo "Checking for potential secrets..."
+SECRETS_PATTERN='(password|secret|key|token|api_key|private_key)\s*=\s*["\047][^"\047]{8,}["\047]'
+for file in $STAGED_PY_FILES; do
+    if grep -iE "$SECRETS_PATTERN" "$file" | grep -v "test_" | grep -v "example" | grep -v "your_" | grep -v "TODO" > /dev/null; then
+        echo "WARNING: Potential hardcoded secret in $file"
+        echo "Review the file to ensure no credentials are committed"
+    fi
+done
+
+# Check 5: Quick unit tests (optional, can be slow)
+# Uncomment to enable:
+# echo "Running quick unit tests..."
+# python -m pytest tests/unit/ -x --tb=short -q || {
+#     echo "ERROR: Unit tests failed"
+#     exit 1
+# }
+
+echo "Pre-commit checks passed"
+exit 0
