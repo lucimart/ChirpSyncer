@@ -1007,8 +1007,10 @@ def main():
     debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
     # nosemgrep: python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host
     app.run(
-        host="0.0.0.0", port=5000, debug=debug_mode
-    )  # nosec B104 - binding to all interfaces intentional for containerized deployment
+        host="0.0.0.0",  # nosec B104 - binding to all interfaces intentional for containerized deployment
+        port=5000,
+        debug=debug_mode,
+    )
 
 
 if __name__ == "__main__":
