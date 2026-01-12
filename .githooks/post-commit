@@ -1,0 +1,73 @@
+#!/bin/bash
+# Automatically update CHANGELOG.md after each commit
+# Extracts commit type and description from conventional commit format
+
+# Get the latest commit message
+COMMIT_MSG=$(git log -1 --pretty=%B)
+COMMIT_HASH=$(git log -1 --pretty=%h)
+COMMIT_DATE=$(git log -1 --pretty=%ad --date=short)
+
+# Parse conventional commit format: type(scope): description
+if [[ $COMMIT_MSG =~ ^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\([a-zA-Z0-9_-]+\))?:\ (.+)$ ]]; then
+    TYPE="${BASH_REMATCH[1]}"
+    SCOPE="${BASH_REMATCH[2]}"
+    DESC="${BASH_REMATCH[3]}"
+
+    # Map commit type to changelog category
+    case "$TYPE" in
+        feat)
+            CATEGORY="Added"
+            ;;
+        fix)
+            CATEGORY="Fixed"
+            ;;
+        docs)
+            CATEGORY="Documentation"
+            ;;
+        refactor|perf)
+            CATEGORY="Changed"
+            ;;
+        test)
+            CATEGORY="Testing"
+            ;;
+        ci|build)
+            CATEGORY="Build"
+            ;;
+        *)
+            CATEGORY="Changed"
+            ;;
+    esac
+
+    # Check if CHANGELOG.md exists
+    if [ -f "CHANGELOG.md" ]; then
+        # Create temp file with updated changelog
+        {
+            # Read until [Unreleased] section
+            sed -n '1,/## \[Unreleased\]/p' CHANGELOG.md
+
+            # Check if category exists in Unreleased section
+            if grep -q "### $CATEGORY" CHANGELOG.md; then
+                # Add to existing category
+                sed -n "/## \[Unreleased\]/,/## \[/p" CHANGELOG.md | \
+                    sed "/### $CATEGORY/a - $DESC" | \
+                    sed '/## \[Unreleased\]/d'
+            else
+                # Create new category
+                echo ""
+                echo "### $CATEGORY"
+                echo "- $DESC"
+            fi
+
+            # Add rest of file (other versions)
+            sed -n '/## \[1\./,$p' CHANGELOG.md
+        } > CHANGELOG.md.tmp
+
+        mv CHANGELOG.md.tmp CHANGELOG.md
+
+        # Amend the commit to include CHANGELOG.md if it changed
+        git add CHANGELOG.md 2>/dev/null
+        # Note: Not amending automatically to avoid hook loops
+    fi
+fi
+
+exit 0

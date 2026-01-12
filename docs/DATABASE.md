@@ -2668,15 +2668,15 @@ conn.execute('PRAGMA journal_mode=WAL')
 
 The ChirpSyncer database is a comprehensive SQLite-based system supporting:
 
-- ✅ **Multi-user architecture** with full user isolation
-- ✅ **AES-256-GCM encryption** for sensitive credentials
-- ✅ **FTS5 full-text search** with phrase, boolean, and proximity queries
-- ✅ **Comprehensive analytics** with time-series metrics
-- ✅ **Scheduled content** with queue management
-- ✅ **Rule-based cleanup** with dry-run support
-- ✅ **Complete audit trail** for security and compliance
-- ✅ **Automatic maintenance** with backups and archival
-- ✅ **Migration system** for schema upgrades
+- Multi-user architecture with full user isolation
+- AES-256-GCM encryption for sensitive credentials
+- FTS5 full-text search with phrase, boolean, and proximity queries
+- Comprehensive analytics with time-series metrics
+- Scheduled content with queue management
+- Rule-based cleanup with dry-run support
+- Complete audit trail for security and compliance
+- Automatic maintenance with backups and archival
+- Migration system for schema upgrades
 
 **Total Tables:** 20+ (including FTS5 virtual table)
 **Total Indexes:** 40+
