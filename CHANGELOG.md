@@ -239,6 +239,12 @@ All tests passing with real SQLite DB integration
 - README rewritten for clarity
 
 ### Fixed
+- remove --with-deps flag from playwright install
+
+- Ubuntu 24.04 renamed libasound2 to libasound2t64
+- Playwright --with-deps tries to install old package name
+- GitHub Actions runners have most dependencies pre-installed
+- Install only browsers without system dependency management
 - fix 6 failing integration tests
 
 - Fix validation tests to patch config values directly instead of os.environ
