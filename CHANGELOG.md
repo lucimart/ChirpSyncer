@@ -239,6 +239,11 @@ All tests passing with real SQLite DB integration
 - README rewritten for clarity
 
 ### Fixed
+- downgrade pytest to 8.3.4 for playwright compatibility
+
+- pytest-playwright 0.5.2 requires pytest<9.0.0
+- Downgrade from pytest 9.0.2 to 8.3.4
+- Resolves dependency conflict with pytest-playwright
 - upgrade pytest-playwright to 0.5.2 for pytest 9.x compatibility
 
 - pytest-playwright 0.4.3 requires pytest<8.0.0
