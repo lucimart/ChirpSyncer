@@ -95,22 +95,14 @@
                             </td>
                             <td class="py-3 px-2">
                                 {% if task.last_run %}
-                                    <span class="text-sm text-gray-600">
-                                        <script>
-                                            document.write(new Date({{ task.last_run * 1000 }}).toLocaleString());
-                                        </script>
-                                    </span>
+                                    <span class="text-sm text-gray-600 timestamp-display" data-timestamp="{{ task.last_run }}"></span>
                                 {% else %}
                                     <span class="text-sm text-gray-400">Never</span>
                                 {% endif %}
                             </td>
                             <td class="py-3 px-2">
                                 {% if task.next_run and task.enabled %}
-                                    <span class="text-sm text-gray-600">
-                                        <script>
-                                            document.write(new Date({{ task.next_run * 1000 }}).toLocaleString());
-                                        </script>
-                                    </span>
+                                    <span class="text-sm text-gray-600 timestamp-display" data-timestamp="{{ task.next_run }}"></span>
                                 {% else %}
                                     <span class="text-sm text-gray-400">-</span>
                                 {% endif %}
@@ -194,9 +186,19 @@
         {% endif %}
     </div>
 
-    <!-- JavaScript for task toggle -->
-    {% if is_admin %}
+    <!-- JavaScript for task toggle and timestamp formatting -->
     <script>
+        // Format all timestamps on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.timestamp-display').forEach(function(element) {
+                const timestamp = parseInt(element.getAttribute('data-timestamp'));
+                if (timestamp && !isNaN(timestamp)) {
+                    element.textContent = new Date(timestamp * 1000).toLocaleString();
+                }
+            });
+        });
+
+        {% if is_admin %}
         async function toggleTask(taskName, isEnabled) {
             try {
                 const response = await fetch(`/tasks/${taskName}/toggle`, {
@@ -218,7 +220,7 @@
                 alert('Error toggling task: ' + error.message);
             }
         }
+        {% endif %}
     </script>
-    {% endif %}
 </body>
 </html>

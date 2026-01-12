@@ -80,7 +80,17 @@ if [[ $COMMIT_MSG =~ ^(feat|fix|docs|style|refactor|test|perf|ci|build|revert)(\
         # Only update if file changed
         if ! cmp -s CHANGELOG.md CHANGELOG.md.tmp; then
             mv CHANGELOG.md.tmp CHANGELOG.md
-            git add CHANGELOG.md 2>/dev/null
+
+            # Check if this commit has been pushed
+            if git branch -r --contains HEAD | grep -q .; then
+                # Commit has been pushed, create a new commit
+                git add CHANGELOG.md
+                git commit -m "chore: update CHANGELOG with $TYPE changes" --no-verify
+            else
+                # Commit hasn't been pushed, safe to amend
+                git add CHANGELOG.md
+                git commit --amend --no-edit --no-verify
+            fi
         else
             rm CHANGELOG.md.tmp
         fi
