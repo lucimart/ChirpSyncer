@@ -448,7 +448,8 @@ class AnalyticsTracker:
             # Get top tweets by metric
             # Use subquery to get latest metrics for each tweet
             # Safe: order_by_column validated via whitelist dict
-            query = f"""  # nosec B608 - order_by_column validated via whitelist dict
+            # nosec B608 - order_by_column validated via whitelist dict
+            query = f"""
                 SELECT tweet_id, user_id, timestamp, impressions, likes, retweets,
                        replies, engagements, engagement_rate
                 FROM (
