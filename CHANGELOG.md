@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- add commit-msg, pre-commit, and pre-push hooks
+
+- commit-msg: validates conventional commit format
+- pre-commit: black, isort, syntax, secrets check
+- pre-push: runs full test suite before pushing
+- Updated hooks documentation with examples
 - Integration test suite with 122 tests
 - E2E test suite with 24 tests
 - GitHub Actions workflows for integration and E2E tests
@@ -21,6 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - README rewritten for clarity
 
 ### Fixed
+- make documentation checks fail on errors
+
+- Removed continue-on-error from TODO/FIXME check
+- Removed continue-on-error from markdown link check
+- Disabled pre-push hook by default (850+ tests too slow)
+- Updated documentation to reflect changes
 - correct awk logic to only update Unreleased section
 
 - Fixed hook to stop at first version marker

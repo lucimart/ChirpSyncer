@@ -47,11 +47,11 @@ Code quality checks before commit.
 **Skip:** `git commit --no-verify`
 
 ### pre-push
-Full test suite before pushing.
+Disabled by default (tests run in CI).
 
-**Runs:** All tests in `tests/`
+**Why disabled:** Running 850+ tests before every push is excessive. CI handles full test suite.
 
-**Skip:** `git push --no-verify` (not recommended)
+**Enable:** Uncomment code in `.githooks/pre-push` if needed
 
 ### post-commit
 Automatically updates `CHANGELOG.md` in Unreleased section.

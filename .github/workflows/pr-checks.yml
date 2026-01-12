@@ -150,14 +150,13 @@ jobs:
     - name: Check for TODO/FIXME
       run: |
         if grep -r "TODO\|FIXME" app/ --exclude-dir=__pycache__; then
-          echo "⚠️  Found TODO/FIXME comments in code"
+          echo "Found TODO/FIXME comments in code"
           echo "Please resolve before merging or document as known issues"
+          exit 1
         fi
-      continue-on-error: true
 
     - name: Check markdown links
       uses: gaurav-nelson/github-action-markdown-link-check@v1
       with:
         use-quiet-mode: 'yes'
         config-file: '.github/markdown-link-check-config.json'
-      continue-on-error: true
