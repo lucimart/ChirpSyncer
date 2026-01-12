@@ -20,7 +20,6 @@ import json
 import sqlite3
 import tempfile
 import time
-from pathlib import Path
 from typing import Dict, List, Any
 
 import pytest

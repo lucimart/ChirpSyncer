@@ -234,8 +234,6 @@ def cleanup_error_logs(days_old: int = 30, db_path: str = DB_PATH) -> Dict:
 
 def setup_default_tasks(scheduler):
     """Register all default maintenance tasks with scheduler"""
-    from app.services.task_scheduler import TaskScheduler
-
     # Cleanup sessions - every hour
     scheduler.add_cron_task(
         name='cleanup_sessions',

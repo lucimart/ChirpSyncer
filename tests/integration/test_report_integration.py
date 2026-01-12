@@ -28,8 +28,6 @@ import sys
 import time
 import sqlite3
 import json
-import csv
-import io
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple
 from unittest.mock import MagicMock, patch, Mock
