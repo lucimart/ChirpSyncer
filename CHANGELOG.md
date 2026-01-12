@@ -8,6 +8,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- add comprehensive integration tests for auth, scheduler, cleanup, and platform modules
+
+Phase 1: Authentication Integration (32 tests)
+- User registration and login workflows
+- Multi-user credential management with AES-256-GCM encryption
+- Authentication decorator integration (@require_auth, @require_admin)
+- Session management and expiration
+- Audit trail verification
+- Coverage: 75% of app/auth modules (418 statements)
+
+Phase 2.1: Tweet Scheduler Integration (37 tests)
+- Complete scheduling workflows with DB persistence
+- Credential integration with CredentialManager
+- Status transitions (pending → posted/failed/cancelled)
+- Queue processing with batch handling
+- Edit and cancel operations
+- Coverage: 100% of tweet_scheduler (134 statements)
+
+Phase 2.2: Cleanup Engine Integration (17 tests)
+- Age-based, engagement-based, and pattern-based cleanup rules
+- Dry run vs execute validation
+- Multi-rule interaction and enable/disable
+- User isolation verification
+- Database schema updates (cleanup_rules, cleanup_history tables)
+- Coverage: 96% of cleanup_engine (185 statements)
+
+Phase 3: Platform Integration (20 tests)
+- Bluesky handler: login, post, media, error handling
+- Twitter API handler: OAuth, tweet posting, media upload
+- Twitter scraper: async/sync wrapper, tweet adapters
+- Credential validator: all credential types validation
+- End-to-end sync workflows with multi-user isolation
+- Coverage: All 4 integration modules (293 statements)
+
+Total: 106 new integration tests
+All tests passing with real SQLite DB integration
 - add commit-msg, pre-commit, and pre-push hooks
 
 - commit-msg: validates conventional commit format
