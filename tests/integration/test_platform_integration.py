@@ -340,15 +340,14 @@ def test_bluesky_handler_login_to_bluesky():
 @pytest.mark.api
 def test_bluesky_handler_post_error_handling():
     """Test Bluesky posting error handling with retry decorator."""
-    with patch("app.integrations.bluesky_handler.bsky_client") as mock_client:
-        from app.integrations.bluesky_handler import post_to_bluesky
-        from tenacity import RetryError
+    from app.integrations.bluesky_handler import post_to_bluesky
 
+    with patch("app.integrations.bluesky_handler.bsky_client") as mock_client:
         # Mock posting error
         mock_client.post.side_effect = Exception("Network error: Connection timeout")
 
-        # The function has a retry decorator, so it will raise RetryError
-        with pytest.raises((Exception, RetryError)):
+        # The function has a retry decorator, so it will raise Exception
+        with pytest.raises(Exception):
             post_to_bluesky("Test content")
 
 
@@ -356,17 +355,16 @@ def test_bluesky_handler_post_error_handling():
 @pytest.mark.api
 def test_bluesky_handler_fetch_error_handling():
     """Test Bluesky fetch error handling with retry decorator."""
-    with patch("app.integrations.bluesky_handler.bsky_client") as mock_client:
-        from app.integrations.bluesky_handler import fetch_posts_from_bluesky
-        from tenacity import RetryError
+    from app.integrations.bluesky_handler import fetch_posts_from_bluesky
 
+    with patch("app.integrations.bluesky_handler.bsky_client") as mock_client:
         # Mock fetch error
         mock_client.app.bsky.feed.get_author_feed.side_effect = Exception(
             "Connection timeout"
         )
 
-        # The function has a retry decorator, so it will raise RetryError
-        with pytest.raises((Exception, RetryError)):
+        # The function has a retry decorator, so it will raise Exception
+        with pytest.raises(Exception):
             fetch_posts_from_bluesky("testuser.bsky.social")
 
 

@@ -540,22 +540,10 @@ class TestValidationModuleIntegration:
 
     def test_validate_credentials_raises_on_missing_twitter_username(self):
         """Test validate_credentials raises when TWITTER_USERNAME is missing"""
-        with patch.dict(
-            os.environ,
-            {
-                "TWITTER_PASSWORD": "test_pass",
-                "TWITTER_EMAIL": "test@example.com",
-                "TWITTER_EMAIL_PASSWORD": "email_pass",
-                "BSKY_USERNAME": "bsky_user",
-                "BSKY_PASSWORD": "bsky_pass",
-            },
-            clear=False,
-        ):
-            # Ensure TWITTER_USERNAME is not set
-            os.environ.pop("TWITTER_USERNAME", None)
+        from app.validation import validate_credentials
 
-            from app.validation import validate_credentials
-
+        # Patch config values directly since they're loaded at import time
+        with patch("app.validation.TWITTER_USERNAME", None):
             with pytest.raises(
                 ValueError, match="Missing required environment variables"
             ):
@@ -563,19 +551,10 @@ class TestValidationModuleIntegration:
 
     def test_validate_credentials_raises_on_empty_string_credentials(self):
         """Test validate_credentials raises when credentials are empty strings"""
-        with patch.dict(
-            os.environ,
-            {
-                "TWITTER_USERNAME": "",  # Empty string
-                "TWITTER_PASSWORD": "test_pass",
-                "TWITTER_EMAIL": "test@example.com",
-                "TWITTER_EMAIL_PASSWORD": "email_pass",
-                "BSKY_USERNAME": "bsky_user",
-                "BSKY_PASSWORD": "bsky_pass",
-            },
-        ):
-            from app.validation import validate_credentials
+        from app.validation import validate_credentials
 
+        # Patch config values directly since they're loaded at import time
+        with patch("app.validation.TWITTER_USERNAME", ""):
             with pytest.raises(
                 ValueError, match="Missing required environment variables"
             ):
@@ -603,19 +582,10 @@ class TestValidationModuleIntegration:
 
     def test_validate_credentials_raises_on_missing_bluesky_credentials(self):
         """Test validate_credentials raises when Bluesky credentials are missing"""
-        with patch.dict(
-            os.environ,
-            {
-                "TWITTER_USERNAME": "test_user",
-                "TWITTER_PASSWORD": "test_pass",
-                "TWITTER_EMAIL": "test@example.com",
-                "TWITTER_EMAIL_PASSWORD": "email_pass",
-                "BSKY_USERNAME": "",  # Empty
-                "BSKY_PASSWORD": "bsky_pass",
-            },
-        ):
-            from app.validation import validate_credentials
+        from app.validation import validate_credentials
 
+        # Patch config values directly since they're loaded at import time
+        with patch("app.validation.BSKY_USERNAME", ""):
             with pytest.raises(
                 ValueError, match="Missing required environment variables"
             ):
@@ -623,19 +593,10 @@ class TestValidationModuleIntegration:
 
     def test_validate_credentials_handles_whitespace_only_strings(self):
         """Test validate_credentials treats whitespace-only strings as empty"""
-        with patch.dict(
-            os.environ,
-            {
-                "TWITTER_USERNAME": "   ",  # Whitespace only
-                "TWITTER_PASSWORD": "test_pass",
-                "TWITTER_EMAIL": "test@example.com",
-                "TWITTER_EMAIL_PASSWORD": "email_pass",
-                "BSKY_USERNAME": "bsky_user",
-                "BSKY_PASSWORD": "bsky_pass",
-            },
-        ):
-            from app.validation import validate_credentials
+        from app.validation import validate_credentials
 
+        # Patch config values directly since they're loaded at import time
+        with patch("app.validation.TWITTER_USERNAME", "   "):  # Whitespace only
             with pytest.raises(
                 ValueError, match="Missing required environment variables"
             ):
