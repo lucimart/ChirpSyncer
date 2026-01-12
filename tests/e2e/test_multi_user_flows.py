@@ -206,7 +206,6 @@ class TestCredentialSharing:
     shared credentials are properly accessible and read-only.
     """
 
-    @pytest.mark.skip(reason="Credential sharing functionality causes server errors")
     def test_credential_sharing_workflow(
         self, client, user_manager, credential_manager, db_connection
     ):

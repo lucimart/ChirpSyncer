@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- implement session expiry validation
+
+- Create database-tracked sessions on login with session_token
+- Store session_token in Flask session for tracking
+- Update auth decorators to validate session expiry on each request
+- Delete expired sessions automatically via validate_session()
+- Clear Flask session and redirect to login when session expires
+- Delete session from database on logout
+- Remove skip decorator from session expiry test
+
+Sessions now expire after 7 days (default) and are properly validated
+on every protected route access.
 - implement task management API endpoints
 
 - Add /api/tasks/<task_id>/status endpoint for individual task status
