@@ -264,11 +264,12 @@ class SearchEngine:
                 - date_to: Unix timestamp (maximum date)
                 - hashtags: List of hashtags to filter by
                 - author: Filter by tweet author username
-                - has_media: Boolean (not implemented in FTS, placeholder)
-                - min_likes: Minimum likes (not implemented in FTS, placeholder)
+                - has_media: Boolean - filter by media presence
+                - min_likes: Minimum likes count
+                - min_retweets: Minimum retweets count
 
         Returns:
-            List of matching tweets
+            List of matching tweets with engagement data
         """
         try:
             if filters is None:
@@ -277,72 +278,140 @@ class SearchEngine:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
 
+            # Check if we need to join with synced_posts for engagement/media filters
+            needs_join = any(key in filters for key in ['has_media', 'min_likes', 'min_retweets'])
+
             # Build query with filters
             where_clauses = []
             params = []
 
             # User filter
-            where_clauses.append("user_id = ?")
+            where_clauses.append("tsi.user_id = ?")
             params.append(user_id)
 
             # Date range filter
             if 'date_from' in filters:
-                where_clauses.append("posted_at >= ?")
+                where_clauses.append("tsi.posted_at >= ?")
                 params.append(filters['date_from'])
 
             if 'date_to' in filters:
-                where_clauses.append("posted_at <= ?")
+                where_clauses.append("tsi.posted_at <= ?")
                 params.append(filters['date_to'])
 
             # Hashtag filter
             if 'hashtags' in filters and filters['hashtags']:
                 hashtag_conditions = []
                 for tag in filters['hashtags']:
-                    hashtag_conditions.append("hashtags LIKE ?")
+                    hashtag_conditions.append("tsi.hashtags LIKE ?")
                     params.append(f"%{tag}%")
                 where_clauses.append(f"({' OR '.join(hashtag_conditions)})")
 
             # Author filter
             if 'author' in filters and filters['author']:
-                where_clauses.append("author = ?")
+                where_clauses.append("tsi.author = ?")
                 params.append(filters['author'])
+
+            # Media filter (requires join)
+            if 'has_media' in filters and filters['has_media'] is not None:
+                where_clauses.append("sp.has_media = ?")
+                params.append(1 if filters['has_media'] else 0)
+
+            # Engagement filters (requires join)
+            if 'min_likes' in filters and filters['min_likes'] is not None:
+                where_clauses.append("COALESCE(sp.likes_count, 0) >= ?")
+                params.append(filters['min_likes'])
+
+            if 'min_retweets' in filters and filters['min_retweets'] is not None:
+                where_clauses.append("COALESCE(sp.retweets_count, 0) >= ?")
+                params.append(filters['min_retweets'])
 
             where_sql = " AND ".join(where_clauses)
 
             # Execute search
             results = []
 
-            if query.strip():
-                # With FTS search
-                sql = f"""
-                SELECT tweet_id, user_id, content, hashtags, author, posted_at, rank
-                FROM tweet_search_index
-                WHERE tweet_search_index MATCH ? AND {where_sql}
-                ORDER BY rank
-                LIMIT 50
-                """  # nosec B608 - where_sql built from validated filters with parameterized queries
-                cursor.execute(sql, [query] + params)
-            else:
-                # Without FTS search (just filters)
-                sql = f"""
-                SELECT tweet_id, user_id, content, hashtags, author, posted_at, 0 as rank
-                FROM tweet_search_index
-                WHERE {where_sql}
-                ORDER BY posted_at DESC
-                LIMIT 50
-                """  # nosec B608 - where_sql built from validated filters with parameterized queries
-                cursor.execute(sql, params)
+            if needs_join:
+                # Join with synced_posts for has_media and engagement filters
+                if query.strip():
+                    sql = f"""
+                    SELECT tsi.tweet_id, tsi.user_id, tsi.content, tsi.hashtags,
+                           tsi.author, tsi.posted_at, rank,
+                           COALESCE(sp.has_media, 0) as has_media,
+                           COALESCE(sp.likes_count, 0) as likes,
+                           COALESCE(sp.retweets_count, 0) as retweets
+                    FROM tweet_search_index tsi
+                    JOIN synced_posts sp ON (
+                        tsi.tweet_id = sp.twitter_id OR tsi.tweet_id = sp.bluesky_uri
+                    )
+                    WHERE tweet_search_index MATCH ? AND {where_sql}
+                    ORDER BY rank
+                    LIMIT 50
+                    """  # nosec B608 - where_sql built from validated filters
+                    cursor.execute(sql, [query] + params)
+                else:
+                    sql = f"""
+                    SELECT tsi.tweet_id, tsi.user_id, tsi.content, tsi.hashtags,
+                           tsi.author, tsi.posted_at, 0 as rank,
+                           COALESCE(sp.has_media, 0) as has_media,
+                           COALESCE(sp.likes_count, 0) as likes,
+                           COALESCE(sp.retweets_count, 0) as retweets
+                    FROM tweet_search_index tsi
+                    JOIN synced_posts sp ON (
+                        tsi.tweet_id = sp.twitter_id OR tsi.tweet_id = sp.bluesky_uri
+                    )
+                    WHERE {where_sql}
+                    ORDER BY tsi.posted_at DESC
+                    LIMIT 50
+                    """  # nosec B608 - where_sql built from validated filters
+                    cursor.execute(sql, params)
 
-            for row in cursor.fetchall():
-                results.append({
-                    'tweet_id': row[0],
-                    'user_id': row[1],
-                    'content': row[2],
-                    'hashtags': row[3],
-                    'author': row[4],
-                    'posted_at': row[5],
-                    'rank': row[6]
-                })
+                for row in cursor.fetchall():
+                    results.append({
+                        'tweet_id': row[0],
+                        'user_id': row[1],
+                        'content': row[2],
+                        'hashtags': row[3],
+                        'author': row[4],
+                        'posted_at': row[5],
+                        'rank': row[6],
+                        'has_media': bool(row[7]),
+                        'likes': row[8],
+                        'retweets': row[9]
+                    })
+            else:
+                # Simple FTS query without join
+                # Replace tsi. prefix since we're not joining
+                simple_where = where_sql.replace("tsi.", "")
+
+                if query.strip():
+                    sql = f"""
+                    SELECT tweet_id, user_id, content, hashtags, author, posted_at, rank
+                    FROM tweet_search_index
+                    WHERE tweet_search_index MATCH ? AND {simple_where}
+                    ORDER BY rank
+                    LIMIT 50
+                    """  # nosec B608 - where_sql built from validated filters
+                    cursor.execute(sql, [query] + params)
+                else:
+                    sql = f"""
+                    SELECT tweet_id, user_id, content, hashtags, author, posted_at, 0 as rank
+                    FROM tweet_search_index
+                    WHERE {simple_where}
+                    ORDER BY posted_at DESC
+                    LIMIT 50
+                    """  # nosec B608 - where_sql built from validated filters
+                    cursor.execute(sql, params)
+
+                for row in cursor.fetchall():
+                    results.append({
+                        'tweet_id': row[0],
+                        'user_id': row[1],
+                        'content': row[2],
+                        'hashtags': row[3],
+                        'author': row[4],
+                        'posted_at': row[5],
+                        'rank': row[6]
+                    })
 
             conn.close()
 

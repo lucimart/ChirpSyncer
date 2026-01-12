@@ -906,3 +906,328 @@ def test_rebuild_index_with_bluesky_uri(search_engine, temp_db):
     results = search_engine.search(query="Python", user_id=1)
     assert len(results) == 1, "Should find bluesky indexed post"
     assert results[0]['tweet_id'] == "at://bsky.social/post123", "Should use bluesky_uri as tweet_id"
+
+
+@pytest.fixture
+def search_engine_with_synced_posts(temp_db):
+    """Create SearchEngine with synced_posts table containing engagement data"""
+    engine = SearchEngine(temp_db)
+
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+
+    # Create users table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL
+    )
+    """)
+    cursor.execute("INSERT INTO users (username, password_hash) VALUES (?, ?)",
+                   ("testuser", "hash123"))
+
+    # Create synced_posts with engagement columns
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS synced_posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        twitter_id TEXT,
+        bluesky_uri TEXT,
+        source TEXT NOT NULL,
+        content_hash TEXT NOT NULL UNIQUE,
+        synced_to TEXT,
+        synced_at INTEGER,
+        original_text TEXT NOT NULL,
+        user_id INTEGER,
+        twitter_username TEXT,
+        hashtags TEXT,
+        posted_at INTEGER,
+        has_media INTEGER DEFAULT 0,
+        likes_count INTEGER DEFAULT 0,
+        retweets_count INTEGER DEFAULT 0
+    )
+    """)
+
+    conn.commit()
+    conn.close()
+
+    engine.init_fts_index()
+    return engine
+
+
+def test_search_with_has_media_filter_true(search_engine_with_synced_posts, temp_db):
+    """Test: has_media=True filter returns only tweets with media"""
+    engine = search_engine_with_synced_posts
+    now = int(time.time())
+
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+
+    # Insert tweets with and without media
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, has_media, likes_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("1", "twitter", "hash1", "Tweet with media", 1, "testuser", "#test", now, 1, 10))
+
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, has_media, likes_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("2", "twitter", "hash2", "Tweet without media", 1, "testuser", "#test", now, 0, 5))
+
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, has_media, likes_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("3", "twitter", "hash3", "Another media tweet", 1, "testuser", "#test", now, 1, 20))
+
+    conn.commit()
+    conn.close()
+
+    # Index tweets
+    engine.rebuild_index()
+
+    # Filter by has_media=True
+    filters = {'has_media': True}
+    results = engine.search_with_filters(query="", user_id=1, filters=filters)
+
+    assert len(results) == 2, "Should find only tweets with media"
+    assert all(r['has_media'] is True for r in results), "All results should have media"
+
+
+def test_search_with_has_media_filter_false(search_engine_with_synced_posts, temp_db):
+    """Test: has_media=False filter returns only tweets without media"""
+    engine = search_engine_with_synced_posts
+    now = int(time.time())
+
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, has_media)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("1", "twitter", "hash1", "Media tweet", 1, "testuser", "#test", now, 1))
+
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, has_media)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("2", "twitter", "hash2", "Text only tweet", 1, "testuser", "#test", now, 0))
+
+    conn.commit()
+    conn.close()
+
+    engine.rebuild_index()
+
+    # Filter by has_media=False
+    filters = {'has_media': False}
+    results = engine.search_with_filters(query="", user_id=1, filters=filters)
+
+    assert len(results) == 1, "Should find only tweets without media"
+    assert results[0]['has_media'] is False, "Result should not have media"
+
+
+def test_search_with_min_likes_filter(search_engine_with_synced_posts, temp_db):
+    """Test: min_likes filter returns tweets with at least specified likes"""
+    engine = search_engine_with_synced_posts
+    now = int(time.time())
+
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, likes_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("1", "twitter", "hash1", "Viral tweet", 1, "testuser", "#viral", now, 1000))
+
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, likes_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("2", "twitter", "hash2", "Popular tweet", 1, "testuser", "#popular", now, 100))
+
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, likes_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("3", "twitter", "hash3", "Unpopular tweet", 1, "testuser", "#meh", now, 5))
+
+    conn.commit()
+    conn.close()
+
+    engine.rebuild_index()
+
+    # Filter by min_likes=100
+    filters = {'min_likes': 100}
+    results = engine.search_with_filters(query="", user_id=1, filters=filters)
+
+    assert len(results) == 2, "Should find tweets with 100+ likes"
+    assert all(r['likes'] >= 100 for r in results), "All results should have 100+ likes"
+
+
+def test_search_with_min_retweets_filter(search_engine_with_synced_posts, temp_db):
+    """Test: min_retweets filter returns tweets with at least specified retweets"""
+    engine = search_engine_with_synced_posts
+    now = int(time.time())
+
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, retweets_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("1", "twitter", "hash1", "Viral retweet", 1, "testuser", "#viral", now, 500))
+
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, retweets_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("2", "twitter", "hash2", "Some retweets", 1, "testuser", "#ok", now, 50))
+
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, retweets_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("3", "twitter", "hash3", "Few retweets", 1, "testuser", "#low", now, 2))
+
+    conn.commit()
+    conn.close()
+
+    engine.rebuild_index()
+
+    # Filter by min_retweets=50
+    filters = {'min_retweets': 50}
+    results = engine.search_with_filters(query="", user_id=1, filters=filters)
+
+    assert len(results) == 2, "Should find tweets with 50+ retweets"
+    assert all(r['retweets'] >= 50 for r in results), "All results should have 50+ retweets"
+
+
+def test_search_with_combined_engagement_filters(search_engine_with_synced_posts, temp_db):
+    """Test: Multiple engagement filters work together (min_likes AND min_retweets)"""
+    engine = search_engine_with_synced_posts
+    now = int(time.time())
+
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+
+    # High likes, high retweets
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, likes_count, retweets_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("1", "twitter", "hash1", "Super viral", 1, "testuser", "#viral", now, 1000, 500))
+
+    # High likes, low retweets
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, likes_count, retweets_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("2", "twitter", "hash2", "Many likes", 1, "testuser", "#likes", now, 500, 10))
+
+    # Low likes, high retweets
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, likes_count, retweets_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("3", "twitter", "hash3", "Many retweets", 1, "testuser", "#rt", now, 10, 500))
+
+    conn.commit()
+    conn.close()
+
+    engine.rebuild_index()
+
+    # Filter by both min_likes AND min_retweets
+    filters = {'min_likes': 100, 'min_retweets': 100}
+    results = engine.search_with_filters(query="", user_id=1, filters=filters)
+
+    assert len(results) == 1, "Should find only tweet with both high likes AND high retweets"
+    assert results[0]['likes'] >= 100, "Should have 100+ likes"
+    assert results[0]['retweets'] >= 100, "Should have 100+ retweets"
+
+
+def test_search_with_media_and_engagement_filters(search_engine_with_synced_posts, temp_db):
+    """Test: has_media combined with engagement filters"""
+    engine = search_engine_with_synced_posts
+    now = int(time.time())
+
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+
+    # Media with high engagement
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, has_media, likes_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("1", "twitter", "hash1", "Viral photo", 1, "testuser", "#photo", now, 1, 500))
+
+    # Media with low engagement
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, has_media, likes_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("2", "twitter", "hash2", "Ignored photo", 1, "testuser", "#photo", now, 1, 5))
+
+    # Text with high engagement
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, has_media, likes_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("3", "twitter", "hash3", "Viral text", 1, "testuser", "#text", now, 0, 500))
+
+    conn.commit()
+    conn.close()
+
+    engine.rebuild_index()
+
+    # Filter by has_media=True AND min_likes=100
+    filters = {'has_media': True, 'min_likes': 100}
+    results = engine.search_with_filters(query="", user_id=1, filters=filters)
+
+    assert len(results) == 1, "Should find only media tweet with high engagement"
+    assert results[0]['has_media'] is True, "Should have media"
+    assert results[0]['likes'] >= 100, "Should have 100+ likes"
+
+
+def test_search_with_query_and_media_filter(search_engine_with_synced_posts, temp_db):
+    """Test: FTS query combined with has_media filter"""
+    engine = search_engine_with_synced_posts
+    now = int(time.time())
+
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, has_media)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("1", "twitter", "hash1", "Python programming with images", 1, "testuser", "#python", now, 1))
+
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, has_media)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("2", "twitter", "hash2", "Python text only tutorial", 1, "testuser", "#python", now, 0))
+
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at, has_media)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("3", "twitter", "hash3", "JavaScript with images", 1, "testuser", "#js", now, 1))
+
+    conn.commit()
+    conn.close()
+
+    engine.rebuild_index()
+
+    # Search for Python with media
+    filters = {'has_media': True}
+    results = engine.search_with_filters(query="Python", user_id=1, filters=filters)
+
+    assert len(results) == 1, "Should find only Python tweet with media"
+    assert 'python' in results[0]['content'].lower(), "Should contain Python"
+    assert results[0]['has_media'] is True, "Should have media"
