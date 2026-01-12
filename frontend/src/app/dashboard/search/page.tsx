@@ -9,6 +9,9 @@ import {
   Image,
   Heart,
   Repeat,
+  Download,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { Button, Card, Input } from '@/components/ui';
 import type { SearchResult, SearchFilters } from '@/types';
@@ -172,6 +175,59 @@ const EmptyState = styled.div`
   color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
+const Pagination = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+  margin-top: ${({ theme }) => theme.spacing[6]};
+`;
+
+const PageButton = styled.button<{ $active?: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: ${({ theme }) => `0 ${theme.spacing[2]}`};
+  border: 1px solid
+    ${({ $active, theme }) =>
+      $active ? theme.colors.primary[600] : theme.colors.border.default};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  background-color: ${({ $active, theme }) =>
+    $active ? theme.colors.primary[600] : 'transparent'};
+  color: ${({ $active, theme }) =>
+    $active ? 'white' : theme.colors.text.primary};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background-color: ${({ $active, theme }) =>
+      $active ? theme.colors.primary[700] : theme.colors.background.secondary};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const ResultCheckbox = styled.input`
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  margin-right: ${({ theme }) => theme.spacing[3]};
+`;
+
+const ResultCardWrapper = styled.div`
+  display: flex;
+  align-items: flex-start;
+`;
+
+const ResultCardContent = styled.div`
+  flex: 1;
+`;
+
 // Safe text highlighting without dangerouslySetInnerHTML
 function HighlightedContent({ content, query }: { content: string; query: string }) {
   if (!query) return <>{content}</>;
@@ -191,6 +247,8 @@ function HighlightedContent({ content, query }: { content: string; query: string
   );
 }
 
+const PAGE_SIZE = 10;
+
 export default function SearchPage() {
   const [query, setQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -198,6 +256,8 @@ export default function SearchPage() {
     has_media: false,
     min_likes: undefined,
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const { data: results, isLoading } = useQuery<SearchResult[]>({
     queryKey: ['search', query, filters],
@@ -247,6 +307,36 @@ export default function SearchPage() {
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString();
+  };
+
+  // Pagination
+  const totalResults = results?.length ?? 0;
+  const totalPages = Math.ceil(totalResults / PAGE_SIZE);
+  const paginatedResults = results?.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  const handleSelectResult = (id: string) => {
+    const newSelection = new Set(selectedIds);
+    if (newSelection.has(id)) {
+      newSelection.delete(id);
+    } else {
+      newSelection.add(id);
+    }
+    setSelectedIds(newSelection);
+  };
+
+  const handleExportSelected = () => {
+    const selected = results?.filter((r) => selectedIds.has(r.id)) ?? [];
+    const data = JSON.stringify(selected, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `search-export-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -316,8 +406,14 @@ export default function SearchPage() {
           <span>
             {isLoading
               ? 'Searching...'
-              : `${results?.length ?? 0} results for "${query}"`}
+              : `${totalResults} results for "${query}"`}
           </span>
+          {selectedIds.size > 0 && (
+            <Button variant="secondary" size="sm" onClick={handleExportSelected}>
+              <Download size={16} />
+              Export {selectedIds.size} selected
+            </Button>
+          )}
         </ResultsInfo>
       )}
 
@@ -331,38 +427,87 @@ export default function SearchPage() {
         <Card padding="lg">
           <EmptyState>Searching...</EmptyState>
         </Card>
-      ) : results && results.length > 0 ? (
-        <ResultsList>
-          {results.map((result) => (
-            <ResultCard key={result.id} padding="md">
-              <ResultHeader>
-                <ResultPlatform $platform={result.platform}>
-                  {result.platform}
-                </ResultPlatform>
-                <ResultDate>{formatDate(result.created_at)}</ResultDate>
-              </ResultHeader>
-              <ResultContent>
-                <HighlightedContent content={result.content} query={query} />
-              </ResultContent>
-              <ResultMeta>
-                <MetaItem>
-                  <Heart size={14} />
-                  {result.likes}
-                </MetaItem>
-                <MetaItem>
-                  <Repeat size={14} />
-                  {result.retweets}
-                </MetaItem>
-                {result.has_media && (
-                  <MetaItem>
-                    <Image size={14} />
-                    Media
-                  </MetaItem>
-                )}
-              </ResultMeta>
-            </ResultCard>
-          ))}
-        </ResultsList>
+      ) : paginatedResults && paginatedResults.length > 0 ? (
+        <>
+          <ResultsList>
+            {paginatedResults.map((result) => (
+              <ResultCard key={result.id} padding="md">
+                <ResultCardWrapper>
+                  <ResultCheckbox
+                    type="checkbox"
+                    checked={selectedIds.has(result.id)}
+                    onChange={() => handleSelectResult(result.id)}
+                  />
+                  <ResultCardContent>
+                    <ResultHeader>
+                      <ResultPlatform $platform={result.platform}>
+                        {result.platform}
+                      </ResultPlatform>
+                      <ResultDate>{formatDate(result.created_at)}</ResultDate>
+                    </ResultHeader>
+                    <ResultContent>
+                      <HighlightedContent content={result.content} query={query} />
+                    </ResultContent>
+                    <ResultMeta>
+                      <MetaItem>
+                        <Heart size={14} />
+                        {result.likes}
+                      </MetaItem>
+                      <MetaItem>
+                        <Repeat size={14} />
+                        {result.retweets}
+                      </MetaItem>
+                      {result.has_media && (
+                        <MetaItem>
+                          <Image size={14} />
+                          Media
+                        </MetaItem>
+                      )}
+                    </ResultMeta>
+                  </ResultCardContent>
+                </ResultCardWrapper>
+              </ResultCard>
+            ))}
+          </ResultsList>
+
+          {totalPages > 1 && (
+            <Pagination>
+              <PageButton
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft size={16} />
+              </PageButton>
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum: number;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+                return (
+                  <PageButton
+                    key={pageNum}
+                    $active={currentPage === pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                  >
+                    {pageNum}
+                  </PageButton>
+                );
+              })}
+              <PageButton
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight size={16} />
+              </PageButton>
+            </Pagination>
+          )}
+        </>
       ) : (
         <Card padding="lg">
           <EmptyState>No results found for &quot;{query}&quot;</EmptyState>

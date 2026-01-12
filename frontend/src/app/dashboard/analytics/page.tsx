@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import styled from 'styled-components';
 import {
@@ -9,11 +10,51 @@ import {
   Heart,
   MessageCircle,
   Eye,
+  Download,
 } from 'lucide-react';
-import { Card } from '@/components/ui';
+import { Button, Card } from '@/components/ui';
 
 const PageHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: ${({ theme }) => theme.spacing[6]};
+`;
+
+const HeaderLeft = styled.div``;
+
+const HeaderRight = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing[3]};
+  align-items: center;
+`;
+
+const PeriodSelector = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing[1]};
+  background-color: ${({ theme }) => theme.colors.background.secondary};
+  padding: ${({ theme }) => theme.spacing[1]};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+`;
+
+const PeriodButton = styled.button<{ $active: boolean }>`
+  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.fast};
+  background-color: ${({ $active, theme }) =>
+    $active ? theme.colors.background.primary : 'transparent'};
+  color: ${({ $active, theme }) =>
+    $active ? theme.colors.text.primary : theme.colors.text.secondary};
+  box-shadow: ${({ $active }) =>
+    $active ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'};
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.text.primary};
+  }
 `;
 
 const PageTitle = styled.h1`
@@ -177,9 +218,20 @@ interface AnalyticsData {
   }>;
 }
 
+type Period = '24h' | '7d' | '30d' | '90d';
+
+const PERIODS: { value: Period; label: string }[] = [
+  { value: '24h', label: '24h' },
+  { value: '7d', label: '7d' },
+  { value: '30d', label: '30d' },
+  { value: '90d', label: '90d' },
+];
+
 export default function AnalyticsPage() {
+  const [period, setPeriod] = useState<Period>('30d');
+
   const { data: analytics } = useQuery<AnalyticsData>({
-    queryKey: ['analytics'],
+    queryKey: ['analytics', period],
     queryFn: async () => {
       // Mock data
       return {
@@ -255,13 +307,54 @@ export default function AnalyticsPage() {
     return num.toLocaleString();
   };
 
+  const handleExportData = () => {
+    const exportData = {
+      period,
+      exportedAt: new Date().toISOString(),
+      stats: {
+        followers: analytics?.followers,
+        engagement: analytics?.engagement,
+        impressions: analytics?.impressions,
+        interactions: analytics?.interactions,
+      },
+      topPosts: analytics?.topPosts,
+    };
+    const data = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analytics-${period}-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div>
       <PageHeader>
-        <PageTitle>Analytics</PageTitle>
-        <PageDescription>
-          Track your social media performance across platforms
-        </PageDescription>
+        <HeaderLeft>
+          <PageTitle>Analytics</PageTitle>
+          <PageDescription>
+            Track your social media performance across platforms
+          </PageDescription>
+        </HeaderLeft>
+        <HeaderRight>
+          <PeriodSelector>
+            {PERIODS.map((p) => (
+              <PeriodButton
+                key={p.value}
+                $active={period === p.value}
+                onClick={() => setPeriod(p.value)}
+              >
+                {p.label}
+              </PeriodButton>
+            ))}
+          </PeriodSelector>
+          <Button variant="secondary" onClick={handleExportData}>
+            <Download size={18} />
+            Export
+          </Button>
+        </HeaderRight>
       </PageHeader>
 
       <StatsGrid>
