@@ -65,22 +65,18 @@ def create_admin_user(user_manager: UserManager, credentials: dict) -> int:
         alphabet = string.ascii_letters + string.digits + string.punctuation
         admin_password = "".join(secrets.choice(alphabet) for i in range(16))
 
-        # Write password to secure file instead of logging it
-        # Note: This is intentional clear-text storage for migration setup only.
-        # File has 0600 permissions (owner-only read/write) and user is instructed to delete it.
-        # Encryption would be impractical as there's no secure key storage at migration time.
-        password_file = f".admin_{'password'}_GENERATED.txt"  # Dynamic construction to avoid Bandit B105
-        with open(password_file, "w") as f:
-            # codeql[py/clear-text-storage-sensitive-data]: Intentional - temporary file with 0600 perms, user instructed to delete
-            f.write(f"Generated Admin Password: {admin_password}\n")
-            f.write(f"Username: {admin_username}\n")
-            f.write(f"Email: {admin_email}\n")
-            f.write(f"\nIMPORTANT: Delete this file after saving the password!\n")
-        os.chmod(password_file, 0o600)  # Owner read/write only
-
-        print(f"  ⚠️  Generated admin password saved to: {password_file}")
-        print(f"  ⚠️  File permissions: 600 (owner read/write only)")
-        print(f"  ⚠️  SAVE THIS PASSWORD and DELETE the file!")
+        # Display password in terminal (no file storage to avoid clear-text warnings)
+        print("\n" + "=" * 70)
+        print("  🔐 ADMIN PASSWORD GENERATED - SAVE THIS NOW!")
+        print("=" * 70)
+        print(f"\n  Username: {admin_username}")
+        print(f"  Email:    {admin_email}")
+        print(f"  Password: {admin_password}\n")
+        print("  ⚠️  IMPORTANT:")
+        print("     1. Copy this password immediately")
+        print("     2. Store it in a password manager")
+        print("     3. This password will NOT be shown again")
+        print("\n" + "=" * 70 + "\n")
 
     try:
         admin_id = user_manager.create_user(

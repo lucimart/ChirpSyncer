@@ -299,35 +299,24 @@ def ensure_admin_user():
             alphabet = string.ascii_letters + string.digits + string.punctuation
             admin_password = "".join(secrets.choice(alphabet) for _ in range(16))
 
-            # Write password to secure file instead of logging it (security best practice)
-            # Note: This is intentional clear-text storage for initial setup only.
-            # File has 0600 permissions (owner-only read/write) and user is instructed to delete it.
-            # Encryption would be impractical as there's no secure key storage at initial setup.
-            password_file = f".admin_{'password'}_GENERATED.txt"  # Dynamic construction to avoid Bandit B105
-            try:
-                with open(password_file, "w") as f:
-                    f.write(f"Generated Admin Password\n")
-                    f.write(f"========================\n\n")
-                    f.write(f"Username: admin\n")
-                    # codeql[py/clear-text-storage-sensitive-data]: Intentional - temporary file with 0600 perms, user instructed to delete
-                    f.write(f"Password: {admin_password}\n\n")
-                    f.write(f"IMPORTANT:\n")
-                    f.write(f"1. Save this password immediately\n")
-                    f.write(f"2. Delete this file after saving\n")
-                    f.write(f"3. Set ADMIN_PASSWORD in .env to use a custom password\n")
-                os.chmod(password_file, 0o600)  # Owner read/write only
+            # Display password in terminal (no file storage to avoid clear-text warnings)
+            print("\n" + "=" * 70)
+            print("🔐 ADMIN PASSWORD GENERATED - SAVE THIS NOW!")
+            print("=" * 70)
+            print(f"\n  Username: admin")
+            print(f"  Password: {admin_password}\n")
+            print("  ⚠️  IMPORTANT:")
+            print("     1. Copy this password immediately")
+            print("     2. Store it in a password manager")
+            print("     3. Set ADMIN_PASSWORD in .env for custom password")
+            print("     4. This password will NOT be shown again")
+            print("\n" + "=" * 70 + "\n")
 
-                logger.warning("=" * 60)
-                logger.warning("ADMIN PASSWORD GENERATED")
-                logger.warning(f"Password saved to: {password_file}")
-                logger.warning("File permissions: 600 (owner read/write only)")
-                logger.warning("SAVE THE PASSWORD AND DELETE THE FILE!")
-                logger.warning("=" * 60)
-            except Exception as e:
-                logger.error(f"Failed to write password file: {e}")
-                logger.warning(
-                    "Unable to save password to file. Set ADMIN_PASSWORD in .env."
-                )
+            logger.warning("=" * 60)
+            logger.warning("ADMIN PASSWORD DISPLAYED ABOVE")
+            logger.warning("Copy the password from terminal output")
+            logger.warning("Set ADMIN_PASSWORD in .env to customize")
+            logger.warning("=" * 60)
 
         # Create admin user
         admin_id = user_manager.create_user(
