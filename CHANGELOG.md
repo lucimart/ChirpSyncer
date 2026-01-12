@@ -239,6 +239,22 @@ All tests passing with real SQLite DB integration
 - README rewritten for clarity
 
 ### Fixed
+- fix 6 failing integration tests
+
+- Fix validation tests to patch config values directly instead of os.environ
+  Config values are loaded at import time, so patching environment
+  variables after import has no effect
+- Fix Bluesky error handling tests to use single Exception type
+  instead of tuple with RetryError to avoid MagicMock type errors
+- Move imports before patch context for proper fixture setup
+
+Fixes:
+- test_validate_credentials_raises_on_missing_twitter_username
+- test_validate_credentials_raises_on_empty_string_credentials
+- test_validate_credentials_raises_on_missing_bluesky_credentials
+- test_validate_credentials_handles_whitespace_only_strings
+- test_bluesky_handler_post_error_handling
+- test_bluesky_handler_fetch_error_handling
 - downgrade pytest to 8.3.4 for playwright compatibility
 
 - pytest-playwright 0.5.2 requires pytest<9.0.0
