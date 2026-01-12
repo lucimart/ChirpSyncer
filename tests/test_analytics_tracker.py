@@ -451,3 +451,69 @@ class TestEdgeCases:
         top_tweets = analytics_tracker.get_top_tweets(user_id, metric='likes', limit=10)
         assert isinstance(top_tweets, list)
         assert len(top_tweets) == 0
+
+
+class TestDatabaseErrorHandling:
+    """Test error handling for database exceptions"""
+
+    def test_record_metrics_database_connection_error(self, analytics_tracker, user_manager, monkeypatch):
+        """Test record_metrics handles database connection errors (lines 166-168)"""
+        _, user_id, _ = user_manager
+        
+        monkeypatch.setattr(
+            "sqlite3.connect",
+            lambda *args, **kwargs: (_ for _ in ()).throw(
+                sqlite3.OperationalError("database is locked")
+            )
+        )
+        
+        metrics = {'impressions': 1000, 'likes': 50, 'retweets': 10, 'replies': 5, 'engagements': 65}
+        result = analytics_tracker.record_metrics('error_tweet', user_id, metrics)
+        
+        assert result is False
+
+    def test_get_user_analytics_database_connection_error(self, analytics_tracker, monkeypatch):
+        """Test get_user_analytics handles database connection errors"""
+        
+        monkeypatch.setattr(
+            "sqlite3.connect",
+            lambda *args, **kwargs: (_ for _ in ()).throw(
+                sqlite3.OperationalError("database connection failed")
+            )
+        )
+        
+        result = analytics_tracker.get_user_analytics(user_id=999, period='daily')
+        
+        assert result is not None
+        assert result['user_id'] == 999
+        assert result['total_tweets'] == 0
+
+    def test_create_snapshot_database_connection_error(self, analytics_tracker, user_manager, monkeypatch):
+        """Test create_snapshot handles database connection errors"""
+        _, user_id, _ = user_manager
+        
+        monkeypatch.setattr(
+            "sqlite3.connect",
+            lambda *args, **kwargs: (_ for _ in ()).throw(
+                sqlite3.OperationalError("database locked")
+            )
+        )
+        
+        result = analytics_tracker.create_snapshot(user_id, period='daily')
+        
+        assert result is False
+
+    def test_get_top_tweets_database_connection_error(self, analytics_tracker, user_manager, monkeypatch):
+        """Test get_top_tweets handles database connection errors"""
+        _, user_id, _ = user_manager
+        
+        monkeypatch.setattr(
+            "sqlite3.connect",
+            lambda *args, **kwargs: (_ for _ in ()).throw(
+                sqlite3.OperationalError("cannot open database")
+            )
+        )
+        
+        result = analytics_tracker.get_top_tweets(user_id, metric='likes', limit=10)
+        
+        assert result == []

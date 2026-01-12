@@ -559,3 +559,32 @@ class TestCredentialMetadata:
 # Run tests
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
+
+
+class TestEncryptionFailures:
+    """Tests for encryption/decryption error handling"""
+
+    def test_decrypt_credentials_with_tampered_data(self, credential_manager):
+        """Test that decryption fails with tampered ciphertext"""
+        data = {'username': 'test', 'password': 'secret'}
+        encrypted_data, iv, tag = credential_manager._encrypt_credentials(data)
+        
+        tampered = bytearray(encrypted_data)
+        tampered[0] ^= 0xFF
+        
+        with pytest.raises(Exception):
+            credential_manager._decrypt_credentials(bytes(tampered), iv, tag)
+
+    def test_decrypt_credentials_with_wrong_master_key(self, temp_db):
+        """Test that decryption fails when master key is wrong"""
+        key1 = os.urandom(32)
+        manager1 = CredentialManager(master_key=key1, db_path=temp_db)
+        
+        data = {'username': 'test', 'password': 'secret'}
+        encrypted_data, iv, tag = manager1._encrypt_credentials(data)
+        
+        key2 = os.urandom(32)
+        manager2 = CredentialManager(master_key=key2, db_path=temp_db)
+        
+        with pytest.raises(Exception):
+            manager2._decrypt_credentials(encrypted_data, iv, tag)

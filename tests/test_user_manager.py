@@ -370,3 +370,26 @@ class TestPasswordHashing:
 # Run tests
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
+
+
+class TestUpdateUserExceptionHandling:
+    """Tests for exception handling during user update"""
+
+    def test_update_user_no_updates_provided(self, user_manager):
+        """Test update_user returns False when no valid fields provided"""
+        user_id = user_manager.create_user('testuser', 'test@example.com', 'Pass123!')
+
+        result = user_manager.update_user(user_id)
+        assert result is False
+
+    def test_update_user_bcrypt_error(self, user_manager, monkeypatch):
+        """Test exception handling when bcrypt.hashpw fails during password update"""
+        user_id = user_manager.create_user('testuser', 'test@example.com', 'OldPass123!')
+
+        def mock_hashpw(password, salt):
+            raise ValueError('bcrypt error: invalid input')
+
+        monkeypatch.setattr('bcrypt.hashpw', mock_hashpw)
+
+        result = user_manager.update_user(user_id, password='NewPass456!')
+        assert result is False
