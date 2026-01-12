@@ -411,7 +411,8 @@ class TestUserSettingsIntegration:
         assert value == "updated_value"
 
         # Delete
-        assert settings.delete(1, "custom_setting") is True
+        delete_result = settings.delete(1, "custom_setting")
+        assert delete_result is True
         value = settings.get(1, "custom_setting")
         assert value is None
 
@@ -713,12 +714,11 @@ class TestStatsHandlerIntegration:
         assert rate == 100.0
 
         # All failed
-        tracker2 = StatsTracker(db_path=test_db_path)
-        fd, path = tempfile.mkstemp(suffix=".db")
+        fd, temp_db_path = tempfile.mkstemp(suffix=".db")
         os.close(fd)
         try:
             # Create new database
-            conn = sqlite3.connect(path)
+            conn = sqlite3.connect(temp_db_path)
             cursor = conn.cursor()
             cursor.execute(
                 """
@@ -739,14 +739,14 @@ class TestStatsHandlerIntegration:
             conn.commit()
             conn.close()
 
-            tracker2 = StatsTracker(db_path=path)
+            tracker2 = StatsTracker(db_path=temp_db_path)
             for _ in range(5):
                 tracker2.record_sync("twitter", "bluesky", False)
             rate = tracker2.get_success_rate(period="24h")
             assert rate == 0.0
         finally:
-            if os.path.exists(path):
-                os.unlink(path)
+            if os.path.exists(temp_db_path):
+                os.unlink(temp_db_path)
 
     def test_stats_aggregation_by_direction(self, test_db, test_db_path):
         """

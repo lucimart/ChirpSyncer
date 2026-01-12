@@ -28,7 +28,6 @@ import sqlite3
 import time
 import json
 import hashlib
-import tempfile
 from unittest.mock import MagicMock, patch, call, ANY
 from typing import Dict, Tuple
 from datetime import datetime

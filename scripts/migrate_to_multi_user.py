@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 
 # Add app directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.auth.user_manager import UserManager
 from app.auth.credential_manager import CredentialManager
@@ -29,16 +29,16 @@ def load_env_credentials():
     load_dotenv()
 
     credentials = {
-        'twitter': {
-            'username': os.getenv('TWITTER_USERNAME'),
-            'password': os.getenv('TWITTER_PASSWORD'),
-            'email': os.getenv('TWITTER_EMAIL'),
-            'email_password': os.getenv('TWITTER_EMAIL_PASSWORD'),
+        "twitter": {
+            "username": os.getenv("TWITTER_USERNAME"),
+            "password": os.getenv("TWITTER_PASSWORD"),
+            "email": os.getenv("TWITTER_EMAIL"),
+            "email_password": os.getenv("TWITTER_EMAIL_PASSWORD"),
         },
-        'bluesky': {
-            'username': os.getenv('BLUESKY_USERNAME'),
-            'password': os.getenv('BLUESKY_PASSWORD'),
-        }
+        "bluesky": {
+            "username": os.getenv("BLUESKY_USERNAME"),
+            "password": os.getenv("BLUESKY_PASSWORD"),
+        },
     }
 
     return credentials
@@ -53,25 +53,46 @@ def create_admin_user(user_manager: UserManager, credentials: dict) -> int:
     """
     print("\n[1/5] Creating admin user...")
 
-    admin_username = os.getenv('ADMIN_USERNAME', 'admin')
-    admin_email = os.getenv('ADMIN_EMAIL', 'admin@chirpsyncer.local')
-    admin_password = os.getenv('ADMIN_PASSWORD')
+    admin_username = os.getenv("ADMIN_USERNAME", "admin")
+    admin_email = os.getenv("ADMIN_EMAIL", "admin@chirpsyncer.local")
+    admin_password = os.getenv("ADMIN_PASSWORD")
 
     if not admin_password:
-        # Generate random password if not provided
-        import secrets
-        import string
-        alphabet = string.ascii_letters + string.digits + string.punctuation
-        admin_password = ''.join(secrets.choice(alphabet) for i in range(16))
-        print(f"  ⚠️  Generated admin password: {admin_password}")
-        print(f"  ⚠️  SAVE THIS PASSWORD - it won't be shown again!")
+        # Prompt user to enter password securely (no echo)
+        import getpass
+
+        print("\n" + "=" * 70)
+        print("  🔐 ADMIN ACCOUNT SETUP")
+        print("=" * 70)
+        print("\n  No ADMIN_PASSWORD found in .env file.")
+        print(f"  Please enter a password for the admin account ({admin_username}).\n")
+
+        while True:
+            admin_password = getpass.getpass("  Enter admin password: ")
+            if not admin_password:
+                print("  ❌ Password cannot be empty. Please try again.\n")
+                continue
+
+            password_confirm = getpass.getpass("  Confirm admin password: ")
+            if admin_password != password_confirm:
+                print("  ❌ Passwords do not match. Please try again.\n")
+                continue
+
+            if len(admin_password) < 8:
+                print("  ❌ Password must be at least 8 characters. Please try again.\n")
+                continue
+
+            break
+
+        print("\n  ✓ Admin password set successfully!")
+        print("=" * 70 + "\n")
 
     try:
         admin_id = user_manager.create_user(
             username=admin_username,
             email=admin_email,
             password=admin_password,
-            is_admin=True
+            is_admin=True,
         )
         print(f"  ✓ Admin user created with ID: {admin_id}")
         print(f"    Username: {admin_username}")
@@ -88,38 +109,40 @@ def create_admin_user(user_manager: UserManager, credentials: dict) -> int:
         raise
 
 
-def migrate_credentials(admin_id: int, credentials: dict, cred_manager: CredentialManager):
+def migrate_credentials(
+    admin_id: int, credentials: dict, cred_manager: CredentialManager
+):
     """Migrate credentials from .env to encrypted storage"""
     print("\n[2/5] Migrating credentials to encrypted storage...")
 
     # Migrate Twitter credentials
-    if credentials['twitter']['username']:
+    if credentials["twitter"]["username"]:
         try:
             cred_manager.save_credentials(
                 user_id=admin_id,
-                platform='twitter',
-                credential_type='scraping',
-                data=credentials['twitter']
+                platform="twitter",
+                credential_type="scraping",
+                data=credentials["twitter"],
             )
             print("  ✓ Twitter scraping credentials migrated")
         except Exception as e:
             print(f"  ⚠️  Twitter credentials migration failed: {e}")
 
     # Migrate Bluesky credentials
-    if credentials['bluesky']['username']:
+    if credentials["bluesky"]["username"]:
         try:
             cred_manager.save_credentials(
                 user_id=admin_id,
-                platform='bluesky',
-                credential_type='api',
-                data=credentials['bluesky']
+                platform="bluesky",
+                credential_type="api",
+                data=credentials["bluesky"],
             )
             print("  ✓ Bluesky credentials migrated")
         except Exception as e:
             print(f"  ⚠️  Bluesky credentials migration failed: {e}")
 
 
-def update_database_schema(db_path: str = 'chirpsyncer.db'):
+def update_database_schema(db_path: str = "chirpsyncer.db"):
     """Update database schema to add user_id columns"""
     print("\n[3/5] Updating database schema...")
 
@@ -132,12 +155,14 @@ def update_database_schema(db_path: str = 'chirpsyncer.db'):
         existing_tables = [row[0] for row in cursor.fetchall()]
 
         # Add user_id to synced_posts if table exists
-        if 'synced_posts' in existing_tables:
+        if "synced_posts" in existing_tables:
             try:
-                cursor.execute('ALTER TABLE synced_posts ADD COLUMN user_id INTEGER REFERENCES users(id)')
+                cursor.execute(
+                    "ALTER TABLE synced_posts ADD COLUMN user_id INTEGER REFERENCES users(id)"
+                )
                 print("  ✓ Added user_id to synced_posts")
             except sqlite3.OperationalError as e:
-                if 'duplicate column' in str(e).lower():
+                if "duplicate column" in str(e).lower():
                     print("  ℹ️  user_id already exists in synced_posts")
                 else:
                     raise
@@ -145,12 +170,14 @@ def update_database_schema(db_path: str = 'chirpsyncer.db'):
             print("  ℹ️  synced_posts table doesn't exist yet (will be created by app)")
 
         # Add user_id to sync_stats if table exists
-        if 'sync_stats' in existing_tables:
+        if "sync_stats" in existing_tables:
             try:
-                cursor.execute('ALTER TABLE sync_stats ADD COLUMN user_id INTEGER REFERENCES users(id)')
+                cursor.execute(
+                    "ALTER TABLE sync_stats ADD COLUMN user_id INTEGER REFERENCES users(id)"
+                )
                 print("  ✓ Added user_id to sync_stats")
             except sqlite3.OperationalError as e:
-                if 'duplicate column' in str(e).lower():
+                if "duplicate column" in str(e).lower():
                     print("  ℹ️  user_id already exists in sync_stats")
                 else:
                     raise
@@ -158,12 +185,14 @@ def update_database_schema(db_path: str = 'chirpsyncer.db'):
             print("  ℹ️  sync_stats table doesn't exist yet (will be created by app)")
 
         # Add user_id to hourly_stats if table exists
-        if 'hourly_stats' in existing_tables:
+        if "hourly_stats" in existing_tables:
             try:
-                cursor.execute('ALTER TABLE hourly_stats ADD COLUMN user_id INTEGER REFERENCES users(id)')
+                cursor.execute(
+                    "ALTER TABLE hourly_stats ADD COLUMN user_id INTEGER REFERENCES users(id)"
+                )
                 print("  ✓ Added user_id to hourly_stats")
             except sqlite3.OperationalError as e:
-                if 'duplicate column' in str(e).lower():
+                if "duplicate column" in str(e).lower():
                     print("  ℹ️  user_id already exists in hourly_stats")
                 else:
                     raise
@@ -171,12 +200,18 @@ def update_database_schema(db_path: str = 'chirpsyncer.db'):
             print("  ℹ️  hourly_stats table doesn't exist yet (will be created by app)")
 
         # Create indexes only for existing tables
-        if 'synced_posts' in existing_tables:
-            cursor.execute('CREATE INDEX IF NOT EXISTS idx_synced_posts_user ON synced_posts(user_id)')
-        if 'sync_stats' in existing_tables:
-            cursor.execute('CREATE INDEX IF NOT EXISTS idx_sync_stats_user ON sync_stats(user_id)')
-        if 'hourly_stats' in existing_tables:
-            cursor.execute('CREATE INDEX IF NOT EXISTS idx_hourly_stats_user ON hourly_stats(user_id)')
+        if "synced_posts" in existing_tables:
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_synced_posts_user ON synced_posts(user_id)"
+            )
+        if "sync_stats" in existing_tables:
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_sync_stats_user ON sync_stats(user_id)"
+            )
+        if "hourly_stats" in existing_tables:
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_hourly_stats_user ON hourly_stats(user_id)"
+            )
         print("  ✓ Created indexes on user_id columns (for existing tables)")
 
         conn.commit()
@@ -190,7 +225,7 @@ def update_database_schema(db_path: str = 'chirpsyncer.db'):
         conn.close()
 
 
-def assign_existing_data_to_admin(admin_id: int, db_path: str = 'chirpsyncer.db'):
+def assign_existing_data_to_admin(admin_id: int, db_path: str = "chirpsyncer.db"):
     """Assign all existing data to admin user"""
     print("\n[4/5] Assigning existing data to admin user...")
 
@@ -203,24 +238,30 @@ def assign_existing_data_to_admin(admin_id: int, db_path: str = 'chirpsyncer.db'
         existing_tables = [row[0] for row in cursor.fetchall()]
 
         # Update synced_posts if exists
-        if 'synced_posts' in existing_tables:
-            cursor.execute('UPDATE synced_posts SET user_id = ? WHERE user_id IS NULL', (admin_id,))
+        if "synced_posts" in existing_tables:
+            cursor.execute(
+                "UPDATE synced_posts SET user_id = ? WHERE user_id IS NULL", (admin_id,)
+            )
             posts_updated = cursor.rowcount
             print(f"  ✓ Assigned {posts_updated} posts to admin")
         else:
             print("  ℹ️  No synced_posts to assign (table doesn't exist yet)")
 
         # Update sync_stats if exists
-        if 'sync_stats' in existing_tables:
-            cursor.execute('UPDATE sync_stats SET user_id = ? WHERE user_id IS NULL', (admin_id,))
+        if "sync_stats" in existing_tables:
+            cursor.execute(
+                "UPDATE sync_stats SET user_id = ? WHERE user_id IS NULL", (admin_id,)
+            )
             stats_updated = cursor.rowcount
             print(f"  ✓ Assigned {stats_updated} sync stats to admin")
         else:
             print("  ℹ️  No sync_stats to assign (table doesn't exist yet)")
 
         # Update hourly_stats if exists
-        if 'hourly_stats' in existing_tables:
-            cursor.execute('UPDATE hourly_stats SET user_id = ? WHERE user_id IS NULL', (admin_id,))
+        if "hourly_stats" in existing_tables:
+            cursor.execute(
+                "UPDATE hourly_stats SET user_id = ? WHERE user_id IS NULL", (admin_id,)
+            )
             hourly_updated = cursor.rowcount
             print(f"  ✓ Assigned {hourly_updated} hourly stats to admin")
         else:
@@ -237,7 +278,7 @@ def assign_existing_data_to_admin(admin_id: int, db_path: str = 'chirpsyncer.db'
         conn.close()
 
 
-def verify_migration(admin_id: int, db_path: str = 'chirpsyncer.db'):
+def verify_migration(admin_id: int, db_path: str = "chirpsyncer.db"):
     """Verify migration integrity"""
     print("\n[5/5] Verifying migration...")
 
@@ -246,14 +287,18 @@ def verify_migration(admin_id: int, db_path: str = 'chirpsyncer.db'):
 
     try:
         # Check admin user exists
-        cursor.execute('SELECT id, username, is_admin FROM users WHERE id = ?', (admin_id,))
+        cursor.execute(
+            "SELECT id, username, is_admin FROM users WHERE id = ?", (admin_id,)
+        )
         admin = cursor.fetchone()
         assert admin, "Admin user not found"
         assert admin[2] == 1, "User is not admin"
         print(f"  ✓ Admin user verified (ID: {admin_id}, username: {admin[1]})")
 
         # Check credentials
-        cursor.execute('SELECT COUNT(*) FROM user_credentials WHERE user_id = ?', (admin_id,))
+        cursor.execute(
+            "SELECT COUNT(*) FROM user_credentials WHERE user_id = ?", (admin_id,)
+        )
         cred_count = cursor.fetchone()[0]
         print(f"  ✓ Found {cred_count} credentials for admin")
 
@@ -262,20 +307,24 @@ def verify_migration(admin_id: int, db_path: str = 'chirpsyncer.db'):
         existing_tables = [row[0] for row in cursor.fetchall()]
 
         # Check data assignment only for existing tables
-        if 'synced_posts' in existing_tables:
-            cursor.execute('SELECT COUNT(*) FROM synced_posts WHERE user_id = ?', (admin_id,))
+        if "synced_posts" in existing_tables:
+            cursor.execute(
+                "SELECT COUNT(*) FROM synced_posts WHERE user_id = ?", (admin_id,)
+            )
             posts = cursor.fetchone()[0]
             print(f"  ✓ Admin owns {posts} synced posts")
 
-            cursor.execute('SELECT COUNT(*) FROM synced_posts WHERE user_id IS NULL')
+            cursor.execute("SELECT COUNT(*) FROM synced_posts WHERE user_id IS NULL")
             orphaned_posts = cursor.fetchone()[0]
             if orphaned_posts > 0:
                 print(f"  ⚠️  Warning: {orphaned_posts} posts without user_id")
         else:
             print("  ℹ️  No synced_posts table to verify (will be created by app)")
 
-        if 'sync_stats' in existing_tables:
-            cursor.execute('SELECT COUNT(*) FROM sync_stats WHERE user_id = ?', (admin_id,))
+        if "sync_stats" in existing_tables:
+            cursor.execute(
+                "SELECT COUNT(*) FROM sync_stats WHERE user_id = ?", (admin_id,)
+            )
             stats = cursor.fetchone()[0]
             print(f"  ✓ Admin owns {stats} sync stats")
         else:
@@ -296,7 +345,7 @@ def main():
     print("ChirpSyncer: Single-User to Multi-User Migration")
     print("=" * 60)
 
-    db_path = 'chirpsyncer.db'
+    db_path = "chirpsyncer.db"
 
     # Check database exists
     if not Path(db_path).exists():
@@ -306,6 +355,7 @@ def main():
 
     # Backup database
     import shutil
+
     backup_path = f"{db_path}.backup.{int(time.time())}"
     shutil.copy2(db_path, backup_path)
     print(f"\n✓ Database backed up to: {backup_path}")
@@ -316,9 +366,11 @@ def main():
         user_manager.init_db()
 
         # Get master key from environment
-        master_key = os.getenv('SECRET_KEY', 'default-secret-key-change-me').encode('utf-8')
+        master_key = os.getenv("SECRET_KEY", "default-secret-key-change-me").encode(
+            "utf-8"
+        )
         if len(master_key) < 32:
-            master_key = master_key.ljust(32, b'0')[:32]
+            master_key = master_key.ljust(32, b"0")[:32]
 
         cred_manager = CredentialManager(master_key, db_path)
         cred_manager.init_db()
@@ -355,5 +407,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

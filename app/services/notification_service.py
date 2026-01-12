@@ -2,6 +2,7 @@
 Email Notification Service for ChirpSyncer.
 Handles SMTP email notifications for scheduled tasks.
 """
+
 import os
 import smtplib
 from email.mime.text import MIMEText
@@ -35,25 +36,26 @@ class NotificationService:
         """
         if smtp_config:
             self.smtp_config = {
-                'host': smtp_config.get('host', 'smtp.gmail.com'),
-                'port': smtp_config.get('port', 587),
-                'user': smtp_config.get('user', ''),
-                'password': smtp_config.get('password', ''),
-                'from_addr': smtp_config.get('from_addr', 'noreply@chirpsyncer.local'),
-                'enabled': smtp_config.get('enabled', False)
+                "host": smtp_config.get("host", "smtp.gmail.com"),
+                "port": smtp_config.get("port", 587),
+                "user": smtp_config.get("user", ""),
+                "password": smtp_config.get("password", ""),
+                "from_addr": smtp_config.get("from_addr", "noreply@chirpsyncer.local"),
+                "enabled": smtp_config.get("enabled", False),
             }
         else:
             # Load from environment variables
             self.smtp_config = {
-                'host': os.getenv('SMTP_HOST', 'smtp.gmail.com'),
-                'port': int(os.getenv('SMTP_PORT', '587')),
-                'user': os.getenv('SMTP_USER', ''),
-                'password': os.getenv('SMTP_PASSWORD', ''),
-                'from_addr': os.getenv('SMTP_FROM', 'noreply@chirpsyncer.local'),
-                'enabled': os.getenv('SMTP_ENABLED', 'false').lower() == 'true'
+                "host": os.getenv("SMTP_HOST", "smtp.gmail.com"),
+                "port": int(os.getenv("SMTP_PORT", "587")),
+                "user": os.getenv("SMTP_USER", ""),
+                "password": os.getenv("SMTP_PASSWORD", ""),
+                "from_addr": os.getenv("SMTP_FROM", "noreply@chirpsyncer.local"),
+                "enabled": os.getenv("SMTP_ENABLED", "false").lower() == "true",
             }
 
-        logger.info(f"NotificationService initialized (enabled={self.smtp_config['enabled']})")
+        status = "enabled" if self.smtp_config["enabled"] else "disabled"
+        logger.info(f"NotificationService initialized ({status})")
 
     def test_connection(self) -> bool:
         """
@@ -62,18 +64,20 @@ class NotificationService:
         Returns:
             True if connection successful, False otherwise
         """
-        if not self.smtp_config['enabled']:
+        if not self.smtp_config["enabled"]:
             logger.warning("SMTP is disabled, skipping connection test")
             return False
 
-        if not self.smtp_config['user'] or not self.smtp_config['password']:
+        if not self.smtp_config["user"] or not self.smtp_config["password"]:
             logger.error("SMTP credentials not configured")
             return False
 
         try:
-            with smtplib.SMTP(self.smtp_config['host'], self.smtp_config['port']) as server:
+            with smtplib.SMTP(
+                self.smtp_config["host"], self.smtp_config["port"]
+            ) as server:
                 server.starttls()
-                server.login(self.smtp_config['user'], self.smtp_config['password'])
+                server.login(self.smtp_config["user"], self.smtp_config["password"])
                 logger.info("SMTP connection test successful")
                 return True
         except smtplib.SMTPException as e:
@@ -96,35 +100,37 @@ class NotificationService:
         Returns:
             True if email sent successfully, False otherwise
         """
-        if not self.smtp_config['enabled']:
+        if not self.smtp_config["enabled"]:
             logger.info(f"SMTP disabled, skipping email to {to}")
             return False
 
-        if not self.smtp_config['user'] or not self.smtp_config['password']:
+        if not self.smtp_config["user"] or not self.smtp_config["password"]:
             logger.error("SMTP credentials not configured")
             return False
 
         try:
             # Create message
-            msg = MIMEMultipart('alternative') if html else MIMEMultipart()
-            msg['Subject'] = subject
-            msg['From'] = self.smtp_config['from_addr']
-            msg['To'] = to
+            msg = MIMEMultipart("alternative") if html else MIMEMultipart()
+            msg["Subject"] = subject
+            msg["From"] = self.smtp_config["from_addr"]
+            msg["To"] = to
 
             # Add body
             if html:
                 # Add plain text fallback
-                plain_part = MIMEText(self._html_to_plain(body), 'plain')
-                html_part = MIMEText(body, 'html')
+                plain_part = MIMEText(self._html_to_plain(body), "plain")
+                html_part = MIMEText(body, "html")
                 msg.attach(plain_part)
                 msg.attach(html_part)
             else:
-                msg.attach(MIMEText(body, 'plain'))
+                msg.attach(MIMEText(body, "plain"))
 
             # Send email
-            with smtplib.SMTP(self.smtp_config['host'], self.smtp_config['port']) as server:
+            with smtplib.SMTP(
+                self.smtp_config["host"], self.smtp_config["port"]
+            ) as server:
                 server.starttls()
-                server.login(self.smtp_config['user'], self.smtp_config['password'])
+                server.login(self.smtp_config["user"], self.smtp_config["password"])
                 server.send_message(msg)
 
             logger.info(f"Email sent successfully to {to}: {subject}")
@@ -137,7 +143,9 @@ class NotificationService:
             logger.error(f"Unexpected error sending email to {to}: {e}")
             return False
 
-    def notify_task_completion(self, task_name: str, result: Dict, recipients: List[str]) -> bool:
+    def notify_task_completion(
+        self, task_name: str, result: Dict, recipients: List[str]
+    ) -> bool:
         """
         Send task completion notification.
 
@@ -163,7 +171,9 @@ class NotificationService:
 
         return success
 
-    def notify_task_failure(self, task_name: str, error: str, recipients: List[str]) -> bool:
+    def notify_task_failure(
+        self, task_name: str, error: str, recipients: List[str]
+    ) -> bool:
         """
         Send task failure alert.
 
@@ -205,11 +215,11 @@ class NotificationService:
 
         # Generate mock summary for now (will be replaced with actual data)
         tasks_summary = {
-            'total_executions': 0,
-            'successful': 0,
-            'failed': 0,
-            'success_rate': 0.0,
-            'failed_tasks': []
+            "total_executions": 0,
+            "successful": 0,
+            "failed": 0,
+            "success_rate": 0.0,
+            "failed_tasks": [],
         }
 
         subject = "ChirpSyncer Weekly Report"
@@ -233,9 +243,9 @@ class NotificationService:
         Returns:
             HTML email body
         """
-        items_processed = result.get('items_processed', 0)
-        duration = result.get('duration', 0)
-        success = result.get('success', True)
+        items_processed = result.get("items_processed", 0)
+        duration = result.get("duration", 0)
+        success = result.get("success", True)
 
         html = f"""
 <!DOCTYPE html>
@@ -283,7 +293,9 @@ class NotificationService:
 """
         return html
 
-    def _render_task_failure_template(self, task_name: str, error: str, stacktrace: str = None) -> str:
+    def _render_task_failure_template(
+        self, task_name: str, error: str, stacktrace: str = None
+    ) -> str:
         """
         Render task failure email template.
 
@@ -350,11 +362,11 @@ class NotificationService:
         Returns:
             HTML email body
         """
-        total = tasks_summary.get('total_executions', 0)
-        successful = tasks_summary.get('successful', 0)
-        failed = tasks_summary.get('failed', 0)
-        success_rate = tasks_summary.get('success_rate', 0.0)
-        failed_tasks = tasks_summary.get('failed_tasks', [])
+        total = tasks_summary.get("total_executions", 0)
+        successful = tasks_summary.get("successful", 0)
+        failed = tasks_summary.get("failed", 0)
+        success_rate = tasks_summary.get("success_rate", 0.0)
+        failed_tasks = tasks_summary.get("failed_tasks", [])
 
         html = f"""
 <!DOCTYPE html>
@@ -432,10 +444,10 @@ class NotificationService:
         """Render failed tasks section for weekly report."""
         html = '<div class="failed-list"><h3>Failed Tasks:</h3>'
         for task in failed_tasks:
-            task_name = task.get('name', 'Unknown')
-            error = task.get('error', 'No error message')
+            task_name = task.get("name", "Unknown")
+            error = task.get("error", "No error message")
             html += f'<div class="failed-item"><strong>{task_name}</strong><br>{error}</div>'
-        html += '</div>'
+        html += "</div>"
         return html
 
     def _html_to_plain(self, html: str) -> str:
@@ -450,8 +462,9 @@ class NotificationService:
         """
         # Simple HTML to text conversion (basic implementation)
         import re
+
         # Remove HTML tags
-        text = re.sub(r'<[^>]+>', '', html)
+        text = re.sub(r"<[^>]+>", "", html)
         # Remove extra whitespace
-        text = re.sub(r'\s+', ' ', text)
+        text = re.sub(r"\s+", " ", text)
         return text.strip()

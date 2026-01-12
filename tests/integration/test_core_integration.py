@@ -16,10 +16,8 @@ import os
 import sys
 import sqlite3
 import tempfile
-import hashlib
 import json
 import time
-from pathlib import Path
 from unittest.mock import patch, MagicMock
 import pytest
 
@@ -543,7 +541,7 @@ class TestValidationModuleIntegration:
         from app.validation import validate_credentials
 
         # Patch config values directly since they're loaded at import time
-        with patch("app.validation.TWITTER_USERNAME", None):
+        with patch("app.core.config.TWITTER_USERNAME", None):
             with pytest.raises(
                 ValueError, match="Missing required environment variables"
             ):
@@ -554,7 +552,7 @@ class TestValidationModuleIntegration:
         from app.validation import validate_credentials
 
         # Patch config values directly since they're loaded at import time
-        with patch("app.validation.TWITTER_USERNAME", ""):
+        with patch("app.core.config.TWITTER_USERNAME", ""):
             with pytest.raises(
                 ValueError, match="Missing required environment variables"
             ):
@@ -565,7 +563,7 @@ class TestValidationModuleIntegration:
         from app.validation import validate_credentials
 
         # Mock the config values to test validation logic
-        with patch("app.validation.TWITTER_USERNAME", None):
+        with patch("app.core.config.TWITTER_USERNAME", None):
             with pytest.raises(ValueError, match="Missing required"):
                 validate_credentials()
 
@@ -585,7 +583,7 @@ class TestValidationModuleIntegration:
         from app.validation import validate_credentials
 
         # Patch config values directly since they're loaded at import time
-        with patch("app.validation.BSKY_USERNAME", ""):
+        with patch("app.core.config.BSKY_USERNAME", ""):
             with pytest.raises(
                 ValueError, match="Missing required environment variables"
             ):
@@ -596,7 +594,7 @@ class TestValidationModuleIntegration:
         from app.validation import validate_credentials
 
         # Patch config values directly since they're loaded at import time
-        with patch("app.validation.TWITTER_USERNAME", "   "):  # Whitespace only
+        with patch("app.core.config.TWITTER_USERNAME", "   "):  # Whitespace only
             with pytest.raises(
                 ValueError, match="Missing required environment variables"
             ):
@@ -878,12 +876,12 @@ class TestCoreModulesEdgeCases:
         from app.validation import validate_credentials
 
         # Mock config with empty strings
-        with patch("app.validation.TWITTER_USERNAME", ""):
+        with patch("app.core.config.TWITTER_USERNAME", ""):
             with pytest.raises(ValueError, match="Missing required"):
                 validate_credentials()
 
         # Mock config with whitespace only
-        with patch("app.validation.TWITTER_PASSWORD", "   "):
+        with patch("app.core.config.TWITTER_PASSWORD", "   "):
             with pytest.raises(ValueError, match="Missing required"):
                 validate_credentials()
 
@@ -892,22 +890,22 @@ class TestCoreModulesEdgeCases:
         from app.validation import validate_credentials
 
         # Mock all required credentials but missing optional ones
-        with patch("app.validation.TWITTER_USERNAME", "user"), patch(
-            "app.validation.TWITTER_PASSWORD", "pass"
-        ), patch("app.validation.TWITTER_EMAIL", "email@example.com"), patch(
-            "app.validation.TWITTER_EMAIL_PASSWORD", "email_pass"
+        with patch("app.core.config.TWITTER_USERNAME", "user"), patch(
+            "app.core.config.TWITTER_PASSWORD", "pass"
+        ), patch("app.core.config.TWITTER_EMAIL", "email@example.com"), patch(
+            "app.core.config.TWITTER_EMAIL_PASSWORD", "email_pass"
         ), patch(
-            "app.validation.BSKY_USERNAME", "bsky_user"
+            "app.core.config.BSKY_USERNAME", "bsky_user"
         ), patch(
-            "app.validation.BSKY_PASSWORD", "bsky_pass"
+            "app.core.config.BSKY_PASSWORD", "bsky_pass"
         ), patch(
-            "app.validation.TWITTER_API_KEY", None
+            "app.core.config.TWITTER_API_KEY", None
         ), patch(
-            "app.validation.TWITTER_API_SECRET", None
+            "app.core.config.TWITTER_API_SECRET", None
         ), patch(
-            "app.validation.TWITTER_ACCESS_TOKEN", None
+            "app.core.config.TWITTER_ACCESS_TOKEN", None
         ), patch(
-            "app.validation.TWITTER_ACCESS_SECRET", None
+            "app.core.config.TWITTER_ACCESS_SECRET", None
         ):
 
             # Patch the logger to verify warning was called
@@ -921,22 +919,22 @@ class TestCoreModulesEdgeCases:
         from app.validation import validate_credentials
 
         # Mock all required AND optional credentials
-        with patch("app.validation.TWITTER_USERNAME", "user"), patch(
-            "app.validation.TWITTER_PASSWORD", "pass"
-        ), patch("app.validation.TWITTER_EMAIL", "email@example.com"), patch(
-            "app.validation.TWITTER_EMAIL_PASSWORD", "email_pass"
+        with patch("app.core.config.TWITTER_USERNAME", "user"), patch(
+            "app.core.config.TWITTER_PASSWORD", "pass"
+        ), patch("app.core.config.TWITTER_EMAIL", "email@example.com"), patch(
+            "app.core.config.TWITTER_EMAIL_PASSWORD", "email_pass"
         ), patch(
-            "app.validation.BSKY_USERNAME", "bsky_user"
+            "app.core.config.BSKY_USERNAME", "bsky_user"
         ), patch(
-            "app.validation.BSKY_PASSWORD", "bsky_pass"
+            "app.core.config.BSKY_PASSWORD", "bsky_pass"
         ), patch(
-            "app.validation.TWITTER_API_KEY", "api_key"
+            "app.core.config.TWITTER_API_KEY", "api_key"
         ), patch(
-            "app.validation.TWITTER_API_SECRET", "api_secret"
+            "app.core.config.TWITTER_API_SECRET", "api_secret"
         ), patch(
-            "app.validation.TWITTER_ACCESS_TOKEN", "access_token"
+            "app.core.config.TWITTER_ACCESS_TOKEN", "access_token"
         ), patch(
-            "app.validation.TWITTER_ACCESS_SECRET", "access_secret"
+            "app.core.config.TWITTER_ACCESS_SECRET", "access_secret"
         ):
 
             # Patch the logger to verify info was called
