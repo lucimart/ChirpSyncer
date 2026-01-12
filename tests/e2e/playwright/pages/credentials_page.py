@@ -266,7 +266,7 @@ class CredentialsPage:
                 try:
                     self.page.click('button:has-text("Confirm")')
                 except Exception:
-                    pass
+                    pass  # Confirmation dialog may not be present in UI
                 self.page.wait_for_load_state("networkidle")
                 return True
             return False

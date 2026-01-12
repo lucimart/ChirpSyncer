@@ -154,28 +154,28 @@ class RegisterPage:
             if username_error:
                 errors["username"] = username_error.text_content().strip()
         except Exception:
-            pass
+            pass  # Element may not exist if no error for this field
 
         try:
             email_error = self.page.query_selector(self.EMAIL_ERROR)
             if email_error:
                 errors["email"] = email_error.text_content().strip()
         except Exception:
-            pass
+            pass  # Element may not exist if no error for this field
 
         try:
             password_error = self.page.query_selector(self.PASSWORD_ERROR)
             if password_error:
                 errors["password"] = password_error.text_content().strip()
         except Exception:
-            pass
+            pass  # Element may not exist if no error for this field
 
         try:
             confirm_error = self.page.query_selector(self.CONFIRM_PASSWORD_ERROR)
             if confirm_error:
                 errors["confirm_password"] = confirm_error.text_content().strip()
         except Exception:
-            pass
+            pass  # Element may not exist if no error for this field
 
         return errors
 

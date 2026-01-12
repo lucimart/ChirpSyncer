@@ -23,7 +23,7 @@ import sqlite3
 import pytest
 from typing import Generator, Tuple
 import hashlib
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch, MagicMock
 
 # Add app to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../"))
@@ -151,7 +151,7 @@ def temp_db_path() -> Generator[str, None, None]:
         try:
             os.unlink(db_path)
         except OSError:
-            pass
+            pass  # File may be locked or already deleted, safe to ignore
 
 
 @pytest.fixture(scope="function")
@@ -665,11 +665,6 @@ def mock_tweepy():
         mock_tweepy_module.OAuthHandler.return_value = mock_auth
 
         # Mock API class
-        def api_init_side_effect(auth):
-            # Check if the auth has invalid tokens
-            # We'll check via the call args
-            return mock_api_instance
-
         mock_tweepy_module.API.return_value = mock_api_instance
         mock_api_instance.verify_credentials.side_effect = (
             verify_credentials_side_effect
@@ -683,9 +678,7 @@ def mock_tweepy():
             "TweepyException", (Exception,), {}
         )
 
-        # Track calls to detect invalid credentials
-        original_oauth_handler = mock_tweepy_module.OAuthHandler
-
+        # Define OAuth handler with validation
         def oauth_handler_with_validation(api_key, api_secret):
             # If credentials contain 'invalid', we'll make verify_credentials fail
             if "invalid" in api_key.lower() or "invalid" in api_secret.lower():

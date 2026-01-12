@@ -7,7 +7,6 @@ to verify stored credentials are working.
 """
 
 import asyncio
-import logging
 from typing import Dict, Tuple
 from atproto import Client
 from twscrape import API
@@ -37,9 +36,6 @@ async def _validate_twitter_scraping_async(
     try:
         # Initialize twscrape API
         api = API()
-
-        # Check if account exists in pool
-        accounts = await api.pool.accounts_info()
 
         # For now, just verify credentials structure is correct
         required_fields = ["username", "password", "email", "email_password"]

@@ -9,8 +9,6 @@ Tests critical authentication flows including:
 """
 
 import pytest
-import sqlite3
-from pathlib import Path
 
 # Import page objects
 from tests.e2e.playwright.pages.login_page import LoginPage

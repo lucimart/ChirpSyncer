@@ -3,6 +3,7 @@ Security Utilities (Sprint 6 - SECURITY-001)
 
 Provides password validation, rate limiting, and audit logging functionality.
 """
+
 import sqlite3
 import time
 import re
@@ -14,10 +15,10 @@ import threading
 # Password validation requirements
 PASSWORD_MIN_LENGTH = 8
 PASSWORD_PATTERNS = {
-    'uppercase': re.compile(r'[A-Z]'),
-    'lowercase': re.compile(r'[a-z]'),
-    'digit': re.compile(r'\d'),
-    'special': re.compile(r'[!@#$%^&*(),.?":{}|<>]')
+    "uppercase": re.compile(r"[A-Z]"),
+    "lowercase": re.compile(r"[a-z]"),
+    "digit": re.compile(r"\d"),
+    "special": re.compile(r'[!@#$%^&*(),.?":{}|<>]'),
 }
 
 
@@ -42,16 +43,16 @@ def validate_password(password: str) -> bool:
         return False
 
     # Check all pattern requirements
-    if not PASSWORD_PATTERNS['uppercase'].search(password):
+    if not PASSWORD_PATTERNS["uppercase"].search(password):
         return False
 
-    if not PASSWORD_PATTERNS['lowercase'].search(password):
+    if not PASSWORD_PATTERNS["lowercase"].search(password):
         return False
 
-    if not PASSWORD_PATTERNS['digit'].search(password):
+    if not PASSWORD_PATTERNS["digit"].search(password):
         return False
 
-    if not PASSWORD_PATTERNS['special'].search(password):
+    if not PASSWORD_PATTERNS["special"].search(password):
         return False
 
     return True
@@ -68,7 +69,9 @@ class RateLimiter:
         self._attempts = defaultdict(list)  # key -> [(timestamp, ...)]
         self._lock = threading.Lock()
 
-    def check_rate_limit(self, key: str, max_attempts: int, window_seconds: int) -> bool:
+    def check_rate_limit(
+        self, key: str, max_attempts: int, window_seconds: int
+    ) -> bool:
         """
         Check if rate limit is exceeded.
 
@@ -110,10 +113,17 @@ class RateLimiter:
 rate_limiter = RateLimiter()
 
 
-def log_audit(user_id: Optional[int], action: str, success: bool,
-              resource_type: str = None, resource_id: int = None,
-              ip_address: str = None, user_agent: str = None,
-              details: dict = None, db_path: str = 'chirpsyncer.db'):
+def log_audit(
+    user_id: Optional[int],
+    action: str,
+    success: bool,
+    resource_type: str = None,
+    resource_id: int = None,
+    ip_address: str = None,
+    user_agent: str = None,
+    details: dict = None,
+    db_path: str = "chirpsyncer.db",
+):
     """
     Log audit event to database.
 
@@ -133,7 +143,8 @@ def log_audit(user_id: Optional[int], action: str, success: bool,
         cursor = conn.cursor()
 
         # Create audit_log table if not exists
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS audit_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER,
@@ -146,19 +157,33 @@ def log_audit(user_id: Optional[int], action: str, success: bool,
                 details TEXT,
                 created_at INTEGER NOT NULL
             )
-        ''')
+        """
+        )
 
         # Convert details to JSON string
         import json
+
         details_json = json.dumps(details) if details else None
 
         # Insert audit log
-        cursor.execute('''
+        cursor.execute(
+            """
             INSERT INTO audit_log (user_id, action, resource_type, resource_id,
                                   ip_address, user_agent, success, details, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (user_id, action, resource_type, resource_id, ip_address, user_agent,
-              int(success), details_json, int(time.time())))
+        """,
+            (
+                user_id,
+                action,
+                resource_type,
+                resource_id,
+                ip_address,
+                user_agent,
+                int(success),
+                details_json,
+                int(time.time()),
+            ),
+        )
 
         conn.commit()
         conn.close()
@@ -168,8 +193,9 @@ def log_audit(user_id: Optional[int], action: str, success: bool,
         print(f"Warning: Failed to log audit event: {e}")
 
 
-def get_audit_log(user_id: Optional[int] = None, limit: int = 100,
-                  db_path: str = 'chirpsyncer.db') -> List[Dict]:
+def get_audit_log(
+    user_id: Optional[int] = None, limit: int = 100, db_path: str = "chirpsyncer.db"
+) -> List[Dict]:
     """
     Get audit log entries.
 
@@ -187,33 +213,40 @@ def get_audit_log(user_id: Optional[int] = None, limit: int = 100,
         cursor = conn.cursor()
 
         if user_id is not None:
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT * FROM audit_log
                 WHERE user_id = ?
                 ORDER BY created_at DESC
                 LIMIT ?
-            ''', (user_id, limit))
+            """,
+                (user_id, limit),
+            )
         else:
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT * FROM audit_log
                 ORDER BY created_at DESC
                 LIMIT ?
-            ''', (limit,))
+            """,
+                (limit,),
+            )
 
         rows = cursor.fetchall()
         conn.close()
 
         # Convert to dicts
         import json
+
         logs = []
         for row in rows:
             log_entry = dict(row)
             # Parse JSON details
-            if log_entry.get('details'):
+            if log_entry.get("details"):
                 try:
-                    log_entry['details'] = json.loads(log_entry['details'])
+                    log_entry["details"] = json.loads(log_entry["details"])
                 except (json.JSONDecodeError, TypeError, ValueError):
-                    pass
+                    pass  # Keep details as string if JSON parsing fails
             logs.append(log_entry)
 
         return logs
@@ -240,11 +273,11 @@ def check_rate_limit(user_id: int, action: str) -> bool:
     """
     key = f"{user_id}:{action}"
 
-    if action == 'login':
+    if action == "login":
         # 5 attempts per 15 minutes
         return rate_limiter.check_rate_limit(key, max_attempts=5, window_seconds=900)
 
-    elif action == 'api_call':
+    elif action == "api_call":
         # 100 requests per minute
         return rate_limiter.check_rate_limit(key, max_attempts=100, window_seconds=60)
 

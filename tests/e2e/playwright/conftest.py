@@ -13,11 +13,8 @@ import os
 import sys
 import sqlite3
 import tempfile
-import hashlib
-import json
 import time
 import subprocess
-import signal
 import socket
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -425,7 +422,7 @@ def app_server(flask_app, test_db_path):
                 if result == 0:
                     break
         except Exception:
-            pass
+            pass  # Ignore connection errors during server startup
         time.sleep(0.5)
         retry_count += 1
 

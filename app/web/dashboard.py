@@ -10,7 +10,6 @@ Provides routes for:
 """
 
 import os
-import json
 import logging
 from flask import (
     Flask,
@@ -24,7 +23,6 @@ from flask import (
     abort,
 )
 from flask_session import Session
-from werkzeug.security import safe_join
 from app.auth.user_manager import UserManager
 from app.auth.credential_manager import CredentialManager
 from app.auth.auth_decorators import require_auth, require_admin, require_self_or_admin
@@ -155,9 +153,7 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
         # Create user
         user_manager = UserManager(app.config["DB_PATH"])
         try:
-            user_id = user_manager.create_user(
-                username, email, password, is_admin=False
-            )
+            _ = user_manager.create_user(username, email, password, is_admin=False)
             flash("Registration successful! Please login.", "success")
             return redirect(url_for("login"))
         except ValueError as e:
@@ -587,6 +583,7 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
         except Exception as e:
             flash(f"Error loading task details: {str(e)}", "error")
             abort(404)
+            return None  # Explicit return to satisfy static analysis
 
     @app.route("/tasks/<task_name>/trigger", methods=["POST"])
     @require_admin

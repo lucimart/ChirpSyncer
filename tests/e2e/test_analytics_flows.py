@@ -15,11 +15,9 @@ Tests verify:
 - CSV exports contain correct data
 """
 
-import pytest
 import json
 import csv
 import io
-import time
 from datetime import datetime, timedelta
 
 

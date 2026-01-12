@@ -8,8 +8,8 @@ Provides common functionality for all page objects including:
 - Flash message handling
 """
 
-from typing import Optional, List
-from playwright.sync_api import Page, expect
+from typing import Optional
+from playwright.sync_api import Page
 
 
 class BasePage:

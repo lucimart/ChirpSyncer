@@ -10,8 +10,6 @@ Tests critical credential management flows including:
 
 import pytest
 import sqlite3
-import json
-from pathlib import Path
 
 # Import page objects
 from tests.e2e.playwright.pages.login_page import LoginPage
@@ -98,7 +96,6 @@ class TestCredentialManagement:
         ), "Should return to credentials list"
 
         # Verify credential appears in the UI
-        credentials_list = credentials_page.get_credentials_list()
         # Note: This depends on HTML structure; may need adjustment
 
         # Verify credential is encrypted in database
@@ -245,8 +242,7 @@ class TestCredentialManagement:
             cred_id
         ), "Should delete credential successfully"
 
-        # Verify success message
-        success_msg = credentials_page.get_success_message()
+        # Verify success message (if implemented in UI)
         # Note: May need adjustment based on actual success message
 
         # Verify removed from database
