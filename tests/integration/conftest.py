@@ -745,6 +745,15 @@ def integration_app(test_db_path):
     # Disable CSRF for testing
     app.config["WTF_CSRF_ENABLED"] = False
 
+    # Setup mock task scheduler for tests
+    from unittest.mock import MagicMock
+
+    mock_scheduler = MagicMock()
+    mock_scheduler.get_all_tasks.return_value = []
+    mock_scheduler.get_task_status.return_value = None
+    mock_scheduler.trigger_task_now.return_value = True
+    app.config["TASK_SCHEDULER"] = mock_scheduler
+
     yield app
 
 

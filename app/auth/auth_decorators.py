@@ -39,9 +39,9 @@ def require_auth(f):
         # Validate session if session_token exists
         if "session_token" in session:
             user_manager = _get_user_manager()
-            user_id = user_manager.validate_session(session["session_token"])
+            validated_user = user_manager.validate_session(session["session_token"])
 
-            if user_id is None:
+            if validated_user is None:
                 # Session expired or invalid
                 session.clear()
                 from flask import flash
@@ -50,7 +50,7 @@ def require_auth(f):
                 return redirect(url_for("login"))
 
             # Update session user_id in case it changed
-            session["user_id"] = user_id
+            session["user_id"] = validated_user.id
 
         return f(*args, **kwargs)
 
@@ -79,9 +79,9 @@ def require_admin(f):
         # Validate session if session_token exists
         user_manager = _get_user_manager()
         if "session_token" in session:
-            user_id = user_manager.validate_session(session["session_token"])
+            validated_user = user_manager.validate_session(session["session_token"])
 
-            if user_id is None:
+            if validated_user is None:
                 # Session expired or invalid
                 session.clear()
                 from flask import flash
@@ -89,7 +89,7 @@ def require_admin(f):
                 flash("Your session has expired. Please log in again.", "warning")
                 return redirect(url_for("login"))
 
-            session["user_id"] = user_id
+            session["user_id"] = validated_user.id
 
         user = user_manager.get_user_by_id(session["user_id"])
 
@@ -124,9 +124,9 @@ def require_self_or_admin(f):
         # Validate session if session_token exists
         user_manager = _get_user_manager()
         if "session_token" in session:
-            validated_user_id = user_manager.validate_session(session["session_token"])
+            validated_user = user_manager.validate_session(session["session_token"])
 
-            if validated_user_id is None:
+            if validated_user is None:
                 # Session expired or invalid
                 session.clear()
                 from flask import flash
@@ -134,7 +134,7 @@ def require_self_or_admin(f):
                 flash("Your session has expired. Please log in again.", "warning")
                 return redirect(url_for("login"))
 
-            session["user_id"] = validated_user_id
+            session["user_id"] = validated_user.id
 
         current_user = user_manager.get_user_by_id(session["user_id"])
 

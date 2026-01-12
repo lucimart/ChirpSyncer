@@ -506,7 +506,7 @@ class UserManager:
             session_token: Session token
 
         Returns:
-            User ID if session is valid, None otherwise
+            User object if session is valid, None otherwise
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -538,8 +538,8 @@ class UserManager:
                 conn.commit()
                 return None
 
-            # Return user_id
-            return user_id
+            # Return user object
+            return self.get_user_by_id(user_id)
 
         finally:
             conn.close()

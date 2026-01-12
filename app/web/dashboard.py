@@ -591,10 +591,7 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
         scheduler = _get_scheduler()
 
         if not scheduler:
-            return (
-                jsonify({"success": False, "error": "Scheduler not available"}),
-                500,
-            )
+            return jsonify({"success": False, "error": "Scheduler not available"})
 
         try:
             success = scheduler.trigger_task_now(task_name)
@@ -604,12 +601,9 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
                     {"success": True, "message": f"Task {task_name} triggered"}
                 )
             else:
-                return (
-                    jsonify({"success": False, "error": "Failed to trigger task"}),
-                    500,
-                )
+                return jsonify({"success": False, "error": "Failed to trigger task"})
         except Exception as e:
-            return jsonify({"success": False, "error": str(e)}), 500
+            return jsonify({"success": False, "error": str(e)})
 
     @app.route("/tasks/<task_name>/toggle", methods=["POST"])
     @require_admin

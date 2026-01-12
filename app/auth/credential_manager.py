@@ -289,7 +289,7 @@ class CredentialManager:
         self, user_id: int, platform: str, credential_type: str
     ) -> Optional[dict]:
         """
-        Get decrypted credentials for a user.
+        Get decrypted credentials for a user (including shared credentials).
 
         Args:
             user_id: User ID
@@ -303,9 +303,10 @@ class CredentialManager:
         cursor = conn.cursor()
 
         try:
+            # First try to find user's own credentials
             cursor.execute(
                 """
-                SELECT encrypted_data, encryption_iv, encryption_tag
+                SELECT encrypted_data, encryption_iv, encryption_tag, id
                 FROM user_credentials
                 WHERE user_id = ? AND platform = ? AND credential_type = ?
             """,
@@ -313,6 +314,20 @@ class CredentialManager:
             )
 
             row = cursor.fetchone()
+
+            # If not found, check for shared credentials
+            if not row:
+                cursor.execute(
+                    """
+                    SELECT uc.encrypted_data, uc.encryption_iv, uc.encryption_tag, uc.id
+                    FROM user_credentials uc
+                    INNER JOIN shared_credentials sc ON uc.id = sc.credential_id
+                    WHERE sc.shared_with_user_id = ? AND uc.platform = ? AND uc.credential_type = ?
+                """,
+                    (user_id, platform, credential_type),
+                )
+                row = cursor.fetchone()
+
             if not row:
                 return None
 
@@ -320,6 +335,7 @@ class CredentialManager:
             encrypted_data = row["encrypted_data"]
             iv = row["encryption_iv"]
             tag = row["encryption_tag"]
+            cred_id = row["id"]
 
             decrypted_data = self._decrypt_credentials(encrypted_data, iv, tag)
 
@@ -328,9 +344,9 @@ class CredentialManager:
                 """
                 UPDATE user_credentials
                 SET last_used = ?
-                WHERE user_id = ? AND platform = ? AND credential_type = ?
+                WHERE id = ?
             """,
-                (int(time.time()), user_id, platform, credential_type),
+                (int(time.time()), cred_id),
             )
             conn.commit()
 

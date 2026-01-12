@@ -649,18 +649,21 @@ def test_credential_sharing_between_users(
     assert creds_d is not None
     assert creds_d["api_key"] == sample_user_credentials["api_key"]
 
-    # Verify shared credentials are marked correctly
+    # Verify shared credentials are tracked correctly in shared_credentials table
     cursor = test_db.cursor()
     cursor.execute(
         """
-        SELECT is_shared, owner_user_id FROM user_credentials
-        WHERE user_id = ? AND platform = 'twitter'
+        SELECT sc.owner_user_id, sc.shared_with_user_id, uc.platform
+        FROM shared_credentials sc
+        INNER JOIN user_credentials uc ON sc.credential_id = uc.id
+        WHERE sc.shared_with_user_id = ? AND uc.platform = 'twitter'
     """,
         (user_c_id,),
     )
     row = cursor.fetchone()
-    assert row["is_shared"] == 1
+    assert row is not None
     assert row["owner_user_id"] == owner_id
+    assert row["shared_with_user_id"] == user_c_id
 
 
 @pytest.mark.integration
