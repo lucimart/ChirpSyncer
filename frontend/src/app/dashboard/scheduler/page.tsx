@@ -1,0 +1,664 @@
+'use client';
+
+import { useState } from 'react';
+import styled from 'styled-components';
+import {
+  Calendar,
+  Clock,
+  Plus,
+  Trash2,
+  TrendingUp,
+  Twitter,
+  CheckCircle,
+  AlertCircle,
+  Sparkles,
+  Target,
+} from 'lucide-react';
+import { Button, Card, Input, Modal, useToast } from '@/components/ui';
+import {
+  useOptimalTimes,
+  useScheduledPosts,
+  useEngagementPrediction,
+  useCreateScheduledPost,
+  useDeleteScheduledPost,
+  ScheduledPost,
+  TimeSlot,
+} from '@/lib/scheduling';
+
+const PageHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: ${({ theme }) => theme.spacing[6]};
+`;
+
+const HeaderLeft = styled.div``;
+
+const PageTitle = styled.h1`
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const PageDescription = styled.p`
+  color: ${({ theme }) => theme.colors.text.secondary};
+  margin-top: ${({ theme }) => theme.spacing[1]};
+`;
+
+const GridLayout = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: ${({ theme }) => theme.spacing[6]};
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const MainContent = styled.div``;
+
+const Sidebar = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[4]};
+`;
+
+const SectionTitle = styled.h2`
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  color: ${({ theme }) => theme.colors.text.primary};
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+`;
+
+const OptimalTimesList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[2]};
+`;
+
+const OptimalTimeItem = styled.button<{ $selected?: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: ${({ theme }) => theme.spacing[3]};
+  background-color: ${({ $selected, theme }) =>
+    $selected ? theme.colors.primary[50] : theme.colors.background.secondary};
+  border: 1px solid
+    ${({ $selected, theme }) =>
+      $selected ? theme.colors.primary[300] : 'transparent'};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.fast};
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary[50]};
+  }
+`;
+
+const TimeLabel = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const ScoreBadge = styled.span<{ $score: number }>`
+  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  background-color: ${({ $score, theme }) =>
+    $score >= 80
+      ? theme.colors.success[100]
+      : $score >= 60
+        ? theme.colors.warning[100]
+        : theme.colors.neutral[100]};
+  color: ${({ $score, theme }) =>
+    $score >= 80
+      ? theme.colors.success[700]
+      : $score >= 60
+        ? theme.colors.warning[700]
+        : theme.colors.neutral[700]};
+`;
+
+const ScheduledList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[3]};
+`;
+
+const ScheduledCard = styled(Card)`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[3]};
+`;
+
+const ScheduledHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+`;
+
+const ScheduledContent = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text.primary};
+  line-height: 1.5;
+`;
+
+const ScheduledMeta = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[4]};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.text.tertiary};
+`;
+
+const MetaItem = styled.span`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[1]};
+`;
+
+const PlatformBadge = styled.span<{ $platform: string }>`
+  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  background-color: ${({ $platform, theme }) =>
+    $platform === 'twitter'
+      ? '#E8F5FD'
+      : $platform === 'bluesky'
+        ? '#E8F0FF'
+        : theme.colors.primary[100]};
+  color: ${({ $platform, theme }) =>
+    $platform === 'twitter'
+      ? '#1DA1F2'
+      : $platform === 'bluesky'
+        ? '#0085FF'
+        : theme.colors.primary[700]};
+`;
+
+const StatusBadge = styled.span<{ $status: string }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[1]};
+  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  background-color: ${({ $status, theme }) =>
+    $status === 'published'
+      ? theme.colors.success[100]
+      : $status === 'failed'
+        ? theme.colors.danger[100]
+        : theme.colors.warning[100]};
+  color: ${({ $status, theme }) =>
+    $status === 'published'
+      ? theme.colors.success[700]
+      : $status === 'failed'
+        ? theme.colors.danger[700]
+        : theme.colors.warning[700]};
+`;
+
+const EmptyState = styled.div`
+  text-align: center;
+  padding: ${({ theme }) => theme.spacing[8]};
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[4]};
+`;
+
+const TextArea = styled.textarea`
+  width: 100%;
+  min-height: 120px;
+  padding: ${({ theme }) => theme.spacing[3]};
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  resize: vertical;
+  font-family: inherit;
+
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary[500]};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[100]};
+  }
+`;
+
+const Label = styled.label`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.text.primary};
+  display: block;
+  margin-bottom: ${({ theme }) => theme.spacing[1]};
+`;
+
+const FieldGroup = styled.div``;
+
+const PlatformSelect = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing[2]};
+`;
+
+const PlatformOption = styled.button<{ $selected: boolean }>`
+  flex: 1;
+  padding: ${({ theme }) => theme.spacing[3]};
+  border: 1px solid
+    ${({ $selected, theme }) =>
+      $selected ? theme.colors.primary[500] : theme.colors.border.default};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  background-color: ${({ $selected, theme }) =>
+    $selected ? theme.colors.primary[50] : 'transparent'};
+  color: ${({ $selected, theme }) =>
+    $selected ? theme.colors.primary[700] : theme.colors.text.secondary};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.fast};
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary[300]};
+  }
+`;
+
+const PredictionCard = styled.div`
+  padding: ${({ theme }) => theme.spacing[4]};
+  background-color: ${({ theme }) => theme.colors.background.secondary};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  margin-top: ${({ theme }) => theme.spacing[4]};
+`;
+
+const PredictionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: ${({ theme }) => theme.spacing[3]};
+`;
+
+const PredictionTitle = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  color: ${({ theme }) => theme.colors.text.primary};
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+`;
+
+const PredictionScore = styled.span<{ $score: number }>`
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ $score, theme }) =>
+    $score >= 80
+      ? theme.colors.success[600]
+      : $score >= 60
+        ? theme.colors.warning[600]
+        : theme.colors.danger[600]};
+`;
+
+const SuggestionsList = styled.ul`
+  margin: 0;
+  padding-left: ${({ theme }) => theme.spacing[4]};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.text.secondary};
+
+  li {
+    margin-bottom: ${({ theme }) => theme.spacing[1]};
+  }
+`;
+
+export default function SchedulerPage() {
+  const { addToast } = useToast();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [content, setContent] = useState('');
+  const [scheduledAt, setScheduledAt] = useState('');
+  const [platform, setPlatform] = useState<'twitter' | 'bluesky' | 'both'>('both');
+
+  const { data: optimalTimes } = useOptimalTimes();
+  const { data: scheduledPosts, isLoading } = useScheduledPosts();
+  const engagementPrediction = useEngagementPrediction();
+  const createPost = useCreateScheduledPost();
+  const deletePost = useDeleteScheduledPost();
+
+  const handleOptimalTimeSelect = (slot: TimeSlot) => {
+    const now = new Date();
+    const targetDate = new Date();
+    const daysUntilTarget = (slot.day - now.getDay() + 7) % 7 || 7;
+    targetDate.setDate(now.getDate() + daysUntilTarget);
+    targetDate.setHours(slot.hour, 0, 0, 0);
+
+    const formatted = targetDate.toISOString().slice(0, 16);
+    setScheduledAt(formatted);
+
+    if (content) {
+      engagementPrediction.mutate({
+        content,
+        scheduledAt: formatted,
+        hasMedia: false,
+      });
+    }
+  };
+
+  const handleContentChange = (value: string) => {
+    setContent(value);
+    if (value && scheduledAt) {
+      engagementPrediction.mutate({
+        content: value,
+        scheduledAt,
+        hasMedia: false,
+      });
+    }
+  };
+
+  const handleDateChange = (value: string) => {
+    setScheduledAt(value);
+    if (content && value) {
+      engagementPrediction.mutate({
+        content,
+        scheduledAt: value,
+        hasMedia: false,
+      });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!content.trim() || !scheduledAt) return;
+
+    try {
+      await createPost.mutateAsync({ content, scheduledAt, platform });
+      addToast({
+        type: 'success',
+        title: 'Post Scheduled',
+        message: 'Your post has been scheduled successfully',
+      });
+      setIsModalOpen(false);
+      setContent('');
+      setScheduledAt('');
+      setPlatform('both');
+    } catch {
+      addToast({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to schedule post',
+      });
+    }
+  };
+
+  const handleDelete = async (postId: string) => {
+    try {
+      await deletePost.mutateAsync(postId);
+      addToast({
+        type: 'success',
+        title: 'Post Deleted',
+        message: 'Scheduled post has been removed',
+      });
+    } catch {
+      addToast({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to delete post',
+      });
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'published':
+        return <CheckCircle size={12} />;
+      case 'failed':
+        return <AlertCircle size={12} />;
+      default:
+        return <Clock size={12} />;
+    }
+  };
+
+  const pendingPosts = scheduledPosts?.filter((p) => p.status === 'pending') ?? [];
+  const publishedPosts = scheduledPosts?.filter((p) => p.status !== 'pending') ?? [];
+
+  return (
+    <div>
+      <PageHeader>
+        <HeaderLeft>
+          <PageTitle>Scheduler</PageTitle>
+          <PageDescription>
+            Schedule posts with AI-powered optimal timing suggestions
+          </PageDescription>
+        </HeaderLeft>
+        <Button onClick={() => setIsModalOpen(true)}>
+          <Plus size={18} />
+          Schedule Post
+        </Button>
+      </PageHeader>
+
+      <GridLayout>
+        <MainContent>
+          <SectionTitle>
+            <Clock size={20} />
+            Upcoming Posts ({pendingPosts.length})
+          </SectionTitle>
+
+          {isLoading ? (
+            <Card padding="lg">
+              <EmptyState>Loading scheduled posts...</EmptyState>
+            </Card>
+          ) : pendingPosts.length > 0 ? (
+            <ScheduledList>
+              {pendingPosts.map((post) => (
+                <ScheduledCard key={post.id} padding="md">
+                  <ScheduledHeader>
+                    <PlatformBadge $platform={post.platform}>
+                      {post.platform === 'both' ? 'All Platforms' : post.platform}
+                    </PlatformBadge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(post.id)}
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </ScheduledHeader>
+                  <ScheduledContent>{post.content}</ScheduledContent>
+                  <ScheduledMeta>
+                    <MetaItem>
+                      <Calendar size={14} />
+                      {formatDate(post.scheduled_at)}
+                    </MetaItem>
+                    <MetaItem>
+                      <Target size={14} />
+                      {post.predicted_engagement}% predicted
+                    </MetaItem>
+                    <StatusBadge $status={post.status}>
+                      {getStatusIcon(post.status)}
+                      {post.status}
+                    </StatusBadge>
+                  </ScheduledMeta>
+                </ScheduledCard>
+              ))}
+            </ScheduledList>
+          ) : (
+            <Card padding="lg">
+              <EmptyState>
+                No scheduled posts. Click "Schedule Post" to create one.
+              </EmptyState>
+            </Card>
+          )}
+
+          {publishedPosts.length > 0 && (
+            <>
+              <SectionTitle style={{ marginTop: '32px' }}>
+                <CheckCircle size={20} />
+                Recently Published ({publishedPosts.length})
+              </SectionTitle>
+              <ScheduledList>
+                {publishedPosts.map((post) => (
+                  <ScheduledCard key={post.id} padding="md">
+                    <ScheduledHeader>
+                      <PlatformBadge $platform={post.platform}>
+                        {post.platform === 'both' ? 'All Platforms' : post.platform}
+                      </PlatformBadge>
+                      <StatusBadge $status={post.status}>
+                        {getStatusIcon(post.status)}
+                        {post.status}
+                      </StatusBadge>
+                    </ScheduledHeader>
+                    <ScheduledContent>{post.content}</ScheduledContent>
+                    <ScheduledMeta>
+                      <MetaItem>
+                        <Calendar size={14} />
+                        {formatDate(post.scheduled_at)}
+                      </MetaItem>
+                    </ScheduledMeta>
+                  </ScheduledCard>
+                ))}
+              </ScheduledList>
+            </>
+          )}
+        </MainContent>
+
+        <Sidebar>
+          <Card padding="md">
+            <SectionTitle>
+              <Sparkles size={20} />
+              Optimal Times
+            </SectionTitle>
+            {optimalTimes ? (
+              <>
+                <OptimalTimesList>
+                  {optimalTimes.best_times.map((slot, i) => (
+                    <OptimalTimeItem
+                      key={i}
+                      onClick={() => handleOptimalTimeSelect(slot)}
+                    >
+                      <TimeLabel>{slot.label}</TimeLabel>
+                      <ScoreBadge $score={slot.score}>{slot.score}%</ScoreBadge>
+                    </OptimalTimeItem>
+                  ))}
+                </OptimalTimesList>
+                <MetaItem style={{ marginTop: '12px', fontSize: '11px' }}>
+                  Based on {optimalTimes.based_on_posts} posts
+                </MetaItem>
+              </>
+            ) : (
+              <EmptyState>Loading optimal times...</EmptyState>
+            )}
+          </Card>
+        </Sidebar>
+      </GridLayout>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Schedule New Post"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={!content.trim() || !scheduledAt}
+              isLoading={createPost.isPending}
+            >
+              Schedule Post
+            </Button>
+          </>
+        }
+      >
+        <Form onSubmit={handleSubmit}>
+          <FieldGroup>
+            <Label>Content</Label>
+            <TextArea
+              value={content}
+              onChange={(e) => handleContentChange(e.target.value)}
+              placeholder="What do you want to share?"
+              maxLength={280}
+            />
+          </FieldGroup>
+
+          <FieldGroup>
+            <Label>Schedule For</Label>
+            <Input
+              type="datetime-local"
+              value={scheduledAt}
+              onChange={(e) => handleDateChange(e.target.value)}
+              min={new Date().toISOString().slice(0, 16)}
+              fullWidth
+            />
+          </FieldGroup>
+
+          <FieldGroup>
+            <Label>Platform</Label>
+            <PlatformSelect>
+              <PlatformOption
+                type="button"
+                $selected={platform === 'twitter'}
+                onClick={() => setPlatform('twitter')}
+              >
+                Twitter
+              </PlatformOption>
+              <PlatformOption
+                type="button"
+                $selected={platform === 'bluesky'}
+                onClick={() => setPlatform('bluesky')}
+              >
+                Bluesky
+              </PlatformOption>
+              <PlatformOption
+                type="button"
+                $selected={platform === 'both'}
+                onClick={() => setPlatform('both')}
+              >
+                Both
+              </PlatformOption>
+            </PlatformSelect>
+          </FieldGroup>
+
+          {engagementPrediction.data && (
+            <PredictionCard>
+              <PredictionHeader>
+                <PredictionTitle>
+                  <TrendingUp size={16} />
+                  Engagement Prediction
+                </PredictionTitle>
+                <PredictionScore $score={engagementPrediction.data.score}>
+                  {engagementPrediction.data.score}%
+                </PredictionScore>
+              </PredictionHeader>
+              {engagementPrediction.data.suggested_improvements.length > 0 && (
+                <SuggestionsList>
+                  {engagementPrediction.data.suggested_improvements.map((tip, i) => (
+                    <li key={i}>{tip}</li>
+                  ))}
+                </SuggestionsList>
+              )}
+            </PredictionCard>
+          )}
+
+          {engagementPrediction.isPending && (
+            <PredictionCard>
+              <PredictionTitle>
+                <TrendingUp size={16} />
+                Analyzing engagement...
+              </PredictionTitle>
+            </PredictionCard>
+          )}
+        </Form>
+      </Modal>
+    </div>
+  );
+}

@@ -14,6 +14,7 @@ import {
   LogOut,
   Bookmark,
   Download,
+  Calendar,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -150,6 +151,7 @@ const navItems = [
   { href: '/dashboard', icon: Home, label: 'Dashboard' },
   { href: '/dashboard/credentials', icon: Key, label: 'Credentials' },
   { href: '/dashboard/sync', icon: RefreshCw, label: 'Sync' },
+  { href: '/dashboard/scheduler', icon: Calendar, label: 'Scheduler' },
   { href: '/dashboard/cleanup', icon: Trash2, label: 'Cleanup' },
   { href: '/dashboard/search', icon: Search, label: 'Search' },
   { href: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
