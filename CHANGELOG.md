@@ -315,6 +315,7 @@ Benefits:
 - README rewritten for clarity
 
 ### Fixed
+- move nosec B104 comment to correct line for Bandit suppression
 - resolve all E2E test failures from CI run
 
 Fixed 6 critical issues found in CI:
