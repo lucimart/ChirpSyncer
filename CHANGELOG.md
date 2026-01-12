@@ -315,6 +315,45 @@ Benefits:
 - README rewritten for clarity
 
 ### Fixed
+- resolve all E2E test failures from CI run
+
+Fixed 6 critical issues found in CI:
+
+1. **validate_session() return type** (user_manager.py:459)
+   - Fixed method to return int instead of User object
+   - Resolves TypeError in 3 tests (test_user_registration_to_first_sync,
+     test_admin_user_management, test_session_creation_and_clearing)
+
+2. **get_shared_credentials() SQL query** (credential_manager.py:685)
+   - Updated query to use INNER JOIN on shared_credentials table
+   - Previously queried wrong table (user_credentials with is_shared flag)
+   - Resolves empty shared credentials list in test_admin_user_management
+
+3. **Tweepy mocking for tests** (conftest.py, credential_validator.py)
+   - Imported tweepy at module level in credential_validator.py
+   - Added autouse fixture to mock tweepy in all E2E tests
+   - Mock fails invalid credentials (containing 'invalid')
+   - Resolves test_invalid_credential_test_failure
+
+4. **Bytes vs string comparison** (test_multi_user_flows.py:185)
+   - Fixed encryption test to compare bytes with bytes
+   - Added isinstance() check to handle both bytes and str
+   - Resolves TypeError in test_credential_encryption_and_isolation
+
+5. **Shared credential deletion authorization** (dashboard.py:427)
+   - Added owner_user_id check in delete endpoint
+   - Users can only delete their own credentials, not shared ones
+   - Returns 403 Forbidden for shared credential deletion attempts
+   - Resolves test_credential_sharing_workflow failure
+
+6. **Task scheduler setup for tests** (conftest.py:191, dashboard.py:590, test_task_scheduling.py:222)
+   - Added TaskScheduler.init_db() to create task execution tables
+   - Created mock scheduler with database-backed trigger_task_now()
+   - Fixed trigger endpoint to always return JSON
+   - Fixed test to use correct column name (started_at not executed_at)
+   - Resolves 3 task scheduling test failures
+
+All 77 E2E tests now pass.
 - implement proper JSON error handling
 
 - Add try-catch for JSON parsing in all API endpoints
