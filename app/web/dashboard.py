@@ -95,10 +95,17 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
         user = user_manager.authenticate_user(username, password)
 
         if user:
-            # Create session
+            # Create database-tracked session
+            ip_address = request.remote_addr or "unknown"
+            user_agent = request.headers.get("User-Agent", "unknown")
+            session_token = user_manager.create_session(user.id, ip_address, user_agent)
+
+            # Store in Flask session
             session["user_id"] = user.id
             session["username"] = user.username
             session["is_admin"] = user.is_admin
+            session["session_token"] = session_token
+
             flash(f"Welcome back, {user.username}!", "success")
             return redirect(url_for("dashboard"))
         else:
@@ -108,6 +115,11 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
     @app.route("/logout", methods=["POST"])
     def logout():
         """Logout handler"""
+        # Delete session from database if it exists
+        if "session_token" in session:
+            user_manager = UserManager(app.config["DB_PATH"])
+            user_manager.delete_session(session["session_token"])
+
         session.clear()
         flash("You have been logged out", "success")
         return redirect(url_for("login"))

@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- implement task management API endpoints
+
+- Add /api/tasks/<task_id>/status endpoint for individual task status
+- Update /api/tasks/status to include success field
+- Make /tasks/<task_id>/trigger return JSON for API calls
+- Add proper status mapping (running/paused/completed/failed)
+- Remove skip decorators from 3 task scheduling tests
+
+This enables full task management via API including status monitoring
+and manual task triggering.
 - implement real Twitter API credential validation
 
 - Add actual Twitter API authentication using tweepy
