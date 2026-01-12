@@ -239,6 +239,11 @@ All tests passing with real SQLite DB integration
 - README rewritten for clarity
 
 ### Fixed
+- upgrade pytest-playwright to 0.5.2 for pytest 9.x compatibility
+
+- pytest-playwright 0.4.3 requires pytest<8.0.0
+- pytest-playwright 0.5.2 supports pytest 9.x
+- Resolves dependency conflict in CI pipeline
 - enable pytest-playwright plugin and fix fixture chain
 
 - Add pytest_plugins declaration to enable pytest-playwright
