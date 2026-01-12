@@ -1,5 +1,5 @@
 ---
-name: ChirpSyncer Design System
+name: chirp-design-system
 description: Modern design system with light/dark mode, animations, and sleek UI patterns
 ---
 

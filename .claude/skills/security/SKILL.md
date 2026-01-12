@@ -1,5 +1,5 @@
 ---
-name: Security Assessment
+name: security
 description: Code security review, vulnerability detection, and secure coding practices
 ---
 

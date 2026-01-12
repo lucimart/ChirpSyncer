@@ -1,5 +1,5 @@
 ---
-name: Skill Workflow
+name: skill-workflow
 description: Master document defining how skills interact, trigger, and flow together
 ---
 

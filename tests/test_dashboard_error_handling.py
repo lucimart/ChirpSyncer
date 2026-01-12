@@ -936,3 +936,159 @@ def test_analytics_overview_success(client, regular_user):
         assert data['success'] is True
 
 
+# ============================================================================
+# SEARCH API ROUTE TESTS (Sprint 9 - TASK-901, TASK-902)
+# ============================================================================
+
+def test_search_api_requires_auth(client):
+    """Test /api/search requires authentication"""
+    response = client.get('/api/search?q=test')
+    assert response.status_code == 302  # Redirect to login
+
+
+def test_search_api_missing_query(client, regular_user):
+    """Test /api/search returns error when query is missing"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = regular_user.id
+
+    response = client.get('/api/search')
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert data['success'] is False
+    assert 'required' in data['error'].lower()
+
+
+def test_search_api_empty_query(client, regular_user):
+    """Test /api/search returns error for empty query"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = regular_user.id
+
+    response = client.get('/api/search?q=')
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert data['success'] is False
+
+
+def test_search_api_success(client, regular_user):
+    """Test /api/search success with basic query"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = regular_user.id
+
+    with patch('app.web.dashboard.SearchEngine') as mock_engine_class:
+        mock_engine = Mock()
+        mock_engine_class.return_value = mock_engine
+        mock_engine.search_with_filters.return_value = [
+            {'tweet_id': '123', 'content': 'Test tweet'}
+        ]
+
+        response = client.get('/api/search?q=test')
+        assert response.status_code == 200
+        data = json.loads(response.data)
+        assert data['success'] is True
+        assert data['query'] == 'test'
+        assert len(data['results']) == 1
+
+
+def test_search_api_with_filters(client, regular_user):
+    """Test /api/search with all filters"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = regular_user.id
+
+    with patch('app.web.dashboard.SearchEngine') as mock_engine_class:
+        mock_engine = Mock()
+        mock_engine_class.return_value = mock_engine
+        mock_engine.search_with_filters.return_value = []
+
+        response = client.get(
+            '/api/search?q=test&has_media=true&min_likes=10&min_retweets=5'
+            '&author=user&hashtags=python,flask&date_from=1000&date_to=2000'
+        )
+        assert response.status_code == 200
+        data = json.loads(response.data)
+        assert data['success'] is True
+        assert data['filters']['has_media'] is True
+        assert data['filters']['min_likes'] == 10
+        assert data['filters']['min_retweets'] == 5
+        assert data['filters']['author'] == 'user'
+        assert 'python' in data['filters']['hashtags']
+
+
+def test_search_api_invalid_date_from(client, regular_user):
+    """Test /api/search with invalid date_from"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = regular_user.id
+
+    response = client.get('/api/search?q=test&date_from=invalid')
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'date_from' in data['error']
+
+
+def test_search_api_invalid_date_to(client, regular_user):
+    """Test /api/search with invalid date_to"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = regular_user.id
+
+    response = client.get('/api/search?q=test&date_to=notanumber')
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'date_to' in data['error']
+
+
+def test_search_api_invalid_min_likes(client, regular_user):
+    """Test /api/search with invalid min_likes"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = regular_user.id
+
+    response = client.get('/api/search?q=test&min_likes=abc')
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'min_likes' in data['error']
+
+
+def test_search_api_invalid_min_retweets(client, regular_user):
+    """Test /api/search with invalid min_retweets"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = regular_user.id
+
+    response = client.get('/api/search?q=test&min_retweets=xyz')
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'min_retweets' in data['error']
+
+
+def test_search_api_limit_capped(client, regular_user):
+    """Test /api/search caps limit at 100"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = regular_user.id
+
+    with patch('app.web.dashboard.SearchEngine') as mock_engine_class:
+        mock_engine = Mock()
+        mock_engine_class.return_value = mock_engine
+        # Return more than 100 results
+        mock_engine.search_with_filters.return_value = [
+            {'tweet_id': str(i)} for i in range(150)
+        ]
+
+        response = client.get('/api/search?q=test&limit=200')
+        assert response.status_code == 200
+        data = json.loads(response.data)
+        assert data['count'] <= 100  # Should be capped
+
+
+def test_search_api_exception(client, regular_user):
+    """Test /api/search handles exceptions gracefully"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = regular_user.id
+
+    with patch('app.web.dashboard.SearchEngine') as mock_engine_class:
+        mock_engine = Mock()
+        mock_engine_class.return_value = mock_engine
+        mock_engine.search_with_filters.side_effect = Exception("DB error")
+
+        response = client.get('/api/search?q=test')
+        assert response.status_code == 500
+        data = json.loads(response.data)
+        assert data['success'] is False
+
+

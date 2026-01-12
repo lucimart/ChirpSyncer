@@ -107,7 +107,7 @@ def test_db(test_db_path):
     """
     )
 
-    # Create user_credentials table for encrypted credentials storage
+    # Create user_credentials table for encrypted credentials storage (AES-256-GCM)
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS user_credentials (
@@ -115,9 +115,13 @@ def test_db(test_db_path):
             user_id INTEGER NOT NULL,
             platform TEXT NOT NULL,
             credential_type TEXT NOT NULL,
-            encrypted_data TEXT NOT NULL,
+            encrypted_data BLOB NOT NULL,
+            encryption_iv BLOB NOT NULL,
+            encryption_tag BLOB NOT NULL,
             created_at INTEGER NOT NULL,
             updated_at INTEGER NOT NULL,
+            last_used INTEGER,
+            is_active INTEGER DEFAULT 1,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             UNIQUE(user_id, platform, credential_type)
         )
@@ -125,6 +129,7 @@ def test_db(test_db_path):
     )
 
     # Create synced_posts table for tracking bidirectional sync
+    # Extended with engagement/media columns for Sprint 9 search filters
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS synced_posts (
@@ -136,6 +141,13 @@ def test_db(test_db_path):
             synced_to TEXT,
             synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             original_text TEXT NOT NULL,
+            user_id INTEGER,
+            twitter_username TEXT,
+            hashtags TEXT,
+            posted_at INTEGER,
+            has_media INTEGER DEFAULT 0,
+            likes_count INTEGER DEFAULT 0,
+            retweets_count INTEGER DEFAULT 0,
             CHECK (source IN ('twitter', 'bluesky')),
             CHECK (synced_to IN ('bluesky', 'twitter', 'both'))
         )

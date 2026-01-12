@@ -1,5 +1,5 @@
 ---
-name: Memory Management
+name: memory-management
 description: Store, retrieve, and manage context across sessions using claude-mem and openmemory
 ---
 

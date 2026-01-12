@@ -1,5 +1,5 @@
 ---
-name: ChirpSyncer Architecture
+name: chirp-architecture
 description: Architectural analysis and planning for ChirpSyncer platform
 ---
 

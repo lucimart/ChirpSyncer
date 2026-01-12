@@ -1,5 +1,5 @@
 ---
-name: Open Social Hub Vision
+name: chirp-open-social-hub
 description: Evolution from ChirpSyncer to multi-platform social hub with user-owned algorithms
 ---
 

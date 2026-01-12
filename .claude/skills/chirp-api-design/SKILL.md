@@ -1,5 +1,5 @@
 ---
-name: ChirpSyncer API Design
+name: chirp-api-design
 description: REST API and WebSocket endpoint design patterns
 ---
 

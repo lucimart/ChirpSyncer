@@ -1,5 +1,5 @@
 ---
-name: Skill Management
+name: skill-management
 description: Meta-skill for creating, updating, and improving skills based on project context
 ---
 

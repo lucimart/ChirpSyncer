@@ -1,5 +1,5 @@
 ---
-name: Connector Framework
+name: chirp-connector-framework
 description: Multi-platform connector architecture for Twitter, Bluesky, Mastodon, Instagram
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: ChirpSyncer Multi-Platform
+name: chirp-multi-platform
 description: Capabilities-first platform abstraction for Twitter, Bluesky, and future platforms
 ---
 

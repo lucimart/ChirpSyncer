@@ -28,6 +28,7 @@ from app.auth.credential_manager import CredentialManager
 from app.auth.auth_decorators import require_auth, require_admin, require_self_or_admin
 from app.auth.security_utils import validate_password
 from app.features.analytics_tracker import AnalyticsTracker
+from app.features.search_engine import SearchEngine
 
 logger = logging.getLogger(__name__)
 
@@ -1024,6 +1025,112 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
             return jsonify({"success": True, "snapshots": snapshots})
         except Exception as e:
             logger.error(f"Error getting snapshots: {str(e)}")
+            return (
+                jsonify({"success": False, "error": "An internal error occurred"}),
+                500,
+            )
+
+    # ========================================================================
+    # SEARCH ROUTES (Sprint 9 - TASK-901, TASK-902)
+    # ========================================================================
+
+    @app.route("/api/search")
+    @require_auth
+    def api_search():
+        """
+        Search tweets with filters (JSON API).
+
+        Query parameters:
+        - q: Search query (required)
+        - date_from: Unix timestamp (minimum date)
+        - date_to: Unix timestamp (maximum date)
+        - hashtags: Comma-separated list of hashtags
+        - author: Filter by tweet author username
+        - has_media: Boolean (true/false) - filter by media presence
+        - min_likes: Minimum likes count
+        - min_retweets: Minimum retweets count
+        - limit: Maximum results (default 50, max 100)
+        """
+        try:
+            user_id = session["user_id"]
+
+            # Get search query (required)
+            query = request.args.get("q", "").strip()
+            if not query:
+                return jsonify({"success": False, "error": "Query parameter 'q' is required"}), 400
+
+            # Build filters from query parameters
+            filters = {}
+
+            # Date filters
+            date_from = request.args.get("date_from")
+            if date_from:
+                try:
+                    filters["date_from"] = int(date_from)
+                except ValueError:
+                    return jsonify({"success": False, "error": "Invalid date_from format"}), 400
+
+            date_to = request.args.get("date_to")
+            if date_to:
+                try:
+                    filters["date_to"] = int(date_to)
+                except ValueError:
+                    return jsonify({"success": False, "error": "Invalid date_to format"}), 400
+
+            # Hashtags filter
+            hashtags = request.args.get("hashtags")
+            if hashtags:
+                filters["hashtags"] = [h.strip().lstrip("#") for h in hashtags.split(",") if h.strip()]
+
+            # Author filter
+            author = request.args.get("author")
+            if author:
+                filters["author"] = author.strip().lstrip("@")
+
+            # Media filter (Sprint 9 - TASK-901)
+            has_media = request.args.get("has_media")
+            if has_media is not None:
+                filters["has_media"] = has_media.lower() == "true"
+
+            # Engagement filters (Sprint 9 - TASK-902)
+            min_likes = request.args.get("min_likes")
+            if min_likes is not None:
+                try:
+                    filters["min_likes"] = int(min_likes)
+                except ValueError:
+                    return jsonify({"success": False, "error": "Invalid min_likes format"}), 400
+
+            min_retweets = request.args.get("min_retweets")
+            if min_retweets is not None:
+                try:
+                    filters["min_retweets"] = int(min_retweets)
+                except ValueError:
+                    return jsonify({"success": False, "error": "Invalid min_retweets format"}), 400
+
+            # Limit
+            limit = request.args.get("limit", 50)
+            try:
+                limit = min(int(limit), 100)  # Cap at 100
+            except ValueError:
+                limit = 50
+
+            # Execute search
+            search_engine = SearchEngine(app.config["DB_PATH"])
+            results = search_engine.search_with_filters(query, user_id, filters)
+
+            # Apply limit
+            results = results[:limit]
+
+            return jsonify({
+                "success": True,
+                "query": query,
+                "filters": filters,
+                "results": results,
+                "count": len(results),
+            })
+
+        except Exception as e:
+            logger.error(f"Error in search: {str(e)}")
             return (
                 jsonify({"success": False, "error": "An internal error occurred"}),
                 500,
