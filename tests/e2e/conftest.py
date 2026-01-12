@@ -191,6 +191,20 @@ def e2e_app(temp_db_path) -> Generator:
 
 
 @pytest.fixture(scope="function")
+def test_app(e2e_app):
+    """
+    Alias for e2e_app fixture for backwards compatibility.
+
+    Args:
+        e2e_app: Flask application fixture
+
+    Yields:
+        Flask: Configured Flask application instance
+    """
+    yield e2e_app
+
+
+@pytest.fixture(scope="function")
 def client(e2e_app):
     """
     Create Flask test client for HTTP requests.
