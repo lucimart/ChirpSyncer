@@ -315,6 +315,20 @@ Benefits:
 - README rewritten for clarity
 
 ### Fixed
+- prevent SQL injection in analytics tracker
+
+Refactored get_top_tweets() to use whitelist dict instead of f-string
+for ORDER BY clause construction. This prevents SQL injection and makes
+the validation more recognizable by static analysis tools like CodeQL.
+
+Changes:
+- Replaced list-based validation with dict-based whitelist
+- metric parameter validated via dict.get() with safe default
+- order_by_column used instead of direct metric interpolation
+- Removed # nosec comment (no longer needed with proper validation)
+
+Security: Resolves CodeQL SQL injection warning
+Tests: All 5 analytics tracker tests pass
 - resolve 10 failing tests from CI (Phase 0 complete)
 
 Fixed all 10 originally failing tests:
