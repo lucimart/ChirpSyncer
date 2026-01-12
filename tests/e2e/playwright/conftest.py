@@ -25,9 +25,6 @@ from contextlib import closing
 
 import pytest
 
-# Enable pytest-playwright plugin
-pytest_plugins = ["pytest_playwright.pytest_playwright"]
-
 # Add app directory to path for imports
 sys.path.insert(
     0,
