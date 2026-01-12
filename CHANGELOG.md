@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - README rewritten for clarity
 
 ### Fixed
+- update TweetScheduler tests to include master_key parameter
+
+- TweetScheduler now requires master_key for credential decryption
+- Updated all test instantiations to pass master_key
+- All 542 unit tests passing with 87.18% coverage
 - fix broken documentation links
 
 - Update placeholder URL in API.md to actual repository

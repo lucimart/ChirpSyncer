@@ -33,12 +33,15 @@ from typing import Dict, Optional, Tuple
 import pytest
 
 # Add app directory to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'app'))
+sys.path.insert(
+    0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "app")
+)
 
 
 # =============================================================================
 # DATABASE FIXTURES
 # =============================================================================
+
 
 @pytest.fixture(scope="function")
 def test_db_path():
@@ -95,7 +98,8 @@ def test_db(test_db_path):
     cursor = conn.cursor()
 
     # Create users table
-    cursor.execute('''
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
@@ -107,10 +111,12 @@ def test_db(test_db_path):
             is_admin INTEGER DEFAULT 0,
             settings_json TEXT
         )
-    ''')
+    """
+    )
 
     # Create user_sessions table
-    cursor.execute('''
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS user_sessions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
@@ -121,10 +127,12 @@ def test_db(test_db_path):
             user_agent TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
-    ''')
+    """
+    )
 
     # Create user_credentials table for encrypted credentials storage
-    cursor.execute('''
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS user_credentials (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
@@ -136,10 +144,12 @@ def test_db(test_db_path):
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             UNIQUE(user_id, platform, credential_type)
         )
-    ''')
+    """
+    )
 
     # Create synced_posts table for tracking bidirectional sync
-    cursor.execute('''
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS synced_posts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             twitter_id TEXT,
@@ -152,16 +162,24 @@ def test_db(test_db_path):
             CHECK (source IN ('twitter', 'bluesky')),
             CHECK (synced_to IN ('bluesky', 'twitter', 'both'))
         )
-    ''')
+    """
+    )
 
     # Create indexes for synced_posts
-    cursor.execute('CREATE INDEX IF NOT EXISTS idx_twitter_id ON synced_posts(twitter_id)')
-    cursor.execute('CREATE INDEX IF NOT EXISTS idx_bluesky_uri ON synced_posts(bluesky_uri)')
-    cursor.execute('CREATE INDEX IF NOT EXISTS idx_content_hash ON synced_posts(content_hash)')
-    cursor.execute('CREATE INDEX IF NOT EXISTS idx_source ON synced_posts(source)')
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_twitter_id ON synced_posts(twitter_id)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_bluesky_uri ON synced_posts(bluesky_uri)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_content_hash ON synced_posts(content_hash)"
+    )
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_source ON synced_posts(source)")
 
     # Create sync_stats table for tracking sync metrics
-    cursor.execute('''
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS sync_stats (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp INTEGER NOT NULL,
@@ -175,10 +193,12 @@ def test_db(test_db_path):
             duration_ms INTEGER,
             user_id INTEGER
         )
-    ''')
+    """
+    )
 
     # Create hourly_stats table for aggregated metrics
-    cursor.execute('''
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS hourly_stats (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             hour_timestamp INTEGER NOT NULL UNIQUE,
@@ -191,16 +211,26 @@ def test_db(test_db_path):
             total_threads INTEGER DEFAULT 0,
             avg_duration_ms REAL DEFAULT 0
         )
-    ''')
+    """
+    )
 
     # Create indexes for stats tables
-    cursor.execute('CREATE INDEX IF NOT EXISTS idx_sync_stats_timestamp ON sync_stats(timestamp)')
-    cursor.execute('CREATE INDEX IF NOT EXISTS idx_sync_stats_success ON sync_stats(success)')
-    cursor.execute('CREATE INDEX IF NOT EXISTS idx_sync_stats_user ON sync_stats(user_id)')
-    cursor.execute('CREATE INDEX IF NOT EXISTS idx_hourly_stats_timestamp ON hourly_stats(hour_timestamp)')
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_sync_stats_timestamp ON sync_stats(timestamp)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_sync_stats_success ON sync_stats(success)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_sync_stats_user ON sync_stats(user_id)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_hourly_stats_timestamp ON hourly_stats(hour_timestamp)"
+    )
 
     # Create audit_log table for security tracking
-    cursor.execute('''
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS audit_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
@@ -211,7 +241,53 @@ def test_db(test_db_path):
             ip_address TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
         )
-    ''')
+    """
+    )
+
+    # Create cleanup_rules table for cleanup engine
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS cleanup_rules (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            enabled INTEGER DEFAULT 1,
+            rule_type TEXT NOT NULL,
+            rule_config TEXT NOT NULL,
+            last_run INTEGER,
+            deleted_count INTEGER DEFAULT 0,
+            created_at INTEGER NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """
+    )
+
+    # Create cleanup_history table for tracking cleanup executions
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS cleanup_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            rule_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            tweets_deleted INTEGER DEFAULT 0,
+            executed_at INTEGER NOT NULL,
+            dry_run INTEGER DEFAULT 1,
+            FOREIGN KEY (rule_id) REFERENCES cleanup_rules(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """
+    )
+
+    # Create indexes for cleanup tables
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_cleanup_rules_user ON cleanup_rules(user_id)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_cleanup_history_user ON cleanup_history(user_id)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_cleanup_history_rule ON cleanup_history(rule_id)"
+    )
 
     conn.commit()
     yield conn
@@ -221,6 +297,7 @@ def test_db(test_db_path):
 # =============================================================================
 # USER FIXTURES
 # =============================================================================
+
 
 @pytest.fixture(scope="function")
 def test_user(test_db) -> Dict:
@@ -254,28 +331,31 @@ def test_user(test_db) -> Dict:
     import bcrypt
     import time
 
-    username = 'testuser'
-    email = 'testuser@example.com'
-    password = 'TestPassword123!'
+    username = "testuser"
+    email = "testuser@example.com"
+    password = "TestPassword123!"
 
     # Hash password with bcrypt (cost factor 12)
-    password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=12))
+    password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(rounds=12))
 
     cursor = test_db.cursor()
-    cursor.execute('''
+    cursor.execute(
+        """
         INSERT INTO users (username, email, password_hash, created_at, is_active, is_admin)
         VALUES (?, ?, ?, ?, 1, 0)
-    ''', (username, email, password_hash.decode('utf-8'), int(time.time())))
+    """,
+        (username, email, password_hash.decode("utf-8"), int(time.time())),
+    )
 
     user_id = cursor.lastrowid
     test_db.commit()
 
     return {
-        'id': user_id,
-        'username': username,
-        'email': email,
-        'password': password,
-        'is_admin': False,
+        "id": user_id,
+        "username": username,
+        "email": email,
+        "password": password,
+        "is_admin": False,
     }
 
 
@@ -308,34 +388,38 @@ def test_admin_user(test_db) -> Dict:
     import bcrypt
     import time
 
-    username = 'admin'
-    email = 'admin@example.com'
-    password = 'AdminPassword123!'
+    username = "admin"
+    email = "admin@example.com"
+    password = "AdminPassword123!"
 
     # Hash password with bcrypt
-    password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=12))
+    password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(rounds=12))
 
     cursor = test_db.cursor()
-    cursor.execute('''
+    cursor.execute(
+        """
         INSERT INTO users (username, email, password_hash, created_at, is_active, is_admin)
         VALUES (?, ?, ?, ?, 1, 1)
-    ''', (username, email, password_hash.decode('utf-8'), int(time.time())))
+    """,
+        (username, email, password_hash.decode("utf-8"), int(time.time())),
+    )
 
     user_id = cursor.lastrowid
     test_db.commit()
 
     return {
-        'id': user_id,
-        'username': username,
-        'email': email,
-        'password': password,
-        'is_admin': True,
+        "id": user_id,
+        "username": username,
+        "email": email,
+        "password": password,
+        "is_admin": True,
     }
 
 
 # =============================================================================
 # MOCK API FIXTURES
 # =============================================================================
+
 
 @pytest.fixture(scope="function")
 def mock_twitter_api():
@@ -370,41 +454,41 @@ def mock_twitter_api():
 
     # Mock user data
     api.get_user.return_value = {
-        'id': '123456789',
-        'screen_name': 'testuser',
-        'name': 'Test User',
-        'followers_count': 100,
-        'friends_count': 50,
-        'verified': False,
-        'created_at': 'Mon Jan 01 00:00:00 +0000 2024',
+        "id": "123456789",
+        "screen_name": "testuser",
+        "name": "Test User",
+        "followers_count": 100,
+        "friends_count": 50,
+        "verified": False,
+        "created_at": "Mon Jan 01 00:00:00 +0000 2024",
     }
 
     # Mock search tweets
     api.search_tweets.return_value = [
         {
-            'id': '1001',
-            'text': 'Test tweet 1',
-            'created_at': 'Mon Jan 01 12:00:00 +0000 2024',
-            'author_id': '123456789',
-            'author': {'username': 'testuser'},
-            'public_metrics': {
-                'retweet_count': 5,
-                'reply_count': 2,
-                'like_count': 10,
-                'quote_count': 1,
+            "id": "1001",
+            "text": "Test tweet 1",
+            "created_at": "Mon Jan 01 12:00:00 +0000 2024",
+            "author_id": "123456789",
+            "author": {"username": "testuser"},
+            "public_metrics": {
+                "retweet_count": 5,
+                "reply_count": 2,
+                "like_count": 10,
+                "quote_count": 1,
             },
         },
         {
-            'id': '1002',
-            'text': 'Test tweet 2 with #hashtag',
-            'created_at': 'Mon Jan 01 13:00:00 +0000 2024',
-            'author_id': '123456789',
-            'author': {'username': 'testuser'},
-            'public_metrics': {
-                'retweet_count': 3,
-                'reply_count': 1,
-                'like_count': 7,
-                'quote_count': 0,
+            "id": "1002",
+            "text": "Test tweet 2 with #hashtag",
+            "created_at": "Mon Jan 01 13:00:00 +0000 2024",
+            "author_id": "123456789",
+            "author": {"username": "testuser"},
+            "public_metrics": {
+                "retweet_count": 3,
+                "reply_count": 1,
+                "like_count": 7,
+                "quote_count": 0,
             },
         },
     ]
@@ -412,39 +496,39 @@ def mock_twitter_api():
     # Mock home timeline
     api.get_home_timeline.return_value = [
         {
-            'id': '2001',
-            'text': 'Timeline tweet 1',
-            'created_at': 'Mon Jan 01 14:00:00 +0000 2024',
-            'author_id': '987654321',
-            'author': {'username': 'other_user'},
+            "id": "2001",
+            "text": "Timeline tweet 1",
+            "created_at": "Mon Jan 01 14:00:00 +0000 2024",
+            "author_id": "987654321",
+            "author": {"username": "other_user"},
         }
     ]
 
     # Mock post tweet
     api.post_tweet.return_value = {
-        'data': {'id': '3001', 'text': 'Posted tweet'},
-        'errors': None,
+        "data": {"id": "3001", "text": "Posted tweet"},
+        "errors": None,
     }
 
     # Mock get tweet
     api.get_tweet.return_value = {
-        'id': '1001',
-        'text': 'Test tweet 1',
-        'author_id': '123456789',
+        "id": "1001",
+        "text": "Test tweet 1",
+        "author_id": "123456789",
     }
 
     # Mock media upload
     api.upload_media.return_value = {
-        'media_id': 'media_123',
-        'size': 2048,
-        'expires_after_secs': 3600,
+        "media_id": "media_123",
+        "size": 2048,
+        "expires_after_secs": 3600,
     }
 
     # Mock like/retweet operations
-    api.like.return_value = {'data': {'liked': True}}
-    api.retweet.return_value = {'data': {'retweeted': True}}
-    api.unlike.return_value = {'data': {'liked': False}}
-    api.unretweet.return_value = {'data': {'retweeted': False}}
+    api.like.return_value = {"data": {"liked": True}}
+    api.retweet.return_value = {"data": {"retweeted": True}}
+    api.unlike.return_value = {"data": {"liked": False}}
+    api.unretweet.return_value = {"data": {"retweeted": False}}
 
     # Add side effects for more complex scenarios
     api.search_tweets.side_effect = None  # Clear side effects
@@ -494,104 +578,104 @@ def mock_bluesky_api():
 
     # Mock login
     api.login.return_value = {
-        'accessJwt': 'jwt_token_123',
-        'refreshJwt': 'refresh_token_123',
-        'handle': 'testuser.bsky.social',
-        'did': 'did:plc:testuser123',
+        "accessJwt": "jwt_token_123",
+        "refreshJwt": "refresh_token_123",
+        "handle": "testuser.bsky.social",
+        "did": "did:plc:testuser123",
     }
 
     # Mock get profile
     api.get_profile.return_value = {
-        'did': 'did:plc:testuser123',
-        'handle': 'testuser.bsky.social',
-        'displayName': 'Test User',
-        'description': 'Test description',
-        'followersCount': 100,
-        'followsCount': 50,
-        'postsCount': 25,
-        'created_at': '2023-01-01T00:00:00Z',
+        "did": "did:plc:testuser123",
+        "handle": "testuser.bsky.social",
+        "displayName": "Test User",
+        "description": "Test description",
+        "followersCount": 100,
+        "followsCount": 50,
+        "postsCount": 25,
+        "created_at": "2023-01-01T00:00:00Z",
     }
 
     # Mock get timeline (feed)
     api.get_timeline.return_value = {
-        'feed': [
+        "feed": [
             {
-                'post': {
-                    'uri': 'at://did:plc:testuser123/app.bsky.feed.post/bsky001',
-                    'cid': 'cid_bsky001',
-                    'record': {
-                        'text': 'Test Bluesky post 1',
-                        'createdAt': '2024-01-01T12:00:00Z',
-                        'facets': [],
-                        'reply': None,
+                "post": {
+                    "uri": "at://did:plc:testuser123/app.bsky.feed.post/bsky001",
+                    "cid": "cid_bsky001",
+                    "record": {
+                        "text": "Test Bluesky post 1",
+                        "createdAt": "2024-01-01T12:00:00Z",
+                        "facets": [],
+                        "reply": None,
                     },
-                    'author': {
-                        'did': 'did:plc:testuser123',
-                        'handle': 'testuser.bsky.social',
+                    "author": {
+                        "did": "did:plc:testuser123",
+                        "handle": "testuser.bsky.social",
                     },
                 },
-                'likeCount': 10,
-                'replyCount': 2,
-                'repostCount': 5,
+                "likeCount": 10,
+                "replyCount": 2,
+                "repostCount": 5,
             },
             {
-                'post': {
-                    'uri': 'at://did:plc:testuser123/app.bsky.feed.post/bsky002',
-                    'cid': 'cid_bsky002',
-                    'record': {
-                        'text': 'Test Bluesky post 2 with #hashtag',
-                        'createdAt': '2024-01-01T13:00:00Z',
-                        'facets': [],
-                        'reply': None,
+                "post": {
+                    "uri": "at://did:plc:testuser123/app.bsky.feed.post/bsky002",
+                    "cid": "cid_bsky002",
+                    "record": {
+                        "text": "Test Bluesky post 2 with #hashtag",
+                        "createdAt": "2024-01-01T13:00:00Z",
+                        "facets": [],
+                        "reply": None,
                     },
-                    'author': {
-                        'did': 'did:plc:testuser123',
-                        'handle': 'testuser.bsky.social',
+                    "author": {
+                        "did": "did:plc:testuser123",
+                        "handle": "testuser.bsky.social",
                     },
                 },
-                'likeCount': 7,
-                'replyCount': 1,
-                'repostCount': 3,
+                "likeCount": 7,
+                "replyCount": 1,
+                "repostCount": 3,
             },
         ],
-        'cursor': 'next_cursor_123',
+        "cursor": "next_cursor_123",
     }
 
     # Mock send post (create post)
     api.send_post.return_value = {
-        'uri': 'at://did:plc:testuser123/app.bsky.feed.post/posted001',
-        'cid': 'cid_posted001',
+        "uri": "at://did:plc:testuser123/app.bsky.feed.post/posted001",
+        "cid": "cid_posted001",
     }
 
     # Mock get post
     api.get_post.return_value = {
-        'post': {
-            'uri': 'at://did:plc:testuser123/app.bsky.feed.post/bsky001',
-            'cid': 'cid_bsky001',
-            'record': {
-                'text': 'Test Bluesky post 1',
-                'createdAt': '2024-01-01T12:00:00Z',
+        "post": {
+            "uri": "at://did:plc:testuser123/app.bsky.feed.post/bsky001",
+            "cid": "cid_bsky001",
+            "record": {
+                "text": "Test Bluesky post 1",
+                "createdAt": "2024-01-01T12:00:00Z",
             },
-            'author': {
-                'did': 'did:plc:testuser123',
-                'handle': 'testuser.bsky.social',
+            "author": {
+                "did": "did:plc:testuser123",
+                "handle": "testuser.bsky.social",
             },
         }
     }
 
     # Mock delete post
-    api.delete_post.return_value = {'success': True}
+    api.delete_post.return_value = {"success": True}
 
     # Mock like operation
     api.like.return_value = {
-        'uri': 'at://did:plc:testuser123/app.bsky.feed.like/like001',
-        'cid': 'cid_like001',
+        "uri": "at://did:plc:testuser123/app.bsky.feed.like/like001",
+        "cid": "cid_like001",
     }
 
     # Mock repost operation
     api.repost.return_value = {
-        'uri': 'at://did:plc:testuser123/app.bsky.feed.repost/repost001',
-        'cid': 'cid_repost001',
+        "uri": "at://did:plc:testuser123/app.bsky.feed.repost/repost001",
+        "cid": "cid_repost001",
     }
 
     # Mock unlike operation
@@ -606,6 +690,7 @@ def mock_bluesky_api():
 # =============================================================================
 # FLASK APP FIXTURES
 # =============================================================================
+
 
 @pytest.fixture(scope="function")
 def integration_app(test_db_path):
@@ -652,13 +737,13 @@ def integration_app(test_db_path):
     app = create_app(db_path=test_db_path, master_key=None)
 
     # Configure for testing
-    app.config['TESTING'] = True
-    app.config['DEBUG'] = True
-    app.config['JSON_SORT_KEYS'] = False
-    app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
+    app.config["TESTING"] = True
+    app.config["DEBUG"] = True
+    app.config["JSON_SORT_KEYS"] = False
+    app.config["PRESERVE_CONTEXT_ON_EXCEPTION"] = False
 
     # Disable CSRF for testing
-    app.config['WTF_CSRF_ENABLED'] = False
+    app.config["WTF_CSRF_ENABLED"] = False
 
     yield app
 
@@ -716,6 +801,7 @@ def app_context(integration_app):
 # HELPER FIXTURES AND UTILITIES
 # =============================================================================
 
+
 @pytest.fixture(scope="function")
 def user_session(test_db, test_user) -> str:
     """
@@ -745,18 +831,21 @@ def user_session(test_db, test_user) -> str:
     expires_at = int(time.time()) + 3600  # 1 hour expiry
 
     cursor = test_db.cursor()
-    cursor.execute('''
+    cursor.execute(
+        """
         INSERT INTO user_sessions
         (user_id, session_token, created_at, expires_at, ip_address, user_agent)
         VALUES (?, ?, ?, ?, ?, ?)
-    ''', (
-        test_user['id'],
-        session_token,
-        int(time.time()),
-        expires_at,
-        '127.0.0.1',
-        'TestClient/1.0'
-    ))
+    """,
+        (
+            test_user["id"],
+            session_token,
+            int(time.time()),
+            expires_at,
+            "127.0.0.1",
+            "TestClient/1.0",
+        ),
+    )
     test_db.commit()
 
     return session_token
@@ -781,42 +870,42 @@ def sample_tweets():
     """
     return [
         {
-            'id': '1001',
-            'text': 'Sample tweet 1 for testing',
-            'created_at': '2024-01-01T12:00:00Z',
-            'author_id': '123456789',
-            'public_metrics': {
-                'retweet_count': 5,
-                'reply_count': 2,
-                'like_count': 10,
-                'quote_count': 1,
+            "id": "1001",
+            "text": "Sample tweet 1 for testing",
+            "created_at": "2024-01-01T12:00:00Z",
+            "author_id": "123456789",
+            "public_metrics": {
+                "retweet_count": 5,
+                "reply_count": 2,
+                "like_count": 10,
+                "quote_count": 1,
             },
         },
         {
-            'id': '1002',
-            'text': 'Sample tweet 2 with multiple lines\nand line breaks',
-            'created_at': '2024-01-01T13:00:00Z',
-            'author_id': '123456789',
-            'public_metrics': {
-                'retweet_count': 3,
-                'reply_count': 1,
-                'like_count': 7,
-                'quote_count': 0,
+            "id": "1002",
+            "text": "Sample tweet 2 with multiple lines\nand line breaks",
+            "created_at": "2024-01-01T13:00:00Z",
+            "author_id": "123456789",
+            "public_metrics": {
+                "retweet_count": 3,
+                "reply_count": 1,
+                "like_count": 7,
+                "quote_count": 0,
             },
         },
         {
-            'id': '1003',
-            'text': 'Sample tweet 3 with media',
-            'created_at': '2024-01-01T14:00:00Z',
-            'author_id': '123456789',
-            'attachments': {
-                'media_keys': ['3_1234567890'],
+            "id": "1003",
+            "text": "Sample tweet 3 with media",
+            "created_at": "2024-01-01T14:00:00Z",
+            "author_id": "123456789",
+            "attachments": {
+                "media_keys": ["3_1234567890"],
             },
-            'public_metrics': {
-                'retweet_count': 2,
-                'reply_count': 0,
-                'like_count': 5,
-                'quote_count': 0,
+            "public_metrics": {
+                "retweet_count": 2,
+                "reply_count": 0,
+                "like_count": 5,
+                "quote_count": 0,
             },
         },
     ]
@@ -841,51 +930,51 @@ def sample_bluesky_posts():
     """
     return [
         {
-            'uri': 'at://did:plc:testuser/app.bsky.feed.post/bsky001',
-            'cid': 'cid_bsky001',
-            'record': {
-                'text': 'Sample Bluesky post 1',
-                'createdAt': '2024-01-01T12:00:00Z',
-                'facets': [],
+            "uri": "at://did:plc:testuser/app.bsky.feed.post/bsky001",
+            "cid": "cid_bsky001",
+            "record": {
+                "text": "Sample Bluesky post 1",
+                "createdAt": "2024-01-01T12:00:00Z",
+                "facets": [],
             },
-            'author': {
-                'did': 'did:plc:testuser',
-                'handle': 'testuser.bsky.social',
-            },
-        },
-        {
-            'uri': 'at://did:plc:testuser/app.bsky.feed.post/bsky002',
-            'cid': 'cid_bsky002',
-            'record': {
-                'text': 'Sample Bluesky post 2 with multiple lines\nand formatting',
-                'createdAt': '2024-01-01T13:00:00Z',
-                'facets': [],
-            },
-            'author': {
-                'did': 'did:plc:testuser',
-                'handle': 'testuser.bsky.social',
+            "author": {
+                "did": "did:plc:testuser",
+                "handle": "testuser.bsky.social",
             },
         },
         {
-            'uri': 'at://did:plc:testuser/app.bsky.feed.post/bsky003',
-            'cid': 'cid_bsky003',
-            'record': {
-                'text': 'Sample Bluesky post 3 with image',
-                'createdAt': '2024-01-01T14:00:00Z',
-                'facets': [],
-                'embed': {
-                    '$type': 'app.bsky.embed.images',
-                    'images': [
+            "uri": "at://did:plc:testuser/app.bsky.feed.post/bsky002",
+            "cid": "cid_bsky002",
+            "record": {
+                "text": "Sample Bluesky post 2 with multiple lines\nand formatting",
+                "createdAt": "2024-01-01T13:00:00Z",
+                "facets": [],
+            },
+            "author": {
+                "did": "did:plc:testuser",
+                "handle": "testuser.bsky.social",
+            },
+        },
+        {
+            "uri": "at://did:plc:testuser/app.bsky.feed.post/bsky003",
+            "cid": "cid_bsky003",
+            "record": {
+                "text": "Sample Bluesky post 3 with image",
+                "createdAt": "2024-01-01T14:00:00Z",
+                "facets": [],
+                "embed": {
+                    "$type": "app.bsky.embed.images",
+                    "images": [
                         {
-                            'image': {'$type': 'blob', 'link': 'image_link'},
-                            'alt': 'Test image',
+                            "image": {"$type": "blob", "link": "image_link"},
+                            "alt": "Test image",
                         }
                     ],
                 },
             },
-            'author': {
-                'did': 'did:plc:testuser',
-                'handle': 'testuser.bsky.social',
+            "author": {
+                "did": "did:plc:testuser",
+                "handle": "testuser.bsky.social",
             },
         },
     ]
@@ -894,6 +983,7 @@ def sample_bluesky_posts():
 # =============================================================================
 # PYTEST HOOKS AND CONFIGURATION
 # =============================================================================
+
 
 def pytest_configure(config):
     """
@@ -905,19 +995,9 @@ def pytest_configure(config):
     - database: Marks tests that use database operations
     - api: Marks tests that use API mocks
     """
+    config.addinivalue_line("markers", "integration: mark test as an integration test")
+    config.addinivalue_line("markers", "slow: mark test as slow running")
     config.addinivalue_line(
-        "markers",
-        "integration: mark test as an integration test"
+        "markers", "database: mark test as using database operations"
     )
-    config.addinivalue_line(
-        "markers",
-        "slow: mark test as slow running"
-    )
-    config.addinivalue_line(
-        "markers",
-        "database: mark test as using database operations"
-    )
-    config.addinivalue_line(
-        "markers",
-        "api: mark test as using API mocks"
-    )
+    config.addinivalue_line("markers", "api: mark test as using API mocks")
