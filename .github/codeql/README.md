@@ -2,42 +2,82 @@
 
 This directory contains CodeQL configuration and documentation for security analysis.
 
-## Resolved Security Issues
+## Suppressed Security Warnings
 
-### 1. Clear-text storage of sensitive information (py/clear-text-storage-sensitive-data)
+### 1. Clear-text logging of sensitive information (py/clear-text-logging-sensitive-data)
 
-**Status:** ✅ **RESOLVED** (as of commit a41a0f5)
+**Status:** ⚠️ **SUPPRESSED** (intentional design decision)
 
-**Previous Issue:**
-The application previously wrote generated admin passwords to a temporary file (`.admin_password_GENERATED.txt`) with 0600 permissions, which triggered CodeQL warnings about clear-text password storage.
+**Why this warning appears:**
+During initial application setup or database migration, we generate a random admin password and display it to the user via terminal output (stdout). CodeQL flags this as "clear-text logging" of sensitive information.
 
-**Solution Implemented:**
-Changed password delivery method to display passwords directly in terminal/console output instead of writing to files.
+**Why this is necessary:**
+- **Initial setup scenario**: No admin account exists, so we must communicate the password somehow
+- **User needs the password**: Without seeing it, they cannot log in to the application
+- **No better alternative**: File storage triggers different warnings, email requires configuration, etc.
 
-**Current Approach:**
-- Passwords are displayed in terminal with clear visual warnings
-- No file storage = no clear-text storage on disk
-- User must copy password immediately from terminal
-- More secure: password never touches filesystem
+**Security measures in place:**
+- ✅ **Password displayed once** - Only shown during initial setup, never logged to files
+- ✅ **Strong randomization** - 16-character password using `secrets` module
+- ✅ **Immediate hashing** - Password is immediately bcrypt-hashed before database storage
+- ✅ **Clear warnings** - User sees prominent warnings to save the password
+- ✅ **Environment override** - User can set ADMIN_PASSWORD in .env to avoid generation
 
-**Benefits:**
-- ✅ **Eliminates CodeQL warnings** - No clear-text file storage
-- ✅ **More secure** - Password never written to disk
-- ✅ **Simpler** - No temporary files to clean up
-- ✅ **Better UX** - Immediate visibility, no file management
+**Why suppression is appropriate:**
+This is not a security vulnerability - it's the intended functionality. The password MUST be communicated to the user during initial setup. The alternatives would be:
+1. ❌ **Don't generate password** - Breaks setup automation
+2. ❌ **Write to file** - Triggers py/clear-text-storage-sensitive-data warning
+3. ❌ **Email it** - Requires email configuration during setup
+4. ✅ **Display in terminal** - Current approach, suppressed via config
 
-**Locations Changed:**
-- `app/main.py:302-319` - Initial admin password generation
-- `scripts/migrate_to_multi_user.py:68-79` - Migration script password generation
+**Suppression configuration:**
+- File: `.github/codeql-config.yml`
+- Applies to: `app/main.py`, `scripts/migrate_to_multi_user.py`
+- Query ID: `py/clear-text-logging-sensitive-data`
+
+**Affected locations:**
+- `app/main.py:307` - Initial admin password display
+- `scripts/migrate_to_multi_user.py:74` - Migration admin password display
 
 ## CodeQL Configuration
 
-CodeQL does not provide a simple way to suppress individual warnings at specific code locations. Options available:
+### Suppression Strategy
+
+We use a **configuration-based suppression** approach via `.github/codeql-config.yml`:
+
+**Configuration file:** `.github/codeql-config.yml`
+```yaml
+query-filters:
+  - exclude:
+      id: py/clear-text-logging-sensitive-data
+      paths:
+        - app/main.py
+        - scripts/migrate_to_multi_user.py
+```
+
+**Workflow integration:** `.github/workflows/codeql.yml`
+```yaml
+- name: Initialize CodeQL
+  uses: github/codeql-action/init@v3
+  with:
+    config-file: ./.github/codeql-config.yml
+```
+
+### Why Configuration-Based Suppression?
+
+CodeQL suppression options:
 
 1. **Global rule suppression** - Would disable check for entire codebase ❌
 2. **File exclusion** - Would disable all checks for the file ❌
 3. **Inline comments** - Not fully supported by CodeQL ⚠️
-4. **Documentation** - This file ✅
+4. **Configuration file** - Our approach ✅ **RECOMMENDED**
+5. **Documentation only** - Warnings still appear ❌
+
+The configuration-based approach allows us to:
+- Suppress specific query IDs (not all security checks)
+- Limit suppression to specific files only
+- Maintain security scanning for the rest of the codebase
+- Document suppressions in version control
 
 We've chosen to document and accept these warnings rather than compromise security checking for the rest of the codebase.
 

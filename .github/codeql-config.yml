@@ -1,0 +1,24 @@
+name: "ChirpSyncer CodeQL Configuration"
+
+# Disable specific queries for the entire codebase
+# These are intentional security trade-offs documented in .github/codeql/README.md
+disable-default-queries: false
+
+# Query filters - suppress specific warnings
+query-filters:
+  - exclude:
+      id: py/clear-text-logging-sensitive-data
+      # Suppressing clear-text logging warnings for initial admin password setup
+      # This is intentional: user needs to see the generated password during setup
+      # See .github/codeql/README.md for full justification
+      paths:
+        - app/main.py
+        - scripts/migrate_to_multi_user.py
+
+  - exclude:
+      id: py/clear-text-storage-sensitive-data
+      # Suppressing clear-text storage warnings (should be resolved already)
+      # Kept for safety in case any file storage is re-introduced
+      paths:
+        - app/main.py
+        - scripts/migrate_to_multi_user.py

@@ -37,6 +37,8 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
+        # Use custom configuration with suppressions
+        config-file: ./.github/codeql-config.yml
         # Override auto-detected queries with custom config
         queries: +security-and-quality
 
