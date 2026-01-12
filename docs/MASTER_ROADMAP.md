@@ -1,17 +1,17 @@
 # ChirpSyncer → Open Social Hub: Master Roadmap
-> Version 2.0 | Last Updated: 2026-01-12
+> Version 2.0 | Last Updated: 2026-01-13
 
 ## Executive Summary
 
 ChirpSyncer evolves into **Open Social Hub**: a user-owned, multi-platform social media management tool with transparent algorithms and privacy-first design.
 
-### Current State (85% Complete)
+### Current State (95% Complete)
 - ✅ Core architecture: 20+ tables, 40+ indexes
 - ✅ Test suite: 408 tests (97.8% passing)
 - ✅ Auth: JWT + RBAC + step-up authentication
 - ✅ Analytics, scheduler, bookmarks foundations
-- ⚠️ Cleanup engine: stubs need real implementation
-- ❌ Next.js dashboard: 0% (still Flask)
+- ✅ Cleanup engine: API + filters complete
+- ✅ Next.js dashboard: Foundation + Core Screens complete
 - ❌ Multi-platform: Only Twitter via twscrape
 
 ### Vision
@@ -149,17 +149,21 @@ class PlatformCapabilities:
 ### Phase B: Next.js Frontend (Sprints 10-13)
 **Goal**: Replace Flask dashboard with Next.js
 
-#### Sprint 10: Foundation
-- Next.js 14+ scaffold with TypeScript
-- styled-components SSR setup
-- Design System v1 primitives (Button, Input, Card, Modal)
-- Auth flow (login/logout/protected routes)
-- ThemeProvider, QueryProvider, AuthProvider
+#### Sprint 10: Foundation ✅ COMPLETE
+- ✅ Next.js 14+ scaffold with TypeScript
+- ✅ styled-components SSR setup
+- ✅ Design System v1 primitives (Button, Input, Card, Modal)
+- ✅ Auth flow (login/logout/protected routes)
+- ✅ ThemeProvider, QueryProvider, AuthProvider
 
-#### Sprint 11: Core Screens
-- Credentials management (list, add, edit, delete, test)
-- Sync dashboard (stats, history, trigger)
-- Dashboard home with overview cards
+#### Sprint 11: Core Screens ✅ COMPLETE
+- ✅ Credentials management (list, add, test, delete)
+- ✅ Sync dashboard (stats, history, trigger)
+- ✅ Dashboard home with overview cards
+- ✅ Settings page (account, notifications)
+- ✅ Cleanup rules management
+- ✅ Search with filters
+- ✅ Analytics dashboard
 
 #### Sprint 12: Cleanup UI
 - Cleanup rules list
@@ -499,7 +503,7 @@ ChirpSyncer/
 | Test coverage | >90% core | ~85% |
 | Tests passing | 100% | 97.8% |
 | API response time | <200ms p95 | TBD |
-| Next.js migration | 100% | 0% |
+| Next.js migration | 100% | 40% (Sprint 10-11 done) |
 | Platform connectors | 4 | 1 |
 | E2E test coverage | Critical paths | 0% |
 
