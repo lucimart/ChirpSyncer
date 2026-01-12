@@ -2,9 +2,6 @@ import sys
 import os
 from unittest.mock import MagicMock, patch
 
-# Enable pytest-playwright plugin globally
-pytest_plugins = ["pytest_playwright.pytest_playwright"]
-
 # Add the app directory to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), "app"))
 
