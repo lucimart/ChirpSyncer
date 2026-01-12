@@ -337,18 +337,22 @@ class TweetScheduler:
         Raises:
             Exception: If posting fails
         """
-        # TODO: Implement actual Twitter posting with user credentials
-        # For now, this is a placeholder that will be implemented
-        # when integrating with the actual Twitter API
-        #
-        # This would:
+        # PLANNED FEATURE: Direct Twitter posting from scheduled tweets
+        # This feature is planned but not yet implemented. Implementation will require:
         # 1. Get user's Twitter credentials from credential_manager
-        # 2. Initialize Twitter API client
-        # 3. Upload media if present
-        # 4. Post tweet
-        # 5. Return tweet ID
+        # 2. Initialize Twitter API client with user-specific authentication
+        # 3. Upload media if present (handle rate limits and file size constraints)
+        # 4. Post tweet with proper error handling and retry logic
+        # 5. Return tweet ID and update scheduled tweet status
+        #
+        # Current workaround: Users can schedule tweets in the database and manually
+        # post them, or use the bidirectional sync feature to sync from one platform
+        # to another instead of direct posting.
 
-        raise NotImplementedError("Twitter posting not yet implemented")
+        raise NotImplementedError(
+            "Direct Twitter posting from scheduler not yet implemented. "
+            "Use bidirectional sync or manual posting as alternatives."
+        )
 
     def update_status(self, scheduled_tweet_id: int, status: str,
                      tweet_id: str = None, error: str = None) -> bool:

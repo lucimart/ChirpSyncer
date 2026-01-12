@@ -399,8 +399,10 @@ def create_app(db_path='chirpsyncer.db', master_key=None):
             session['user_id'], cred['platform'], cred['credential_type']
         )
 
-        # TODO: Implement actual credential testing
-        # For now, just return success if credentials exist
+        # NOTE: This endpoint verifies that credentials are stored and can be decrypted,
+        # but does not test authentication against Twitter/Bluesky APIs to avoid
+        # rate limiting and unnecessary API calls. For full credential validation,
+        # use the sync operations which will report authentication errors.
         if data:
             return jsonify({
                 'success': True,

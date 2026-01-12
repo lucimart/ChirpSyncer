@@ -223,11 +223,11 @@ ChirpSyncer/
 
 ## Documentation
 
-- [Architecture Overview](docs/ARCHITECTURE.md)
+- [Architecture Overview](docs/architecture/ARCHITECTURE.md)
 - [Deployment Guides](docs/)
 - [API Reference](docs/API.md)
 - [Database Schema](docs/DATABASE.md)
-- [Sprint Summaries](docs/)
+- [Sprint Summaries](docs/sprints/summaries/)
 
 ## Deployment
 
