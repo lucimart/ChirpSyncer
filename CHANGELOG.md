@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- implement credential sharing between users
+
+- Add shared_credentials table for many-to-many relationship tracking
+- Update share_credentials() to create sharing entries in new table
+- Update list_user_credentials() to include shared credentials
+- Shared credentials are read-only and show owner_user_id
+- Remove skip decorator from credential sharing test
+
+Users can now share credentials with other users via the sharing
+interface, and recipients can view and use shared credentials.
 - implement session expiry validation
 
 - Create database-tracked sessions on login with session_token

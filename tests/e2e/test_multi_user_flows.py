@@ -138,7 +138,6 @@ class TestMultiUserCredentialIsolation:
         user_a_creds_after = credential_manager.list_user_credentials(user_a_id)
         assert len(user_a_creds_after) == 1
 
-    @pytest.mark.skip(reason="Multi-user credential isolation causes server errors")
     def test_credential_encryption_and_isolation(
         self, client, user_manager, credential_manager, db_connection
     ):
