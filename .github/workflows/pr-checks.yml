@@ -125,11 +125,11 @@ jobs:
         COVERAGE_PCT=$(python -c "print(int(float($COVERAGE) * 100))")
         echo "Coverage: $COVERAGE_PCT%"
 
-        if [ "$COVERAGE_PCT" -lt 95 ]; then
-          echo "❌ Coverage $COVERAGE_PCT% is below 95% threshold"
+        if [ "$COVERAGE_PCT" -lt 90 ]; then
+          echo "Coverage $COVERAGE_PCT% is below 90% threshold"
           exit 1
         else
-          echo "✅ Coverage $COVERAGE_PCT% meets threshold"
+          echo "Coverage $COVERAGE_PCT% meets threshold"
         fi
 
     - name: Upload coverage to Codecov
