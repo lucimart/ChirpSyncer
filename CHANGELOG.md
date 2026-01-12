@@ -239,6 +239,11 @@ All tests passing with real SQLite DB integration
 - README rewritten for clarity
 
 ### Fixed
+- remove manual pytest-playwright plugin declaration
+
+- pytest-playwright auto-registers as a plugin when installed
+- Manual declaration was causing import errors
+- Plugin will be discovered automatically by pytest
 - move pytest_plugins to top-level conftest.py
 
 - pytest_plugins declaration must be in top-level conftest.py
