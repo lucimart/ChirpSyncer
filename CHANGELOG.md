@@ -376,6 +376,16 @@ Fixes:
 - Updated PR checks to require 90% coverage instead of 95%
 - More realistic threshold for active development
 - Integration tests remain at 85%
+
+### Testing
+- skip Playwright tests until UI templates implemented
+
+All E2E Playwright tests are now marked as skipped with clear reason.
+These tests are structurally correct but expect Flask UI templates
+(login forms, success messages, error displays, etc.) that are not
+yet implemented in the application.
+
+Tests will be enabled once the Flask UI implementation is complete.
 ## [1.6.0] - 2026-01-12
 
 ### Added
