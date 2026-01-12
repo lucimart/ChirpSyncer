@@ -1,18 +1,6 @@
 ---
 name: Open Social Hub Vision
 description: Evolution from ChirpSyncer to multi-platform social hub with user-owned algorithms
-category: architecture
-triggers:
-  - open social hub
-  - user-owned algorithm
-  - feed lab
-  - multi-platform vision
-  - future roadmap
-dependencies:
-  - docs/MASTER_ROADMAP.md
-  - .claude/skills/chirp-architecture.md
-  - .claude/skills/chirp-connector-framework.md
-version: "1.1"
 ---
 
 # Skill: Open Social Hub Vision

@@ -1,32 +1,6 @@
 ---
 name: ChirpSyncer Testing
 description: TDD workflow, test optimization, coverage targets, and CI acceleration
-category: testing
-triggers:
-  - writing tests
-  - test coverage
-  - test strategy
-  - pytest
-  - playwright
-  - mocking
-  - fixture
-  - conftest
-  - E2E test
-  - unit test
-  - integration test
-  - TDD
-  - test driven
-  - slow tests
-  - CI optimization
-auto_trigger: before_feature_start,after_feature_complete,after_ci_failure
-dependencies:
-  - tests/
-  - pytest.ini
-  - playwright.config.ts
-  - .github/workflows/ci.yml
-  - chirp-architecture.md
-version: "2.0"
-sprint_relevant: all
 ---
 
 # Skill: ChirpSyncer Testing Strategy

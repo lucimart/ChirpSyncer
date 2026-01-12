@@ -1,25 +1,6 @@
 ---
 name: ChirpSyncer API Design
 description: REST API and WebSocket endpoint design patterns
-category: api
-triggers:
-  - new API endpoint
-  - endpoint modification
-  - WebSocket events
-  - API documentation
-  - response format design
-  - route
-  - REST
-  - HTTP status
-  - step-up auth
-auto_trigger: after_api_change
-dependencies:
-  - app/web/dashboard.py
-  - docs/API.md
-  - chirp-api-contracts.md
-  - chirp-database.md
-version: "1.1"
-sprint_relevant: all
 ---
 
 # Skill: ChirpSyncer API Design

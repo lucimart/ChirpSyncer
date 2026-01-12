@@ -1,34 +1,6 @@
 ---
 name: ChirpSyncer Design System
 description: Modern design system with light/dark mode, animations, and sleek UI patterns
-category: frontend
-triggers:
-  - design system
-  - UI components
-  - styled-components
-  - theme tokens
-  - component design
-  - Button Input Card Modal
-  - create component
-  - new UI
-  - dark mode
-  - light mode
-  - theme toggle
-  - responsive
-  - accessibility
-  - animation
-  - transition
-  - sass
-  - sleek
-  - modern UI
-auto_trigger: after_ui_change,before_component_create,after_theme_change
-dependencies:
-  - docs/migration/CHIRP_NEXT_DASHBOARD_SPEC.md
-  - dashboard/components/ui/
-  - dashboard/lib/theme/
-  - chirp-nextjs-migration.md
-version: "2.0"
-sprint_relevant: 10-13
 ---
 
 # Skill: ChirpSyncer Design System v2

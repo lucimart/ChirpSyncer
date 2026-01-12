@@ -1,18 +1,6 @@
 ---
 name: ChirpSyncer Architecture
 description: Architectural analysis and planning for ChirpSyncer platform
-category: architecture
-triggers:
-  - architectural changes
-  - system design review
-  - new feature evaluation
-  - component integration
-  - migration planning
-dependencies:
-  - docs/architecture/
-  - app/core/
-  - app/features/
-version: "1.1"
 ---
 
 # Skill: ChirpSyncer Architecture Analysis

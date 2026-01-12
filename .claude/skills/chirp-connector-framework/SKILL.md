@@ -1,26 +1,6 @@
 ---
 name: Connector Framework
 description: Multi-platform connector architecture for Twitter, Bluesky, Mastodon, Instagram
-category: integration
-triggers:
-  - connector
-  - platform integration
-  - bluesky
-  - mastodon
-  - instagram
-  - multi-platform
-  - twscrape
-  - PlatformConnector
-  - rate limiter
-  - CanonicalPost
-auto_trigger: after_platform_change
-dependencies:
-  - app/integrations/
-  - chirp-open-social-hub.md
-  - chirp-multi-platform.md
-  - docs/PROTOCOL_ROADMAP.md
-version: "1.1"
-sprint_relevant: 16-18
 ---
 
 # Skill: Connector Framework

@@ -1,22 +1,6 @@
 ---
 name: Memory Management
 description: Store, retrieve, and manage context across sessions using claude-mem and openmemory
-category: context
-triggers:
-  - remember this
-  - save context
-  - recall
-  - memory
-  - previous session
-  - what did we
-  - store observation
-  - search memories
-auto_trigger: session_start,session_end,after_significant_decision
-dependencies:
-  - mcp__plugin_claude-mem_mcp-search__*
-  - mcp__openmemory__*
-version: "1.0"
-sprint_relevant: all
 ---
 
 # Skill: Memory Management

@@ -1,18 +1,6 @@
 ---
 name: ChirpSyncer API Contracts
 description: Complete API endpoint specifications with request/response schemas
-category: api
-triggers:
-  - API integration
-  - fetch data
-  - endpoint schema
-  - request format
-  - response format
-dependencies:
-  - docs/migration/CHIRP_NEXT_DASHBOARD_SPEC.md
-  - docs/API.md
-  - app/web/dashboard.py
-version: "1.2"
 ---
 
 # Skill: ChirpSyncer API Contracts v1.1
