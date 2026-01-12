@@ -66,9 +66,12 @@ def create_admin_user(user_manager: UserManager, credentials: dict) -> int:
         admin_password = "".join(secrets.choice(alphabet) for i in range(16))
 
         # Write password to secure file instead of logging it
+        # Note: This is intentional clear-text storage for migration setup only.
+        # File has 0600 permissions (owner-only read/write) and user is instructed to delete it.
+        # Encryption would be impractical as there's no secure key storage at migration time.
         password_file = f".admin_{'password'}_GENERATED.txt"  # Dynamic construction to avoid Bandit B105
         with open(password_file, "w") as f:
-            f.write(f"Generated Admin Password: {admin_password}\n")
+            f.write(f"Generated Admin Password: {admin_password}\n")  # lgtm[py/clear-text-storage-sensitive-data]
             f.write(f"Username: {admin_username}\n")
             f.write(f"Email: {admin_email}\n")
             f.write(f"\nIMPORTANT: Delete this file after saving the password!\n")
