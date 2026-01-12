@@ -714,7 +714,6 @@ class TestStatsHandlerIntegration:
         assert rate == 100.0
 
         # All failed
-        tracker2 = StatsTracker(db_path=test_db_path)
         fd, temp_db_path = tempfile.mkstemp(suffix=".db")
         os.close(fd)
         try:

@@ -14,7 +14,7 @@ Minimum 10 tests covering:
 import pytest
 import json
 import os
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 
 @pytest.fixture

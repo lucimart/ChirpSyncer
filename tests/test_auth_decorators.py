@@ -9,6 +9,7 @@ Tests authentication decorators:
 
 import pytest
 from flask import Flask, session
+from markupsafe import escape
 from app.auth.auth_decorators import require_auth, require_admin, require_self_or_admin
 from app.auth.user_manager import UserManager
 
@@ -35,8 +36,8 @@ def test_app(db_path):
     @app.route("/user/<int:user_id>/profile")
     @require_self_or_admin
     def user_profile(user_id):
-        # Use str() to safely convert int to string, preventing XSS
-        return "User {} profile".format(str(user_id)), 200
+        # Use escape() to prevent XSS when rendering user_id
+        return "User {} profile".format(escape(user_id)), 200
 
     @app.route("/login")
     def login():
