@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
 import {
@@ -11,14 +11,25 @@ import {
   ArrowRight,
   Play,
 } from 'lucide-react';
-import { api } from '@/lib/api';
-import { Button, Card } from '@/components/ui';
+import { Button, Card, Progress, useToast, ConnectionStatus } from '@/components/ui';
+import {
+  useRealtimeMessage,
+  SyncProgressPayload,
+} from '@/providers/RealtimeProvider';
 
 const PageHeader = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: ${({ theme }) => theme.spacing[6]};
+`;
+
+const HeaderLeft = styled.div``;
+
+const HeaderRight = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing[3]};
+  align-items: center;
 `;
 
 const PageTitle = styled.h1`
@@ -183,9 +194,48 @@ interface SyncHistory {
   created_at: string;
 }
 
+interface SyncProgress {
+  current: number;
+  total: number;
+  message: string;
+}
+
 export default function SyncPage() {
   const queryClient = useQueryClient();
+  const { addToast } = useToast();
   const [isSyncing, setIsSyncing] = useState(false);
+  const [syncProgress, setSyncProgress] = useState<SyncProgress | null>(null);
+
+  // Handle real-time sync progress updates
+  useRealtimeMessage(
+    'sync.progress',
+    useCallback((payload: SyncProgressPayload) => {
+      setSyncProgress({
+        current: payload.current,
+        total: payload.total,
+        message: payload.message,
+      });
+    }, [])
+  );
+
+  // Handle sync completion
+  useRealtimeMessage(
+    'sync.complete',
+    useCallback(
+      (payload: { operation_id: string; synced: number }) => {
+        setIsSyncing(false);
+        setSyncProgress(null);
+        queryClient.invalidateQueries({ queryKey: ['sync-stats'] });
+        queryClient.invalidateQueries({ queryKey: ['sync-history'] });
+        addToast({
+          type: 'success',
+          title: 'Sync Complete',
+          message: `Successfully synced ${payload.synced} posts`,
+        });
+      },
+      [queryClient, addToast]
+    )
+  );
 
   const { data: stats } = useQuery<SyncStats>({
     queryKey: ['sync-stats'],
@@ -267,20 +317,37 @@ export default function SyncPage() {
   return (
     <div>
       <PageHeader>
-        <div>
+        <HeaderLeft>
           <PageTitle>Sync Dashboard</PageTitle>
           <PageDescription>
             Manage synchronization between Twitter and Bluesky
           </PageDescription>
-        </div>
-        <Button
-          onClick={() => syncMutation.mutate('both')}
-          isLoading={isSyncing}
-        >
-          <RefreshCw size={18} />
-          Sync Now
-        </Button>
+        </HeaderLeft>
+        <HeaderRight>
+          <ConnectionStatus />
+          <Button
+            onClick={() => syncMutation.mutate('both')}
+            isLoading={isSyncing}
+          >
+            <RefreshCw size={18} />
+            Sync Now
+          </Button>
+        </HeaderRight>
       </PageHeader>
+
+      {syncProgress && (
+        <Card padding="md" style={{ marginBottom: '24px' }}>
+          <Progress
+            value={syncProgress.current}
+            max={syncProgress.total}
+            showPercentage
+            details={[
+              { label: 'Progress', value: `${syncProgress.current}/${syncProgress.total}` },
+              { label: 'Status', value: syncProgress.message },
+            ]}
+          />
+        </Card>
+      )}
 
       <StatsGrid>
         <StatCard padding="md">

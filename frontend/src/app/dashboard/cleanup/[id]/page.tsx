@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, use } from 'react';
+import { useState, use, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
@@ -21,7 +21,12 @@ import {
   DangerConfirm,
   Progress,
   Column,
+  useToast,
 } from '@/components/ui';
+import {
+  useRealtimeMessage,
+  CleanupProgressPayload,
+} from '@/providers/RealtimeProvider';
 
 const PageHeader = styled.div`
   display: flex;
@@ -187,6 +192,7 @@ export default function CleanupPreviewPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const { addToast } = useToast();
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
     new Set()
   );
@@ -197,6 +203,44 @@ export default function CleanupPreviewPage({
     deleted: 0,
     failed: 0,
   });
+
+  // Handle real-time cleanup progress
+  useRealtimeMessage(
+    'cleanup.progress',
+    useCallback(
+      (payload: CleanupProgressPayload) => {
+        if (payload.rule_id === parseInt(id)) {
+          setExecution((prev) => ({
+            ...prev,
+            deleted: payload.deleted,
+            total: payload.total,
+          }));
+        }
+      },
+      [id]
+    )
+  );
+
+  // Handle cleanup completion
+  useRealtimeMessage(
+    'cleanup.complete',
+    useCallback(
+      (payload: { rule_id: number; deleted: number }) => {
+        if (payload.rule_id === parseInt(id)) {
+          setExecution((prev) => ({
+            ...prev,
+            isRunning: false,
+          }));
+          addToast({
+            type: 'success',
+            title: 'Cleanup Complete',
+            message: `Successfully deleted ${payload.deleted} tweets`,
+          });
+        }
+      },
+      [id, addToast]
+    )
+  );
 
   const { data: rule } = useQuery<CleanupRule>({
     queryKey: ['cleanup-rule', id],
