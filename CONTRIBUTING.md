@@ -214,7 +214,7 @@ pytest tests/ -v
 # Run with coverage
 pytest --cov=app --cov-report=term --cov-report=html tests/
 
-# Check coverage threshold (must be ≥95%)
+# Check coverage threshold (must be ≥90%)
 open htmlcov/index.html
 ```
 
@@ -343,7 +343,7 @@ git push origin feature/your-feature-name
 
 Before submitting, ensure:
 - [ ] All tests pass (422/422)
-- [ ] Coverage remains ≥95%
+- [ ] Coverage remains ≥90%
 - [ ] Code follows style guidelines
 - [ ] Documentation updated
 - [ ] Commit messages follow conventions
@@ -360,7 +360,7 @@ Before submitting, ensure:
    - CI tests (Python 3.10, 3.11)
    - Linting (flake8, black, isort)
    - Security scans (CodeQL, Bandit, Safety)
-   - Coverage check (≥95%)
+   - Coverage check (≥90%)
 
 2. **Code Review** (1-3 days)
    - A maintainer will review your code

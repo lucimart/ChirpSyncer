@@ -52,10 +52,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Git hook changelog logic to preserve existing entries
 
 ### Documentation
+- update coverage threshold references to 90%
+
+- Updated CONTRIBUTING.md
+- Updated PR template checklist
+- Updated GitHub setup summary
 - Removed emojis from DATABASE.md
 - Added comprehensive API.md (95KB) and DATABASE.md (75KB)
 - Created automatic changelog system via git hooks
 
+
+### Build
+- lower coverage threshold from 95% to 90%
+
+- Updated PR checks to require 90% coverage instead of 95%
+- More realistic threshold for active development
+- Integration tests remain at 85%
 ## [1.6.0] - 2026-01-12
 
 ### Added

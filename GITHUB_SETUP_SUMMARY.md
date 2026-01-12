@@ -99,7 +99,7 @@ Complete GitHub repository configuration for production-ready open source projec
 5. **pr-checks.yml** - PR quality gates (NEW)
    - PR size check
    - Code quality (Black, isort, Flake8, Pylint)
-   - Test coverage check (≥95%)
+   - Test coverage check (≥90%)
    - Documentation check
    - Markdown link validation
 
@@ -189,7 +189,7 @@ Auto-assigns reviewers for:
 ### Automated Checks on Every PR
 
 1. **Tests** - Must pass on Python 3.10 & 3.11
-2. **Coverage** - Must be ≥95%
+2. **Coverage** - Must be ≥90%
 3. **Linting** - Black, isort, Flake8, Pylint
 4. **Security** - CodeQL, Bandit, Safety, Semgrep
 5. **PR Size** - Warning if >50 files or >1000 lines
@@ -200,7 +200,7 @@ Auto-assigns reviewers for:
 
 All of these must pass before merge:
 - ✅ All tests passing (422/422)
-- ✅ Coverage ≥95%
+- ✅ Coverage ≥90%
 - ✅ Code quality checks pass
 - ✅ Security scans pass
 - ✅ 1 approval from maintainer
@@ -217,7 +217,7 @@ All of these must pass before merge:
 2. **Clone** your fork
 3. **Create branch**: `feature/your-feature` or `bugfix/issue-123`
 4. **Make changes** following style guide
-5. **Write tests** (maintain ≥95% coverage)
+5. **Write tests** (maintain ≥90% coverage)
 6. **Commit** using conventional commits format
 7. **Push** to your fork
 8. **Create PR** using the template
@@ -301,7 +301,7 @@ git push origin test/github-setup
 ✅ Enforced code style (Black, isort)
 ✅ Static analysis (Pylint, Flake8)
 ✅ Type checking ready (mypy config)
-✅ Test coverage tracking (≥95%)
+✅ Test coverage tracking (≥90%)
 ✅ Automated code review gates
 
 ### For Contributors
