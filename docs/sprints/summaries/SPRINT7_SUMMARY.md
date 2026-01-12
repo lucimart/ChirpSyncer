@@ -5,7 +5,7 @@ Sprint 7 adds advanced Twitter analytics, tweet scheduling, automated cleanup, f
 
 **Status:** ✅ Core implementation complete (399/408 tests passing - 97.8%)
 **Date:** January 11, 2026
-**Architecture:** See [SPRINT7_ARCHITECTURE_DECISIONS.md](./SPRINT7_ARCHITECTURE_DECISIONS.md)
+**Architecture:** See [SPRINT7_ARCHITECTURE_DECISIONS.md](../../architecture/decisions/SPRINT7_ARCHITECTURE_DECISIONS.md)
 
 ---
 

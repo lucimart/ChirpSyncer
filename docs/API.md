@@ -4257,7 +4257,7 @@ except Exception as e:
 ## Support and Contributing
 
 For issues, feature requests, or contributions, please visit:
-- GitHub: [ChirpSyncer Repository](https://github.com/yourusername/chirpsyncer)
+- GitHub: [ChirpSyncer Repository](https://github.com/lucimart/ChirpSyncer)
 - Documentation: See `docs/` directory for additional guides
 - Issues: Report bugs via GitHub Issues
 

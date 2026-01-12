@@ -8,6 +8,15 @@
     },
     {
       "pattern": "^http://192.168"
+    },
+    {
+      "pattern": "^https://github.com/lucimart/ChirpSyncer/(releases|compare)"
+    },
+    {
+      "pattern": "^https://github.com/lucimart/ChirpSyncer/(blob|tree)/main"
+    },
+    {
+      "pattern": "^https://lucimart.github.io/ChirpSyncer"
     }
   ],
   "replacementPatterns": [],
