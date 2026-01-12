@@ -309,7 +309,8 @@ def ensure_admin_user():
                     f.write(f"Generated Admin Password\n")
                     f.write(f"========================\n\n")
                     f.write(f"Username: admin\n")
-                    f.write(f"Password: {admin_password}\n\n")  # lgtm[py/clear-text-storage-sensitive-data]
+                    # codeql[py/clear-text-storage-sensitive-data]: Intentional - temporary file with 0600 perms, user instructed to delete
+                    f.write(f"Password: {admin_password}\n\n")
                     f.write(f"IMPORTANT:\n")
                     f.write(f"1. Save this password immediately\n")
                     f.write(f"2. Delete this file after saving\n")
