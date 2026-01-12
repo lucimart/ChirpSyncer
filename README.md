@@ -1,305 +1,303 @@
 # ChirpSyncer
 
-**ChirpSyncer** is a cross-posting tool that bridges the gap between Twitter and Bluesky. It monitors your tweets and posts them on Bluesky, ensuring your audience stays up-to-date on both platforms.
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/lucimart/ChirpSyncer/ci.yml?branch=main)
+![GitHub License](https://img.shields.io/github/license/lucimart/ChirpSyncer)
+![Python Version](https://img.shields.io/badge/python-3.11-blue)
+![Code Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)
+![GitHub Issues](https://img.shields.io/github/issues/lucimart/ChirpSyncer)
+![GitHub Stars](https://img.shields.io/github/stars/lucimart/ChirpSyncer?style=social)
 
+Bidirectional synchronization platform for Twitter and Bluesky with analytics, scheduling, multi-user support, and automated maintenance.
 
 ## Features
 
-- Automatically syncs tweets from Twitter to Bluesky.
-- Avoids duplicate posting using an integrated SQLite database.
-- Uses free Twitter scraping (no API rate limits or costs).
-- Designed for easy deployment using Docker and Docker Compose.
+**Sync Operations**
+- Bidirectional sync between Twitter and Bluesky
+- Duplicate detection and loop prevention
+- Media handling (images, videos)
+- Thread support and detection
+- Rate limit management
 
+**Multi-User Platform**
+- User authentication with role-based access control
+- AES-256-GCM encrypted credential storage
+- Per-user analytics and settings
+- Audit logging for all operations
+- Flask-based web dashboard
 
-## Prerequisites
+**Advanced Features**
+- Analytics tracking with engagement metrics
+- Tweet scheduler for future posting
+- Rule-based automated cleanup engine
+- Full-text search with FTS5
+- Bookmark management and collections
+- Multi-format report generation (PDF/CSV/JSON/HTML)
+- Cron-based maintenance tasks
 
-### 0. Make
-If you are using MacOS or Linux, you already have it by default and can jump to the next step.
-If you are using windows:
-1. Install [Chocolatey](https://docs.chocolatey.org/en-us/choco/setup/#installing-chocolatey-cli) (if not already installed).
-2. Install make:
+## Quick Start
+
+### Docker (Recommended)
+
 ```bash
-choco install make
+git clone https://github.com/lucimart/ChirpSyncer.git
+cd ChirpSyncer
+cp .env.example .env
+# Edit .env with your credentials
+docker-compose up -d
 ```
 
-### 1. Python and pyenv
-Ensure you have Python (3.10.x) installed. Using **pyenv** is recommended to manage the Python version and virtual environments.
+Access dashboard at http://localhost:5000
 
-1. Install pyenv:
-   Follow the instructions at [pyenv installation guide](https://github.com/pyenv/pyenv).
-   Alternatively, if you are on windows use the [pyenv-win installation guide](https://github.com/pyenv-win/pyenv-win?tab=readme-ov-file#quick-start)
+### Manual Installation
 
-2. Install the required Python version:
 ```bash
-   make pyenv-setup
-```
-### 2. Twitter Credentials (twscrape)
-ChirpSyncer now uses **twscrape** for Twitter scraping instead of the official Twitter API. This allows unlimited scraping without API rate limits.
-
-You'll need the following credentials:
-- Your Twitter username
-- Your Twitter password
-- Your Twitter email
-- Your email password (for account verification)
-
-**Important Security Notes:**
-- Consider using a dedicated Twitter account for scraping
-- Enable 2FA on your Twitter account for better security
-- Never share or commit your credentials to version control
-
-### 3. Bluesky API Credentials
-You need to paste your username and password
-
-
-### 4. Docker and Docker Compose
-Ensure you have Docker and Docker Compose installed on your machine:
-
-- **Docker**: Install from the [official Docker website](https://www.docker.com/).
-- **Docker Compose**: Usually included with Docker Desktop. Verify installation by running: `docker-compose --version`
-
-
-# Migration Guide: Twitter API to twscrape
-
-If you're upgrading from the old Twitter API credentials to twscrape, follow this guide.
-
-## Why Migrate?
-
-The Twitter API has strict rate limits (100 requests/month on the free tier), which severely limits ChirpSyncer's functionality. By switching to twscrape, you get:
-- Unlimited scraping (no API rate limits)
-- No need for Twitter Developer account approval
-- More reliable access to your tweets
-
-## Migration Steps
-
-### Step 1: Update Your .env File
-
-Replace your old Twitter API credentials with the new twscrape credentials:
-
-**OLD (deprecated):**
-```bash
-TWITTER_API_KEY=your-twitter-api-key
-TWITTER_API_SECRET=your-twitter-api-secret
-TWITTER_ACCESS_TOKEN=your-twitter-access-token
-TWITTER_ACCESS_SECRET=your-twitter-access-secret
+git clone https://github.com/lucimart/ChirpSyncer.git
+cd ChirpSyncer
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+# Edit .env with your credentials
+python app/main.py
 ```
 
-**NEW (required):**
+### System Service (Linux)
+
 ```bash
-TWITTER_USERNAME=your_twitter_username
-TWITTER_PASSWORD=your_twitter_password
-TWITTER_EMAIL=your_twitter_email@example.com
-TWITTER_EMAIL_PASSWORD=your_email_password
+sudo ./scripts/install.sh
+sudo systemctl start chirpsyncer
 ```
 
-### Step 2: Set Up twscrape Account (One-Time Setup)
+See [deployment guides](docs/) for detailed instructions.
 
-After updating your credentials, you need to perform a one-time account setup:
+## Configuration
 
-1. Install twscrape in your environment:
-   ```bash
-   pip install twscrape
-   ```
+Required environment variables:
 
-2. Add your Twitter account to twscrape:
-   ```bash
-   twscrape add_accounts accounts.txt your_username:your_password:your_email:your_email_password
-   ```
-
-3. Log in to your account (this may require 2FA verification):
-   ```bash
-   twscrape login_accounts
-   ```
-
-4. Verify your account is active:
-   ```bash
-   twscrape accounts
-   ```
-
-### Step 3: Test Your Setup
-
-Verify that twscrape can access your Twitter account:
 ```bash
-twscrape user_by_login your_username
+# Twitter (uses twscrape - no API keys needed)
+TWITTER_USERNAME=your_username
+TWITTER_PASSWORD=your_password
+TWITTER_EMAIL=your_email@example.com
+TWITTER_EMAIL_PASSWORD=email_password
+
+# Bluesky
+BSKY_USERNAME=username.bsky.social
+BSKY_PASSWORD=app_password
+
+# Application
+MULTI_USER_ENABLED=true
+SECRET_KEY=change-this-secret-key
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=secure_password
 ```
 
-If this command returns your Twitter profile information, your setup is complete!
+See [.env.example](.env.example) for all available options.
 
-### Step 4: Update Your Code (if applicable)
+## Usage
 
-If you have custom code that uses the old Twitter API credentials, you'll need to update it to use the new twscrape library. The main application code has already been updated to support twscrape.
+### Web Dashboard
+
+Navigate to http://localhost:5000 after starting the application. The dashboard provides:
+
+- Credential management
+- Sync history and statistics
+- Task scheduler interface
+- Analytics overview
+- User management (admin only)
+
+### Python API
+
+```python
+from app.analytics_tracker import AnalyticsTracker
+
+tracker = AnalyticsTracker(user_id=1)
+tracker.record_metrics(
+    tweet_id="123456",
+    impressions=1000,
+    likes=50,
+    retweets=10
+)
+
+stats = tracker.get_user_analytics(period='24h')
+top_tweets = tracker.get_top_tweets(metric='engagement', limit=10)
+```
+
+```python
+from app.tweet_scheduler import TweetScheduler
+from datetime import datetime, timedelta
+
+scheduler = TweetScheduler(user_id=1)
+scheduler.schedule_tweet(
+    content="Scheduled tweet",
+    scheduled_time=datetime.now() + timedelta(hours=2)
+)
+```
+
+```python
+from app.cleanup_engine import CleanupEngine
+
+engine = CleanupEngine(user_id=1)
+engine.create_rule(
+    name="Delete old tweets",
+    rule_type="age",
+    rule_config={"days_old": 90, "exclude_threads": True}
+)
+
+preview = engine.preview_cleanup(rule_id=1)
+result = engine.execute_cleanup(rule_id=1, dry_run=False)
+```
+
+See [API documentation](docs/API.md) for complete reference.
+
+## Development
+
+### Setup
+
+```bash
+git clone https://github.com/lucimart/ChirpSyncer.git
+cd ChirpSyncer
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Testing
+
+```bash
+# Run all tests
+pytest tests/
+
+# With coverage
+pytest --cov=app --cov-report=html tests/
+
+# Specific test file
+pytest tests/test_analytics_tracker.py -v
+```
+
+### Code Quality
+
+```bash
+# Linting
+pylint app/ tests/
+
+# Formatting
+black app/ tests/
+isort app/ tests/
+
+# Type checking
+mypy app/
+```
+
+## Project Structure
+
+```
+ChirpSyncer/
+├── app/
+│   ├── auth/              # Authentication and security
+│   ├── features/          # Core features (analytics, scheduler, cleanup)
+│   ├── integrations/      # Twitter and Bluesky API handlers
+│   ├── models/            # Database models
+│   ├── services/          # Business logic services
+│   ├── web/               # Web dashboard (Flask)
+│   └── main.py            # Entry point
+├── tests/
+│   ├── unit/              # Unit tests
+│   ├── integration/       # Integration tests
+│   └── e2e/               # End-to-end tests
+├── scripts/               # Installation and deployment scripts
+├── docs/                  # Documentation
+└── requirements.txt       # Python dependencies
+```
+
+## Security
+
+- All credentials encrypted with AES-256-GCM
+- Password hashing with bcrypt
+- SQL injection protection via parameterized queries
+- CSRF protection on all forms
+- Rate limiting on authentication endpoints
+- Comprehensive audit logging
+
+**Never commit `.env` to version control.**
+
+## Documentation
+
+- [Architecture Overview](docs/architecture/ARCHITECTURE.md)
+- [Deployment Guides](docs/)
+- [API Reference](docs/API.md)
+- [Database Schema](docs/DATABASE.md)
+- [Sprint Summaries](docs/sprints/summaries/)
+
+## Deployment
+
+### Systemd Service
+
+```bash
+sudo ./scripts/install.sh
+sudo systemctl enable chirpsyncer
+sudo systemctl start chirpsyncer
+journalctl -u chirpsyncer -f
+```
+
+### Docker
+
+```bash
+docker build -t chirpsyncer .
+docker run -d -p 5000:5000 -v $(pwd)/.env:/app/.env chirpsyncer
+```
+
+### Docker Compose
+
+```bash
+docker-compose up -d
+docker-compose logs -f
+```
 
 ## Troubleshooting
 
-### Account Login Issues
-- Make sure 2FA is enabled on your Twitter account
-- Check that your credentials are correct in the .env file
-- Try logging in manually through twscrape: `twscrape login_accounts`
-
-### Email Verification Required
-- Some accounts may require email verification during setup
-- Make sure your email password is correct in the .env file
-- Check your email for verification codes during the login process
-
-### Rate Limiting
-- While twscrape has no official API limits, Twitter may still detect and limit scraping
-- Consider using a dedicated Twitter account for scraping
-- Add delays between requests if needed
-
-
-# Installation
-
-## 1. Clone the Repository
-Clone this repository to your local machine:
-
+**Database locked:**
 ```bash
-   git clone https://github.com/lucimart/chirpsyncer.git
-   cd chirpsyncer
+sudo systemctl stop chirpsyncer
+rm -f chirpsyncer.db-shm chirpsyncer.db-wal
+sudo systemctl start chirpsyncer
 ```
 
-## 2. Set Up Environment Variables
-Create a `.env` file in the root directory by copying the example file:
+**Twitter account issues:**
+- Use a dedicated account for scraping
+- Enable 2FA on the account
+- Avoid running multiple instances simultaneously
 
- ```bash
-    cp .env.example .env
- ```
-
-Then edit the `.env` file and add your credentials:
-
- ```bash
-    # Twitter credentials (for twscrape)
-    TWITTER_USERNAME=your_twitter_username
-    TWITTER_PASSWORD=your_twitter_password
-    TWITTER_EMAIL=your_twitter_email@example.com
-    TWITTER_EMAIL_PASSWORD=your_email_password
-
-    # Bluesky credentials
-    BSKY_USERNAME=your-username.bsky.social
-    BSKY_PASSWORD=your-bluesky-app-password
- ```
-
-**Note:** See the [Migration Guide](#migration-guide-twitter-api-to-twscrape) section above if you're upgrading from Twitter API credentials.
-## 3. Install dependencies
-For production dependencies:
+**Port already in use:**
 ```bash
-   make install
+# Change FLASK_PORT in .env
+sudo netstat -tlnp | grep 5000
 ```
 
-For development dependencies:
-```bash
-   make install-dev
-```
+## Contributing
 
-## 4. Build the Docker Containers
-Run the following commands to build the service:
+Contributions are welcome. Please:
 
- ```bash
-    make docker-build
- ```
+1. Fork the repository
+2. Create a feature branch
+3. Write tests for new functionality
+4. Ensure all tests pass
+5. Submit a pull request
 
+Code should follow PEP 8 style guidelines and maintain test coverage above 80%.
 
+## License
 
-# Usage
+MIT License - see [LICENSE](LICENSE) file for details.
 
-## Start
-Run the following commands to start the service:
+## Acknowledgments
 
- ```bash
-    make docker-up
- ```
+- [twscrape](https://github.com/vladkens/twscrape) - Twitter API-free scraping
+- [atproto](https://github.com/MarshalX/atproto) - Bluesky AT Protocol
+- [Flask](https://flask.palletsprojects.com/) - Web framework
+- [APScheduler](https://apscheduler.readthedocs.io/) - Task scheduling
 
+## Support
 
-## Monitor Logs
-To ensure the bot is running correctly, monitor the logs:
-
- ```bash
-   make logs
- ```
-
-## Stop the Application
-To stop the containers, run:
-
- ```bash
-   make docker-down
- ```
-
-## Rebuild After Changes
-If you make changes to the code, rebuild the containers:
-
- ```bash
-   make rebuild
- ```
-
-
-# Troubleshooting
-
-## Database Issues
-If the database (`data.db`) gets corrupted or you want to reset it, delete the file:
-
- ```bash
-   make db-reset
- ```
-
-Restart the containers to regenerate it.
-
-## Twitter Account Issues
-Since ChirpSyncer uses web scraping via twscrape:
-- If your Twitter account gets temporarily locked, you may need to verify it through Twitter's website
-- Using a dedicated Twitter account for syncing is recommended
-- Avoid running multiple instances with the same account simultaneously
-- The scraping approach respects Twitter's natural rate limits
-
-
-# For Developers / Contributors
-1. Clone the Repository:
-```bash    
-   git clone https://github.com/lucimart/chirpsyncer.git
-   cd chirpsyncer
-```
-
-2. Set Up Environment Variables:
-   Follow the instructions in the **Installation** section to create a `.env` file.
-3. Set Up the Python Environment: If you are using `pyenv`:
-```bash
-   make pyenv-setup
-```
-
-4. Install Development Dependencies:
-    This installs all production dependencies as well as additional tools for development, testing, and linting:
-
-```bash
-   make install-dev
-   pre-commit install
-```
-
-5. Set Up Pre-Commit Hooks
-   Install and set up the pre-commit hooks:
-```bash
-   make pre-commit-setup
-```
-
-   To manually run pre-commit hooks on all files:
-```bash
-   make pre-commit-run
-```
-
-6. Run Tests:
-```bash
-   make test
-```
-
-7. Lint and Format Code: Ensure code style consistency:
-```bash
-   make lint
-```
-
-
-## Continuous Integration with GitHub Actions
-
-Every time you push code or open a pull request, the CI pipeline will:
-1. Set up Python in a virtual environment.
-2. Install dependencies.
-3. Run the test suite using `pytest`.
-
-
-# License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+- Report issues: [GitHub Issues](https://github.com/lucimart/ChirpSyncer/issues)
+- Discussions: [GitHub Discussions](https://github.com/lucimart/ChirpSyncer/discussions)

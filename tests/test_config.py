@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 import os
-from app.config import POLL_INTERVAL
+from app.core.config import POLL_INTERVAL
 
 
 class TestConfig(unittest.TestCase):
@@ -47,7 +47,7 @@ class TestTwitterScrapingCredentials(unittest.TestCase):
         with patch.dict(os.environ, {'TWITTER_USERNAME': 'test_twitter_user'}):
             # Reimport config to pick up the environment variable
             import importlib
-            from app import config
+            from app.core import config
             importlib.reload(config)
             self.assertEqual(config.TWITTER_USERNAME, 'test_twitter_user')
 
@@ -55,7 +55,7 @@ class TestTwitterScrapingCredentials(unittest.TestCase):
         """Test that TWITTER_PASSWORD is loaded from environment variable"""
         with patch.dict(os.environ, {'TWITTER_PASSWORD': 'test_twitter_pass'}):
             import importlib
-            from app import config
+            from app.core import config
             importlib.reload(config)
             self.assertEqual(config.TWITTER_PASSWORD, 'test_twitter_pass')
 
@@ -63,7 +63,7 @@ class TestTwitterScrapingCredentials(unittest.TestCase):
         """Test that TWITTER_EMAIL is loaded from environment variable"""
         with patch.dict(os.environ, {'TWITTER_EMAIL': 'test@example.com'}):
             import importlib
-            from app import config
+            from app.core import config
             importlib.reload(config)
             self.assertEqual(config.TWITTER_EMAIL, 'test@example.com')
 
@@ -71,7 +71,7 @@ class TestTwitterScrapingCredentials(unittest.TestCase):
         """Test that TWITTER_EMAIL_PASSWORD is loaded from environment variable"""
         with patch.dict(os.environ, {'TWITTER_EMAIL_PASSWORD': 'test_email_pass'}):
             import importlib
-            from app import config
+            from app.core import config
             importlib.reload(config)
             self.assertEqual(config.TWITTER_EMAIL_PASSWORD, 'test_email_pass')
 

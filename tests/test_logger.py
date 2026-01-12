@@ -11,14 +11,14 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), 'app
 # Mock config before importing logger
 sys.modules['config'] = MagicMock()
 
-from app.logger import setup_logger
+from app.core.logger import setup_logger
 
 
 def test_logger_setup_creates_handlers():
     """Test that setup_logger creates both console and file handlers"""
     with tempfile.TemporaryDirectory() as tmpdir:
         # Mock the logs directory to use temp directory
-        with patch('app.logger.LOGS_DIR', Path(tmpdir)):
+        with patch('app.core.logger.LOGS_DIR', Path(tmpdir)):
             logger = setup_logger('test_logger_handlers')
 
             # Should have 2 handlers: console and file
@@ -38,7 +38,7 @@ def test_logger_setup_creates_handlers():
 def test_logger_format_correct():
     """Test that logger format includes required fields"""
     with tempfile.TemporaryDirectory() as tmpdir:
-        with patch('app.logger.LOGS_DIR', Path(tmpdir)):
+        with patch('app.core.logger.LOGS_DIR', Path(tmpdir)):
             logger = setup_logger('test_logger_format')
 
             # Check that all handlers have formatters
@@ -60,7 +60,7 @@ def test_logger_format_correct():
 def test_file_rotation_configured():
     """Test that file rotation is configured with correct parameters"""
     with tempfile.TemporaryDirectory() as tmpdir:
-        with patch('app.logger.LOGS_DIR', Path(tmpdir)):
+        with patch('app.core.logger.LOGS_DIR', Path(tmpdir)):
             logger = setup_logger('test_logger_rotation')
 
             # Find the RotatingFileHandler
@@ -88,7 +88,7 @@ def test_file_rotation_configured():
 def test_multiple_loggers_independent():
     """Test that multiple loggers are independent and don't interfere"""
     with tempfile.TemporaryDirectory() as tmpdir:
-        with patch('app.logger.LOGS_DIR', Path(tmpdir)):
+        with patch('app.core.logger.LOGS_DIR', Path(tmpdir)):
             logger1 = setup_logger('test_logger_1')
             logger2 = setup_logger('test_logger_2')
 
@@ -114,7 +114,7 @@ def test_multiple_loggers_independent():
 def test_console_handler_info_level():
     """Test that console handler is set to INFO level"""
     with tempfile.TemporaryDirectory() as tmpdir:
-        with patch('app.logger.LOGS_DIR', Path(tmpdir)):
+        with patch('app.core.logger.LOGS_DIR', Path(tmpdir)):
             logger = setup_logger('test_console_level')
 
             # Find the StreamHandler (console)
@@ -136,7 +136,7 @@ def test_console_handler_info_level():
 def test_logger_logs_to_correct_file():
     """Test that logger writes to chirpsyncer.log"""
     with tempfile.TemporaryDirectory() as tmpdir:
-        with patch('app.logger.LOGS_DIR', Path(tmpdir)):
+        with patch('app.core.logger.LOGS_DIR', Path(tmpdir)):
             logger = setup_logger('test_file_output')
 
             # Find the file handler and check its filename

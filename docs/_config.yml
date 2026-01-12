@@ -1,0 +1,12 @@
+title: ChirpSyncer
+description: Cross-Platform Social Media Management - Sync Twitter & Bluesky
+theme: jekyll-theme-minimal
+show_downloads: true
+
+github:
+  is_project_page: true
+  repository_url: https://github.com/lucimart/ChirpSyncer
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap

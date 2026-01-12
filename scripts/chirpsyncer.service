@@ -1,0 +1,45 @@
+[Unit]
+Description=ChirpSyncer - Twitter to Bluesky Sync Service
+After=network.target
+Documentation=https://github.com/lucimart/ChirpSyncer
+
+[Service]
+Type=simple
+User=chirpsyncer
+Group=chirpsyncer
+WorkingDirectory=/opt/chirpsyncer
+Environment="PATH=/opt/chirpsyncer/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONUNBUFFERED=1"
+
+# Load environment variables from .env file
+EnvironmentFile=/opt/chirpsyncer/.env
+
+# Main service command
+ExecStart=/opt/chirpsyncer/venv/bin/python /opt/chirpsyncer/app/main.py
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=200
+StartLimitBurst=5
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/chirpsyncer
+ReadOnlyPaths=/opt/chirpsyncer/app
+
+# Resource limits
+LimitNOFILE=65536
+MemoryMax=2G
+CPUQuota=80%
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=chirpsyncer
+
+[Install]
+WantedBy=multi-user.target

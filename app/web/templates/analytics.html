@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - ChirpSyncer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">ChirpSyncer</h1>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('dashboard') }}" class="hover:text-blue-200">Dashboard</a>
+                <a href="{{ url_for('analytics_dashboard') }}" class="text-blue-200 font-semibold">Analytics</a>
+                <a href="{{ url_for('credentials_list') }}" class="hover:text-blue-200">Credentials</a>
+                {% if is_admin %}
+                <a href="{{ url_for('users_list') }}" class="hover:text-blue-200">Users</a>
+                {% endif %}
+                <span class="text-sm">{{ username }}</span>
+                <form method="POST" action="{{ url_for('logout') }}" class="inline">
+                    <button type="submit" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm">
+                        Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto mt-8 p-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-4 p-4 rounded {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Page Header -->
+        <div class="mb-6">
+            <h2 class="text-3xl font-bold text-gray-800">Analytics Dashboard</h2>
+            <p class="text-gray-600 mt-2">Track your tweet performance and engagement metrics</p>
+        </div>
+
+        <!-- Overview Cards -->
+        <div id="overview-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <!-- Loading State -->
+            <div class="bg-white rounded-lg shadow-md p-6 animate-pulse">
+                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div class="h-8 bg-gray-200 rounded w-1/2"></div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 animate-pulse">
+                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div class="h-8 bg-gray-200 rounded w-1/2"></div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 animate-pulse">
+                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div class="h-8 bg-gray-200 rounded w-1/2"></div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 animate-pulse">
+                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div class="h-8 bg-gray-200 rounded w-1/2"></div>
+            </div>
+        </div>
+
+        <!-- Period Selector -->
+        <div class="mb-6">
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Time Period</label>
+                <select id="period-selector" class="border border-gray-300 rounded-md px-4 py-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="daily">Last 24 Hours</option>
+                    <option value="weekly" selected>Last 7 Days</option>
+                    <option value="monthly">Last 30 Days</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Top Tweets Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Top Performing Tweets</h3>
+                <select id="metric-selector" class="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option value="engagement_rate" selected>Engagement Rate</option>
+                    <option value="likes">Likes</option>
+                    <option value="retweets">Retweets</option>
+                    <option value="impressions">Impressions</option>
+                </select>
+            </div>
+
+            <div id="top-tweets-list">
+                <!-- Loading State -->
+                <div class="space-y-3">
+                    <div class="border border-gray-200 rounded-lg p-4 animate-pulse">
+                        <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                        <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-4 animate-pulse">
+                        <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                        <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-4 animate-pulse">
+                        <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                        <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Engagement Chart -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Engagement Overview</h3>
+                <canvas id="engagement-chart"></canvas>
+            </div>
+
+            <!-- Performance Chart -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Tweet Performance</h3>
+                <canvas id="performance-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="bg-white rounded-lg shadow-md p-12 text-center hidden">
+            <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No Analytics Data Yet</h3>
+            <p class="text-gray-500">Start tracking your tweets to see analytics here.</p>
+        </div>
+    </div>
+
+    <script>
+        let engagementChart = null;
+        let performanceChart = null;
+
+        // Load overview data
+        async function loadOverview() {
+            try {
+                const response = await fetch('/api/analytics/overview');
+                const data = await response.json();
+
+                if (!data.success) {
+                    console.error('Failed to load overview:', data.error);
+                    return;
+                }
+
+                const period = document.getElementById('period-selector').value;
+                const periodData = data[period] || data.daily;
+
+                // Update overview cards
+                const overviewSection = document.getElementById('overview-section');
+                overviewSection.innerHTML = `
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Total Tweets</p>
+                                <p class="text-3xl font-bold text-gray-800">${periodData.total_tweets.toLocaleString()}</p>
+                            </div>
+                            <div class="text-blue-500">
+                                <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Total Engagements</p>
+                                <p class="text-3xl font-bold text-gray-800">${periodData.total_engagements.toLocaleString()}</p>
+                            </div>
+                            <div class="text-green-500">
+                                <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Avg Engagement Rate</p>
+                                <p class="text-3xl font-bold text-gray-800">${periodData.avg_engagement_rate.toFixed(2)}%</p>
+                            </div>
+                            <div class="text-purple-500">
+                                <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Total Impressions</p>
+                                <p class="text-3xl font-bold text-gray-800">${periodData.total_impressions.toLocaleString()}</p>
+                            </div>
+                            <div class="text-orange-500">
+                                <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Check if we should show empty state
+                if (periodData.total_tweets === 0) {
+                    document.getElementById('empty-state').classList.remove('hidden');
+                } else {
+                    document.getElementById('empty-state').classList.add('hidden');
+                }
+
+                // Update charts
+                updateCharts(data);
+            } catch (error) {
+                console.error('Error loading overview:', error);
+            }
+        }
+
+        // Load top tweets
+        async function loadTopTweets() {
+            try {
+                const metric = document.getElementById('metric-selector').value;
+                const response = await fetch(`/api/analytics/top-tweets?metric=${metric}&limit=10`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    console.error('Failed to load top tweets:', data.error);
+                    return;
+                }
+
+                const listContainer = document.getElementById('top-tweets-list');
+
+                if (data.tweets.length === 0) {
+                    listContainer.innerHTML = '<p class="text-gray-500 text-center py-8">No tweets found</p>';
+                    return;
+                }
+
+                listContainer.innerHTML = data.tweets.map((tweet, index) => `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-lg font-bold text-blue-600">#${index + 1}</span>
+                            <span class="text-sm text-gray-500">ID: ${tweet.tweet_id}</span>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                            <div>
+                                <span class="text-gray-600">Engagement Rate:</span>
+                                <span class="font-semibold text-purple-600">${tweet.engagement_rate.toFixed(2)}%</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Likes:</span>
+                                <span class="font-semibold text-red-600">${tweet.likes.toLocaleString()}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Retweets:</span>
+                                <span class="font-semibold text-green-600">${tweet.retweets.toLocaleString()}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Impressions:</span>
+                                <span class="font-semibold text-blue-600">${tweet.impressions.toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading top tweets:', error);
+            }
+        }
+
+        // Update charts
+        function updateCharts(data) {
+            const ctx1 = document.getElementById('engagement-chart').getContext('2d');
+            const ctx2 = document.getElementById('performance-chart').getContext('2d');
+
+            // Destroy existing charts
+            if (engagementChart) engagementChart.destroy();
+            if (performanceChart) performanceChart.destroy();
+
+            // Engagement Chart (Bar Chart)
+            engagementChart = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Likes', 'Retweets', 'Replies'],
+                    datasets: [{
+                        label: 'Total Engagement',
+                        data: [
+                            data.weekly.total_likes || 0,
+                            data.weekly.total_retweets || 0,
+                            data.weekly.total_replies || 0
+                        ],
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(34, 197, 94, 0.8)',
+                            'rgba(59, 130, 246, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(239, 68, 68)',
+                            'rgb(34, 197, 94)',
+                            'rgb(59, 130, 246)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Performance Chart (Doughnut Chart)
+            performanceChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Daily', 'Weekly', 'Monthly'],
+                    datasets: [{
+                        label: 'Tweets',
+                        data: [
+                            data.daily.total_tweets || 0,
+                            data.weekly.total_tweets || 0,
+                            data.monthly.total_tweets || 0
+                        ],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(147, 51, 234, 0.8)',
+                            'rgba(236, 72, 153, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(59, 130, 246)',
+                            'rgb(147, 51, 234)',
+                            'rgb(236, 72, 153)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true
+                }
+            });
+        }
+
+        // Event listeners
+        document.getElementById('period-selector').addEventListener('change', loadOverview);
+        document.getElementById('metric-selector').addEventListener('change', loadTopTweets);
+
+        // Initial load
+        loadOverview();
+        loadTopTweets();
+    </script>
+</body>
+</html>

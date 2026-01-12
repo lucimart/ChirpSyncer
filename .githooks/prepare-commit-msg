@@ -1,0 +1,16 @@
+#!/bin/bash
+# Git hook to automatically update CHANGELOG.md
+# This hook runs before the commit message editor opens
+
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+SHA1=$3
+
+# Only run for regular commits (not merges, amends, etc.)
+if [ -z "$COMMIT_SOURCE" ]; then
+    # Extract commit message (will be refined after editor)
+    # For now, just mark that CHANGELOG should be updated manually or via post-commit
+    exit 0
+fi
+
+exit 0
