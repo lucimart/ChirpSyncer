@@ -219,7 +219,7 @@ class TestManualTaskTrigger:
             # Check if execution was recorded
             cursor = db_connection.cursor()
             cursor.execute(
-                "SELECT * FROM task_executions WHERE task_name = ? ORDER BY executed_at DESC LIMIT 1",
+                "SELECT * FROM task_executions WHERE task_name = ? ORDER BY started_at DESC LIMIT 1",
                 ("cleanup_task",),
             )
             execution = cursor.fetchone()

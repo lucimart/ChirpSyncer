@@ -684,11 +684,12 @@ class CredentialManager:
         try:
             cursor.execute(
                 """
-                SELECT id, platform, credential_type, created_at, updated_at,
-                       last_used, is_active, owner_user_id
-                FROM user_credentials
-                WHERE user_id = ? AND is_shared = 1
-                ORDER BY platform, credential_type
+                SELECT uc.id, uc.platform, uc.credential_type, uc.created_at, uc.updated_at,
+                       uc.last_used, uc.is_active, uc.user_id as owner_user_id
+                FROM user_credentials uc
+                INNER JOIN shared_credentials sc ON uc.id = sc.credential_id
+                WHERE sc.shared_with_user_id = ?
+                ORDER BY uc.platform, uc.credential_type
             """,
                 (user_id,),
             )

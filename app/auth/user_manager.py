@@ -5,6 +5,7 @@ Implements complete user management with bcrypt authentication, sessions,
 and database persistence. Provides secure user creation, authentication,
 session management, and CRUD operations.
 """
+
 import sqlite3
 import bcrypt
 import secrets
@@ -17,6 +18,7 @@ from app.auth.security_utils import validate_password, log_audit
 @dataclass
 class User:
     """User data class"""
+
     id: int
     username: str
     email: str
@@ -36,7 +38,7 @@ class UserManager:
     All passwords are hashed with bcrypt (cost factor 12).
     """
 
-    def __init__(self, db_path: str = 'chirpsyncer.db'):
+    def __init__(self, db_path: str = "chirpsyncer.db"):
         """
         Initialize UserManager.
 
@@ -57,7 +59,8 @@ class UserManager:
         cursor = conn.cursor()
 
         # Create users table
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
@@ -69,10 +72,12 @@ class UserManager:
                 is_admin INTEGER DEFAULT 0,
                 settings_json TEXT
             )
-        ''')
+        """
+        )
 
         # Create user_sessions table
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS user_sessions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
@@ -83,17 +88,26 @@ class UserManager:
                 user_agent TEXT,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )
-        ''')
+        """
+        )
 
         # Create indexes
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_sessions_user ON user_sessions(user_id)')
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_sessions_token ON user_sessions(session_token)')
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_sessions_expires ON user_sessions(expires_at)')
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_sessions_user ON user_sessions(user_id)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_sessions_token ON user_sessions(session_token)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_sessions_expires ON user_sessions(expires_at)"
+        )
 
         conn.commit()
         conn.close()
 
-    def create_user(self, username: str, email: str, password: str, is_admin: bool = False) -> int:
+    def create_user(
+        self, username: str, email: str, password: str, is_admin: bool = False
+    ) -> int:
         """
         Create a new user with hashed password.
 
@@ -111,37 +125,53 @@ class UserManager:
         """
         # Validate password strength
         if not validate_password(password):
-            raise ValueError('Password does not meet security requirements')
+            raise ValueError("Password does not meet security requirements")
 
         conn = self._get_connection()
         cursor = conn.cursor()
 
         try:
             # Check for duplicate username
-            cursor.execute('SELECT id FROM users WHERE username = ?', (username,))
+            cursor.execute("SELECT id FROM users WHERE username = ?", (username,))
             if cursor.fetchone():
-                raise ValueError('Username already exists')
+                raise ValueError("Username already exists")
 
             # Check for duplicate email
-            cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
+            cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
             if cursor.fetchone():
-                raise ValueError('Email already exists')
+                raise ValueError("Email already exists")
 
             # Hash password with bcrypt
-            password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=12))
+            password_hash = bcrypt.hashpw(
+                password.encode("utf-8"), bcrypt.gensalt(rounds=12)
+            )
 
             # Create user
             created_at = int(time.time())
-            cursor.execute('''
+            cursor.execute(
+                """
                 INSERT INTO users (username, email, password_hash, created_at, is_active, is_admin)
                 VALUES (?, ?, ?, ?, 1, ?)
-            ''', (username, email, password_hash.decode('utf-8'), created_at, int(is_admin)))
+            """,
+                (
+                    username,
+                    email,
+                    password_hash.decode("utf-8"),
+                    created_at,
+                    int(is_admin),
+                ),
+            )
 
             user_id = cursor.lastrowid
             conn.commit()
 
             # Log audit event
-            log_audit(user_id, 'user_created', success=True, details={'username': username, 'is_admin': is_admin})
+            log_audit(
+                user_id,
+                "user_created",
+                success=True,
+                details={"username": username, "is_admin": is_admin},
+            )
 
             return user_id
 
@@ -149,7 +179,7 @@ class UserManager:
             raise
         except Exception as e:
             conn.rollback()
-            raise Exception(f'Failed to create user: {e}')
+            raise Exception(f"Failed to create user: {e}")
         finally:
             conn.close()
 
@@ -169,30 +199,52 @@ class UserManager:
 
         try:
             # Get user by username
-            cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+            cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
             row = cursor.fetchone()
 
             if not row:
-                log_audit(None, 'login_failed', success=False, details={'username': username, 'reason': 'user_not_found'})
+                log_audit(
+                    None,
+                    "login_failed",
+                    success=False,
+                    details={"username": username, "reason": "user_not_found"},
+                )
                 return None
 
             user = self._row_to_user(row)
 
             # Check if user is active
             if not user.is_active:
-                log_audit(user.id, 'login_failed', success=False, details={'username': username, 'reason': 'user_inactive'})
+                log_audit(
+                    user.id,
+                    "login_failed",
+                    success=False,
+                    details={"username": username, "reason": "user_inactive"},
+                )
                 return None
 
             # Verify password with bcrypt
-            if not bcrypt.checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8')):
-                log_audit(user.id, 'login_failed', success=False, details={'username': username, 'reason': 'wrong_password'})
+            if not bcrypt.checkpw(
+                password.encode("utf-8"), user.password_hash.encode("utf-8")
+            ):
+                log_audit(
+                    user.id,
+                    "login_failed",
+                    success=False,
+                    details={"username": username, "reason": "wrong_password"},
+                )
                 return None
 
             # Update last_login
-            cursor.execute('UPDATE users SET last_login = ? WHERE id = ?', (int(time.time()), user.id))
+            cursor.execute(
+                "UPDATE users SET last_login = ? WHERE id = ?",
+                (int(time.time()), user.id),
+            )
             conn.commit()
 
-            log_audit(user.id, 'login_success', success=True, details={'username': username})
+            log_audit(
+                user.id, "login_success", success=True, details={"username": username}
+            )
 
             # Return updated user
             return self.get_user_by_id(user.id)
@@ -214,7 +266,7 @@ class UserManager:
         cursor = conn.cursor()
 
         try:
-            cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
+            cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
             row = cursor.fetchone()
 
             if row:
@@ -238,7 +290,7 @@ class UserManager:
         cursor = conn.cursor()
 
         try:
-            cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+            cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
             row = cursor.fetchone()
 
             if row:
@@ -264,7 +316,7 @@ class UserManager:
 
         try:
             # Check user exists
-            cursor.execute('SELECT id FROM users WHERE id = ?', (user_id,))
+            cursor.execute("SELECT id FROM users WHERE id = ?", (user_id,))
             if not cursor.fetchone():
                 return False
 
@@ -272,27 +324,29 @@ class UserManager:
             updates = []
             values = []
 
-            if 'email' in kwargs:
-                updates.append('email = ?')
-                values.append(kwargs['email'])
+            if "email" in kwargs:
+                updates.append("email = ?")
+                values.append(kwargs["email"])
 
-            if 'password' in kwargs:
+            if "password" in kwargs:
                 # Hash new password
-                password_hash = bcrypt.hashpw(kwargs['password'].encode('utf-8'), bcrypt.gensalt(rounds=12))
-                updates.append('password_hash = ?')
-                values.append(password_hash.decode('utf-8'))
+                password_hash = bcrypt.hashpw(
+                    kwargs["password"].encode("utf-8"), bcrypt.gensalt(rounds=12)
+                )
+                updates.append("password_hash = ?")
+                values.append(password_hash.decode("utf-8"))
 
-            if 'is_active' in kwargs:
-                updates.append('is_active = ?')
-                values.append(int(kwargs['is_active']))
+            if "is_active" in kwargs:
+                updates.append("is_active = ?")
+                values.append(int(kwargs["is_active"]))
 
-            if 'is_admin' in kwargs:
-                updates.append('is_admin = ?')
-                values.append(int(kwargs['is_admin']))
+            if "is_admin" in kwargs:
+                updates.append("is_admin = ?")
+                values.append(int(kwargs["is_admin"]))
 
-            if 'settings_json' in kwargs:
-                updates.append('settings_json = ?')
-                values.append(kwargs['settings_json'])
+            if "settings_json" in kwargs:
+                updates.append("settings_json = ?")
+                values.append(kwargs["settings_json"])
 
             if not updates:
                 return False
@@ -303,13 +357,18 @@ class UserManager:
             cursor.execute(query, values)
             conn.commit()
 
-            log_audit(user_id, 'user_updated', success=True, details={'fields': list(kwargs.keys())})
+            log_audit(
+                user_id,
+                "user_updated",
+                success=True,
+                details={"fields": list(kwargs.keys())},
+            )
 
             return True
 
         except Exception as e:
             conn.rollback()
-            log_audit(user_id, 'user_updated', success=False, details={'error': str(e)})
+            log_audit(user_id, "user_updated", success=False, details={"error": str(e)})
             return False
         finally:
             conn.close()
@@ -329,26 +388,28 @@ class UserManager:
 
         try:
             # Check user exists
-            cursor.execute('SELECT id FROM users WHERE id = ?', (user_id,))
+            cursor.execute("SELECT id FROM users WHERE id = ?", (user_id,))
             if not cursor.fetchone():
                 return False
 
             # Delete user (cascade will delete sessions)
-            cursor.execute('DELETE FROM users WHERE id = ?', (user_id,))
+            cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
             conn.commit()
 
-            log_audit(user_id, 'user_deleted', success=True)
+            log_audit(user_id, "user_deleted", success=True)
 
             return True
 
         except Exception as e:
             conn.rollback()
-            log_audit(user_id, 'user_deleted', success=False, details={'error': str(e)})
+            log_audit(user_id, "user_deleted", success=False, details={"error": str(e)})
             return False
         finally:
             conn.close()
 
-    def list_users(self, admin_only: bool = False, active_only: bool = False) -> List[User]:
+    def list_users(
+        self, admin_only: bool = False, active_only: bool = False
+    ) -> List[User]:
         """
         List users.
 
@@ -363,14 +424,14 @@ class UserManager:
         cursor = conn.cursor()
 
         try:
-            query = 'SELECT * FROM users WHERE 1=1'
+            query = "SELECT * FROM users WHERE 1=1"
             params = []
 
             if admin_only:
-                query += ' AND is_admin = 1'
+                query += " AND is_admin = 1"
 
             if active_only:
-                query += ' AND is_active = 1'
+                query += " AND is_active = 1"
 
             cursor.execute(query, params)
             rows = cursor.fetchall()
@@ -380,7 +441,9 @@ class UserManager:
         finally:
             conn.close()
 
-    def create_session(self, user_id: int, ip_address: str, user_agent: str, expires_in: int = 604800) -> str:
+    def create_session(
+        self, user_id: int, ip_address: str, user_agent: str, expires_in: int = 604800
+    ) -> str:
         """
         Create a new session for user.
 
@@ -403,21 +466,35 @@ class UserManager:
             created_at = int(time.time())
             expires_at = created_at + expires_in
 
-            cursor.execute('''
+            cursor.execute(
+                """
                 INSERT INTO user_sessions (user_id, session_token, created_at, expires_at, ip_address, user_agent)
                 VALUES (?, ?, ?, ?, ?, ?)
-            ''', (user_id, session_token, created_at, expires_at, ip_address, user_agent))
+            """,
+                (
+                    user_id,
+                    session_token,
+                    created_at,
+                    expires_at,
+                    ip_address,
+                    user_agent,
+                ),
+            )
 
             conn.commit()
 
-            log_audit(user_id, 'session_created', success=True, details={'ip': ip_address})
+            log_audit(
+                user_id, "session_created", success=True, details={"ip": ip_address}
+            )
 
             return session_token
 
         except Exception as e:
             conn.rollback()
-            log_audit(user_id, 'session_created', success=False, details={'error': str(e)})
-            raise Exception(f'Failed to create session: {e}')
+            log_audit(
+                user_id, "session_created", success=False, details={"error": str(e)}
+            )
+            raise Exception(f"Failed to create session: {e}")
         finally:
             conn.close()
 
@@ -429,34 +506,40 @@ class UserManager:
             session_token: Session token
 
         Returns:
-            User object if session is valid, None otherwise
+            User ID if session is valid, None otherwise
         """
         conn = self._get_connection()
         cursor = conn.cursor()
 
         try:
             # Get session
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT user_id, expires_at FROM user_sessions
                 WHERE session_token = ?
-            ''', (session_token,))
+            """,
+                (session_token,),
+            )
 
             row = cursor.fetchone()
             if not row:
                 return None
 
-            user_id = row['user_id']
-            expires_at = row['expires_at']
+            user_id = row["user_id"]
+            expires_at = row["expires_at"]
 
             # Check expiration
             if int(time.time()) > expires_at:
                 # Session expired, delete it
-                cursor.execute('DELETE FROM user_sessions WHERE session_token = ?', (session_token,))
+                cursor.execute(
+                    "DELETE FROM user_sessions WHERE session_token = ?",
+                    (session_token,),
+                )
                 conn.commit()
                 return None
 
-            # Return user
-            return self.get_user_by_id(user_id)
+            # Return user_id
+            return user_id
 
         finally:
             conn.close()
@@ -476,19 +559,24 @@ class UserManager:
 
         try:
             # Check session exists and get user_id for audit
-            cursor.execute('SELECT user_id FROM user_sessions WHERE session_token = ?', (session_token,))
+            cursor.execute(
+                "SELECT user_id FROM user_sessions WHERE session_token = ?",
+                (session_token,),
+            )
             row = cursor.fetchone()
 
             if not row:
                 return False
 
-            user_id = row['user_id']
+            user_id = row["user_id"]
 
             # Delete session
-            cursor.execute('DELETE FROM user_sessions WHERE session_token = ?', (session_token,))
+            cursor.execute(
+                "DELETE FROM user_sessions WHERE session_token = ?", (session_token,)
+            )
             conn.commit()
 
-            log_audit(user_id, 'session_deleted', success=True)
+            log_audit(user_id, "session_deleted", success=True)
 
             return True
 
@@ -501,13 +589,13 @@ class UserManager:
     def _row_to_user(self, row: sqlite3.Row) -> User:
         """Convert database row to User object"""
         return User(
-            id=row['id'],
-            username=row['username'],
-            email=row['email'],
-            password_hash=row['password_hash'],
-            created_at=row['created_at'],
-            last_login=row['last_login'],
-            is_active=bool(row['is_active']),
-            is_admin=bool(row['is_admin']),
-            settings_json=row['settings_json']
+            id=row["id"],
+            username=row["username"],
+            email=row["email"],
+            password_hash=row["password_hash"],
+            created_at=row["created_at"],
+            last_login=row["last_login"],
+            is_active=bool(row["is_active"]),
+            is_admin=bool(row["is_admin"]),
+            settings_json=row["settings_json"],
         )

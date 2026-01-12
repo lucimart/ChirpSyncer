@@ -182,8 +182,14 @@ class TestMultiUserCredentialIsolation:
         encrypted_data = row["encrypted_data"]
 
         # Verify encrypted data is not plaintext
-        assert "secret_user.bsky" not in encrypted_data
-        assert "SecretPassword123!" not in encrypted_data
+        # encrypted_data is bytes, so convert strings to bytes for comparison
+        if isinstance(encrypted_data, bytes):
+            assert b"secret_user.bsky" not in encrypted_data
+            assert b"SecretPassword123!" not in encrypted_data
+        else:
+            # If it's a string (shouldn't be, but handle it)
+            assert "secret_user.bsky" not in encrypted_data
+            assert "SecretPassword123!" not in encrypted_data
 
         # Verify credentials can still be retrieved decrypted through manager
         retrieved_creds = credential_manager.get_credentials(user_id, "bluesky", "api")

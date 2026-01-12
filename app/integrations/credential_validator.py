@@ -13,6 +13,12 @@ from atproto import Client
 from twscrape import API
 from app.core.logger import setup_logger
 
+# Import tweepy at module level so it can be mocked in tests
+try:
+    import tweepy
+except ImportError:
+    tweepy = None
+
 logger = setup_logger(__name__)
 
 
@@ -95,10 +101,12 @@ def validate_twitter_api(credentials: Dict[str, str]) -> Tuple[bool, str]:
         if missing_fields:
             return False, f"Missing required fields: {', '.join(missing_fields)}"
 
+        # Check if tweepy is available
+        if tweepy is None:
+            return False, "tweepy library not installed"
+
         # Attempt to authenticate with Twitter API using tweepy
         try:
-            import tweepy
-
             # Create auth handler
             auth = tweepy.OAuthHandler(
                 credentials["api_key"], credentials["api_secret"]

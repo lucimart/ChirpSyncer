@@ -23,6 +23,7 @@ import sqlite3
 import pytest
 from typing import Generator, Tuple
 import hashlib
+from unittest.mock import Mock, patch, MagicMock
 
 # Add app to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../"))
@@ -186,6 +187,54 @@ def e2e_app(temp_db_path) -> Generator:
 
     # Disable CSRF for testing
     app.config["WTF_CSRF_ENABLED"] = False
+
+    # Setup task scheduler database tables and mock scheduler for testing
+    from app.services.task_scheduler import TaskScheduler
+
+    real_scheduler = TaskScheduler(db_path=temp_db_path)
+    real_scheduler.init_db()  # Create tables
+
+    # Create side effect function that logs execution to database
+    def trigger_task_side_effect(task_name):
+        import time
+
+        conn = sqlite3.connect(temp_db_path)
+        cursor = conn.cursor()
+        now = int(time.time())
+        cursor.execute(
+            """
+            INSERT INTO task_executions (task_name, started_at, completed_at, status, duration_ms)
+            VALUES (?, ?, ?, ?, ?)
+        """,
+            (task_name, now, now, "success", 100),
+        )
+        conn.commit()
+        conn.close()
+        return True
+
+    # Create mock scheduler with real database backing
+    mock_scheduler = MagicMock()
+    mock_scheduler.get_all_tasks.return_value = [
+        {
+            "id": "sync_task",
+            "name": "sync_task",
+            "schedule": "0 * * * *",
+            "enabled": True,
+            "last_run": None,
+            "next_run": None,
+        }
+    ]
+    mock_scheduler.get_task_status.return_value = {
+        "id": "sync_task",
+        "name": "sync_task",
+        "schedule": "0 * * * *",
+        "enabled": True,
+        "last_run": None,
+        "next_run": None,
+    }
+    mock_scheduler.trigger_task_now.side_effect = trigger_task_side_effect
+    mock_scheduler.db_path = temp_db_path
+    app.config["TASK_SCHEDULER"] = mock_scheduler
 
     yield app
 
@@ -589,6 +638,69 @@ def _cleanup_flask_session(e2e_app):
     """
     yield
     # Cleanup happens automatically with function-scoped fixtures
+
+
+@pytest.fixture(autouse=True)
+def mock_tweepy():
+    """
+    Mock tweepy for all E2E tests to avoid real API calls.
+
+    Invalid credentials (containing 'invalid') will fail authentication.
+    Valid-looking credentials will succeed.
+    """
+    with patch("app.integrations.credential_validator.tweepy") as mock_tweepy_module:
+        # Create mock API instance
+        mock_api_instance = MagicMock()
+
+        # Create a side effect function that checks credentials
+        def verify_credentials_side_effect():
+            # Access the auth that was passed to OAuthHandler
+            # If credentials contain 'invalid', raise Unauthorized
+            mock_user = MagicMock()
+            mock_user.screen_name = "test_user"
+            return mock_user
+
+        # Mock OAuthHandler
+        mock_auth = MagicMock()
+        mock_tweepy_module.OAuthHandler.return_value = mock_auth
+
+        # Mock API class
+        def api_init_side_effect(auth):
+            # Check if the auth has invalid tokens
+            # We'll check via the call args
+            return mock_api_instance
+
+        mock_tweepy_module.API.return_value = mock_api_instance
+        mock_api_instance.verify_credentials.side_effect = (
+            verify_credentials_side_effect
+        )
+
+        # Mock error classes
+        mock_tweepy_module.errors = MagicMock()
+        mock_tweepy_module.errors.Unauthorized = type("Unauthorized", (Exception,), {})
+        mock_tweepy_module.errors.Forbidden = type("Forbidden", (Exception,), {})
+        mock_tweepy_module.errors.TweepyException = type(
+            "TweepyException", (Exception,), {}
+        )
+
+        # Track calls to detect invalid credentials
+        original_oauth_handler = mock_tweepy_module.OAuthHandler
+
+        def oauth_handler_with_validation(api_key, api_secret):
+            # If credentials contain 'invalid', we'll make verify_credentials fail
+            if "invalid" in api_key.lower() or "invalid" in api_secret.lower():
+                mock_api_instance.verify_credentials.side_effect = (
+                    mock_tweepy_module.errors.Unauthorized("Invalid credentials")
+                )
+            else:
+                mock_api_instance.verify_credentials.side_effect = (
+                    verify_credentials_side_effect
+                )
+            return mock_auth
+
+        mock_tweepy_module.OAuthHandler.side_effect = oauth_handler_with_validation
+
+        yield mock_tweepy_module
 
 
 # ============================================================================

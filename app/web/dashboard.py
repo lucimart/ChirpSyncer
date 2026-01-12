@@ -423,6 +423,11 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
         if not cred:
             abort(404)
 
+        # Check if user is the owner of the credential (not just shared with them)
+        if cred.get("owner_user_id") and cred["owner_user_id"] != session["user_id"]:
+            flash("Cannot delete shared credentials", "error")
+            abort(403)
+
         if credential_manager.delete_credentials(
             session["user_id"], cred["platform"], cred["credential_type"]
         ):
@@ -582,46 +587,29 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
     @app.route("/tasks/<task_name>/trigger", methods=["POST"])
     @require_admin
     def task_trigger(task_name):
-        """Manually trigger a task now (admin only)"""
+        """Manually trigger a task now (admin only) - Returns JSON"""
         scheduler = _get_scheduler()
 
         if not scheduler:
-            # Return JSON if requested, otherwise flash and redirect
-            if request.accept_mimetypes.best == "application/json" or request.is_json:
-                return (
-                    jsonify({"success": False, "error": "Scheduler not available"}),
-                    500,
-                )
-            flash("Task scheduler not available", "error")
-            return redirect(url_for("tasks_list"))
+            return (
+                jsonify({"success": False, "error": "Scheduler not available"}),
+                500,
+            )
 
         try:
             success = scheduler.trigger_task_now(task_name)
 
-            # Return JSON if requested
-            if request.accept_mimetypes.best == "application/json" or request.is_json:
-                if success:
-                    return jsonify(
-                        {"success": True, "message": f"Task {task_name} triggered"}
-                    )
-                else:
-                    return (
-                        jsonify({"success": False, "error": "Failed to trigger task"}),
-                        500,
-                    )
-
-            # Otherwise use flash messages and redirect
             if success:
-                flash(f'Task "{task_name}" triggered successfully', "success")
+                return jsonify(
+                    {"success": True, "message": f"Task {task_name} triggered"}
+                )
             else:
-                flash(f'Failed to trigger task "{task_name}"', "error")
+                return (
+                    jsonify({"success": False, "error": "Failed to trigger task"}),
+                    500,
+                )
         except Exception as e:
-            # Return JSON if requested
-            if request.accept_mimetypes.best == "application/json" or request.is_json:
-                return jsonify({"success": False, "error": str(e)}), 500
-            flash(f"Error triggering task: {str(e)}", "error")
-
-        return redirect(url_for("task_detail", task_name=task_name))
+            return jsonify({"success": False, "error": str(e)}), 500
 
     @app.route("/tasks/<task_name>/toggle", methods=["POST"])
     @require_admin
