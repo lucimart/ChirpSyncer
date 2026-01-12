@@ -57,6 +57,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated CONTRIBUTING.md
 - Updated PR template checklist
 - Updated GitHub setup summary
+- update coverage threshold references to 90%
+
+- Updated CONTRIBUTING.md
+- Updated PR template checklist
+- Updated GitHub setup summary
 - Removed emojis from DATABASE.md
 - Added comprehensive API.md (95KB) and DATABASE.md (75KB)
 - Created automatic changelog system via git hooks
