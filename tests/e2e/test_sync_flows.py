@@ -369,7 +369,7 @@ def test_sync_with_threads(mock_twitter_api_class, mock_bluesky_client, mock_is_
     async def mock_is_thread_async():
         return True
 
-    mock_is_thread.return_value = mock_is_thread_async()
+    mock_is_thread.return_value = mock_is_thread_async
 
     # Create thread tweets
     thread_tweets = []
