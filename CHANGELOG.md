@@ -476,6 +476,10 @@ Fixes:
 - Integration tests remain at 85%
 
 ### Testing
+- remove skip decorator from credential encryption test
+
+The encryption functionality is already implemented with AES-256-GCM,
+so this test should pass now.
 - skip Playwright tests until UI templates implemented
 
 All E2E Playwright tests are now marked as skipped with clear reason.
