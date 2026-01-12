@@ -750,8 +750,20 @@ def integration_app(test_db_path):
 
     mock_scheduler = MagicMock()
     mock_scheduler.get_all_tasks.return_value = []
-    mock_scheduler.get_task_status.return_value = None
+    # Return a valid task status for any task (can be overridden in individual tests)
+    mock_scheduler.get_task_status.return_value = {
+        "task_name": "test_task",
+        "enabled": True,
+        "last_run": None,
+        "next_run": None,
+        "run_count": 0,
+        "success_count": 0,
+        "failure_count": 0,
+    }
+    mock_scheduler.get_task_history.return_value = []
     mock_scheduler.trigger_task_now.return_value = True
+    mock_scheduler.pause_task.return_value = True
+    mock_scheduler.resume_task.return_value = True
     app.config["TASK_SCHEDULER"] = mock_scheduler
 
     yield app

@@ -11,6 +11,7 @@ Provides routes for:
 
 import os
 import json
+import logging
 from flask import (
     Flask,
     render_template,
@@ -29,6 +30,8 @@ from app.auth.credential_manager import CredentialManager
 from app.auth.auth_decorators import require_auth, require_admin, require_self_or_admin
 from app.auth.security_utils import validate_password
 from app.features.analytics_tracker import AnalyticsTracker
+
+logger = logging.getLogger(__name__)
 
 
 def create_app(db_path="chirpsyncer.db", master_key=None):
@@ -477,7 +480,8 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
                 }
             )
         except Exception as e:
-            return jsonify({"success": False, "error": f"Validation failed: {str(e)}"})
+            logger.error(f"Error validating credentials: {str(e)}")
+            return jsonify({"success": False, "error": "An internal error occurred"})
 
     @app.route("/credentials/share", methods=["POST"])
     @require_auth
@@ -603,7 +607,8 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
             else:
                 return jsonify({"success": False, "error": "Failed to trigger task"})
         except Exception as e:
-            return jsonify({"success": False, "error": str(e)})
+            logger.error(f"Error triggering task: {str(e)}")
+            return jsonify({"success": False, "error": "An internal error occurred"})
 
     @app.route("/tasks/<task_name>/toggle", methods=["POST"])
     @require_admin
@@ -635,7 +640,11 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
                     500,
                 )
         except Exception as e:
-            return jsonify({"success": False, "error": str(e)}), 500
+            logger.error(f"Error toggling task: {str(e)}")
+            return (
+                jsonify({"success": False, "error": "An internal error occurred"}),
+                500,
+            )
 
     @app.route("/tasks/<task_name>/configure", methods=["POST"])
     @require_admin
@@ -683,7 +692,11 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
             tasks = scheduler.get_all_tasks()
             return jsonify({"success": True, "tasks": tasks, "count": len(tasks)})
         except Exception as e:
-            return jsonify({"success": False, "error": str(e)}), 500
+            logger.error(f"Error getting tasks status: {str(e)}")
+            return (
+                jsonify({"success": False, "error": "An internal error occurred"}),
+                500,
+            )
 
     @app.route("/api/tasks/<task_id>/status")
     @require_auth
@@ -722,7 +735,11 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
                 }
             )
         except Exception as e:
-            return jsonify({"success": False, "error": str(e)}), 500
+            logger.error(f"Error getting task status: {str(e)}")
+            return (
+                jsonify({"success": False, "error": "An internal error occurred"}),
+                500,
+            )
 
     # ========================================================================
     # ANALYTICS ROUTES (Sprint 7 - ANALYTICS-001)
@@ -768,7 +785,11 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
             )
 
         except Exception as e:
-            return jsonify({"success": False, "error": str(e)}), 500
+            logger.error(f"Error getting analytics overview: {str(e)}")
+            return (
+                jsonify({"success": False, "error": "An internal error occurred"}),
+                500,
+            )
 
     @app.route("/api/analytics/top-tweets")
     @require_auth
@@ -796,7 +817,11 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
             )
 
         except Exception as e:
-            return jsonify({"success": False, "error": str(e)}), 500
+            logger.error(f"Error getting top tweets: {str(e)}")
+            return (
+                jsonify({"success": False, "error": "An internal error occurred"}),
+                500,
+            )
 
     @app.route("/api/analytics/record-metrics", methods=["POST"])
     @require_auth
@@ -824,7 +849,11 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
             return jsonify({"success": result, "tweet_id": tweet_id})
 
         except Exception as e:
-            return jsonify({"success": False, "error": str(e)}), 500
+            logger.error(f"Error recording metrics: {str(e)}")
+            return (
+                jsonify({"success": False, "error": "An internal error occurred"}),
+                500,
+            )
 
     @app.route("/api/analytics/create-snapshot", methods=["POST"])
     @require_auth
@@ -848,7 +877,11 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
             return jsonify({"success": result, "period": period})
 
         except Exception as e:
-            return jsonify({"success": False, "error": str(e)}), 500
+            logger.error(f"Error creating snapshot: {str(e)}")
+            return (
+                jsonify({"success": False, "error": "An internal error occurred"}),
+                500,
+            )
 
     @app.route("/api/analytics/export")
     @require_auth
@@ -975,7 +1008,11 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
             )
 
         except Exception as e:
-            return jsonify({"success": False, "error": str(e)}), 500
+            logger.error(f"Error exporting analytics: {str(e)}")
+            return (
+                jsonify({"success": False, "error": "An internal error occurred"}),
+                500,
+            )
 
     @app.route("/api/analytics/snapshots")
     @require_auth
@@ -989,7 +1026,11 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
 
             return jsonify({"success": True, "snapshots": snapshots})
         except Exception as e:
-            return jsonify({"success": False, "error": str(e)}), 500
+            logger.error(f"Error getting snapshots: {str(e)}")
+            return (
+                jsonify({"success": False, "error": "An internal error occurred"}),
+                500,
+            )
 
     return app
 

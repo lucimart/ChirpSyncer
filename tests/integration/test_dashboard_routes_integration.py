@@ -834,7 +834,9 @@ class TestTaskManagementRoutes:
                 response = test_client.get("/tasks/test_task")
                 assert response.status_code == 404
 
-    def test_post_task_toggle_no_scheduler(self, test_client, test_admin_user):
+    def test_post_task_toggle_no_scheduler(
+        self, test_client, test_admin_user, integration_app
+    ):
         """POST /tasks/<task_name>/toggle when scheduler not available"""
         # Login as admin
         test_client.post(
@@ -846,11 +848,16 @@ class TestTaskManagementRoutes:
             follow_redirects=True,
         )
 
+        # Remove scheduler to test no-scheduler case
+        integration_app.config["TASK_SCHEDULER"] = None
+
         # Try to toggle task without scheduler
         response = test_client.post("/tasks/test_task/toggle")
         assert response.status_code == 500
 
-    def test_post_task_configure_no_scheduler(self, test_client, test_admin_user):
+    def test_post_task_configure_no_scheduler(
+        self, test_client, test_admin_user, integration_app
+    ):
         """POST /tasks/<task_name>/configure when scheduler not available"""
         # Login as admin
         test_client.post(
@@ -861,6 +868,9 @@ class TestTaskManagementRoutes:
             },
             follow_redirects=True,
         )
+
+        # Remove scheduler to test no-scheduler case
+        integration_app.config["TASK_SCHEDULER"] = None
 
         # Try to configure task without scheduler
         response = test_client.post(

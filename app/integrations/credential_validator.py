@@ -57,7 +57,7 @@ async def _validate_twitter_scraping_async(
 
     except Exception as e:
         logger.error(f"Error validating Twitter scraping credentials: {e}")
-        return False, f"Validation error: {str(e)}"
+        return False, "Validation error occurred"
 
 
 def validate_twitter_scraping(credentials: Dict[str, str]) -> Tuple[bool, str]:
@@ -143,11 +143,11 @@ def validate_twitter_api(credentials: Dict[str, str]) -> Tuple[bool, str]:
             elif "429" in error_msg:
                 return False, "Rate limit exceeded - try again later"
             else:
-                return False, f"Twitter API error: {error_msg}"
+                return False, "Twitter API error occurred"
 
     except Exception as e:
         logger.error(f"Error validating Twitter API credentials: {e}")
-        return False, f"Validation error: {str(e)}"
+        return False, "Validation error occurred"
 
 
 def validate_bluesky(credentials: Dict[str, str]) -> Tuple[bool, str]:
@@ -173,17 +173,18 @@ def validate_bluesky(credentials: Dict[str, str]) -> Tuple[bool, str]:
             client.login(credentials["username"], credentials["password"])
             return True, "Bluesky credentials validated successfully"
         except Exception as login_error:
+            logger.error(f"Bluesky login error: {login_error}")
             error_msg = str(login_error)
             if "Invalid" in error_msg or "Authentication" in error_msg:
                 return False, "Invalid username or password"
             elif "Network" in error_msg or "Connection" in error_msg:
                 return False, "Network error - could not reach Bluesky API"
             else:
-                return False, f"Login failed: {error_msg}"
+                return False, "Login failed"
 
     except Exception as e:
         logger.error(f"Error validating Bluesky credentials: {e}")
-        return False, f"Validation error: {str(e)}"
+        return False, "Validation error occurred"
 
 
 def validate_credentials(
