@@ -165,16 +165,16 @@ class PlatformCapabilities:
 - ✅ Search with filters
 - ✅ Analytics dashboard
 
-#### Sprint 12: Cleanup UI
-- Cleanup rules list
-- Rule creation wizard
-- Preview with DataTable
-- Step-up auth (DangerConfirm modal)
-- Execution with progress
+#### Sprint 12: Cleanup UI ✅ COMPLETE
+- ✅ Cleanup rules list with preview links
+- ✅ Rule creation wizard
+- ✅ Preview with DataTable (sortable, selectable, paginated)
+- ✅ Step-up auth (DangerConfirm modal with typed phrase)
+- ✅ Execution with real-time progress
 
 #### Sprint 13: Search & Analytics
-- Search page with filters
-- Analytics overview with charts
+- Search page with filters (done in Sprint 11)
+- Analytics overview with charts (done in Sprint 11)
 - Bookmarks/saved tweets
 - Export functionality
 
@@ -503,7 +503,7 @@ ChirpSyncer/
 | Test coverage | >90% core | ~85% |
 | Tests passing | 100% | 97.8% |
 | API response time | <200ms p95 | TBD |
-| Next.js migration | 100% | 40% (Sprint 10-11 done) |
+| Next.js migration | 100% | 60% (Sprint 10-12 done) |
 | Platform connectors | 4 | 1 |
 | E2E test coverage | Critical paths | 0% |
 
