@@ -11,6 +11,7 @@ build/
 
 # Environment Variables
 .env
+.admin_password_GENERATED.txt
 
 # Docker-related
 *.log

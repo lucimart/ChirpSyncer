@@ -1,15 +1,4 @@
-from app.core.config import (
-    TWITTER_USERNAME,
-    TWITTER_PASSWORD,
-    TWITTER_EMAIL,
-    TWITTER_EMAIL_PASSWORD,
-    TWITTER_API_KEY,
-    TWITTER_API_SECRET,
-    TWITTER_ACCESS_TOKEN,
-    TWITTER_ACCESS_SECRET,
-    BSKY_USERNAME,
-    BSKY_PASSWORD
-)
+from app.core import config
 from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -32,41 +21,49 @@ def validate_credentials():
     # Required credentials for unidirectional sync (Twitter → Bluesky)
     required_vars = {
         # Twitter scraping credentials (twscrape) - REQUIRED
-        'TWITTER_USERNAME': TWITTER_USERNAME,
-        'TWITTER_PASSWORD': TWITTER_PASSWORD,
-        'TWITTER_EMAIL': TWITTER_EMAIL,
-        'TWITTER_EMAIL_PASSWORD': TWITTER_EMAIL_PASSWORD,
+        "TWITTER_USERNAME": config.TWITTER_USERNAME,
+        "TWITTER_PASSWORD": config.TWITTER_PASSWORD,
+        "TWITTER_EMAIL": config.TWITTER_EMAIL,
+        "TWITTER_EMAIL_PASSWORD": config.TWITTER_EMAIL_PASSWORD,
         # Bluesky credentials - REQUIRED
-        'BSKY_USERNAME': BSKY_USERNAME,
-        'BSKY_PASSWORD': BSKY_PASSWORD
+        "BSKY_USERNAME": config.BSKY_USERNAME,
+        "BSKY_PASSWORD": config.BSKY_PASSWORD,
     }
 
     # Optional credentials for bidirectional sync (Bluesky → Twitter)
     optional_vars = {
-        'TWITTER_API_KEY': TWITTER_API_KEY,
-        'TWITTER_API_SECRET': TWITTER_API_SECRET,
-        'TWITTER_ACCESS_TOKEN': TWITTER_ACCESS_TOKEN,
-        'TWITTER_ACCESS_SECRET': TWITTER_ACCESS_SECRET
+        "TWITTER_API_KEY": config.TWITTER_API_KEY,
+        "TWITTER_API_SECRET": config.TWITTER_API_SECRET,
+        "TWITTER_ACCESS_TOKEN": config.TWITTER_ACCESS_TOKEN,
+        "TWITTER_ACCESS_SECRET": config.TWITTER_ACCESS_SECRET,
     }
 
     # Check required credentials
-    missing = [name for name, value in required_vars.items()
-              if not value or value.strip() == '']
+    missing = [
+        name
+        for name, value in required_vars.items()
+        if not value or value.strip() == ""
+    ]
 
     if missing:
-        raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
+        raise ValueError(
+            f"Missing required environment variables: {', '.join(missing)}"
+        )
 
     # Check optional credentials and warn if missing
-    missing_optional = [name for name, value in optional_vars.items()
-                       if not value or value.strip() == '']
+    missing_optional = [
+        name
+        for name, value in optional_vars.items()
+        if not value or value.strip() == ""
+    ]
 
     if missing_optional:
         logger.warning(
-            f"Twitter API credentials not found: {', '.join(missing_optional)}. "
-            f"Running in unidirectional mode (Twitter → Bluesky only). "
-            f"For bidirectional sync (Bluesky → Twitter), please set: "
-            f"TWITTER_API_KEY, TWITTER_API_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_SECRET. "
-            f"Note: Free tier allows 1,500 tweets/month."
+            "Twitter API credentials not found. "
+            "Running in unidirectional mode (Twitter → Bluesky only). "
+            "For bidirectional sync (Bluesky → Twitter), please set: "
+            "TWITTER_API_KEY, TWITTER_API_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_SECRET. "
+            "Note: Free tier allows 1,500 tweets/month."
         )
     else:
         logger.info(
