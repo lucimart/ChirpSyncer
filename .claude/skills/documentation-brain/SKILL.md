@@ -1,5 +1,5 @@
 ---
-name: Documentation Brain
+name: documentation-brain
 description: Central knowledge base - auto-reviews, documents changes, maintains context across sessions
 ---
 

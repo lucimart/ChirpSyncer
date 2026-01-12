@@ -1,5 +1,5 @@
 ---
-name: ChirpSyncer Next.js Migration
+name: chirp-nextjs-migration
 description: Flask to Next.js dashboard migration guide and patterns
 ---
 

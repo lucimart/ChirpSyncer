@@ -1,5 +1,5 @@
 ---
-name: ChirpSyncer Database
+name: chirp-database
 description: Database schema design, migrations, and query optimization
 ---
 

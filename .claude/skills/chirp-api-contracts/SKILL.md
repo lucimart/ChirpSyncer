@@ -1,5 +1,5 @@
 ---
-name: ChirpSyncer API Contracts
+name: chirp-api-contracts
 description: Complete API endpoint specifications with request/response schemas
 ---
 

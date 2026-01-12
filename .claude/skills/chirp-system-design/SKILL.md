@@ -1,5 +1,5 @@
 ---
-name: ChirpSyncer System Design
+name: chirp-system-design
 description: Complete system architecture, component mapping, configuration, and improvement suggestions
 ---
 

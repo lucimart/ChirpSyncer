@@ -1,5 +1,5 @@
 ---
-name: ChirpSyncer Testing
+name: chirp-testing
 description: TDD workflow, test optimization, coverage targets, and CI acceleration
 ---
 

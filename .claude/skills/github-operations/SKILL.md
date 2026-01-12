@@ -1,5 +1,5 @@
 ---
-name: GitHub Operations
+name: github-operations
 description: PR management, repo hygiene, CI/CD, and repository health
 ---
 

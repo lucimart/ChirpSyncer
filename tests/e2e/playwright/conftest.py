@@ -125,6 +125,7 @@ def test_db(test_db_path):
     )
 
     # Create synced_posts table for tracking bidirectional sync
+    # Extended with engagement/media columns for Sprint 9 search filters
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS synced_posts (
@@ -136,6 +137,13 @@ def test_db(test_db_path):
             synced_to TEXT,
             synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             original_text TEXT NOT NULL,
+            user_id INTEGER,
+            twitter_username TEXT,
+            hashtags TEXT,
+            posted_at INTEGER,
+            has_media INTEGER DEFAULT 0,
+            likes_count INTEGER DEFAULT 0,
+            retweets_count INTEGER DEFAULT 0,
             CHECK (source IN ('twitter', 'bluesky')),
             CHECK (synced_to IN ('bluesky', 'twitter', 'both'))
         )
