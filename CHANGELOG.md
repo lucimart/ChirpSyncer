@@ -239,6 +239,13 @@ All tests passing with real SQLite DB integration
 - README rewritten for clarity
 
 ### Fixed
+- enable pytest-playwright plugin and fix fixture chain
+
+- Add pytest_plugins declaration to enable pytest-playwright
+- Rename browser_context to context to match pytest-playwright convention
+- Add browser fixture to ensure proper dependency chain
+- Ensure app_server starts before browser launch
+- Fix missing 'playwright' fixture error in CI
 - update TweetScheduler tests to include master_key parameter
 
 - TweetScheduler now requires master_key for credential decryption
