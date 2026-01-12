@@ -1,5 +1,21 @@
 name: Integration Tests
 
+env:
+  # Test credentials (mock values for CI)
+  TWITTER_USERNAME: "mock-twitter-user"
+  TWITTER_PASSWORD: "mock-twitter-password"
+  TWITTER_EMAIL: "mock@example.com"
+  TWITTER_EMAIL_PASSWORD: "mock-email-password"
+  TWITTER_API_KEY: "mock-twitter-api-key"
+  TWITTER_API_SECRET: "mock-twitter-api-secret"
+  TWITTER_ACCESS_TOKEN: "mock-twitter-access-token"
+  TWITTER_ACCESS_SECRET: "mock-twitter-access-secret"
+  BSKY_USERNAME: "mock-bsky-username"
+  BSKY_PASSWORD: "mock-bsky-password"
+  MULTI_USER_ENABLED: "false"
+  SECRET_KEY: "test-secret-key-for-ci-only"
+  DATABASE_PATH: "test.db"
+
 on:
   pull_request:
     branches: [main]
@@ -23,11 +39,20 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sqlite3
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov pytest-asyncio
+          pip install -r requirements-dev.txt
+
+      - name: Clean up test databases
+        run: |
+          rm -f data.db test.db chirpsyncer.db *.db
 
       - name: Run integration tests
         run: |
