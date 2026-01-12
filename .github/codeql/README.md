@@ -2,87 +2,69 @@
 
 This directory contains CodeQL configuration and documentation for security analysis.
 
-## Suppressed Security Warnings
+## Resolved Security Issues
 
-### 1. Clear-text logging of sensitive information (py/clear-text-logging-sensitive-data)
+### 1. Clear-text logging/storage of sensitive information
 
-**Status:** ⚠️ **SUPPRESSED** (intentional design decision)
+**Status:** ✅ **RESOLVED** (as of latest commit)
 
-**Why this warning appears:**
-During initial application setup or database migration, we generate a random admin password and display it to the user via terminal output (stdout). CodeQL flags this as "clear-text logging" of sensitive information.
+**Previous Issues:**
+The application previously had two approaches that triggered CodeQL warnings:
+1. **File storage** - Writing generated passwords to `.admin_password_GENERATED.txt` file
+2. **Console logging** - Printing generated passwords to stdout/terminal
 
-**Why this is necessary:**
-- **Initial setup scenario**: No admin account exists, so we must communicate the password somehow
-- **User needs the password**: Without seeing it, they cannot log in to the application
-- **No better alternative**: File storage triggers different warnings, email requires configuration, etc.
+Both approaches triggered CodeQL warnings about clear-text handling of sensitive data.
 
-**Security measures in place:**
-- ✅ **Password displayed once** - Only shown during initial setup, never logged to files
-- ✅ **Strong randomization** - 16-character password using `secrets` module
-- ✅ **Immediate hashing** - Password is immediately bcrypt-hashed before database storage
-- ✅ **Clear warnings** - User sees prominent warnings to save the password
-- ✅ **Environment override** - User can set ADMIN_PASSWORD in .env to avoid generation
+**Solution Implemented:**
+Changed password handling to use **interactive password entry** with `getpass`:
 
-**Why suppression is appropriate:**
-This is not a security vulnerability - it's the intended functionality. The password MUST be communicated to the user during initial setup. The alternatives would be:
-1. ❌ **Don't generate password** - Breaks setup automation
-2. ❌ **Write to file** - Triggers py/clear-text-storage-sensitive-data warning
-3. ❌ **Email it** - Requires email configuration during setup
-4. ✅ **Display in terminal** - Current approach, suppressed via config
+**New Approach:**
+- If `ADMIN_PASSWORD` is set in `.env`, use it (no prompting)
+- If not set, prompt user to enter password interactively using `getpass.getpass()`
+- Password input is hidden (no echo to terminal)
+- Password is validated (min 8 characters, confirmation match)
+- Password is never printed, logged, or written to files
 
-**Suppression configuration:**
-- File: `.github/codeql-config.yml`
-- Applies to: `app/main.py`, `scripts/migrate_to_multi_user.py`
-- Query ID: `py/clear-text-logging-sensitive-data`
+**Benefits:**
+- ✅ **Eliminates all CodeQL warnings** - No clear-text logging or storage
+- ✅ **More secure** - Password never visible on screen or in files
+- ✅ **Better UX** - Standard interactive password entry
+- ✅ **User control** - Users choose their own password
+- ✅ **Industry standard** - Same pattern used by mysql, postgresql, etc.
 
-**Affected locations:**
-- `app/main.py:307` - Initial admin password display
-- `scripts/migrate_to_multi_user.py:74` - Migration admin password display
+**Files Modified:**
+- `app/main.py:294-324` - Interactive password entry for initial setup
+- `scripts/migrate_to_multi_user.py:60-88` - Interactive password entry for migration
 
-## CodeQL Configuration
+**Implementation:**
+```python
+import getpass
 
-### Suppression Strategy
+while True:
+    admin_password = getpass.getpass("Enter admin password: ")
+    if not admin_password:
+        print("❌ Password cannot be empty. Please try again.\n")
+        continue
 
-We use a **configuration-based suppression** approach via `.github/codeql-config.yml`:
+    password_confirm = getpass.getpass("Confirm admin password: ")
+    if admin_password != password_confirm:
+        print("❌ Passwords do not match. Please try again.\n")
+        continue
 
-**Configuration file:** `.github/codeql-config.yml`
-```yaml
-query-filters:
-  - exclude:
-      id: py/clear-text-logging-sensitive-data
-      paths:
-        - app/main.py
-        - scripts/migrate_to_multi_user.py
+    if len(admin_password) < 8:
+        print("❌ Password must be at least 8 characters. Please try again.\n")
+        continue
+
+    break
 ```
 
-**Workflow integration:** `.github/workflows/codeql.yml`
-```yaml
-- name: Initialize CodeQL
-  uses: github/codeql-action/init@v3
-  with:
-    config-file: ./.github/codeql-config.yml
-```
-
-### Why Configuration-Based Suppression?
-
-CodeQL suppression options:
-
-1. **Global rule suppression** - Would disable check for entire codebase ❌
-2. **File exclusion** - Would disable all checks for the file ❌
-3. **Inline comments** - Not fully supported by CodeQL ⚠️
-4. **Configuration file** - Our approach ✅ **RECOMMENDED**
-5. **Documentation only** - Warnings still appear ❌
-
-The configuration-based approach allows us to:
-- Suppress specific query IDs (not all security checks)
-- Limit suppression to specific files only
-- Maintain security scanning for the rest of the codebase
-- Document suppressions in version control
-
-We've chosen to document and accept these warnings rather than compromise security checking for the rest of the codebase.
+**No Configuration Files Needed:**
+Since the password is never logged or stored in clear-text, no CodeQL suppressions or special configurations are required.
 
 ## References
 
+- [Python getpass Module](https://docs.python.org/3/library/getpass.html)
 - [CodeQL Python Queries](https://codeql.github.com/codeql-query-help/python/)
 - [CWE-312: Cleartext Storage of Sensitive Information](https://cwe.mitre.org/data/definitions/312.html)
+- [CWE-532: Insertion of Sensitive Information into Log File](https://cwe.mitre.org/data/definitions/532.html)
 - [OWASP: Cryptographic Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html)

@@ -288,35 +288,40 @@ def ensure_admin_user():
     logger.info("No users found. Creating admin user from .env credentials...")
 
     try:
-        # Get admin password from .env or generate random one
+        # Get admin password from .env or prompt user to enter it
         admin_password = os.getenv("ADMIN_PASSWORD")
 
         if not admin_password:
-            # Generate strong random password
-            import secrets
-            import string
+            # Prompt user to enter password securely (no echo)
+            import getpass
 
-            alphabet = string.ascii_letters + string.digits + string.punctuation
-            admin_password = "".join(secrets.choice(alphabet) for _ in range(16))
-
-            # Display password in terminal (no file storage to avoid clear-text warnings)
             print("\n" + "=" * 70)
-            print("🔐 ADMIN PASSWORD GENERATED - SAVE THIS NOW!")
+            print("🔐 ADMIN ACCOUNT SETUP")
             print("=" * 70)
-            print(f"\n  Username: admin")
-            print(f"  Password: {admin_password}\n")
-            print("  ⚠️  IMPORTANT:")
-            print("     1. Copy this password immediately")
-            print("     2. Store it in a password manager")
-            print("     3. Set ADMIN_PASSWORD in .env for custom password")
-            print("     4. This password will NOT be shown again")
-            print("\n" + "=" * 70 + "\n")
+            print("\nNo ADMIN_PASSWORD found in .env file.")
+            print("Please enter a password for the admin account.\n")
 
-            logger.warning("=" * 60)
-            logger.warning("ADMIN PASSWORD DISPLAYED ABOVE")
-            logger.warning("Copy the password from terminal output")
-            logger.warning("Set ADMIN_PASSWORD in .env to customize")
-            logger.warning("=" * 60)
+            while True:
+                admin_password = getpass.getpass("Enter admin password: ")
+                if not admin_password:
+                    print("❌ Password cannot be empty. Please try again.\n")
+                    continue
+
+                password_confirm = getpass.getpass("Confirm admin password: ")
+                if admin_password != password_confirm:
+                    print("❌ Passwords do not match. Please try again.\n")
+                    continue
+
+                if len(admin_password) < 8:
+                    print("❌ Password must be at least 8 characters. Please try again.\n")
+                    continue
+
+                break
+
+            print("\n✓ Admin password set successfully!")
+            print("=" * 70 + "\n")
+
+            logger.info("Admin password entered interactively")
 
         # Create admin user
         admin_id = user_manager.create_user(
