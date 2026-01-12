@@ -40,33 +40,35 @@ if [[ $COMMIT_MSG =~ ^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|rev
 
     # Check if CHANGELOG.md exists
     if [ -f "CHANGELOG.md" ]; then
-        # Create temp file with updated changelog
-        {
-            # Read until [Unreleased] section
-            sed -n '1,/## \[Unreleased\]/p' CHANGELOG.md
+        # Use awk to insert into correct category
+        awk -v cat="$CATEGORY" -v desc="- $DESC" '
+            /## \[Unreleased\]/ { print; unreleased=1; next }
+            unreleased && /### / {
+                if ($0 ~ "### " cat) {
+                    print
+                    print desc
+                    inserted=1
+                    next
+                }
+            }
+            unreleased && /## \[/ && !inserted {
+                # Reached next version, need to add category
+                print ""
+                print "### " cat
+                print desc
+                print ""
+                inserted=1
+            }
+            { print }
+        ' CHANGELOG.md > CHANGELOG.md.tmp
 
-            # Check if category exists in Unreleased section
-            if grep -q "### $CATEGORY" CHANGELOG.md; then
-                # Add to existing category
-                sed -n "/## \[Unreleased\]/,/## \[/p" CHANGELOG.md | \
-                    sed "/### $CATEGORY/a - $DESC" | \
-                    sed '/## \[Unreleased\]/d'
-            else
-                # Create new category
-                echo ""
-                echo "### $CATEGORY"
-                echo "- $DESC"
-            fi
-
-            # Add rest of file (other versions)
-            sed -n '/## \[1\./,$p' CHANGELOG.md
-        } > CHANGELOG.md.tmp
-
-        mv CHANGELOG.md.tmp CHANGELOG.md
-
-        # Amend the commit to include CHANGELOG.md if it changed
-        git add CHANGELOG.md 2>/dev/null
-        # Note: Not amending automatically to avoid hook loops
+        # Only update if file changed
+        if ! cmp -s CHANGELOG.md CHANGELOG.md.tmp; then
+            mv CHANGELOG.md.tmp CHANGELOG.md
+            git add CHANGELOG.md 2>/dev/null
+        else
+            rm CHANGELOG.md.tmp
+        fi
     fi
 fi
 
