@@ -15,6 +15,7 @@ import {
   Bookmark,
   Download,
   Calendar,
+  Plug,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -150,6 +151,7 @@ const LogoutButton = styled.button`
 const navItems = [
   { href: '/dashboard', icon: Home, label: 'Dashboard' },
   { href: '/dashboard/credentials', icon: Key, label: 'Credentials' },
+  { href: '/dashboard/connectors', icon: Plug, label: 'Connectors' },
   { href: '/dashboard/sync', icon: RefreshCw, label: 'Sync' },
   { href: '/dashboard/scheduler', icon: Calendar, label: 'Scheduler' },
   { href: '/dashboard/cleanup', icon: Trash2, label: 'Cleanup' },
