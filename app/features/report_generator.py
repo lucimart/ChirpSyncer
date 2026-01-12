@@ -10,7 +10,7 @@ import json
 import csv
 import io
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime
 import time
 
 
@@ -247,6 +247,8 @@ class ReportGenerator:
             return self._format_html_engagement(report_data)
         elif format == "pdf":
             return self._format_pdf_engagement(report_data)
+        else:
+            raise ValueError(f"Unsupported format: {format}")
 
     def generate_growth_report(self, user_id: int, format: str) -> bytes:
         """
@@ -319,6 +321,8 @@ class ReportGenerator:
             return self._format_html_growth(report_data)
         elif format == "pdf":
             return self._format_pdf_growth(report_data)
+        else:
+            raise ValueError(f"Unsupported format: {format}")
 
     def generate_top_tweets_report(
         self, user_id: int, limit: int, format: str
@@ -357,6 +361,8 @@ class ReportGenerator:
             return self._format_html_top_tweets(top_tweets, limit)
         elif format == "pdf":
             return self._format_pdf_top_tweets(top_tweets, limit)
+        else:
+            raise ValueError(f"Unsupported format: {format}")
 
     def export_data(self, user_id: int, data_type: str, format: str) -> bytes:
         """
@@ -400,6 +406,8 @@ class ReportGenerator:
             return self._format_html_export(data, data_type)
         elif format == "pdf":
             return self._format_pdf_export(data, data_type)
+        else:
+            raise ValueError(f"Unsupported format: {format}")
 
     # ========================================================================
     # FORMAT HELPERS - JSON
@@ -758,46 +766,36 @@ class ReportGenerator:
     # FORMAT HELPERS - PDF (Optional)
     # ========================================================================
 
-    def _format_pdf_engagement(self, data: Dict[str, Any]) -> bytes:
-        """Format engagement report as PDF (optional, requires WeasyPrint)"""
+    def _html_to_pdf(self, html_bytes: bytes) -> bytes:
+        """Convert HTML bytes to PDF, with fallback to HTML if WeasyPrint unavailable"""
         try:
             from weasyprint import HTML
 
-            html_content = self._format_html_engagement(data).decode("utf-8")
+            html_content = html_bytes.decode("utf-8")
             return HTML(string=html_content).write_pdf()
         except ImportError:
             # Fallback to HTML if WeasyPrint not available
-            return self._format_html_engagement(data)
+            return html_bytes
+
+    def _format_pdf_engagement(self, data: Dict[str, Any]) -> bytes:
+        """Format engagement report as PDF (optional, requires WeasyPrint)"""
+        html_content = self._format_html_engagement(data)
+        return self._html_to_pdf(html_content)
 
     def _format_pdf_growth(self, data: Dict[str, Any]) -> bytes:
         """Format growth report as PDF (optional)"""
-        try:
-            from weasyprint import HTML
-
-            html_content = self._format_html_growth(data).decode("utf-8")
-            return HTML(string=html_content).write_pdf()
-        except ImportError:
-            return self._format_html_growth(data)
+        html_content = self._format_html_growth(data)
+        return self._html_to_pdf(html_content)
 
     def _format_pdf_top_tweets(self, tweets: List[Dict[str, Any]], limit: int) -> bytes:
         """Format top tweets as PDF (optional)"""
-        try:
-            from weasyprint import HTML
-
-            html_content = self._format_html_top_tweets(tweets, limit).decode("utf-8")
-            return HTML(string=html_content).write_pdf()
-        except ImportError:
-            return self._format_html_top_tweets(tweets, limit)
+        html_content = self._format_html_top_tweets(tweets, limit)
+        return self._html_to_pdf(html_content)
 
     def _format_pdf_export(self, data: List[Dict[str, Any]], data_type: str) -> bytes:
         """Format data export as PDF (optional)"""
-        try:
-            from weasyprint import HTML
-
-            html_content = self._format_html_export(data, data_type).decode("utf-8")
-            return HTML(string=html_content).write_pdf()
-        except ImportError:
-            return self._format_html_export(data, data_type)
+        html_content = self._format_html_export(data, data_type)
+        return self._html_to_pdf(html_content)
 
     # ========================================================================
     # EMAIL DELIVERY

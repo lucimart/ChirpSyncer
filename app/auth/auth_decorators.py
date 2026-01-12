@@ -8,7 +8,7 @@ Provides authentication and authorization decorators for Flask routes:
 """
 
 from functools import wraps
-from flask import session, redirect, url_for, abort, current_app
+from flask import session, redirect, url_for, abort, current_app, flash
 from app.auth.user_manager import UserManager
 
 
@@ -44,8 +44,6 @@ def require_auth(f):
             if validated_user is None:
                 # Session expired or invalid
                 session.clear()
-                from flask import flash
-
                 flash("Your session has expired. Please log in again.", "warning")
                 return redirect(url_for("login"))
 
@@ -84,8 +82,6 @@ def require_admin(f):
             if validated_user is None:
                 # Session expired or invalid
                 session.clear()
-                from flask import flash
-
                 flash("Your session has expired. Please log in again.", "warning")
                 return redirect(url_for("login"))
 
@@ -129,8 +125,6 @@ def require_self_or_admin(f):
             if validated_user is None:
                 # Session expired or invalid
                 session.clear()
-                from flask import flash
-
                 flash("Your session has expired. Please log in again.", "warning")
                 return redirect(url_for("login"))
 

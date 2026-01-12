@@ -10,7 +10,6 @@ import os
 import tempfile
 import sqlite3
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 

@@ -1,7 +1,6 @@
 import sys
-import pytest
-from unittest.mock import patch, MagicMock, call
 import time
+from unittest.mock import patch, MagicMock
 
 # Create mock modules with necessary attributes
 twitter_scraper_mock = MagicMock()
