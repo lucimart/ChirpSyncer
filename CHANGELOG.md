@@ -33,6 +33,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed continue-on-error from markdown link check
 - Disabled pre-push hook by default (850+ tests too slow)
 - Updated documentation to reflect changes
+- make documentation checks fail on errors
+
+- Removed continue-on-error from TODO/FIXME check
+- Removed continue-on-error from markdown link check
+- Disabled pre-push hook by default (850+ tests too slow)
+- Updated documentation to reflect changes
 - correct awk logic to only update Unreleased section
 
 - Fixed hook to stop at first version marker
