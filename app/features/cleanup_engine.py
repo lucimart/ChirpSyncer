@@ -4,13 +4,63 @@ CleanupEngine - Automated Tweet Cleanup System (Sprint 7 - CLEANUP-001)
 Implements rule-based tweet cleanup with age, engagement, and pattern rules.
 Provides preview mode, dry-run execution, and detailed history tracking.
 Follows ADR-004 specification for cleanup system architecture.
+
+Sprint 8 Updates:
+- Real tweet fetching via twscrape
+- Real tweet deletion via Twitter API v2
+- Rate limiting with exponential backoff
+- Correlation ID tracking for audit
 """
 import sqlite3
 import json
 import time
 import re
+import asyncio
+import uuid
 from typing import List, Dict, Optional, Any
 from dataclasses import dataclass
+from collections import defaultdict
+
+from app.core.logger import setup_logger
+
+logger = setup_logger(__name__)
+
+
+class RateLimiter:
+    """
+    Sliding window rate limiter for Twitter API compliance.
+
+    Twitter API v2 limits:
+    - Read: 900 requests / 15 min
+    - Delete: 50 requests / 15 min
+    """
+
+    def __init__(self, max_requests: int, window_seconds: int = 900):
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self.requests: List[float] = []
+
+    def can_proceed(self) -> bool:
+        """Check if we can make another request."""
+        self._cleanup_old_requests()
+        return len(self.requests) < self.max_requests
+
+    def record_request(self):
+        """Record a request timestamp."""
+        self.requests.append(time.time())
+
+    def wait_time(self) -> float:
+        """Get seconds to wait before next request is allowed."""
+        self._cleanup_old_requests()
+        if len(self.requests) < self.max_requests:
+            return 0
+        oldest = min(self.requests)
+        return max(0, (oldest + self.window_seconds) - time.time())
+
+    def _cleanup_old_requests(self):
+        """Remove requests outside the current window."""
+        cutoff = time.time() - self.window_seconds
+        self.requests = [t for t in self.requests if t > cutoff]
 
 
 @dataclass
@@ -39,14 +89,18 @@ class CleanupEngine:
     All operations support preview mode and dry-run execution.
     """
 
-    def __init__(self, db_path: str = 'chirpsyncer.db'):
+    def __init__(self, db_path: str = 'chirpsyncer.db', credential_manager=None):
         """
         Initialize CleanupEngine.
 
         Args:
             db_path: Path to SQLite database
+            credential_manager: Optional CredentialManager for API access
         """
         self.db_path = db_path
+        self.credential_manager = credential_manager
+        self._read_limiter = RateLimiter(max_requests=900, window_seconds=900)
+        self._delete_limiter = RateLimiter(max_requests=50, window_seconds=900)
 
     def _get_connection(self) -> sqlite3.Connection:
         """Get database connection"""
@@ -487,27 +541,103 @@ class CleanupEngine:
 
     def _fetch_user_tweets(self, user_id: int) -> List[dict]:
         """
-        Fetch tweets for a user.
-
-        This is a placeholder that should be replaced with actual Twitter API calls.
-        For testing, this will be mocked.
+        Fetch tweets for a user via twscrape.
 
         Args:
             user_id: User ID
 
         Returns:
-            List of tweet dictionaries
+            List of tweet dictionaries with id, text, created_at, likes, replies
         """
-        # Placeholder - in production, this would call Twitter API
-        # using the user's credentials from credential_manager
-        return []
+        correlation_id = str(uuid.uuid4())
+        logger.info(f"[{correlation_id}] Fetching tweets for user_id={user_id}")
+
+        if not self.credential_manager:
+            logger.warning(f"[{correlation_id}] No credential_manager, returning empty")
+            return []
+
+        # Get scraping credentials
+        creds = self.credential_manager.get_credentials(
+            user_id=user_id,
+            platform='twitter',
+            credential_type='scraping'
+        )
+
+        if not creds:
+            logger.warning(f"[{correlation_id}] No scraping credentials for user")
+            return []
+
+        # Rate limit check
+        if not self._read_limiter.can_proceed():
+            wait = self._read_limiter.wait_time()
+            logger.info(f"[{correlation_id}] Rate limited, waiting {wait:.1f}s")
+            time.sleep(wait)
+
+        try:
+            # Use sync wrapper for async twscrape
+            tweets = self._fetch_tweets_sync(creds, correlation_id)
+            self._read_limiter.record_request()
+            logger.info(f"[{correlation_id}] Fetched {len(tweets)} tweets")
+            return tweets
+        except Exception as e:
+            logger.error(f"[{correlation_id}] Failed to fetch tweets: {e}")
+            return []
+
+    def _fetch_tweets_sync(self, creds: dict, correlation_id: str) -> List[dict]:
+        """Sync wrapper for async tweet fetching."""
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        return loop.run_until_complete(self._fetch_tweets_async(creds, correlation_id))
+
+    async def _fetch_tweets_async(self, creds: dict, correlation_id: str) -> List[dict]:
+        """Fetch tweets using twscrape."""
+        try:
+            import twscrape
+
+            api = twscrape.API()
+
+            # Add account from credentials
+            username = creds.get('username', '')
+            password = creds.get('password', '')
+            email = creds.get('email', '')
+            email_password = creds.get('email_password', '')
+
+            if username and password:
+                await api.pool.add_account(
+                    username, password, email, email_password
+                )
+                await api.pool.login_all()
+
+            # Get user's twitter handle from credentials
+            twitter_handle = creds.get('twitter_handle', username)
+
+            tweets = []
+            async for tweet in api.user_tweets(twitter_handle, limit=200):
+                tweets.append({
+                    'id': str(tweet.id),
+                    'text': tweet.rawContent,
+                    'created_at': int(tweet.date.timestamp()),
+                    'likes': tweet.likeCount or 0,
+                    'retweets': tweet.retweetCount or 0,
+                    'replies': tweet.replyCount or 0,
+                })
+
+            return tweets
+
+        except ImportError:
+            logger.error(f"[{correlation_id}] twscrape not installed")
+            return []
+        except Exception as e:
+            logger.error(f"[{correlation_id}] twscrape error: {e}")
+            raise
 
     def _delete_tweet(self, user_id: int, tweet_id: str) -> bool:
         """
-        Delete a tweet via Twitter API.
-
-        This is a placeholder that should be replaced with actual Twitter API calls.
-        For testing, this will be mocked.
+        Delete a tweet via Twitter API v2.
 
         Args:
             user_id: User ID
@@ -516,6 +646,75 @@ class CleanupEngine:
         Returns:
             True if deleted successfully, False otherwise
         """
-        # Placeholder - in production, this would call Twitter API
-        # using the user's credentials from credential_manager
-        return True
+        correlation_id = str(uuid.uuid4())
+        logger.info(f"[{correlation_id}] Deleting tweet_id={tweet_id} for user_id={user_id}")
+
+        if not self.credential_manager:
+            logger.warning(f"[{correlation_id}] No credential_manager")
+            return False
+
+        # Get API credentials (OAuth for delete operations)
+        creds = self.credential_manager.get_credentials(
+            user_id=user_id,
+            platform='twitter',
+            credential_type='api'
+        )
+
+        if not creds:
+            logger.warning(f"[{correlation_id}] No API credentials for user")
+            return False
+
+        # Rate limit check with exponential backoff
+        max_retries = 3
+        base_delay = 1.0
+
+        for attempt in range(max_retries):
+            if not self._delete_limiter.can_proceed():
+                wait = self._delete_limiter.wait_time()
+                logger.info(f"[{correlation_id}] Rate limited, waiting {wait:.1f}s")
+                time.sleep(wait)
+
+            try:
+                success = self._delete_tweet_api(creds, tweet_id, correlation_id)
+                if success:
+                    self._delete_limiter.record_request()
+                    logger.info(f"[{correlation_id}] Successfully deleted tweet")
+                    return True
+            except Exception as e:
+                delay = base_delay * (2 ** attempt)
+                logger.warning(
+                    f"[{correlation_id}] Delete attempt {attempt + 1} failed: {e}, "
+                    f"retrying in {delay}s"
+                )
+                if attempt < max_retries - 1:
+                    time.sleep(delay)
+
+        logger.error(f"[{correlation_id}] Failed to delete tweet after {max_retries} attempts")
+        return False
+
+    def _delete_tweet_api(self, creds: dict, tweet_id: str, correlation_id: str) -> bool:
+        """Execute tweet deletion via tweepy."""
+        try:
+            import tweepy
+
+            client = tweepy.Client(
+                consumer_key=creds.get('api_key'),
+                consumer_secret=creds.get('api_secret'),
+                access_token=creds.get('access_token'),
+                access_token_secret=creds.get('access_token_secret'),
+            )
+
+            response = client.delete_tweet(tweet_id)
+
+            if response and response.data and response.data.get('deleted'):
+                return True
+
+            logger.warning(f"[{correlation_id}] Delete response: {response}")
+            return False
+
+        except ImportError:
+            logger.error(f"[{correlation_id}] tweepy not installed")
+            return False
+        except tweepy.TweepyException as e:
+            logger.error(f"[{correlation_id}] Tweepy error: {e}")
+            raise

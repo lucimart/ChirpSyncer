@@ -1562,16 +1562,26 @@ Automated tweet cleanup system with rule-based deletion.
 
 ```python
 from app.features.cleanup_engine import CleanupEngine
+from app.auth.credential_manager import CredentialManager
 
-engine = CleanupEngine(db_path='chirpsyncer.db')
+cred_mgr = CredentialManager(db_path='chirpsyncer.db')
+engine = CleanupEngine(db_path='chirpsyncer.db', credential_manager=cred_mgr)
 ```
 
-##### `__init__(db_path: str = 'chirpsyncer.db')`
+##### `__init__(db_path: str = 'chirpsyncer.db', credential_manager=None)`
 
 Initialize CleanupEngine.
 
 **Parameters:**
 - `db_path` (str): Path to SQLite database
+- `credential_manager` (CredentialManager, optional): For real Twitter API access. If None, fetch/delete are stubs.
+
+**Sprint 8 Features:**
+- Real tweet fetching via twscrape
+- Real tweet deletion via Twitter API v2
+- Rate limiting (900 read/15min, 50 delete/15min)
+- Exponential backoff on failures
+- Correlation ID tracking for audit
 
 ##### `init_db()`
 
@@ -3900,9 +3910,11 @@ print(f"Posted {stats['successful']} tweets")
 
 ```python
 from app.features.cleanup_engine import CleanupEngine
+from app.auth.credential_manager import CredentialManager
 
-# Initialize
-engine = CleanupEngine('chirpsyncer.db')
+# Initialize with credential manager for real API access
+cred_mgr = CredentialManager('chirpsyncer.db')
+engine = CleanupEngine('chirpsyncer.db', credential_manager=cred_mgr)
 engine.init_db()
 
 # Create age-based rule
@@ -3916,7 +3928,7 @@ rule_id = engine.create_rule(
     }
 )
 
-# Preview cleanup
+# Preview cleanup (fetches real tweets via twscrape)
 preview = engine.preview_cleanup(user_id=1, rule_id=rule_id)
 print(f"Would delete {preview['count']} tweets")
 
@@ -3924,7 +3936,8 @@ print(f"Would delete {preview['count']} tweets")
 result = engine.execute_cleanup(user_id=1, rule_id=rule_id, dry_run=True)
 print(f"Dry run: would delete {result['would_delete']} tweets")
 
-# Execute for real if acceptable
+# Execute for real if acceptable (deletes via Twitter API v2)
+# Note: Rate limited to 50 deletes per 15 minutes
 if result['would_delete'] < 100:
     result = engine.execute_cleanup(user_id=1, rule_id=rule_id, dry_run=False)
     print(f"Deleted {result['tweets_deleted']} tweets")
