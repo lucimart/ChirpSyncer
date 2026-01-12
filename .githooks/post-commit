@@ -7,13 +7,18 @@ COMMIT_MSG=$(git log -1 --pretty=%B)
 COMMIT_HASH=$(git log -1 --pretty=%h)
 COMMIT_DATE=$(git log -1 --pretty=%ad --date=short)
 
+# Skip if commit message mentions changelog (avoid loops)
+if [[ $COMMIT_MSG =~ [Cc]hangelog|CHANGELOG ]]; then
+    exit 0
+fi
+
 # Parse conventional commit format: type(scope): description
-if [[ $COMMIT_MSG =~ ^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\([a-zA-Z0-9_-]+\))?:\ (.+)$ ]]; then
+if [[ $COMMIT_MSG =~ ^(feat|fix|docs|style|refactor|test|perf|ci|build|revert)(\([a-zA-Z0-9_-]+\))?:\ (.+)$ ]]; then
     TYPE="${BASH_REMATCH[1]}"
     SCOPE="${BASH_REMATCH[2]}"
     DESC="${BASH_REMATCH[3]}"
 
-    # Map commit type to changelog category
+    # Map commit type to changelog category (skip chore commits)
     case "$TYPE" in
         feat)
             CATEGORY="Added"
@@ -34,7 +39,8 @@ if [[ $COMMIT_MSG =~ ^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|rev
             CATEGORY="Build"
             ;;
         *)
-            CATEGORY="Changed"
+            # Skip chore and other types
+            exit 0
             ;;
     esac
 
