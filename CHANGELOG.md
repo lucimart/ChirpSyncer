@@ -8,28 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Comprehensive integration test suite with 122 tests
-- E2E test suites with 24 tests
+- Integration test suite with 122 tests
+- E2E test suite with 24 tests
 - GitHub Actions workflows for integration and E2E tests
-- Credential validation against live APIs (Twitter/Bluesky)
-- Twitter posting from scheduler using Twitter API v2
-- Git hooks for automatic CHANGELOG.md updates
+- Credential validation against live APIs
+- Twitter posting from scheduler via API v2
+- Git hooks for automatic changelog updates
 
 ### Changed
-- Test coverage improved from 87.77% to 93.59%
-- README rewritten for clarity and professionalism
-- Dashboard credentials test now validates against actual APIs
+- Test coverage from 87.77% to 93.59%
+- Dashboard credentials test validates against actual APIs
+- README rewritten for clarity
 
 ### Fixed
 - RuntimeWarning about unawaited coroutine in E2E tests
 - Database error handling in analytics tracker
-- Bcrypt and update error handling in user manager
-- Encryption/decryption failure handling in credential manager
+- User manager bcrypt and update error handling
+- Credential manager encryption/decryption failures
+- Git hook changelog logic to preserve existing entries
 
 ### Documentation
-- Removed emoji checkmarks from DATABASE.md
-- Created automatic changelog update system via git hooks
+- Removed emojis from DATABASE.md
 - Added comprehensive API.md (95KB) and DATABASE.md (75KB)
+- Created automatic changelog system via git hooks
+
 ## [1.6.0] - 2026-01-12
 
 ### Added

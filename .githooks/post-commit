@@ -40,26 +40,35 @@ if [[ $COMMIT_MSG =~ ^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|rev
 
     # Check if CHANGELOG.md exists
     if [ -f "CHANGELOG.md" ]; then
-        # Use awk to insert into correct category
+        # Use awk to insert into correct category (Unreleased section only)
         awk -v cat="$CATEGORY" -v desc="- $DESC" '
             /## \[Unreleased\]/ { print; unreleased=1; next }
+            unreleased && /## \[/ {
+                # Reached next version section
+                if (!inserted) {
+                    print ""
+                    print "### " cat
+                    print desc
+                }
+                unreleased=0
+                inserted=0
+            }
             unreleased && /### / {
-                if ($0 ~ "### " cat) {
+                if ($0 ~ "### " cat && !inserted) {
                     print
                     print desc
                     inserted=1
                     next
                 }
             }
-            unreleased && /## \[/ && !inserted {
-                # Reached next version, need to add category
-                print ""
-                print "### " cat
-                print desc
-                print ""
-                inserted=1
-            }
             { print }
+            END {
+                if (unreleased && !inserted) {
+                    print ""
+                    print "### " cat
+                    print desc
+                }
+            }
         ' CHANGELOG.md > CHANGELOG.md.tmp
 
         # Only update if file changed
