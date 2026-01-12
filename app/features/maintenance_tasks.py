@@ -180,9 +180,9 @@ def aggregate_daily_stats(db_path: str = DB_PATH) -> Dict:
         if not cursor.fetchone():
             return {'aggregated': 0, 'duration_ms': int((time.time() - start) * 1000)}
 
-        # Get yesterday's date
+        # Get yesterday's date (use UTC to match Unix timestamps)
         import datetime
-        yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+        yesterday = (datetime.datetime.utcnow() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
 
         # Aggregate yesterday's stats
         cursor.execute('''

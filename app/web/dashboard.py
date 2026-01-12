@@ -726,7 +726,7 @@ def main():
     app = create_app()
     # Use environment variable for debug mode (defaults to False for security)
     debug_mode = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
-    app.run(host='0.0.0.0', port=5000, debug=debug_mode)
+    app.run(host='0.0.0.0', port=5000, debug=debug_mode)  # nosec B104 - binding to all interfaces intentional for containerized deployment
 
 
 if __name__ == '__main__':
