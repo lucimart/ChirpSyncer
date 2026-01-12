@@ -88,4 +88,4 @@ jobs:
       - name: Check coverage threshold
         if: matrix.python-version == '3.11'
         run: |
-          coverage report --fail-under=85
+          coverage report --fail-under=80

@@ -35,7 +35,7 @@ async def _validate_twitter_scraping_async(
     """
     try:
         # Initialize twscrape API
-        api = API()
+        API()
 
         # For now, just verify credentials structure is correct
         required_fields = ["username", "password", "email", "email_password"]

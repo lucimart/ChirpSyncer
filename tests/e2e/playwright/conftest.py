@@ -17,7 +17,6 @@ import time
 import subprocess
 import socket
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 from contextlib import closing
 
 import pytest

@@ -10,7 +10,7 @@ import sqlite3
 import os
 import json
 import time
-from typing import Optional, List, Dict
+from typing import Optional, List
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from app.auth.security_utils import log_audit
 

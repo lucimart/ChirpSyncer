@@ -9,7 +9,6 @@ Tests critical credential management flows including:
 """
 
 import pytest
-import sqlite3
 
 # Import page objects
 from tests.e2e.playwright.pages.login_page import LoginPage
