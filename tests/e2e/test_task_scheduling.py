@@ -62,7 +62,6 @@ class TestViewScheduledTasks:
             or b"schedule" in tasks_response.data.lower()
         )
 
-    @pytest.mark.skip(reason="Task details endpoint causes server errors")
     def test_view_task_details_and_history(self, client, user_manager):
         """
         Test: Can view task details including execution history.
@@ -135,7 +134,6 @@ class TestManualTaskTrigger:
     Test manually triggering tasks.
     """
 
-    @pytest.mark.skip(reason="Task trigger functionality causes server errors")
     def test_trigger_task_manually(self, client, user_manager):
         """
         Test: Admin can trigger a task manually and monitor execution.
@@ -380,7 +378,6 @@ class TestTaskStatusMonitoring:
     Test task status monitoring and real-time updates.
     """
 
-    @pytest.mark.skip(reason="Task status API endpoint causes server errors")
     def test_task_status_api_endpoint(self, client, user_manager):
         """
         Test: Task status API returns current state.

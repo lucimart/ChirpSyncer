@@ -574,16 +574,39 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
         scheduler = _get_scheduler()
 
         if not scheduler:
+            # Return JSON if requested, otherwise flash and redirect
+            if request.accept_mimetypes.best == "application/json" or request.is_json:
+                return (
+                    jsonify({"success": False, "error": "Scheduler not available"}),
+                    500,
+                )
             flash("Task scheduler not available", "error")
             return redirect(url_for("tasks_list"))
 
         try:
             success = scheduler.trigger_task_now(task_name)
+
+            # Return JSON if requested
+            if request.accept_mimetypes.best == "application/json" or request.is_json:
+                if success:
+                    return jsonify(
+                        {"success": True, "message": f"Task {task_name} triggered"}
+                    )
+                else:
+                    return (
+                        jsonify({"success": False, "error": "Failed to trigger task"}),
+                        500,
+                    )
+
+            # Otherwise use flash messages and redirect
             if success:
                 flash(f'Task "{task_name}" triggered successfully', "success")
             else:
                 flash(f'Failed to trigger task "{task_name}"', "error")
         except Exception as e:
+            # Return JSON if requested
+            if request.accept_mimetypes.best == "application/json" or request.is_json:
+                return jsonify({"success": False, "error": str(e)}), 500
             flash(f"Error triggering task: {str(e)}", "error")
 
         return redirect(url_for("task_detail", task_name=task_name))
@@ -660,13 +683,52 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
         scheduler = _get_scheduler()
 
         if not scheduler:
-            return jsonify({"error": "Scheduler not available"}), 500
+            return jsonify({"success": False, "error": "Scheduler not available"}), 500
 
         try:
             tasks = scheduler.get_all_tasks()
-            return jsonify({"tasks": tasks, "count": len(tasks)})
+            return jsonify({"success": True, "tasks": tasks, "count": len(tasks)})
         except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"success": False, "error": str(e)}), 500
+
+    @app.route("/api/tasks/<task_id>/status")
+    @require_auth
+    def api_task_status(task_id):
+        """Get specific task status (JSON API)"""
+        scheduler = _get_scheduler()
+
+        if not scheduler:
+            return jsonify({"success": False, "error": "Scheduler not available"}), 500
+
+        try:
+            task_status = scheduler.get_task_status(task_id)
+            if not task_status:
+                return jsonify({"success": False, "error": "Task not found"}), 404
+
+            # Map task state to status
+            status = "running" if task_status.get("enabled") else "paused"
+            if task_status.get("last_run"):
+                if task_status.get("success_count", 0) > 0:
+                    status = "completed"
+                elif task_status.get("failure_count", 0) > 0:
+                    status = "failed"
+
+            return jsonify(
+                {
+                    "success": True,
+                    "task_id": task_id,
+                    "name": task_status.get("task_name"),
+                    "status": status,
+                    "enabled": bool(task_status.get("enabled")),
+                    "last_run": task_status.get("last_run"),
+                    "next_run": task_status.get("next_run"),
+                    "run_count": task_status.get("run_count", 0),
+                    "success_count": task_status.get("success_count", 0),
+                    "failure_count": task_status.get("failure_count", 0),
+                }
+            )
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)}), 500
 
     # ========================================================================
     # ANALYTICS ROUTES (Sprint 7 - ANALYTICS-001)

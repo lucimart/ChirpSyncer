@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- implement real Twitter API credential validation
+
+- Add actual Twitter API authentication using tweepy
+- Test credentials with verify_credentials() API call
+- Return detailed error messages for auth failures
+- Handle Unauthorized, Forbidden, and rate limit errors
+- Remove skip decorator from credential validation test
+
+This enables proper credential testing instead of just structure validation.
 - implement export and snapshots endpoints
 
 - Add /api/analytics/export endpoint with CSV export functionality
