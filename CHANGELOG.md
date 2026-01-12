@@ -234,6 +234,21 @@ All tests passing with real SQLite DB integration
 - Git hooks for automatic changelog updates
 
 ### Changed
+- separate unit, integration, and e2e test workflows
+
+- CI workflow now only runs unit tests (tests/*.py)
+- Integration tests workflow runs tests/integration/
+- E2E tests workflow runs tests/e2e/
+- Added Playwright browser installation to e2e workflow
+- Added system dependencies and test credentials to all workflows
+- Updated coverage artifact names to distinguish between test types
+- Added coverage flags (unit, integration, e2e) for Codecov
+
+Benefits:
+- Faster feedback loop with separate test suites
+- Easier to debug specific test type failures
+- Better coverage tracking per test type
+- Each workflow runs only what it needs
 - Test coverage from 87.77% to 93.59%
 - Dashboard credentials test validates against actual APIs
 - README rewritten for clarity
