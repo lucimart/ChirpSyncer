@@ -8,6 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- implement export and snapshots endpoints
+
+- Add /api/analytics/export endpoint with CSV export functionality
+  - Support date range filtering (start_date, end_date)
+  - Return CSV with proper headers and content-type
+  - Include all tweet metrics with engagement rate
+
+- Add /api/analytics/snapshots GET endpoint
+  - Retrieve all user analytics snapshots
+  - Return snapshots with metadata and aggregated data
+
+- Add get_snapshots method to AnalyticsTracker class
+  - Query analytics_snapshots table
+  - Return list of snapshot dicts with proper structure
+
+- Initialize AnalyticsTracker in create_app to ensure tables exist
+
+- Remove skip decorators from analytics export and snapshot tests
+
+All analytics E2E tests now passing.
 - implement comprehensive Playwright E2E test infrastructure
 
 ## Summary

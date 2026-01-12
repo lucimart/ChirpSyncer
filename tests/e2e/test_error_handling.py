@@ -524,7 +524,6 @@ class TestInvalidInputHandling:
     Test handling of invalid or malicious input.
     """
 
-    @pytest.mark.skip(reason="API returns 500 instead of 400/422 for invalid JSON")
     def test_invalid_json_api_request(self, client, user_manager):
         """
         Test: Invalid JSON in API request is handled gracefully.

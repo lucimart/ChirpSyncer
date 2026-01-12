@@ -747,10 +747,16 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
     def analytics_record_metrics():
         """Record metrics for a tweet (JSON API)"""
         try:
+            data = request.get_json(force=True)
+            if data is None:
+                return jsonify({"success": False, "error": "Invalid JSON"}), 400
+        except Exception as e:
+            return jsonify({"success": False, "error": "Invalid JSON format"}), 400
+
+        try:
             analytics_tracker = AnalyticsTracker(app.config["DB_PATH"])
             user_id = session["user_id"]
 
-            data = request.get_json()
             tweet_id = data.get("tweet_id")
             metrics = data.get("metrics", {})
 
@@ -769,10 +775,16 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
     def analytics_create_snapshot():
         """Create analytics snapshot (JSON API)"""
         try:
+            data = request.get_json(force=True)
+            if data is None:
+                return jsonify({"success": False, "error": "Invalid JSON"}), 400
+        except Exception as e:
+            return jsonify({"success": False, "error": "Invalid JSON format"}), 400
+
+        try:
             analytics_tracker = AnalyticsTracker(app.config["DB_PATH"])
             user_id = session["user_id"]
 
-            data = request.get_json() or {}
             period = data.get("period", "daily")
 
             result = analytics_tracker.create_snapshot(user_id, period)
