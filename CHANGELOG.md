@@ -239,6 +239,15 @@ All tests passing with real SQLite DB integration
 - README rewritten for clarity
 
 ### Fixed
+- move pytest_plugins to top-level conftest.py
+
+- pytest_plugins declaration must be in top-level conftest.py
+- Moved from tests/e2e/playwright/conftest.py to tests/conftest.py
+- pytest-playwright plugin now loaded globally for all tests
+- Fixes pytest collection error in CI
+
+Error fixed:
+  Defining 'pytest_plugins' in a non-top-level conftest is no longer supported
 - remove --with-deps flag from playwright install
 
 - Ubuntu 24.04 renamed libasound2 to libasound2t64
