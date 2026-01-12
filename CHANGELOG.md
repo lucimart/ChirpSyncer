@@ -315,6 +315,81 @@ Benefits:
 - README rewritten for clarity
 
 ### Fixed
+- prevent information exposure and fix test failures
+
+Deployed 3 specialized agents to fix security vulnerabilities and test failures:
+
+## 1. Information Exposure Prevention (16 instances fixed)
+
+**Files**: dashboard.py, credential_validator.py
+
+**Problem**: Exception details (str(e)) exposed to external users via JSON
+responses, potentially leaking sensitive information (database paths,
+internal structure, API keys).
+
+**Solution**:
+- Added logging infrastructure to dashboard.py
+- Log actual errors server-side: logger.error(f"Error: {str(e)}")
+- Return generic messages to users: "An internal error occurred"
+- Keep specific messages for validation errors (safe to expose)
+
+**Endpoints Fixed** (dashboard.py):
+- credentials_test (line 483)
+- task_trigger (line 610)
+- task_toggle (line 643)
+- api_tasks_status (line 692)
+- api_task_status (line 732)
+- analytics_overview (line 779)
+- analytics_top_tweets (line 808)
+- analytics_record_metrics (line 837)
+- analytics_create_snapshot (line 862)
+- analytics_export (line 990)
+- analytics_snapshots (line 1005)
+
+**Functions Fixed** (credential_validator.py):
+- validate_twitter_scraping (line 60)
+- validate_twitter_api (lines 146, 150)
+- validate_bluesky (lines 183, 187)
+
+## 2. Bandit False Positive Suppression
+
+**File**: analytics_tracker.py:451
+
+**Problem**: Bandit B608 warning on ORDER BY clause despite proper validation
+
+**Solution**: Added # nosec B608 comment with explanation
+- order_by_column validated via whitelist dict (lines 438-446)
+- Comment documents why code is safe
+
+## 3. Test Fixture Improvements (5 tests fixed)
+
+**Files**: conftest.py, test_dashboard_routes_integration.py
+
+**Problem**: 5 integration tests failing with 404 instead of expected status codes
+
+**Root Cause**: Mock scheduler fixture incomplete
+- get_task_status() returned None causing 404s on task_detail route
+- "no scheduler" tests couldn't actually test without scheduler
+
+**Solution**:
+- Enhanced mock scheduler in conftest.py with valid task data
+- Added mock methods: get_task_history, pause_task, resume_task
+- Updated 2 tests to properly remove scheduler for testing
+
+**Tests Fixed**:
+- test_post_task_toggle_no_scheduler (404→500)
+- test_post_task_configure_no_scheduler (404→200)
+- test_post_task_configure_success (404→200)
+- test_post_task_configure_missing_schedule (404→200)
+- test_post_task_configure_unsupported (404→200)
+
+## Results
+
+**Security**: 16 information exposure vulnerabilities fixed
+**Tests**: 5 failing tests now passing (1440/1445 total)
+**Bandit**: 1 false positive suppressed with documentation
+
+All changes preserve functionality while improving security posture.
 - prevent SQL injection in analytics tracker
 
 Refactored get_top_tweets() to use whitelist dict instead of f-string
