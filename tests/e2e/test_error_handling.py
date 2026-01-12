@@ -236,9 +236,6 @@ class TestCredentialTestFailure:
     Test credential testing with invalid credentials.
     """
 
-    @pytest.mark.skip(
-        reason="API only validates credential structure, not actual validity"
-    )
     def test_invalid_credential_test_failure(self, client, user_manager):
         """
         Test: Testing invalid credentials shows error but preserves credential.

@@ -274,6 +274,18 @@ Benefits:
 - README rewritten for clarity
 
 ### Fixed
+- implement proper JSON error handling
+
+- Add try-catch for JSON parsing in all API endpoints
+- Return 400 Bad Request for invalid JSON instead of 500
+- Provide clear error messages for malformed JSON
+- Remove skip decorator from test_invalid_json_api_request
+
+Endpoints updated:
+- /api/analytics/record-metrics
+- /api/analytics/create-snapshot
+
+Test now passes: test_invalid_json_api_request
 - skip tests with unimplemented or broken functionality
 
 Skip 8 E2E tests that depend on features not yet fully implemented or
