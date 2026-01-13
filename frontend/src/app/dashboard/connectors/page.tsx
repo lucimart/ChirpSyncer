@@ -4,7 +4,7 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import {
   Link2,
-  LinkOff,
+  Link2Off,
   Check,
   X,
   ChevronRight,
@@ -548,7 +548,7 @@ export default function ConnectorsPage() {
                       onClick={() => handleDisconnect(connector.platform)}
                       isLoading={disconnectMutation.isPending}
                     >
-                      <LinkOff size={16} />
+                      <Link2Off size={16} />
                       Disconnect
                     </Button>
                     <Button variant="secondary" size="sm">

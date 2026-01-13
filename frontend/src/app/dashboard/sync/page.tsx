@@ -340,7 +340,6 @@ export default function SyncPage() {
           <Progress
             value={syncProgress.current}
             max={syncProgress.total}
-            showPercentage
             details={[
               { label: 'Progress', value: `${syncProgress.current}/${syncProgress.total}` },
               { label: 'Status', value: syncProgress.message },
