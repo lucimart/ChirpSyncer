@@ -1,6 +1,18 @@
 import '@testing-library/jest-dom';
 
+// Polyfill TextEncoder and TextDecoder for Jest environment
+// Using require to ensure it's available before any module imports
+const util = require('util');
+global.TextEncoder = util.TextEncoder;
+global.TextDecoder = util.TextDecoder;
+
+
 // Mock WebSocket
+const mockWebSocketInstances: any[] = [];
+
+// Flag to disable auto-connect for specific tests
+let disableAutoConnect = false;
+
 class MockWebSocket {
   static CONNECTING = 0;
   static OPEN = 1;
@@ -16,10 +28,13 @@ class MockWebSocket {
 
   constructor(url: string) {
     this.url = url;
-    setTimeout(() => {
-      this.readyState = MockWebSocket.OPEN;
-      this.onopen?.(new Event('open'));
-    }, 0);
+    mockWebSocketInstances.push(this);
+    if (!disableAutoConnect) {
+      setTimeout(() => {
+        this.readyState = MockWebSocket.OPEN;
+        this.onopen?.(new Event('open'));
+      }, 0);
+    }
   }
 
   send(data: string) {
@@ -35,7 +50,21 @@ class MockWebSocket {
   simulateMessage(data: unknown) {
     this.onmessage?.(new MessageEvent('message', { data: JSON.stringify(data) }));
   }
+
+  // Helper to manually trigger connection success
+  simulateOpen() {
+    this.readyState = MockWebSocket.OPEN;
+    this.onopen?.(new Event('open'));
+  }
 }
+
+// Store instances in a property accessible from tests
+(MockWebSocket as any).__instances__ = mockWebSocketInstances;
+
+// Export helpers to control auto-connect behavior
+(MockWebSocket as any).__setAutoConnect__ = (enabled: boolean) => {
+  disableAutoConnect = !enabled;
+};
 
 global.WebSocket = MockWebSocket as unknown as typeof WebSocket;
 
@@ -66,4 +95,5 @@ Object.defineProperty(window, 'matchMedia', {
 // Reset mocks between tests
 beforeEach(() => {
   jest.clearAllMocks();
+  mockWebSocketInstances.length = 0; // Clear WebSocket instances
 });

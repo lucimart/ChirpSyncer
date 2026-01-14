@@ -144,10 +144,16 @@ export const Modal = ({
 
   return (
     <Overlay onClick={closeOnOverlayClick ? onClose : undefined}>
-      <ModalContainer $size={sizeMap[size]} onClick={(e) => e.stopPropagation()}>
+      <ModalContainer
+        $size={sizeMap[size]}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? 'modal-title' : undefined}
+      >
         {title && (
           <Header>
-            <Title>{title}</Title>
+            <Title id="modal-title">{title}</Title>
             <CloseButton onClick={onClose} aria-label="Close modal">
               <X size={20} />
             </CloseButton>
