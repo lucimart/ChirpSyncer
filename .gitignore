@@ -79,3 +79,7 @@ test-results/
 
 # Temporary files
 tmpclaude-*
+
+# Claude Code
+CLAUDE.md
+.claude/
