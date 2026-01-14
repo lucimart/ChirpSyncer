@@ -54,3 +54,28 @@ htmlcov/
 *.cover
 .pytest_cache/
 flask_session/
+
+# Node.js / Frontend
+node_modules/
+.next/
+out/
+.nuxt/
+dist/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# Frontend testing
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Frontend misc
+.eslintcache
+*.local
+.vercel
+.turbo
+
+# Temporary files
+tmpclaude-*
