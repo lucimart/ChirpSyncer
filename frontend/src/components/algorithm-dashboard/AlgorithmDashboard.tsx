@@ -14,13 +14,26 @@ export interface FeedComposition {
   unaffected: number;
 }
 
-export interface RuleImpact {
+/** RuleImpact with canonical naming (ruleId, ruleName, ruleType) */
+export interface RuleImpactCanonical {
   ruleId: string;
   ruleName: string;
   ruleType: 'boost' | 'demote' | 'filter';
   postsAffected: number;
   averageImpact?: number;
 }
+
+/** RuleImpact with short naming (id, name, type) - used by tests */
+export interface RuleImpactShort {
+  id: string;
+  name: string;
+  type: 'boost' | 'demote' | 'filter';
+  postsAffected: number;
+  averageImpact?: number;
+}
+
+/** Union type accepting both formats */
+export type RuleImpact = RuleImpactCanonical | RuleImpactShort;
 
 export interface AlgorithmStats {
   transparencyScore: number;
@@ -64,35 +77,39 @@ function formatTimestamp(isoString: string): string {
   }
 }
 
-/**
- * Maps RuleImpact to format expected by RuleImpactSummary
- */
-function mapTopRulesToSummaryFormat(topRules: RuleImpact[] | Array<{
+/** Format expected by RuleImpactSummary component */
+interface RuleImpactSummaryFormat {
   id: string;
   name: string;
   type: 'boost' | 'demote' | 'filter';
   postsAffected: number;
   averageImpact?: number;
-}>): RuleImpact[] {
+}
+
+/**
+ * Maps RuleImpact to format expected by RuleImpactSummary
+ */
+function mapTopRulesToSummaryFormat(topRules: RuleImpact[]): RuleImpactSummaryFormat[] {
   return topRules.map((rule) => {
-    // Handle both formats
+    // Handle RuleImpactCanonical format (ruleId, ruleName, ruleType)
     if ('ruleId' in rule) {
-      return rule as RuleImpact;
+      const ruleImpact = rule as RuleImpactCanonical;
+      return {
+        id: ruleImpact.ruleId,
+        name: ruleImpact.ruleName,
+        type: ruleImpact.ruleType,
+        postsAffected: ruleImpact.postsAffected,
+        averageImpact: ruleImpact.averageImpact,
+      };
     }
-    // Map test format to component format
-    const testRule = rule as {
-      id: string;
-      name: string;
-      type: 'boost' | 'demote' | 'filter';
-      postsAffected: number;
-      averageImpact?: number;
-    };
+    // Handle RuleImpactShort format (id, name, type) - from tests
+    const shortRule = rule as RuleImpactShort;
     return {
-      ruleId: testRule.id,
-      ruleName: testRule.name,
-      ruleType: testRule.type,
-      postsAffected: testRule.postsAffected,
-      averageImpact: testRule.averageImpact,
+      id: shortRule.id,
+      name: shortRule.name,
+      type: shortRule.type,
+      postsAffected: shortRule.postsAffected,
+      averageImpact: shortRule.averageImpact,
     };
   });
 }

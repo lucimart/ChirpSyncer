@@ -457,7 +457,7 @@ describe('Sprint 19: Feed Scoring Engine', () => {
           ({ rules }: { rules: FeedRule[] }) => useScoredFeed(mockPosts, rules),
           {
             wrapper: createWrapper(),
-            initialProps: { rules: [] },
+            initialProps: { rules: [] as FeedRule[] },
           }
         );
 
@@ -630,7 +630,7 @@ describe('Sprint 19: Feed Scoring Engine', () => {
           ({ rules }: { rules: FeedRule[] }) => useFeedPreview(rules),
           {
             wrapper: createWrapper(),
-            initialProps: { rules: [] },
+            initialProps: { rules: [] as FeedRule[] },
           }
         );
 
