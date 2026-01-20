@@ -268,3 +268,18 @@ class UserSettings:
             return False
         finally:
             conn.close()
+
+
+    def reset(self, user_id: int) -> bool:
+        """
+        Reset all settings to defaults for a user.
+
+        Alias for reset_to_defaults() for backwards compatibility.
+
+        Args:
+            user_id: User ID
+
+        Returns:
+            True if reset successful, False otherwise
+        """
+        return self.reset_to_defaults(user_id)

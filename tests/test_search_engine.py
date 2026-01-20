@@ -350,3 +350,192 @@ def test_duplicate_indexing(search_engine):
     # Should have only 1 result
     results = search_engine.search(query="Duplicate", user_id=1)
     assert len(results) == 1, "Should not create duplicate entries"
+
+
+# Test: Search exception handling
+def test_search_exception_handling(search_engine):
+    """Test search handles database errors gracefully"""
+    import os
+    os.remove(search_engine.db_path)
+    
+    # Should return empty results
+    results = search_engine.search(user_id=1, query='test')
+    assert results == []
+
+
+# Test: Index tweet exception handling
+def test_index_tweet_exception_handling(search_engine):
+    """Test index_tweet handles errors gracefully"""
+    import os
+    os.remove(search_engine.db_path)
+    
+    # Should return False
+    result = search_engine.index_tweet(
+        tweet_id='test123',
+        user_id=1,
+        content='Test content',
+        hashtags='#test',
+        author='testuser'
+    )
+    assert result == False
+
+
+def test_remove_from_index(search_engine):
+    """Test removing a tweet from the index"""
+    # Index a tweet
+    search_engine.index_tweet("999", 1, "Tweet to remove", "", "testuser")
+    
+    # Verify it's searchable
+    results = search_engine.search(query="remove", user_id=1)
+    assert len(results) == 1
+    
+    # Remove it
+    result = search_engine.remove_from_index("999")
+    assert result is True
+    
+    # Verify it's gone
+    results = search_engine.search(query="remove", user_id=1)
+    assert len(results) == 0
+
+
+def test_remove_from_index_not_found(search_engine):
+    """Test removing a non-existent tweet"""
+    result = search_engine.remove_from_index("nonexistent_id")
+    assert result is False
+
+
+def test_reindex_all(search_engine, temp_db):
+    """Test reindex_all rebuilds the entire index"""
+    # Create synced_posts table with sample data
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS synced_posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        twitter_id TEXT,
+        bluesky_uri TEXT,
+        source TEXT NOT NULL,
+        content_hash TEXT NOT NULL UNIQUE,
+        synced_to TEXT,
+        synced_at INTEGER,
+        original_text TEXT NOT NULL,
+        user_id INTEGER,
+        twitter_username TEXT,
+        hashtags TEXT,
+        posted_at INTEGER
+    )
+    """)
+
+    now = int(time.time())
+    cursor.execute("""
+    INSERT INTO synced_posts
+    (twitter_id, source, content_hash, original_text, user_id, twitter_username, hashtags, posted_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, ("333", "twitter", "hash3", "Reindex test tweet", 1, "testuser", "#test", now))
+
+    conn.commit()
+    conn.close()
+
+    # Reindex all
+    count = search_engine.reindex_all()
+    assert count >= 1
+
+
+def test_get_suggestions(search_engine):
+    """Test getting search suggestions"""
+    # Index tweets with common words
+    search_engine.index_tweet("1", 1, "Python programming language", "", "testuser")
+    search_engine.index_tweet("2", 1, "Python tutorial basics", "", "testuser")
+    search_engine.index_tweet("3", 1, "Python data science", "", "testuser")
+    
+    # Get suggestions for "pyt"
+    suggestions = search_engine.get_suggestions(user_id=1, prefix="pyt")
+    assert isinstance(suggestions, list)
+
+
+def test_get_suggestions_empty(search_engine):
+    """Test get_suggestions with no matching content"""
+    suggestions = search_engine.get_suggestions(user_id=1, prefix="xyz")
+    assert suggestions == []
+
+
+def test_search_by_hashtag(search_engine):
+    """Test search by hashtag"""
+    search_engine.index_tweet("1", 1, "Python tweet", "#python #coding", "testuser")
+    search_engine.index_tweet("2", 1, "JavaScript tweet", "#javascript", "testuser")
+    
+    results = search_engine.search_by_hashtag(user_id=1, hashtag="python")
+    assert len(results) >= 1
+    
+    # Test with # prefix
+    results2 = search_engine.search_by_hashtag(user_id=1, hashtag="#python")
+    assert len(results2) >= 1
+
+
+def test_search_by_author(search_engine):
+    """Test search by author"""
+    search_engine.index_tweet("1", 1, "Tweet from testuser", "", "testuser")
+    search_engine.index_tweet("2", 1, "Tweet from otheruser", "", "otheruser")
+    
+    results = search_engine.search_by_author(user_id=1, author="testuser")
+    assert len(results) >= 1
+    assert all(r['author'] == 'testuser' for r in results)
+
+
+def test_get_trending_hashtags(search_engine):
+    """Test getting trending hashtags"""
+    search_engine.index_tweet("1", 1, "Tweet 1", "#python #coding", "testuser")
+    search_engine.index_tweet("2", 1, "Tweet 2", "#python #data", "testuser")
+    search_engine.index_tweet("3", 1, "Tweet 3", "#python", "testuser")
+    
+    trending = search_engine.get_trending_hashtags(user_id=1)
+    assert isinstance(trending, list)
+    assert len(trending) > 0
+    # Python should be most popular
+    assert trending[0]['hashtag'] == 'python'
+    assert trending[0]['count'] == 3
+
+
+def test_get_trending_hashtags_empty(search_engine):
+    """Test get_trending_hashtags with no hashtags"""
+    search_engine.index_tweet("1", 1, "Tweet without hashtags", "", "testuser")
+    
+    trending = search_engine.get_trending_hashtags(user_id=1)
+    assert trending == []
+
+
+def test_remove_from_index_exception_handling(search_engine):
+    """Test remove_from_index handles database errors gracefully"""
+    import os
+    os.remove(search_engine.db_path)
+    
+    result = search_engine.remove_from_index("123")
+    assert result is False
+
+
+def test_get_suggestions_exception_handling(search_engine):
+    """Test get_suggestions handles database errors gracefully"""
+    import os
+    os.remove(search_engine.db_path)
+    
+    result = search_engine.get_suggestions(user_id=1, prefix="test")
+    assert result == []
+
+
+def test_search_by_author_exception_handling(search_engine):
+    """Test search_by_author handles database errors gracefully"""
+    import os
+    os.remove(search_engine.db_path)
+    
+    result = search_engine.search_by_author(user_id=1, author="test")
+    assert result == []
+
+
+def test_get_trending_hashtags_exception_handling(search_engine):
+    """Test get_trending_hashtags handles database errors gracefully"""
+    import os
+    os.remove(search_engine.db_path)
+    
+    result = search_engine.get_trending_hashtags(user_id=1)
+    assert result == []

@@ -466,3 +466,181 @@ def test_collection_created_at_timestamp(manager, user1_id):
     created_at = collections[0]['created_at']
     assert created_at >= before
     assert created_at <= after
+
+
+# ============================================================================
+# TEST: Exception handling in save_tweet
+# ============================================================================
+def test_save_tweet_exception_handling(manager):
+    """Test save_tweet handles database errors gracefully"""
+    # Create a broken database scenario
+    import sqlite3
+    conn = sqlite3.connect(manager.db_path)
+    conn.execute("DROP TABLE saved_tweets")
+    conn.commit()
+    conn.close()
+    
+    result = manager.save_tweet(user_id=1, tweet_id='test123')
+    assert result == False
+
+
+# ============================================================================
+# TEST: Exception handling in unsave_tweet
+# ============================================================================
+def test_unsave_tweet_exception_handling():
+    """Test unsave_tweet handles database errors gracefully"""
+    import tempfile
+    from saved_content import SavedContentManager
+    
+    db_fd, db_path = tempfile.mkstemp(suffix='.db')
+    mgr = SavedContentManager(db_path=db_path)
+    mgr.init_db()
+    
+    # Drop the table to cause an error
+    import sqlite3
+    conn = sqlite3.connect(db_path)
+    conn.execute("DROP TABLE saved_tweets")
+    conn.commit()
+    conn.close()
+    
+    result = mgr.unsave_tweet(user_id=1, tweet_id='test123')
+    assert result == False
+    
+    import os
+    os.close(db_fd)
+    os.unlink(db_path)
+
+
+# ============================================================================
+# TEST: Exception handling in get_saved_tweets
+# ============================================================================
+def test_get_saved_tweets_exception_handling():
+    """Test get_saved_tweets handles database errors gracefully"""
+    import tempfile
+    from saved_content import SavedContentManager
+    
+    db_fd, db_path = tempfile.mkstemp(suffix='.db')
+    mgr = SavedContentManager(db_path=db_path)
+    mgr.init_db()
+    
+    # Drop the table to cause an error
+    import sqlite3
+    conn = sqlite3.connect(db_path)
+    conn.execute("DROP TABLE saved_tweets")
+    conn.commit()
+    conn.close()
+    
+    result = mgr.get_saved_tweets(user_id=1)
+    assert result == []
+    
+    import os
+    os.close(db_fd)
+    os.unlink(db_path)
+
+
+# ============================================================================
+# TEST: Exception handling in get_collections
+# ============================================================================
+def test_get_collections_exception_handling():
+    """Test get_collections handles database errors gracefully"""
+    import tempfile
+    from saved_content import SavedContentManager
+    
+    db_fd, db_path = tempfile.mkstemp(suffix='.db')
+    mgr = SavedContentManager(db_path=db_path)
+    mgr.init_db()
+    
+    # Drop the table to cause an error
+    import sqlite3
+    conn = sqlite3.connect(db_path)
+    conn.execute("DROP TABLE collections")
+    conn.commit()
+    conn.close()
+    
+    result = mgr.get_collections(user_id=1)
+    assert result == []
+    
+    import os
+    os.close(db_fd)
+    os.unlink(db_path)
+
+
+# ============================================================================
+# TEST: Exception handling in create_collection
+# ============================================================================
+def test_create_collection_exception_handling():
+    """Test create_collection handles database errors gracefully"""
+    import tempfile
+    from saved_content import SavedContentManager
+    
+    db_fd, db_path = tempfile.mkstemp(suffix='.db')
+    mgr = SavedContentManager(db_path=db_path)
+    mgr.init_db()
+    
+    # Drop the table to cause an error
+    import sqlite3
+    conn = sqlite3.connect(db_path)
+    conn.execute("DROP TABLE collections")
+    conn.commit()
+    conn.close()
+    
+    result = mgr.create_collection(user_id=1, name='Test')
+    assert result is None
+    
+    import os
+    os.close(db_fd)
+    os.unlink(db_path)
+
+
+# ============================================================================
+# TEST: Exception handling in delete_collection
+# ============================================================================
+def test_delete_collection_exception_handling():
+    """Test delete_collection handles database errors gracefully"""
+    import tempfile
+    from saved_content import SavedContentManager
+    
+    db_fd, db_path = tempfile.mkstemp(suffix='.db')
+    mgr = SavedContentManager(db_path=db_path)
+    mgr.init_db()
+    
+    # Drop the table to cause an error
+    import sqlite3
+    conn = sqlite3.connect(db_path)
+    conn.execute("DROP TABLE collections")
+    conn.commit()
+    conn.close()
+    
+    result = mgr.delete_collection(user_id=1, collection_id=1)
+    assert result == False
+    
+    import os
+    os.close(db_fd)
+    os.unlink(db_path)
+
+
+# ============================================================================
+# TEST: Exception handling in move_to_collection
+# ============================================================================
+def test_move_to_collection_exception_handling():
+    """Test move_to_collection handles database errors gracefully"""
+    import tempfile
+    from saved_content import SavedContentManager
+    
+    db_fd, db_path = tempfile.mkstemp(suffix='.db')
+    mgr = SavedContentManager(db_path=db_path)
+    mgr.init_db()
+    
+    # Drop the table to cause an error
+    import sqlite3
+    conn = sqlite3.connect(db_path)
+    conn.execute("DROP TABLE saved_tweets")
+    conn.commit()
+    conn.close()
+    
+    result = mgr.move_to_collection(user_id=1, tweet_id='test', collection_id=1)
+    assert result == False
+    
+    import os
+    os.close(db_fd)
+    os.unlink(db_path)

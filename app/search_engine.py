@@ -446,3 +446,183 @@ class SearchEngine:
                 'total_indexed': 0,
                 'last_indexed': 0
             }
+
+    def remove_from_index(self, tweet_id: str) -> bool:
+        """
+        Remove a tweet from the search index.
+
+        Args:
+            tweet_id: Tweet ID to remove
+
+        Returns:
+            True if removed, False otherwise
+        """
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+
+            cursor.execute("DELETE FROM tweet_search_index WHERE tweet_id = ?", (tweet_id,))
+            deleted = cursor.rowcount > 0
+
+            conn.commit()
+            conn.close()
+
+            logger.debug(f"Removed tweet {tweet_id} from index: {deleted}")
+            return deleted
+
+        except Exception as e:
+            logger.error(f"Failed to remove tweet {tweet_id} from index: {e}")
+            return False
+
+    def reindex_all(self) -> int:
+        """
+        Reindex all tweets from synced_posts.
+
+        Returns:
+            Number of tweets indexed
+        """
+        return self.rebuild_index()
+
+    def get_suggestions(self, user_id: int, prefix: str, limit: int = 10) -> List[str]:
+        """
+        Get search suggestions based on prefix.
+
+        Args:
+            user_id: User ID
+            prefix: Search prefix
+            limit: Maximum suggestions to return
+
+        Returns:
+            List of suggested search terms
+        """
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+
+            cursor.execute("""
+            SELECT DISTINCT content
+            FROM tweet_search_index
+            WHERE user_id = ? AND content LIKE ?
+            LIMIT ?
+            """, (user_id, f"%{prefix}%", limit * 5))
+
+            suggestions = set()
+            for row in cursor.fetchall():
+                words = row[0].lower().split()
+                for word in words:
+                    if word.startswith(prefix.lower()) and len(word) > len(prefix):
+                        suggestions.add(word)
+                        if len(suggestions) >= limit:
+                            break
+                if len(suggestions) >= limit:
+                    break
+
+            conn.close()
+            return list(suggestions)[:limit]
+
+        except Exception as e:
+            logger.error(f"Failed to get suggestions: {e}")
+            return []
+
+    def search_by_hashtag(self, user_id: int, hashtag: str, limit: int = 50) -> List[Dict]:
+        """
+        Search tweets by hashtag.
+
+        Args:
+            user_id: User ID
+            hashtag: Hashtag to search (with or without #)
+            limit: Maximum results
+
+        Returns:
+            List of matching tweets
+        """
+        if not hashtag.startswith('#'):
+            hashtag = f'#{hashtag}'
+
+        return self.search_with_filters(
+            query='',
+            user_id=user_id,
+            filters={'hashtags': [hashtag.lstrip('#')]}
+        )
+
+    def search_by_author(self, user_id: int, author: str, limit: int = 50) -> List[Dict]:
+        """
+        Search tweets by author.
+
+        Args:
+            user_id: User ID
+            author: Author username
+            limit: Maximum results
+
+        Returns:
+            List of matching tweets
+        """
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+
+            cursor.execute("""
+            SELECT tweet_id, user_id, content, hashtags, author, posted_at, 0 as rank
+            FROM tweet_search_index
+            WHERE user_id = ? AND author LIKE ?
+            ORDER BY posted_at DESC
+            LIMIT ?
+            """, (user_id, f"%{author}%", limit))
+
+            results = []
+            for row in cursor.fetchall():
+                results.append({
+                    'tweet_id': row[0],
+                    'user_id': row[1],
+                    'content': row[2],
+                    'hashtags': row[3],
+                    'author': row[4],
+                    'posted_at': row[5],
+                    'rank': row[6]
+                })
+
+            conn.close()
+            return results
+
+        except Exception as e:
+            logger.error(f"Failed to search by author: {e}")
+            return []
+
+    def get_trending_hashtags(self, user_id: int, limit: int = 10) -> List[Dict]:
+        """
+        Get trending hashtags for a user.
+
+        Args:
+            user_id: User ID
+            limit: Maximum hashtags to return
+
+        Returns:
+            List of dicts with hashtag and count
+        """
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+
+            cursor.execute("""
+            SELECT hashtags FROM tweet_search_index
+            WHERE user_id = ? AND hashtags != ''
+            """, (user_id,))
+
+            hashtag_counts = {}
+            for row in cursor.fetchall():
+                tags = row[0].replace(',', ' ').split()
+                for tag in tags:
+                    tag = tag.strip().lower()
+                    if tag.startswith('#'):
+                        tag = tag[1:]
+                    if tag:
+                        hashtag_counts[tag] = hashtag_counts.get(tag, 0) + 1
+
+            conn.close()
+
+            sorted_tags = sorted(hashtag_counts.items(), key=lambda x: x[1], reverse=True)
+            return [{'hashtag': tag, 'count': count} for tag, count in sorted_tags[:limit]]
+
+        except Exception as e:
+            logger.error(f"Failed to get trending hashtags: {e}")
+            return []

@@ -54,7 +54,10 @@ def add_user_id_columns(db_path: str = 'chirpsyncer.db') -> List[str]:
         # Create indexes for better performance
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_synced_posts_user ON synced_posts(user_id)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_sync_stats_user ON sync_stats(user_id)')
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_hourly_stats_user ON hourly_stats(user_id)')
+        # Only create hourly_stats index if table exists
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='hourly_stats'")
+        if cursor.fetchone():
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_hourly_stats_user ON hourly_stats(user_id)')
         operations.append('Created indexes on user_id columns')
 
         conn.commit()
@@ -133,3 +136,4 @@ def init_all_tables(db_path: str = 'chirpsyncer.db'):
 
     # Add user_id columns to existing tables
     add_user_id_columns(db_path)
+

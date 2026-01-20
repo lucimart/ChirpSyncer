@@ -400,3 +400,158 @@ def test_credentials_share(client, admin_user, regular_user, credential_manager)
     shared = credential_manager.get_shared_credentials(regular_user.id)
     assert len(shared) > 0
     assert shared[0]['platform'] == 'twitter'
+
+
+# ===== Additional Coverage Tests for Dashboard =====
+
+def test_dashboard_index_no_session(client):
+    """Test dashboard index redirects when not logged in"""
+    response = client.get('/')
+    assert response.status_code == 302  # Redirect to login
+
+
+def test_create_app_generates_master_key(tmp_path, monkeypatch):
+    """Test create_app generates master key when not in env"""
+    from app.dashboard import create_app
+    db_path = str(tmp_path / 'test.db')
+    
+    # Clear MASTER_KEY from env
+    monkeypatch.delenv('MASTER_KEY', raising=False)
+    
+    app = create_app(db_path=db_path)
+    assert app.config['MASTER_KEY'] is not None
+    assert len(app.config['MASTER_KEY']) == 32
+
+
+def test_credential_add_page(client, regular_user):
+    """Test credentials add page renders"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = regular_user.id
+        sess['username'] = regular_user.username
+    
+    response = client.get('/credentials/add')
+    assert response.status_code == 200
+
+
+def test_users_list(client, admin_user):
+    """Test users list page"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = admin_user.id
+        sess['username'] = admin_user.username
+        sess['is_admin'] = True
+    
+    response = client.get('/users')
+    assert response.status_code == 200
+
+
+def test_tasks_page(client, regular_user):
+    """Test tasks page renders"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = regular_user.id
+        sess['username'] = regular_user.username
+    
+    response = client.get('/tasks')
+    assert response.status_code == 200
+
+
+def test_analytics_page(client, regular_user):
+    """Test analytics page renders"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = regular_user.id
+        sess['username'] = regular_user.username
+    
+    response = client.get('/analytics')
+    assert response.status_code == 200
+
+
+def test_api_analytics_overview(client, regular_user):
+    """Test API analytics overview endpoint"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = regular_user.id
+        sess['username'] = regular_user.username
+    
+    response = client.get('/api/analytics/overview')
+    assert response.status_code == 200
+
+
+def test_api_auth_check(client, regular_user):
+    """Test API auth check endpoint"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = regular_user.id
+        sess['username'] = regular_user.username
+    
+    response = client.get('/api/auth/check')
+    assert response.status_code == 200
+
+
+# ===== Registration Tests =====
+
+def test_register_get(client):
+    """Test GET /register displays registration form"""
+    response = client.get("/register")
+    assert response.status_code == 200
+
+
+def test_register_missing_fields(client):
+    """Test registration with missing fields fails"""
+    response = client.post("/register", data={
+        "username": "newuser",
+        "email": "",
+        "password": "Password123!",
+        "confirm_password": "Password123!"
+    }, follow_redirects=True)
+    assert response.status_code == 200
+
+
+def test_register_password_mismatch(client):
+    """Test registration with mismatched passwords fails"""
+    response = client.post("/register", data={
+        "username": "newuser",
+        "email": "new@test.com",
+        "password": "Password123!",
+        "confirm_password": "DifferentPassword!"
+    }, follow_redirects=True)
+    assert response.status_code == 200
+
+
+def test_register_success(client):
+    """Test successful registration"""
+    response = client.post("/register", data={
+        "username": "newuser1234",
+        "email": "newuser1234@test.com",
+        "password": "SecurePass123!",
+        "confirm_password": "SecurePass123!"
+    }, follow_redirects=True)
+    assert response.status_code == 200
+
+
+def test_user_detail_page(client, admin_user, regular_user):
+    """Test user detail page renders"""
+    with client.session_transaction() as sess:
+        sess["user_id"] = admin_user.id
+        sess["username"] = admin_user.username
+        sess["is_admin"] = True
+    
+    response = client.get(f"/users/{regular_user.id}")
+    assert response.status_code == 200
+
+
+def test_credentials_list(client, regular_user):
+    """Test credentials list page"""
+    with client.session_transaction() as sess:
+        sess["user_id"] = regular_user.id
+        sess["username"] = regular_user.username
+    
+    response = client.get("/credentials")
+    assert response.status_code == 200
+
+
+def test_api_analytics_top_tweets(client, regular_user):
+    """Test analytics top tweets API"""
+    with client.session_transaction() as sess:
+        sess["user_id"] = regular_user.id
+        sess["username"] = regular_user.username
+    
+    response = client.get("/api/analytics/top-tweets")
+    assert response.status_code == 200
+

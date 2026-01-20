@@ -575,3 +575,181 @@ class TestGrowthReport:
         if data['first_period_tweets'] > 0 and data['second_period_tweets'] > 0:
             expected_change = data['second_period_tweets'] - data['first_period_tweets']
             assert data['tweets_change'] == expected_change
+
+
+class TestHTMLGrowthReport:
+    """Test HTML format for growth reports"""
+
+    def test_generate_growth_report_html(self, report_gen):
+        """Test growth report in HTML format"""
+        result = report_gen.generate_growth_report(
+            user_id=1,
+            format='html'
+        )
+
+        assert isinstance(result, bytes)
+        html_content = result.decode('utf-8')
+
+        assert '<html' in html_content.lower()
+        assert 'Growth Report' in html_content
+        assert 'Tweets Change' in html_content
+        assert 'Engagement Trend' in html_content
+
+
+class TestExportFormats:
+    """Test export data formats"""
+
+    def test_export_tweets_json(self, report_gen):
+        """Test exporting tweets to JSON"""
+        result = report_gen.export_data(
+            user_id=1,
+            data_type='tweets',
+            format='json'
+        )
+
+        data = json.loads(result.decode('utf-8'))
+        assert isinstance(data, list)
+
+    def test_export_engagement_json(self, report_gen):
+        """Test exporting engagement to JSON"""
+        result = report_gen.export_data(
+            user_id=1,
+            data_type='engagement',
+            format='json'
+        )
+
+        data = json.loads(result.decode('utf-8'))
+        assert isinstance(data, list)
+
+
+
+class TestInvalidPeriod:
+    """Tests for invalid period handling"""
+
+    def test_invalid_period_format_raises_error(self, report_gen):
+        """Test that invalid period format raises ValueError"""
+        import pytest
+        with pytest.raises(ValueError, match="Invalid period"):
+            report_gen.generate_engagement_report(user_id=1, period='invalid', format='json')
+
+    def test_invalid_day_format_raises_error(self, report_gen):
+        """Test that invalid day format raises ValueError"""
+        import pytest
+        with pytest.raises(ValueError, match="Invalid period format"):
+            report_gen.generate_engagement_report(user_id=1, period='abcd', format='json')
+
+
+class TestPDFFormat:
+    """Tests for PDF format generation"""
+
+    def test_engagement_report_pdf_fallback(self, report_gen):
+        """Test engagement report PDF falls back to HTML when WeasyPrint not available"""
+        result = report_gen.generate_engagement_report(user_id=1, period='30d', format='pdf')
+        assert isinstance(result, bytes)
+        # Without WeasyPrint, should return HTML
+        html_content = result.decode('utf-8')
+        assert '<html' in html_content.lower() or b'%PDF' in result
+
+    def test_growth_report_pdf_fallback(self, report_gen):
+        """Test growth report PDF falls back to HTML when WeasyPrint not available"""
+        result = report_gen.generate_growth_report(user_id=1, format='pdf')
+        assert isinstance(result, bytes)
+
+    def test_top_tweets_pdf_fallback(self, report_gen):
+        """Test top tweets PDF falls back to HTML when WeasyPrint not available"""
+        result = report_gen.generate_top_tweets_report(user_id=1, limit=5, format='pdf')
+        assert isinstance(result, bytes)
+
+
+class TestGrowthReportCSV:
+    """Tests for growth report in CSV format"""
+
+    def test_growth_report_csv_structure(self, report_gen):
+        """Test growth report CSV has correct structure"""
+        import csv
+        import io
+        result = report_gen.generate_growth_report(user_id=1, format='csv')
+        assert isinstance(result, bytes)
+        csv_content = result.decode('utf-8')
+        reader = csv.DictReader(io.StringIO(csv_content))
+        rows = list(reader)
+        assert len(rows) > 0
+        assert 'period_days' in rows[0]
+        assert 'tweets_change' in rows[0]
+        assert 'engagement_trend' in rows[0]
+
+
+class TestExportHTML:
+    """Tests for HTML export"""
+
+    def test_export_tweets_html(self, report_gen):
+        """Test exporting tweets to HTML"""
+        result = report_gen.export_data(user_id=1, data_type='tweets', format='html')
+        assert isinstance(result, bytes)
+        html_content = result.decode('utf-8')
+        assert '<html' in html_content.lower()
+
+    def test_export_engagement_html(self, report_gen):
+        """Test exporting engagement to HTML"""
+        result = report_gen.export_data(user_id=1, data_type='engagement', format='html')
+        assert isinstance(result, bytes)
+        html_content = result.decode('utf-8')
+        assert '<html' in html_content.lower()
+
+
+class TestExportPDF:
+    """Tests for PDF export"""
+
+    def test_export_tweets_pdf_fallback(self, report_gen):
+        """Test exporting tweets to PDF falls back to HTML"""
+        result = report_gen.export_data(user_id=1, data_type='tweets', format='pdf')
+        assert isinstance(result, bytes)
+
+    def test_export_engagement_pdf_fallback(self, report_gen):
+        """Test exporting engagement to PDF falls back to HTML"""
+        result = report_gen.export_data(user_id=1, data_type='engagement', format='pdf')
+        assert isinstance(result, bytes)
+
+
+class TestEngagementRateCalculation:
+    """Tests for engagement rate calculation edge cases"""
+
+    def test_engagement_rate_with_zero_impressions(self, report_gen):
+        """Test engagement rate calculation with zero impressions"""
+        rate = report_gen._calculate_engagement_rate(10, 5, 3, impressions=0)
+        assert rate > 0  # Should estimate impressions
+
+    def test_engagement_rate_with_none_impressions(self, report_gen):
+        """Test engagement rate calculation with None impressions"""
+        rate = report_gen._calculate_engagement_rate(10, 5, 3, impressions=None)
+        assert rate > 0  # Should estimate impressions
+
+    def test_engagement_rate_with_provided_impressions(self, report_gen):
+        """Test engagement rate calculation with provided impressions"""
+        # 18 engagements / 1000 impressions = 1.8%
+        rate = report_gen._calculate_engagement_rate(10, 5, 3, impressions=1000)
+        assert rate == 1.8
+
+    def test_engagement_rate_zero_engagement(self, report_gen):
+        """Test engagement rate with zero engagement"""
+        rate = report_gen._calculate_engagement_rate(0, 0, 0, impressions=1000)
+        assert rate == 0.0
+
+
+class TestTopTweetsCSVEmpty:
+    """Tests for top tweets with empty data"""
+
+    def test_top_tweets_csv_empty(self, report_gen):
+        """Test top tweets CSV with non-existent user returns empty or valid CSV"""
+        result = report_gen.generate_top_tweets_report(user_id=9999, limit=10, format='csv')
+        assert isinstance(result, bytes)
+
+
+class TestExportInvalidDataType:
+    """Tests for export with invalid data type"""
+
+    def test_export_invalid_data_type_raises_error(self, report_gen):
+        """Test that invalid data type raises ValueError"""
+        import pytest
+        with pytest.raises(ValueError, match="Unsupported data type"):
+            report_gen.export_data(user_id=1, data_type='invalid', format='json')
