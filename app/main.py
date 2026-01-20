@@ -762,6 +762,8 @@ def main():
 
     # Check if multi-user mode is enabled
     if MULTI_USER_ENABLED:
+        # Migrate database schema first in multi-user mode
+        migrate_database(db_path=DB_PATH)
         logger.info("MULTI-USER MODE ENABLED")
         logger.info("=" * 80)
 
@@ -808,10 +810,10 @@ def main():
         logger.info("Set MULTI_USER_ENABLED=true in .env to enable multi-user support")
         logger.info("=" * 80)
 
-        # Validate credentials from .env
+        # Validate credentials from .env FIRST (fail-fast before DB operations)
         validate_credentials()
 
-        # Migrate database schema
+        # Migrate database schema (after validation passes)
         migrate_database(db_path=DB_PATH)
 
         # Login to Bluesky

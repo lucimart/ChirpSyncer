@@ -210,6 +210,8 @@ class TweetScheduler:
                     tweet['media_paths'] = json.loads(tweet['media_paths'])
                 else:
                     tweet['media_paths'] = []
+                # Add twitter_id alias for TDD compatibility
+                tweet["twitter_id"] = tweet.get("tweet_id")
                 tweets.append(tweet)
 
             return tweets

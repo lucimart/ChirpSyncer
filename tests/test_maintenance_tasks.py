@@ -58,16 +58,12 @@ def setup_db(temp_db):
         """
         CREATE TABLE IF NOT EXISTS sync_stats (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp INTEGER NOT NULL,
-            source TEXT NOT NULL,
-            target TEXT NOT NULL,
+            user_id INTEGER NOT NULL,
+            sync_type TEXT NOT NULL,
             success INTEGER NOT NULL,
-            media_count INTEGER DEFAULT 0,
-            is_thread INTEGER DEFAULT 0,
-            error_type TEXT,
-            error_message TEXT,
-            duration_ms INTEGER,
-            user_id INTEGER
+            posts_synced INTEGER DEFAULT 0,
+            errors INTEGER DEFAULT 0,
+            created_at INTEGER NOT NULL
         )
     """
     )
