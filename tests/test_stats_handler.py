@@ -437,3 +437,113 @@ def test_invalid_period():
     finally:
         if os.path.exists(db_path):
             os.unlink(db_path)
+
+
+# Test: Exception handling in record_sync
+def test_record_sync_exception_handling():
+    """Test record_sync handles database errors gracefully"""
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.db') as tmp_file:
+        db_path = tmp_file.name
+
+    try:
+        add_stats_tables(db_path=db_path)
+        tracker = StatsTracker(db_path=db_path)
+        
+        # Close the DB and corrupt it
+        os.remove(db_path)
+        
+        # Should not raise
+        tracker.record_sync(
+            source='twitter',
+            target='bluesky',
+            success=True,
+            media_count=0,
+            is_thread=False,
+            duration_ms=100
+        )
+    finally:
+        if os.path.exists(db_path):
+            os.unlink(db_path)
+
+
+# Test: Exception handling in record_error
+def test_record_error_exception_handling():
+    """Test record_error handles database errors gracefully"""
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.db') as tmp_file:
+        db_path = tmp_file.name
+
+    try:
+        add_stats_tables(db_path=db_path)
+        tracker = StatsTracker(db_path=db_path)
+        
+        # Delete DB to cause error
+        os.remove(db_path)
+        
+        # Should not raise
+        tracker.record_error('twitter', 'bluesky', 'TestError', 'Test message')
+    finally:
+        if os.path.exists(db_path):
+            os.unlink(db_path)
+
+
+# Test: Exception handling in get_stats
+def test_get_stats_exception_handling():
+    """Test get_stats handles database errors gracefully"""
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.db') as tmp_file:
+        db_path = tmp_file.name
+
+    try:
+        add_stats_tables(db_path=db_path)
+        tracker = StatsTracker(db_path=db_path)
+        
+        # Delete DB to cause error
+        os.remove(db_path)
+        
+        # Should return empty stats
+        stats = tracker.get_stats()
+        assert stats['total_syncs'] == 0
+    finally:
+        if os.path.exists(db_path):
+            os.unlink(db_path)
+
+
+# Test: Exception handling in get_error_log
+def test_get_error_log_exception_handling():
+    """Test get_error_log handles database errors gracefully"""
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.db') as tmp_file:
+        db_path = tmp_file.name
+
+    try:
+        add_stats_tables(db_path=db_path)
+        tracker = StatsTracker(db_path=db_path)
+        
+        # Delete DB to cause error
+        os.remove(db_path)
+        
+        # Should return empty list
+        errors = tracker.get_error_log()
+        assert errors == []
+    finally:
+        if os.path.exists(db_path):
+            os.unlink(db_path)
+
+
+# Test: Exception handling in get_success_rate
+def test_get_success_rate_exception_handling():
+    """Test get_success_rate handles errors gracefully"""
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.db') as tmp_file:
+        db_path = tmp_file.name
+
+    try:
+        add_stats_tables(db_path=db_path)
+        tracker = StatsTracker(db_path=db_path)
+        
+        # Delete DB to cause error
+        os.remove(db_path)
+        
+        # Should return 0.0
+        rate = tracker.get_success_rate()
+        assert rate == 0.0
+    finally:
+        if os.path.exists(db_path):
+            os.unlink(db_path)
