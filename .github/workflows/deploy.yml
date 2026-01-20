@@ -1,0 +1,89 @@
+name: Deploy to Home Server
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'production' }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Set up deployment info
+      run: |
+        echo "DEPLOY_TAG=$(git describe --tags --always)" >> $GITHUB_ENV
+        echo "DEPLOY_TIME=$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_ENV
+
+    - name: Create deployment package
+      run: |
+        mkdir -p deploy
+        tar -czf deploy/chirpsyncer-${DEPLOY_TAG}.tar.gz \
+          --exclude='*.pyc' \
+          --exclude='__pycache__' \
+          --exclude='.git' \
+          --exclude='*.db' \
+          --exclude='venv' \
+          --exclude='node_modules' \
+          --exclude='.pytest_cache' \
+          --exclude='deploy' \
+          .
+
+    - name: Generate deployment manifest
+      run: |
+        cat > deploy/manifest.json <<EOF
+        {
+          "version": "${DEPLOY_TAG}",
+          "timestamp": "${DEPLOY_TIME}",
+          "commit": "${{ github.sha }}",
+          "branch": "${{ github.ref_name }}",
+          "actor": "${{ github.actor }}"
+        }
+        EOF
+
+    - name: Upload deployment artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: chirpsyncer-deployment-${{ env.DEPLOY_TAG }}
+        path: deploy/
+        retention-days: 30
+
+    # Uncomment and configure when you're ready to automate deployment
+    # - name: Deploy to home server via SSH
+    #   uses: appleboy/ssh-action@v1.0.0
+    #   with:
+    #     host: ${{ secrets.HOME_SERVER_HOST }}
+    #     username: ${{ secrets.HOME_SERVER_USER }}
+    #     key: ${{ secrets.HOME_SERVER_SSH_KEY }}
+    #     port: ${{ secrets.HOME_SERVER_PORT || 22 }}
+    #     script: |
+    #       cd /opt/chirpsyncer
+    #       ./scripts/deploy.sh ${{ env.DEPLOY_TAG }}
+
+    - name: Deployment summary
+      run: |
+        echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version:** ${DEPLOY_TAG}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Timestamp:** ${DEPLOY_TIME}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Environment:** ${{ inputs.environment || 'production' }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Deployment package created successfully!" >> $GITHUB_STEP_SUMMARY
+        echo "Download the artifact and deploy manually to your home server." >> $GITHUB_STEP_SUMMARY

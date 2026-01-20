@@ -1,0 +1,162 @@
+# Pull Request Quality Checks
+# Runs on all PRs to ensure code quality before merge
+
+name: PR Quality Checks
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-metadata:
+    name: Check PR Metadata
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check PR Title
+      uses: amannn/action-semantic-pull-request@v6
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        types: |
+          feat
+          fix
+          docs
+          style
+          refactor
+          perf
+          test
+          build
+          ci
+          chore
+          revert
+        requireScope: false
+        subjectPattern: ^[A-Z].+$
+        subjectPatternError: |
+          The subject "{subject}" found in the pull request title "{title}"
+          didn't match the configured pattern. Please ensure that the subject
+          starts with an uppercase character.
+
+  pr-size:
+    name: Check PR Size
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+
+    - name: Check PR Size
+      run: |
+        FILES_CHANGED=$(git diff --name-only origin/main...HEAD | wc -l)
+        LINES_CHANGED=$(git diff --stat origin/main...HEAD | tail -1 | awk '{print $4 + $6}')
+
+        echo "Files changed: $FILES_CHANGED"
+        echo "Lines changed: $LINES_CHANGED"
+
+        if [ "$FILES_CHANGED" -gt 50 ]; then
+          echo "⚠️  Warning: Large PR with $FILES_CHANGED files changed"
+          echo "Consider splitting into smaller PRs for easier review"
+        fi
+
+        if [ "$LINES_CHANGED" -gt 1000 ]; then
+          echo "⚠️  Warning: Large PR with $LINES_CHANGED lines changed"
+          echo "Consider splitting into smaller PRs for easier review"
+        fi
+
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install flake8 black isort mypy pylint
+        pip install -r requirements.txt
+
+    - name: Run Black (code formatter check)
+      run: black --check app/ tests/
+      continue-on-error: true
+
+    - name: Run isort (import sorting check)
+      run: isort --check-only app/ tests/
+      continue-on-error: true
+
+    - name: Run Flake8 (linting)
+      run: flake8 app/ tests/ --max-line-length=120 --extend-ignore=E203,W503
+      continue-on-error: true
+
+    - name: Run Pylint (static analysis)
+      run: pylint app/ --disable=C,R --max-line-length=120
+      continue-on-error: true
+
+  test-coverage:
+    name: Test Coverage Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install pytest-cov
+
+    - name: Run tests with coverage
+      run: |
+        pytest --cov=app --cov-report=term --cov-report=xml tests/
+
+    - name: Check coverage threshold
+      run: |
+        COVERAGE=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(root.attrib['line-rate'])")
+        COVERAGE_PCT=$(python -c "print(int(float($COVERAGE) * 100))")
+        echo "Coverage: $COVERAGE_PCT%"
+
+        if [ "$COVERAGE_PCT" -lt 90 ]; then
+          echo "Coverage $COVERAGE_PCT% is below 90% threshold"
+          exit 1
+        else
+          echo "Coverage $COVERAGE_PCT% meets threshold"
+        fi
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  documentation:
+    name: Check Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Check for TODO/FIXME
+      run: |
+        if grep -r "TODO\|FIXME" app/ --exclude-dir=__pycache__; then
+          echo "Found TODO/FIXME comments in code"
+          echo "Please resolve before merging or document as known issues"
+          exit 1
+        fi
+
+    - name: Check markdown links
+      uses: gaurav-nelson/github-action-markdown-link-check@v1
+      with:
+        use-quiet-mode: 'yes'
+        config-file: '.github/markdown-link-check-config.json'
