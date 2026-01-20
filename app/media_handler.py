@@ -190,6 +190,10 @@ def get_mime_type(url: str) -> str:
     # Convert to lowercase for case-insensitive matching
     url_lower = url_without_params.lower()
 
+    # Check for known types that mimetypes gets wrong on some systems
+    if url_lower.endswith(".mov"):
+        return "video/quicktime"
+
     # Try to guess MIME type from extension
     mime_type, _ = mimetypes.guess_type(url_lower)
 

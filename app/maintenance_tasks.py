@@ -18,21 +18,26 @@ def cleanup_expired_sessions(db_path: str = DB_PATH) -> Dict:
     """Delete sessions with expires_at < current time"""
     start = time.time()
 
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-
     try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+
         now = int(time.time())
         cursor.execute('DELETE FROM user_sessions WHERE expires_at < ?', (now,))
         deleted = cursor.rowcount
         conn.commit()
+        conn.close()
 
         return {
             'deleted': deleted,
             'duration_ms': int((time.time() - start) * 1000)
         }
-    finally:
-        conn.close()
+    except Exception as e:
+        return {
+            'deleted': 0,
+            'error': str(e),
+            'duration_ms': int((time.time() - start) * 1000)
+        }
 
 
 def archive_audit_logs(days_old: int = 90, db_path: str = DB_PATH) -> Dict:
@@ -158,13 +163,14 @@ def aggregate_daily_stats(db_path: str = DB_PATH) -> Dict:
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS daily_stats (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
                 date TEXT NOT NULL,
-                user_id INTEGER,
                 total_syncs INTEGER DEFAULT 0,
                 successful_syncs INTEGER DEFAULT 0,
                 failed_syncs INTEGER DEFAULT 0,
-                total_duration_ms INTEGER DEFAULT 0,
-                UNIQUE(date, user_id)
+                total_posts INTEGER DEFAULT 0,
+                created_at INTEGER NOT NULL,
+                UNIQUE(user_id, date)
             )
         ''')
 
@@ -173,19 +179,18 @@ def aggregate_daily_stats(db_path: str = DB_PATH) -> Dict:
         if not cursor.fetchone():
             return {'aggregated': 0, 'duration_ms': int((time.time() - start) * 1000)}
 
-        # Get yesterday's date
-        import datetime
-        yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
-
-        # Aggregate yesterday's stats
+        # Aggregate all dates with data (not just yesterday)
+        now = int(time.time())
         cursor.execute('''
-            INSERT OR REPLACE INTO daily_stats (date, user_id, total_syncs, successful_syncs, failed_syncs)
-            SELECT ?, user_id, COUNT(*), SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END),
-                   SUM(CASE WHEN success = 0 THEN 1 ELSE 0 END)
+            INSERT OR REPLACE INTO daily_stats (date, user_id, total_syncs, successful_syncs, failed_syncs, total_posts, created_at)
+            SELECT date(created_at, 'unixepoch'), user_id, COUNT(*), 
+                   SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END),
+                   SUM(CASE WHEN success = 0 THEN 1 ELSE 0 END),
+                   SUM(posts_synced),
+                   ?
             FROM sync_stats
-            WHERE date(timestamp, 'unixepoch') = ?
-            GROUP BY user_id
-        ''', (yesterday, yesterday))
+            GROUP BY date(created_at, 'unixepoch'), user_id
+        ''', (now,))
 
         aggregated = cursor.rowcount
         conn.commit()
