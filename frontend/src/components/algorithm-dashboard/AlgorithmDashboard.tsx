@@ -5,7 +5,7 @@
 
 import React, { useCallback } from 'react';
 import { FeedCompositionChart } from './FeedCompositionChart';
-import { RuleImpactSummary } from './RuleImpactSummary';
+import { RuleImpactSummary, RuleImpact as SummaryRuleImpact } from './RuleImpactSummary';
 
 export interface FeedComposition {
   boosted: number;
@@ -77,20 +77,11 @@ function formatTimestamp(isoString: string): string {
   }
 }
 
-/** Format expected by RuleImpactSummary component */
-interface RuleImpactSummaryFormat {
-  id: string;
-  name: string;
-  type: 'boost' | 'demote' | 'filter';
-  postsAffected: number;
-  averageImpact?: number;
-}
-
 /**
  * Maps RuleImpact to format expected by RuleImpactSummary
  */
-function mapTopRulesToSummaryFormat(topRules: RuleImpact[]): RuleImpactSummaryFormat[] {
-  return topRules.map((rule) => {
+function mapTopRulesToSummaryFormat(topRules: RuleImpact[]): SummaryRuleImpact[] {
+  return topRules.map((rule): SummaryRuleImpact => {
     // Handle RuleImpactCanonical format (ruleId, ruleName, ruleType)
     if ('ruleId' in rule) {
       const ruleImpact = rule as RuleImpactCanonical;
