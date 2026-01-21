@@ -22,7 +22,7 @@ def _get_secret() -> str:
         except RuntimeError:
             secret = None
     if not secret:
-        secret = "dev-jwt-secret"
+        secret = os.urandom(32).hex()
     return secret
 
 
