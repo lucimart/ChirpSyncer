@@ -57,7 +57,7 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           file: ./coverage.xml
           flags: backend-unit
@@ -110,7 +110,7 @@ jobs:
         run: npm test -- --coverage --watchAll=false
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           file: ./frontend/coverage/lcov.info
           flags: frontend-unit
