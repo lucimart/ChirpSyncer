@@ -1,0 +1,38 @@
+name: Unused Code Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  frontend-unused:
+    name: Frontend Unused Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci --prefix frontend
+
+      - name: Unused exports
+        run: |
+          npx --prefix frontend ts-unused-exports frontend/tsconfig.json \
+            --excludePathsFromReport=frontend/src/app;frontend/.next;frontend/src/__tests__ \
+            --ignoreTestFiles \
+            --excludeDeclarationFiles \
+            --exitWithCount
+
+      - name: Unimported files and deps
+        run: npx --prefix frontend unimported frontend --config frontend/.unimportedrc.json

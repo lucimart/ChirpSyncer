@@ -1,0 +1,21 @@
+{
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/*.tests.{js,jsx,ts,tsx}",
+    "**/*.test.{js,jsx,ts,tsx}",
+    "**/*.spec.{js,jsx,ts,tsx}",
+    "**/tests/**",
+    "**/__tests__/**",
+    "src/app/**",
+    "**/*.d.ts"
+  ],
+  "ignoreUnimported": [],
+  "ignoreUnused": [
+    "next",
+    "react",
+    "react-dom"
+  ],
+  "ignoreUnresolved": [],
+  "respectGitignore": true
+}

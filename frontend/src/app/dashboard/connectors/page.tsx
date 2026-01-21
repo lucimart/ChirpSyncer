@@ -125,6 +125,18 @@ const CapabilitiesGrid = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing[4]};
 `;
 
+const CapabilitySection = styled.div`
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
+`;
+
+const CapabilitySectionTitle = styled.h4`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.text.tertiary};
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: ${({ theme }) => theme.spacing[2]};
+`;
+
 const CapabilityBadge = styled.span<{ $enabled: boolean }>`
   display: inline-flex;
   align-items: center;
@@ -280,7 +292,7 @@ const DirectionSelector = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing[4]};
 `;
 
-const DirectionButton = styled.button<{ $active: boolean }>`
+const DirectionButton = styled.button<{ $active: boolean; $disabled?: boolean }>`
   flex: 1;
   padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
   border: 1px solid ${({ $active, theme }) =>
@@ -297,6 +309,12 @@ const DirectionButton = styled.button<{ $active: boolean }>`
   &:hover {
     border-color: ${({ theme }) => theme.colors.primary[300]};
   }
+
+  ${({ $disabled }) => $disabled && `
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  `}
 `;
 
 export default function ConnectorsPage() {
@@ -380,28 +398,99 @@ export default function ConnectorsPage() {
   const renderCapabilities = (connector: PlatformConnector) => {
     const caps = connector.capabilities;
     return (
-      <CapabilitiesGrid>
-        <CapabilityBadge $enabled={caps.publish}>
-          {caps.publish ? <Check /> : <X />}
-          Publish
-        </CapabilityBadge>
-        <CapabilityBadge $enabled={caps.read}>
-          {caps.read ? <Check /> : <X />}
-          Read
-        </CapabilityBadge>
-        <CapabilityBadge $enabled={caps.delete}>
-          {caps.delete ? <Check /> : <X />}
-          Delete
-        </CapabilityBadge>
-        <CapabilityBadge $enabled={caps.metrics}>
-          {caps.metrics ? <Check /> : <X />}
-          Metrics
-        </CapabilityBadge>
-        <CapabilityBadge $enabled={caps.threads}>
-          {caps.threads ? <Check /> : <X />}
-          Threads
-        </CapabilityBadge>
-      </CapabilitiesGrid>
+      <>
+        <CapabilitySection>
+          <CapabilitySectionTitle>Core</CapabilitySectionTitle>
+          <CapabilitiesGrid>
+            <CapabilityBadge $enabled={caps.publish}>
+              {caps.publish ? <Check /> : <X />}
+              Publish
+            </CapabilityBadge>
+            <CapabilityBadge $enabled={caps.read}>
+              {caps.read ? <Check /> : <X />}
+              Read
+            </CapabilityBadge>
+            <CapabilityBadge $enabled={caps.edit}>
+              {caps.edit ? <Check /> : <X />}
+              Edit
+            </CapabilityBadge>
+            <CapabilityBadge $enabled={caps.delete}>
+              {caps.delete ? <Check /> : <X />}
+              Delete
+            </CapabilityBadge>
+            <CapabilityBadge $enabled={caps.metrics}>
+              {caps.metrics ? <Check /> : <X />}
+              Metrics
+            </CapabilityBadge>
+            <CapabilityBadge $enabled={caps.schedule}>
+              {caps.schedule ? <Check /> : <X />}
+              Schedule
+            </CapabilityBadge>
+            <CapabilityBadge $enabled={caps.threads}>
+              {caps.threads ? <Check /> : <X />}
+              Threads
+            </CapabilityBadge>
+          </CapabilitiesGrid>
+        </CapabilitySection>
+
+        <CapabilitySection>
+          <CapabilitySectionTitle>Media</CapabilitySectionTitle>
+          <CapabilitiesGrid>
+            <CapabilityBadge $enabled={caps.media.images}>
+              {caps.media.images ? <Check /> : <X />}
+              Images ({caps.media.maxImages})
+            </CapabilityBadge>
+            <CapabilityBadge $enabled={caps.media.videos}>
+              {caps.media.videos ? <Check /> : <X />}
+              Videos
+            </CapabilityBadge>
+            <CapabilityBadge $enabled={caps.media.gifs}>
+              {caps.media.gifs ? <Check /> : <X />}
+              GIFs
+            </CapabilityBadge>
+          </CapabilitiesGrid>
+        </CapabilitySection>
+
+        <CapabilitySection>
+          <CapabilitySectionTitle>Interactions</CapabilitySectionTitle>
+          <CapabilitiesGrid>
+            <CapabilityBadge $enabled={caps.interactions.like}>
+              {caps.interactions.like ? <Check /> : <X />}
+              Like
+            </CapabilityBadge>
+            <CapabilityBadge $enabled={caps.interactions.repost}>
+              {caps.interactions.repost ? <Check /> : <X />}
+              Repost
+            </CapabilityBadge>
+            <CapabilityBadge $enabled={caps.interactions.reply}>
+              {caps.interactions.reply ? <Check /> : <X />}
+              Reply
+            </CapabilityBadge>
+            <CapabilityBadge $enabled={caps.interactions.quote}>
+              {caps.interactions.quote ? <Check /> : <X />}
+              Quote
+            </CapabilityBadge>
+            <CapabilityBadge $enabled={caps.interactions.bookmark}>
+              {caps.interactions.bookmark ? <Check /> : <X />}
+              Bookmark
+            </CapabilityBadge>
+          </CapabilitiesGrid>
+        </CapabilitySection>
+
+        <CapabilitySection>
+          <CapabilitySectionTitle>Limits</CapabilitySectionTitle>
+          <CapabilitiesGrid>
+            <CapabilityBadge $enabled={true}>
+              <Check />
+              {caps.characterLimit} chars
+            </CapabilityBadge>
+            <CapabilityBadge $enabled={true}>
+              <Check />
+              {caps.altTextLimit} alt text
+            </CapabilityBadge>
+          </CapabilitiesGrid>
+        </CapabilitySection>
+      </>
     );
   };
 
@@ -602,21 +691,31 @@ export default function ConnectorsPage() {
               <DirectionSelector>
                 <DirectionButton
                   $active={config.direction === 'inbound'}
+                  $disabled={!connector.capabilities.read}
+                  title={!connector.capabilities.read ? 'Inbound sync not supported' : undefined}
                   onClick={() => handleChangeDirection(config, 'inbound')}
                 >
-                  {connector.name} → Hub
+                  {connector.name} -> Hub
                 </DirectionButton>
                 <DirectionButton
                   $active={config.direction === 'bidirectional'}
+                  $disabled={!connector.capabilities.read || !connector.capabilities.publish}
+                  title={
+                    !connector.capabilities.read || !connector.capabilities.publish
+                      ? 'Bidirectional sync requires read + publish support'
+                      : undefined
+                  }
                   onClick={() => handleChangeDirection(config, 'bidirectional')}
                 >
                   Bidirectional
                 </DirectionButton>
                 <DirectionButton
                   $active={config.direction === 'outbound'}
+                  $disabled={!connector.capabilities.publish}
+                  title={!connector.capabilities.publish ? 'Outbound sync not supported' : undefined}
                   onClick={() => handleChangeDirection(config, 'outbound')}
                 >
-                  Hub → {connector.name}
+                  Hub -> {connector.name}
                 </DirectionButton>
               </DirectionSelector>
 
