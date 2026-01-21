@@ -542,14 +542,27 @@ export default function SchedulerPage() {
                       key={i}
                       onClick={() => handleOptimalTimeSelect(slot)}
                     >
-                      <TimeLabel>{slot.label}</TimeLabel>
+                      <TimeLabel>
+                        {slot.label}
+                        {slot.estimated && ' *'}
+                      </TimeLabel>
                       <ScoreBadge $score={slot.score}>{slot.score}%</ScoreBadge>
                     </OptimalTimeItem>
                   ))}
                 </OptimalTimesList>
                 <MetaItem style={{ marginTop: '12px', fontSize: '11px' }}>
                   Based on {optimalTimes.based_on_posts} posts
+                  {optimalTimes.data_quality && (
+                    <span style={{ marginLeft: '8px', opacity: 0.7 }}>
+                      ({optimalTimes.data_quality} confidence)
+                    </span>
+                  )}
                 </MetaItem>
+                {optimalTimes.based_on_posts < 10 && (
+                  <MetaItem style={{ marginTop: '4px', fontSize: '10px', opacity: 0.6 }}>
+                    * Estimated based on industry best practices
+                  </MetaItem>
+                )}
               </>
             ) : (
               <EmptyState>Loading optimal times...</EmptyState>

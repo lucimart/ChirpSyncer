@@ -522,22 +522,26 @@ export interface TimeSlot {
   day: number;
   score: number;
   label: string;
+  estimated?: boolean; // True if using default values instead of historical data
 }
 
 export interface OptimalTimeResult {
   best_times: TimeSlot[];
   timezone: string;
   based_on_posts: number;
+  data_quality?: 'high' | 'medium' | 'low'; // Quality indicator based on data volume
 }
 
 export interface EngagementPrediction {
   score: number;
   confidence: number;
+  based_on_posts?: number; // Number of historical posts used for prediction
   factors: {
     time_of_day: number;
     day_of_week: number;
     content_length: number;
     has_media: number;
+    hashtags?: number;
     historical_performance: number;
   };
   suggested_improvements: string[];
