@@ -365,7 +365,162 @@ GET /api/v1/webhooks/:id/deliveries
 
 ---
 
-## 5) Deprecated Documentation
+---
+
+## 5) Future Backlog (Prioritized)
+
+### PRIORITY: Local Dev Environment & Manual E2E Testing
+**Estado**: 🎯 NEXT PRIORITY
+**Motivo**: Validar UX gaps antes de añadir más features.
+
+#### Objetivo
+- Levantar entorno local completo (backend + frontend + Redis + Celery)
+- Ejecutar flujos manuales end-to-end
+- Identificar UX gaps y friction points
+- Documentar issues encontrados
+
+#### Tareas
+- [ ] Script `dev-start.sh` / `dev-start.ps1` para levantar todo
+- [ ] Seed data para testing manual
+- [ ] Checklist de flujos a probar manualmente
+- [ ] Documentar UX gaps encontrados
+
+---
+
+### Infrastructure Backlog
+
+#### PostgreSQL Migration (Future)
+**Complejidad**: Alta | **Prioridad**: Baja (cuando SQLite sea limitante)
+
+**Motivo**: SQLite funciona bien para single-node, pero PostgreSQL necesario para:
+- Multi-node deployment
+- Concurrent writes at scale
+- Advanced queries (JSON, full-text search nativo)
+- Connection pooling
+
+**Tareas**:
+- [ ] SQLAlchemy abstraction layer
+- [ ] Migration scripts (Alembic)
+- [ ] Docker-compose con PostgreSQL
+- [ ] FTS5 → PostgreSQL full-text search
+- [ ] Connection pooling (pgbouncer)
+
+---
+
+### Content & Media
+
+| Feature | Description | Complexity | Priority |
+|---------|-------------|------------|----------|
+| **Media Sync** | Sync images/videos between platforms | Medium | High |
+| **Thread Detection** | Detect and sync entire threads as units | Medium | Medium |
+| **Quote Tweet Handling** | Proper handling of quote tweets/reposts | Low | Medium |
+| **Alt Text Sync** | Sync image alt text for accessibility | Low | Low |
+| **Poll Sync** | Sync polls between platforms | Medium | Low |
+| **Link Preview Caching** | Cache link previews to avoid rate limits | Low | Low |
+
+---
+
+### Analytics & Insights
+
+| Feature | Description | Complexity | Priority |
+|---------|-------------|------------|----------|
+| **Cross-Platform Analytics** | Unified dashboard comparing engagement | Medium | High |
+| **Engagement Heatmaps** | Visual heatmaps by time/day | Low | Medium |
+| **Best Content Analysis** | ML analysis of what performs best where | Medium | Medium |
+| **Audience Overlap Analysis** | Identify followers on multiple platforms | High | Low |
+| **Competitor Tracking** | Track public accounts for benchmarking | Medium | Low |
+| **Sentiment Analysis** | Analyze sentiment of replies/mentions | Medium | Low |
+
+---
+
+### Automation & Rules
+
+| Feature | Description | Complexity | Priority |
+|---------|-------------|------------|----------|
+| **Content Rules Engine** | "If post contains X, don't sync to Y" | Medium | High |
+| **Auto-Hashtag by Platform** | Add platform-specific hashtags | Low | Medium |
+| **Scheduled Cross-Post** | Schedule to multiple platforms at different times | Low | Medium |
+| **Auto-Thread Splitter** | Split long posts into threads | Medium | Medium |
+| **Mention Translation** | Convert @mentions between platforms | Medium | Low |
+| **Draft Sync** | Sync drafts across platforms | Low | Low |
+
+---
+
+### Moderation & Safety
+
+| Feature | Description | Complexity | Priority |
+|---------|-------------|------------|----------|
+| **Rate Limit Dashboard** | Visual dashboard of API rate limits | Low | High |
+| **Block List Sync** | Sync block lists across platforms | Low | Medium |
+| **Mute List Sync** | Sync mute lists | Low | Medium |
+| **Content Warnings** | Auto-add CW based on keywords | Low | Low |
+| **Spam Detection** | Detect potential spam in synced content | Medium | Low |
+| **Audit Log Export** | Export audit logs for compliance | Low | Low |
+
+---
+
+### Collaboration & Teams
+
+| Feature | Description | Complexity | Priority |
+|---------|-------------|------------|----------|
+| **Content Calendar** | Visual calendar of scheduled/synced posts | Medium | High |
+| **Approval Workflows** | Require approval before syncing | Medium | Medium |
+| **Team Roles** | Editor, Viewer, Admin roles per workspace | Medium | Medium |
+| **Activity Feed** | Team activity feed for workspaces | Low | Low |
+| **Comments/Notes** | Internal notes on posts | Low | Low |
+
+---
+
+### Import/Export & Migration
+
+| Feature | Description | Complexity | Priority |
+|---------|-------------|------------|----------|
+| **Twitter Archive Import** | Import from Twitter data export | Medium | High |
+| **GDPR Export** | Full data export for compliance | Low | High |
+| **Bluesky Export** | Export all Bluesky data | Low | Medium |
+| **Platform Migration Wizard** | Guided migration between platforms | Medium | Medium |
+| **Backup to Cloud** | Backup archives to S3/GCS/Azure | Medium | Low |
+
+---
+
+### Notifications & Alerts
+
+| Feature | Description | Complexity | Priority |
+|---------|-------------|------------|----------|
+| **Email Digests** | Daily/weekly sync summaries | Low | High |
+| **Failure Alerts** | Alert on sync failures via multiple channels | Low | High |
+| **Slack/Discord Integration** | Notify on sync events | Low | Medium |
+| **Engagement Alerts** | Alert when post exceeds threshold | Low | Medium |
+| **Mention Aggregation** | Aggregate mentions across platforms | Medium | Low |
+
+---
+
+### API & Integrations
+
+| Feature | Description | Complexity | Priority |
+|---------|-------------|------------|----------|
+| **Public API** | REST API for third-party integrations | Medium | Medium |
+| **RSS Feed Generation** | Generate RSS from synced posts | Low | Medium |
+| **Zapier/n8n Integration** | Connect to automation platforms | Medium | Low |
+| **IFTTT Triggers** | IFTTT integration | Low | Low |
+| **Browser Extension** | Quick-post from browser | High | Low |
+
+---
+
+### Additional Protocols
+
+| Protocol | Description | Complexity | Priority |
+|----------|-------------|------------|----------|
+| **Nostr** | Decentralized social protocol (growing) | Medium | High |
+| **Threads** | Meta's Threads (when API available) | Medium | Medium |
+| **LinkedIn** | Professional network sync | Medium | Medium |
+| **Matrix** | Federated messaging with bridges | Medium | Low |
+| **DSNP** | Decentralized Social Networking Protocol | High | Low |
+| **SSB** | Secure Scuttlebutt (P2P, offline-first) | High | Low |
+
+---
+
+## 6) Deprecated Documentation
 > These files are outdated and superseded by this Master Roadmap. Do not use for planning.
 
 - `docs/PROTOCOL_ROADMAP.md`
@@ -377,12 +532,17 @@ GET /api/v1/webhooks/:id/deliveries
 
 ---
 
-## 6) Orden recomendado
-1. **Sprint Infra**: Redis + Celery (Base sólida).
-2. **Sprint A**: Sync Engine real (Celery-based).
-3. **Sprint B**: WebSockets (Real-time).
-4. **Sprint C**: Webhooks (Integración).
-5. **Sprint D**: Search real.
-6. **Sprint E**: Feed Lab real.
-7. **Sprint F**: ML Scheduling.
-8. **Sprint G**: Multi-Platform + Conflicts.
+## 7) Completed Sprints Summary
+
+| Sprint | Status | Key Deliverables |
+|--------|--------|------------------|
+| Infra | ✅ | Redis + Celery + health checks |
+| A | ✅ | Sync Engine with Celery jobs |
+| B | ✅ | WebSockets real-time |
+| C | ✅ | Webhooks with HMAC |
+| D | ✅ | Search filters |
+| E | ✅ | Feed Lab real data |
+| F | ✅ | ML Scheduling |
+| G | ✅ | Multi-platform framework |
+| H | ✅ | Mastodon/ActivityPub |
+| J | ✅ | Performance & Archival |
