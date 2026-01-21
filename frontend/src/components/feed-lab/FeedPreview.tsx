@@ -1,4 +1,5 @@
 import React from 'react';
+import { WhyAmISeeingThis } from '@/components/feed-lab/WhyAmISeeingThis';
 
 interface Post {
   id: string;
@@ -95,6 +96,10 @@ export const FeedPreview: React.FC<FeedPreviewProps> = ({ posts, onPostClick }) 
               ) : (
                 <span className="text-xs text-gray-500 italic">No rules applied</span>
               )}
+            </div>
+
+            <div className="mt-3" onClick={(event) => event.stopPropagation()}>
+              <WhyAmISeeingThis postId={post.id} />
             </div>
           </div>
         );

@@ -744,7 +744,7 @@ Connect Feed Lab components (Sprint 19-20) to pages and create backend APIs.
 - [ ] Displays RuleList component
 - [ ] Navigation link in sidebar
 
-**Sprint:** I3 | **Priority:** P1 | **Status:** TODO
+**Sprint:** I3 | **Priority:** P1 | **Status:** DONE
 
 ---
 
@@ -758,7 +758,7 @@ Connect Feed Lab components (Sprint 19-20) to pages and create backend APIs.
 - [ ] `DELETE /api/v1/feed-rules/:id` deletes rule
 - [ ] `POST /api/v1/feed/preview` returns scored feed preview
 
-**Sprint:** I3 | **Priority:** P1 | **Status:** TODO
+**Sprint:** I3 | **Priority:** P1 | **Status:** DONE
 
 ---
 
@@ -771,7 +771,7 @@ Connect Feed Lab components (Sprint 19-20) to pages and create backend APIs.
 - [ ] Each rule shows: contribution, percentage, matched_condition
 - [ ] WhyAmISeeingThis component calls this API
 
-**Sprint:** I3 | **Priority:** P1 | **Status:** TODO
+**Sprint:** I3 | **Priority:** P1 | **Status:** DONE
 
 ---
 
@@ -823,7 +823,7 @@ export default function FeedLabPage() {
 - [ ] Navigation link added
 - [ ] Tests pass
 
-**Status:** TODO
+**Status:** DONE
 
 ---
 
@@ -856,7 +856,7 @@ CREATE TABLE feed_rules (
 - [ ] Migration works
 - [ ] Tests pass
 
-**Status:** TODO
+**Status:** DONE
 
 ---
 
@@ -893,7 +893,7 @@ class TestFeedRulesAPI:
 - [ ] Validation enforced
 - [ ] All tests pass
 
-**Status:** TODO
+**Status:** DONE
 
 ---
 
@@ -921,7 +921,7 @@ def test_explain_post(client, auth_headers, test_post, test_feed_rule):
 - [ ] Shows rule contributions
 - [ ] Tests pass
 
-**Status:** TODO
+**Status:** DONE
 
 ---
 
@@ -938,7 +938,7 @@ def test_explain_post(client, auth_headers, test_post, test_feed_rule):
 - [ ] Loading state works
 - [ ] Error handling works
 
-**Status:** TODO
+**Status:** DONE
 
 ---
 

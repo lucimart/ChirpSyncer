@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { RuleContributionChart } from '@/components/feed-lab/RuleContributionChart';
 import { useFeedExplanation } from '@/hooks/useFeedExplanation';
 
 export interface MatchedCondition {
@@ -273,6 +274,10 @@ function ExplanationContent({ explanation }: ExplanationContentProps) {
           </div>
         )}
       </div>
+
+      {hasRules && (
+        <RuleContributionChart explanation={explanation} />
+      )}
 
       {/* Rules or Empty State */}
       {hasRules ? (

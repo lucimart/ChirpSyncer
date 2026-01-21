@@ -10,6 +10,7 @@ Date: 2026-01-21
 ## Summary
 
 The automated audit tools report many unused exports and unimported files, but both tools include false positives for Next.js App Router pages and `.next` generated types. The results below capture the raw output and highlight likely candidates for cleanup once product decisions are made.
+Since the initial audit, feed explainability components have been wired into the Feed Lab preview, reducing unused exports for that area.
 
 ## ts-unused-exports Findings (High-level)
 
