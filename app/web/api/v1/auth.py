@@ -48,7 +48,7 @@ def login():
 
     if data.get("use_cookie"):
         resp = make_response(response, status)
-        resp.set_cookie("auth_token", token, httponly=True, samesite="Lax")
+        resp.set_cookie("auth_token", token, httponly=True, samesite="Lax", secure=True)
         return resp
 
     return response, status
@@ -59,7 +59,7 @@ def login():
 def logout():
     response, status = api_response({"logout": True}, status=200)
     resp = make_response(response, status)
-    resp.set_cookie("auth_token", "", expires=0, httponly=True, samesite="Lax")
+    resp.set_cookie("auth_token", "", expires=0, httponly=True, samesite="Lax", secure=True)
     return resp
 
 

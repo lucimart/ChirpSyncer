@@ -104,7 +104,7 @@ def update_rule(rule_id: int):
             return api_error("INVALID_REQUEST", "No updates provided", status=400)
         params.extend([rule_id, g.user.id])
         cursor.execute(
-            f"UPDATE cleanup_rules SET {', '.join(updates)} WHERE id = ? AND user_id = ?",
+            f"UPDATE cleanup_rules SET {', '.join(updates)} WHERE id = ? AND user_id = ?",  # nosec B608 - columns are whitelisted above
             params,
         )
         conn.commit()

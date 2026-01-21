@@ -181,7 +181,7 @@ def update_rule(rule_id: int):
         cursor = conn.cursor()
         params.extend([rule_id, g.user.id])
         cursor.execute(
-            f"UPDATE feed_rules SET {', '.join(fields)} WHERE id = ? AND user_id = ?",
+            f"UPDATE feed_rules SET {', '.join(fields)} WHERE id = ? AND user_id = ?",  # nosec B608 - columns are whitelisted above
             params,
         )
         conn.commit()
