@@ -253,11 +253,17 @@ def preview():
         rules = _load_rules(g.user.id)
     if not isinstance(rules, list):
         return api_error("INVALID_REQUEST", "rules must be a list", status=400)
-    return api_response(preview_feed(rules))
+
+    # Pass db_path and user_id for real data
+    db_path = current_app.config.get("DB_PATH", "chirpsyncer.db")
+    return api_response(preview_feed(rules, db_path=db_path, user_id=g.user.id))
 
 
 @feed_bp.route("/feed/explain/<post_id>", methods=["GET"])
 @require_auth
 def explain(post_id: str):
     rules = _load_rules(g.user.id)
-    return api_response(explain_post(post_id, rules))
+    db_path = current_app.config.get("DB_PATH", "chirpsyncer.db")
+    return api_response(
+        explain_post(post_id, rules, db_path=db_path, user_id=g.user.id)
+    )
