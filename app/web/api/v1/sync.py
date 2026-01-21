@@ -13,11 +13,12 @@ from app.services.sync_jobs import (
     get_sync_job,
     update_sync_job,
 )
-from app.tasks.sync_tasks import run_sync_job
+from app.core.celery_app import celery_app
 
 sync_bp = Blueprint("sync", __name__, url_prefix="/sync")
 
 _DEFAULT_DIRECTION = "both"
+_SYNC_TASK_NAME = "app.tasks.sync_tasks.run_sync_job"
 
 
 def _get_connection():
@@ -225,7 +226,10 @@ def start_sync():
 
     db_path = current_app.config["DB_PATH"]
     create_sync_job(db_path, job_id, g.user.id, direction)
-    async_result = run_sync_job.delay(job_id, g.user.id, direction, db_path)
+    async_result = celery_app.send_task(
+        _SYNC_TASK_NAME,
+        args=[job_id, g.user.id, direction, db_path],
+    )
     if async_result and async_result.id:
         update_sync_job(db_path, job_id, g.user.id, task_id=async_result.id)
 

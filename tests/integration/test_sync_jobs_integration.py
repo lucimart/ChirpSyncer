@@ -19,7 +19,9 @@ class TestSyncJobs:
         headers = _auth_headers(test_client, test_user)
         mock_result = MagicMock()
         mock_result.id = "task-123"
-        with patch("app.web.api.v1.sync.run_sync_job.delay", return_value=mock_result):
+        with patch(
+            "app.web.api.v1.sync.celery_app.send_task", return_value=mock_result
+        ):
             response = test_client.post(
                 "/api/v1/sync/start",
                 data=json.dumps({"direction": "twitter_to_bluesky"}),
@@ -44,7 +46,9 @@ class TestSyncJobs:
         headers = _auth_headers(test_client, test_user)
         mock_result = MagicMock()
         mock_result.id = "task-456"
-        with patch("app.web.api.v1.sync.run_sync_job.delay", return_value=mock_result):
+        with patch(
+            "app.web.api.v1.sync.celery_app.send_task", return_value=mock_result
+        ):
             start_response = test_client.post(
                 "/api/v1/sync/start",
                 data=json.dumps({"direction": "both"}),
