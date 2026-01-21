@@ -22,3 +22,7 @@ PyJWT==2.8.0               # JWT auth for API
 # Sprint 7 Dependencies - Cron/Scheduled Tasks
 APScheduler==3.11.2        # Task scheduling
 pytest-asyncio>=0.21.0     # Async test support
+
+# Sprint Infra Dependencies
+redis==5.0.4
+celery==5.4.0

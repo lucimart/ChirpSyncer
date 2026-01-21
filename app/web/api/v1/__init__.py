@@ -24,7 +24,9 @@ def add_correlation_header(response):
 
 @api_v1.errorhandler(ApiError)
 def handle_api_error(error):
-    return api_error(error.code, error.message, status=error.status_code, details=error.details)
+    return api_error(
+        error.code, error.message, status=error.status_code, details=error.details
+    )
 
 
 @api_v1.errorhandler(HTTPException)
@@ -53,6 +55,11 @@ from app.web.api.v1.analytics import analytics_bp  # noqa: E402
 from app.web.api.v1.feed import feed_bp  # noqa: E402
 from app.web.api.v1.workspaces import workspaces_bp  # noqa: E402
 from app.web.api.v1.algorithm import algorithm_bp  # noqa: E402
+from app.web.api.v1.scheduling import scheduling_bp  # noqa: E402
+from app.web.api.v1.admin import admin_bp  # noqa: E402
+from app.web.api.v1.search import search_bp  # noqa: E402
+from app.web.api.v1.export import export_bp  # noqa: E402
+from app.web.api.v1.health import health_bp  # noqa: E402
 
 api_v1.register_blueprint(auth_bp)
 api_v1.register_blueprint(dashboard_bp)
@@ -64,3 +71,8 @@ api_v1.register_blueprint(analytics_bp)
 api_v1.register_blueprint(feed_bp)
 api_v1.register_blueprint(workspaces_bp)
 api_v1.register_blueprint(algorithm_bp)
+api_v1.register_blueprint(scheduling_bp)
+api_v1.register_blueprint(admin_bp)
+api_v1.register_blueprint(search_bp)
+api_v1.register_blueprint(export_bp)
+api_v1.register_blueprint(health_bp)
