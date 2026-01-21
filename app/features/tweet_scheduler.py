@@ -410,3 +410,94 @@ class TweetScheduler:
 
         finally:
             conn.close()
+
+    def get_scheduled_tweet(self, tweet_id: int) -> Optional[Dict]:
+        """
+        Get a single scheduled tweet by ID.
+
+        Args:
+            tweet_id: ID of the scheduled tweet
+
+        Returns:
+            Dictionary with tweet data or None if not found
+        """
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT * FROM scheduled_tweets WHERE id = ?
+            ''', (tweet_id,))
+
+            row = cursor.fetchone()
+            if not row:
+                return None
+
+            tweet = dict(row)
+            # Parse media_paths JSON
+            if tweet['media_paths']:
+                tweet['media_paths'] = json.loads(tweet['media_paths'])
+            else:
+                tweet['media_paths'] = []
+            return tweet
+
+        finally:
+            conn.close()
+
+    def update_scheduled_tweet(self, tweet_id: int, **updates) -> bool:
+        """
+        Update a scheduled tweet's content or time.
+
+        Args:
+            tweet_id: ID of the scheduled tweet
+            **updates: Fields to update (content, scheduled_time)
+
+        Returns:
+            True if updated successfully, False otherwise
+        """
+        if not updates:
+            return True
+
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        try:
+            # Build dynamic update query
+            set_clauses = []
+            values = []
+
+            if 'content' in updates:
+                set_clauses.append('content = ?')
+                values.append(updates['content'])
+
+            if 'scheduled_time' in updates:
+                set_clauses.append('scheduled_time = ?')
+                values.append(updates['scheduled_time'])
+
+            if not set_clauses:
+                return True
+
+            values.append(tweet_id)
+            query = f"UPDATE scheduled_tweets SET {', '.join(set_clauses)} WHERE id = ?"
+
+            cursor.execute(query, values)
+            affected = cursor.rowcount
+            conn.commit()
+            return affected > 0
+
+        finally:
+            conn.close()
+
+    def get_all_scheduled_tweets(self, user_id: int, status: str = None) -> List[Dict]:
+        """
+        Alias for get_scheduled_tweets for API compatibility.
+
+        Args:
+            user_id: User ID
+            status: Optional status filter
+
+        Returns:
+            List of scheduled tweet dictionaries
+        """
+        return self.get_scheduled_tweets(user_id, status)

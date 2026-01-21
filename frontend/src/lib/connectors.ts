@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from './api';
 
 // Platform capability flags - what each platform can do
 export interface PlatformCapabilities {
@@ -296,31 +297,23 @@ export function useConnections() {
   return useQuery<PlatformConnection[]>({
     queryKey: ['connections'],
     queryFn: async () => {
-      // Mock connected platforms
-      return [
-        {
-          id: 'conn-1',
-          platform: 'twitter' as PlatformType,
-          connected: true,
-          handle: '@chirpsyncer',
-          display_name: 'ChirpSyncer',
-          avatar: undefined,
-          last_sync: new Date().toISOString(),
-          sync_enabled: true,
-          capabilities_used: ['publish', 'delete', 'read', 'metrics'],
-        },
-        {
-          id: 'conn-2',
-          platform: 'bluesky' as PlatformType,
-          connected: true,
-          handle: 'chirpsyncer.bsky.social',
-          display_name: 'ChirpSyncer',
-          avatar: undefined,
-          last_sync: new Date(Date.now() - 3600000).toISOString(),
-          sync_enabled: true,
-          capabilities_used: ['publish', 'delete', 'read'],
-        },
-      ];
+      const response = await api.getCredentials();
+      if (!response.success || !response.data) {
+        return [];
+      }
+
+      // Map credentials to platform connections
+      return response.data.map((cred) => ({
+        id: `conn-${cred.id}`,
+        platform: cred.platform as PlatformType,
+        connected: cred.is_active,
+        handle: undefined, // Credential API doesn't expose handle
+        display_name: undefined,
+        avatar: undefined,
+        last_sync: cred.last_used || undefined,
+        sync_enabled: cred.is_active,
+        capabilities_used: ['publish', 'delete', 'read'] as (keyof PlatformCapabilities)[],
+      }));
     },
   });
 }
@@ -329,40 +322,40 @@ export function useSyncConfigs() {
   return useQuery<PlatformSyncConfig[]>({
     queryKey: ['sync-configs'],
     queryFn: async () => {
-      return [
-        {
-          platform: 'twitter' as PlatformType,
-          enabled: true,
-          direction: 'bidirectional',
-          filters: {
-            include_replies: false,
-            include_reposts: false,
-            include_quotes: true,
-          },
-          transform: {
-            add_source_link: true,
-            preserve_mentions: true,
-            preserve_hashtags: true,
-            truncate_strategy: 'smart',
-          },
-        },
-        {
-          platform: 'bluesky' as PlatformType,
-          enabled: true,
-          direction: 'bidirectional',
-          filters: {
-            include_replies: false,
-            include_reposts: false,
-            include_quotes: true,
-          },
-          transform: {
-            add_source_link: true,
-            preserve_mentions: true,
-            preserve_hashtags: true,
-            truncate_strategy: 'thread',
-          },
-        },
-      ];
+      // Get saved sync configs from backend
+      const configResponse = await api.getSyncConfig();
+      const credResponse = await api.getCredentials();
+
+      if (!credResponse.success || !credResponse.data) {
+        return [];
+      }
+
+      const savedConfigs = configResponse.success && configResponse.data
+        ? configResponse.data.configs
+        : [];
+
+      // Map credentials to sync configs, using saved config if available
+      return credResponse.data
+        .filter((cred) => cred.is_active)
+        .map((cred) => {
+          const saved = savedConfigs.find((c) => c.platform === cred.platform);
+          return {
+            platform: cred.platform as PlatformType,
+            enabled: saved ? saved.enabled : true,
+            direction: (saved?.direction || 'bidirectional') as 'bidirectional' | 'import_only' | 'export_only',
+            filters: {
+              include_replies: saved ? saved.sync_replies : false,
+              include_reposts: saved ? saved.sync_reposts : false,
+              include_quotes: true,
+            },
+            transform: {
+              add_source_link: true,
+              preserve_mentions: true,
+              preserve_hashtags: saved ? saved.auto_hashtag : true,
+              truncate_strategy: (saved?.truncation_strategy || (cred.platform === 'bluesky' ? 'thread' : 'smart')) as 'thread' | 'smart' | 'truncate',
+            },
+          };
+        });
     },
   });
 }
@@ -375,12 +368,25 @@ export function useConnectPlatform() {
       platform: PlatformType;
       credentials: Record<string, string>;
     }) => {
-      // Mock connection
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Determine credential_type based on platform
+      const credentialType = platform === 'bluesky' ? 'api' : 'scraping';
+
+      const response = await api.addCredential({
+        platform,
+        credential_type: credentialType,
+        credentials,
+      });
+
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to connect platform');
+      }
+
       return { success: true, platform };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['connections'] });
+      queryClient.invalidateQueries({ queryKey: ['sync-configs'] });
+      queryClient.invalidateQueries({ queryKey: ['credentials'] });
     },
   });
 }
@@ -390,11 +396,28 @@ export function useDisconnectPlatform() {
 
   return useMutation({
     mutationFn: async (platform: PlatformType) => {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // First get the credential ID for this platform
+      const credResponse = await api.getCredentials();
+      if (!credResponse.success || !credResponse.data) {
+        throw new Error('Failed to get credentials');
+      }
+
+      const credential = credResponse.data.find((c) => c.platform === platform);
+      if (!credential) {
+        throw new Error('No credential found for platform');
+      }
+
+      const response = await api.deleteCredential(credential.id);
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to disconnect platform');
+      }
+
       return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['connections'] });
+      queryClient.invalidateQueries({ queryKey: ['sync-configs'] });
+      queryClient.invalidateQueries({ queryKey: ['credentials'] });
     },
   });
 }
@@ -404,7 +427,20 @@ export function useUpdateSyncConfig() {
 
   return useMutation({
     mutationFn: async (config: PlatformSyncConfig) => {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      const response = await api.saveSyncConfig({
+        platform: config.platform,
+        enabled: config.enabled,
+        direction: config.direction,
+        sync_replies: config.filters.include_replies,
+        sync_reposts: config.filters.include_reposts,
+        truncation_strategy: config.transform.truncate_strategy === 'thread' ? 'smart' : config.transform.truncate_strategy,
+        auto_hashtag: config.transform.preserve_hashtags,
+      });
+
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to save sync config');
+      }
+
       return config;
     },
     onSuccess: () => {

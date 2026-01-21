@@ -96,3 +96,64 @@ def me():
             "is_admin": g.user.is_admin,
         }
     )
+
+
+@auth_bp.route("/me", methods=["PUT"])
+@require_auth
+def update_profile():
+    """Update current user's profile."""
+    data = request.get_json(silent=True) or {}
+
+    user_manager = _get_user_manager()
+    updates = {}
+
+    if "email" in data:
+        email = data["email"].strip()
+        if not email or "@" not in email:
+            return api_error("INVALID_REQUEST", "Invalid email format", status=400)
+        updates["email"] = email
+
+    if "settings" in data and isinstance(data["settings"], dict):
+        import json
+        updates["settings_json"] = json.dumps(data["settings"])
+
+    if not updates:
+        return api_error("INVALID_REQUEST", "No valid fields to update", status=400)
+
+    success = user_manager.update_user(g.user.id, **updates)
+    if not success:
+        return api_error("UPDATE_FAILED", "Failed to update profile", status=500)
+
+    # Fetch updated user
+    user = user_manager.get_user_by_id(g.user.id)
+    return api_response(_format_user(user))
+
+
+@auth_bp.route("/change-password", methods=["POST"])
+@require_auth
+def change_password():
+    """Change current user's password."""
+    data = request.get_json(silent=True) or {}
+
+    current_password = data.get("current_password")
+    new_password = data.get("new_password")
+
+    if not current_password or not new_password:
+        return api_error("INVALID_REQUEST", "Current password and new password are required", status=400)
+
+    if len(new_password) < 8:
+        return api_error("INVALID_REQUEST", "New password must be at least 8 characters", status=400)
+
+    user_manager = _get_user_manager()
+
+    # Verify current password
+    user = user_manager.authenticate_user(g.user.username, current_password)
+    if not user:
+        return api_error("INVALID_CREDENTIALS", "Current password is incorrect", status=401)
+
+    # Update password
+    success = user_manager.update_user(g.user.id, password=new_password)
+    if not success:
+        return api_error("UPDATE_FAILED", "Failed to update password", status=500)
+
+    return api_response({"success": True})

@@ -1,4 +1,4 @@
-import type { ApiResponse, User, Session, DashboardStats, Credential } from '@/types';
+import type { ApiResponse, User, Session, DashboardStats, Credential, AdminUser } from '@/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
@@ -81,6 +81,20 @@ class ApiClient {
 
   async getCurrentUser(): Promise<ApiResponse<User>> {
     return this.request<User>('/auth/me');
+  }
+
+  async updateProfile(data: { email?: string; settings?: Record<string, unknown> }): Promise<ApiResponse<User>> {
+    return this.request<User>('/auth/me', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<ApiResponse<{ success: boolean }>> {
+    return this.request('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+    });
   }
 
   // Dashboard
@@ -266,6 +280,258 @@ class ApiClient {
   async explainFeed(postId: string): Promise<ApiResponse<unknown>> {
     return this.request(`/feed/explain/${postId}`);
   }
+
+  // Scheduling
+  async getScheduledPosts(status?: string): Promise<ApiResponse<ScheduledPost[]>> {
+    const param = status ? `?status=${status}` : '';
+    return this.request(`/scheduling/posts${param}`);
+  }
+
+  async createScheduledPost(payload: {
+    content: string;
+    scheduled_at: string;
+    platform: 'twitter' | 'bluesky' | 'both';
+    media?: string[];
+  }): Promise<ApiResponse<ScheduledPost>> {
+    return this.request('/scheduling/posts', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async getScheduledPost(id: string): Promise<ApiResponse<ScheduledPost>> {
+    return this.request(`/scheduling/posts/${id}`);
+  }
+
+  async updateScheduledPost(
+    id: string,
+    payload: { content?: string; scheduled_at?: string }
+  ): Promise<ApiResponse<ScheduledPost>> {
+    return this.request(`/scheduling/posts/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteScheduledPost(id: string): Promise<ApiResponse<void>> {
+    return this.request(`/scheduling/posts/${id}`, { method: 'DELETE' });
+  }
+
+  async getOptimalTimes(): Promise<ApiResponse<OptimalTimeResult>> {
+    return this.request('/scheduling/optimal-times');
+  }
+
+  async predictEngagement(payload: {
+    content: string;
+    scheduled_at?: string;
+    has_media?: boolean;
+  }): Promise<ApiResponse<EngagementPrediction>> {
+    return this.request('/scheduling/predict', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  // Admin endpoints
+  async getAdminUsers(params?: {
+    search?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse<AdminUser[]>> {
+    const searchParams = new URLSearchParams();
+    if (params?.search) searchParams.set('search', params.search);
+    if (params?.page) searchParams.set('page', String(params.page));
+    if (params?.limit) searchParams.set('limit', String(params.limit));
+    const query = searchParams.toString();
+    return this.request(`/admin/users${query ? `?${query}` : ''}`);
+  }
+
+  async getAdminUser(id: string): Promise<ApiResponse<AdminUser>> {
+    return this.request(`/admin/users/${id}`);
+  }
+
+  async updateAdminUser(
+    id: string,
+    payload: { email?: string; password?: string; is_active?: boolean; is_admin?: boolean }
+  ): Promise<ApiResponse<AdminUser>> {
+    return this.request(`/admin/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteAdminUser(id: string): Promise<ApiResponse<void>> {
+    return this.request(`/admin/users/${id}`, { method: 'DELETE' });
+  }
+
+  async toggleUserActive(id: string): Promise<ApiResponse<AdminUser>> {
+    return this.request(`/admin/users/${id}/toggle-active`, { method: 'POST' });
+  }
+
+  async toggleUserAdmin(id: string): Promise<ApiResponse<AdminUser>> {
+    return this.request(`/admin/users/${id}/toggle-admin`, { method: 'POST' });
+  }
+
+  // Search
+  async searchPosts(params: {
+    q?: string;
+    limit?: number;
+    has_media?: boolean;
+    min_likes?: number;
+    min_retweets?: number;
+    date_from?: string;
+    date_to?: string;
+    platform?: 'twitter' | 'bluesky';
+  }): Promise<ApiResponse<SearchApiResult>> {
+    const searchParams = new URLSearchParams();
+    if (params.q) searchParams.set('q', params.q);
+    if (params.limit) searchParams.set('limit', String(params.limit));
+    if (params.has_media !== undefined) searchParams.set('has_media', String(params.has_media));
+    if (params.min_likes) searchParams.set('min_likes', String(params.min_likes));
+    if (params.min_retweets) searchParams.set('min_retweets', String(params.min_retweets));
+    if (params.date_from) searchParams.set('date_from', params.date_from);
+    if (params.date_to) searchParams.set('date_to', params.date_to);
+    if (params.platform) searchParams.set('platform', params.platform);
+    const query = searchParams.toString();
+    return this.request(`/search${query ? `?${query}` : ''}`);
+  }
+
+  async searchSuggestions(q: string, limit = 10): Promise<ApiResponse<{ suggestions: string[] }>> {
+    const searchParams = new URLSearchParams();
+    searchParams.set('q', q);
+    searchParams.set('limit', String(limit));
+    return this.request(`/search/suggestions?${searchParams.toString()}`);
+  }
+
+  // Export
+  async exportData(params: {
+    format: 'json' | 'csv' | 'txt';
+    date_range: string;
+    platform: string;
+    include_media: boolean;
+    include_metrics: boolean;
+    include_deleted: boolean;
+  }): Promise<Response> {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    if (this.token) {
+      (headers as Record<string, string>)['Authorization'] = `Bearer ${this.token}`;
+    }
+    return fetch(`${API_BASE}/export`, {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+      body: JSON.stringify(params),
+    });
+  }
+
+  async exportPreview(params: {
+    date_range: string;
+    platform: string;
+    include_deleted: boolean;
+  }): Promise<ApiResponse<ExportPreview>> {
+    return this.request('/export/preview', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    });
+  }
+
+  // Sync Config
+  async getSyncConfig(): Promise<ApiResponse<{ configs: SyncConfig[] }>> {
+    return this.request('/sync/config');
+  }
+
+  async saveSyncConfig(config: SyncConfig): Promise<ApiResponse<SyncConfig>> {
+    return this.request('/sync/config', {
+      method: 'POST',
+      body: JSON.stringify(config),
+    });
+  }
+}
+
+// Scheduling types
+export interface ScheduledPost {
+  id: string;
+  content: string;
+  scheduled_at: string;
+  platform: 'twitter' | 'bluesky' | 'both';
+  status: 'pending' | 'published' | 'failed' | 'cancelled';
+  predicted_engagement: number;
+  created_at: string;
+  posted_at?: string | null;
+  tweet_id?: string | null;
+  error?: string | null;
+}
+
+export interface TimeSlot {
+  hour: number;
+  day: number;
+  score: number;
+  label: string;
+}
+
+export interface OptimalTimeResult {
+  best_times: TimeSlot[];
+  timezone: string;
+  based_on_posts: number;
+}
+
+export interface EngagementPrediction {
+  score: number;
+  confidence: number;
+  factors: {
+    time_of_day: number;
+    day_of_week: number;
+    content_length: number;
+    has_media: number;
+    historical_performance: number;
+  };
+  suggested_improvements: string[];
+}
+
+// Search types
+export interface SearchResultItem {
+  id: string;
+  content: string;
+  created_at: string;
+  platform: 'twitter' | 'bluesky';
+  author: string;
+  hashtags: string[];
+  rank: number;
+}
+
+export interface SearchApiResult {
+  results: SearchResultItem[];
+  total: number;
+  query: string;
+}
+
+// Export types
+export interface ExportPreview {
+  total_posts: number;
+  estimated_sizes: {
+    json: string;
+    csv: string;
+    txt: string;
+  };
+  sample: Array<{
+    id: number;
+    content: string;
+    source: string;
+  }>;
+}
+
+// Sync Config types
+export interface SyncConfig {
+  id?: number;
+  platform: string;
+  enabled: boolean;
+  direction: 'bidirectional' | 'import_only' | 'export_only';
+  sync_replies: boolean;
+  sync_reposts: boolean;
+  truncation_strategy: 'smart' | 'truncate' | 'skip';
+  auto_hashtag: boolean;
 }
 
 export const api = new ApiClient();

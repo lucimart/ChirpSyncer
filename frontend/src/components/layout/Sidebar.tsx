@@ -19,6 +19,7 @@ import {
   Sparkles,
   Users,
   SlidersHorizontal,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -207,6 +208,19 @@ export function Sidebar() {
             Settings
           </NavLink>
         </NavSection>
+
+        {user?.is_admin && (
+          <NavSection>
+            <NavSectionTitle>Admin</NavSectionTitle>
+            <NavLink
+              href="/dashboard/admin/users"
+              $active={pathname === '/dashboard/admin/users'}
+            >
+              <ShieldCheck />
+              User Management
+            </NavLink>
+          </NavSection>
+        )}
       </Nav>
 
       <UserSection>

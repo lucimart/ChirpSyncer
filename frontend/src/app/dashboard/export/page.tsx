@@ -13,6 +13,7 @@ import {
   Archive,
 } from 'lucide-react';
 import { Button, Card, Progress } from '@/components/ui';
+import { api } from '@/lib/api';
 
 const PageHeader = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing[6]};
@@ -242,20 +243,38 @@ export default function ExportPage() {
 
   const exportMutation = useMutation({
     mutationFn: async () => {
-      // Simulate export process
-      const total = 1250;
-      setExportState({ status: 'running', progress: 0, total });
+      setExportState({ status: 'running', progress: 0, total: 100 });
 
-      for (let i = 0; i <= total; i += 50) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        setExportState((prev) => ({ ...prev, progress: i }));
+      const response = await api.exportData({
+        format,
+        date_range: dateRange,
+        platform,
+        include_media: includeMedia,
+        include_metrics: includeMetrics,
+        include_deleted: includeDeleted,
+      });
+
+      if (!response.ok) {
+        throw new Error('Export failed');
       }
 
+      const blob = await response.blob();
       const filename = `chirpsyncer-export-${new Date().toISOString().split('T')[0]}.${format}`;
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
       setExportState({
         status: 'complete',
-        progress: total,
-        total,
+        progress: 100,
+        total: 100,
         filename,
       });
 

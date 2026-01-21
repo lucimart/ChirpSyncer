@@ -7,14 +7,15 @@ import {
   Search as SearchIcon,
   Filter,
   Image,
-  Heart,
-  Repeat,
   Download,
   ChevronLeft,
   ChevronRight,
+  Hash,
+  User,
 } from 'lucide-react';
 import { Button, Card, Input } from '@/components/ui';
-import type { SearchResult, SearchFilters } from '@/types';
+import { api, SearchResultItem } from '@/lib/api';
+import type { SearchFilters } from '@/types';
 
 const PageHeader = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing[6]};
@@ -259,48 +260,20 @@ export default function SearchPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const { data: results, isLoading } = useQuery<SearchResult[]>({
+  const { data: results, isLoading } = useQuery<SearchResultItem[]>({
     queryKey: ['search', query, filters],
     queryFn: async () => {
       if (!query.trim()) return [];
-      // Mock data
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return [
-        {
-          id: '1',
-          content:
-            'Just launched our new feature for automatic tweet cleanup! Check it out at chirpsyncer.com',
-          created_at: new Date().toISOString(),
-          platform: 'twitter',
-          likes: 42,
-          retweets: 12,
-          has_media: true,
-        },
-        {
-          id: '2',
-          content:
-            'The best way to manage your social media presence across multiple platforms.',
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-          platform: 'bluesky',
-          likes: 28,
-          retweets: 5,
-          has_media: false,
-        },
-        {
-          id: '3',
-          content:
-            'New analytics dashboard is live! Track your engagement metrics in real-time.',
-          created_at: new Date(Date.now() - 172800000).toISOString(),
-          platform: 'twitter',
-          likes: 156,
-          retweets: 34,
-          has_media: true,
-        },
-      ].filter((r) => {
-        if (filters.has_media && !r.has_media) return false;
-        if (filters.min_likes && r.likes < filters.min_likes) return false;
-        return r.content.toLowerCase().includes(query.toLowerCase());
+      const response = await api.searchPosts({
+        q: query,
+        limit: 100,
+        has_media: filters.has_media || undefined,
+        min_likes: filters.min_likes,
       });
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Search failed');
+      }
+      return response.data.results;
     },
     enabled: query.length > 0,
   });
@@ -449,18 +422,16 @@ export default function SearchPage() {
                       <HighlightedContent content={result.content} query={query} />
                     </ResultContent>
                     <ResultMeta>
-                      <MetaItem>
-                        <Heart size={14} />
-                        {result.likes}
-                      </MetaItem>
-                      <MetaItem>
-                        <Repeat size={14} />
-                        {result.retweets}
-                      </MetaItem>
-                      {result.has_media && (
+                      {result.author && (
                         <MetaItem>
-                          <Image size={14} />
-                          Media
+                          <User size={14} />
+                          @{result.author}
+                        </MetaItem>
+                      )}
+                      {result.hashtags && result.hashtags.length > 0 && (
+                        <MetaItem>
+                          <Hash size={14} />
+                          {result.hashtags.slice(0, 3).join(', ')}
                         </MetaItem>
                       )}
                     </ResultMeta>

@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import styled from 'styled-components';
-import { Save, Bell, Shield, Palette } from 'lucide-react';
+import { Save, Bell, Shield, Palette, Lock } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
+import { api } from '@/lib/api';
 import { Button, Card, Input } from '@/components/ui';
 
 const PageHeader = styled.div`
@@ -129,8 +130,8 @@ const FormActions = styled.div`
 `;
 
 export default function SettingsPage() {
-  const { user } = useAuth();
-  const [username, setUsername] = useState(user?.username || '');
+  const { user, refreshUser } = useAuth();
+  const [username] = useState(user?.username || '');
   const [email, setEmail] = useState(user?.email || '');
   const [notifications, setNotifications] = useState({
     syncComplete: true,
@@ -138,12 +139,69 @@ export default function SettingsPage() {
     weeklyReport: false,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Password change state
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const handleSave = async () => {
     setIsSaving(true);
-    // Mock save - replace with actual API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setSaveError(null);
+    setSaveSuccess(false);
+
+    const response = await api.updateProfile({
+      email,
+      settings: { notifications },
+    });
+
     setIsSaving(false);
+
+    if (!response.success) {
+      setSaveError(response.error || 'Failed to save');
+      return;
+    }
+
+    setSaveSuccess(true);
+    refreshUser?.();
+    setTimeout(() => setSaveSuccess(false), 3000);
+  };
+
+  const handleChangePassword = async () => {
+    setPasswordError(null);
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Passwords do not match');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordError('Password must be at least 8 characters');
+      return;
+    }
+
+    setIsChangingPassword(true);
+
+    const response = await api.changePassword(currentPassword, newPassword);
+
+    setIsChangingPassword(false);
+
+    if (!response.success) {
+      setPasswordError(response.error || 'Failed to change password');
+      return;
+    }
+
+    setShowPasswordForm(false);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 3000);
   };
 
   return (
@@ -184,13 +242,60 @@ export default function SettingsPage() {
             />
           </SettingsGrid>
 
+          {saveError && (
+            <div style={{ color: 'red', marginTop: '1rem' }}>{saveError}</div>
+          )}
+          {saveSuccess && (
+            <div style={{ color: 'green', marginTop: '1rem' }}>Changes saved successfully!</div>
+          )}
+
           <FormActions>
-            <Button variant="secondary">Change Password</Button>
+            <Button variant="secondary" onClick={() => setShowPasswordForm(!showPasswordForm)}>
+              <Lock size={16} />
+              Change Password
+            </Button>
             <Button onClick={handleSave} isLoading={isSaving}>
               <Save size={16} />
               Save Changes
             </Button>
           </FormActions>
+
+          {showPasswordForm && (
+            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e0e0e0' }}>
+              <h3 style={{ marginBottom: '1rem', fontWeight: 600 }}>Change Password</h3>
+              <SettingsGrid>
+                <Input
+                  label="Current Password"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  fullWidth
+                />
+                <Input
+                  label="New Password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  fullWidth
+                />
+                <Input
+                  label="Confirm New Password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  fullWidth
+                />
+              </SettingsGrid>
+              {passwordError && (
+                <div style={{ color: 'red', marginTop: '1rem' }}>{passwordError}</div>
+              )}
+              <div style={{ marginTop: '1rem' }}>
+                <Button onClick={handleChangePassword} isLoading={isChangingPassword}>
+                  Update Password
+                </Button>
+              </div>
+            </div>
+          )}
         </SectionCard>
 
         <SectionCard padding="lg">
