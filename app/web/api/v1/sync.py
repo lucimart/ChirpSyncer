@@ -1,4 +1,5 @@
 import sqlite3
+import sqlite3
 import time
 import uuid
 from datetime import datetime
@@ -7,6 +8,12 @@ from flask import Blueprint, current_app, request, g
 
 from app.auth.api_auth import require_auth
 from app.web.api.v1.responses import api_response, api_error
+from app.services.sync_jobs import (
+    create_sync_job,
+    get_sync_job,
+    update_sync_job,
+)
+from app.tasks.sync_tasks import run_sync_job
 
 sync_bp = Blueprint("sync", __name__, url_prefix="/sync")
 
@@ -34,10 +41,13 @@ def _ensure_sync_jobs_table(conn):
             completed_at INTEGER,
             error_message TEXT,
             posts_synced INTEGER DEFAULT 0,
+            task_id TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
         """
     )
+    if not _has_column(conn, "sync_jobs", "task_id"):
+        cursor.execute("ALTER TABLE sync_jobs ADD COLUMN task_id TEXT")
     cursor.execute(
         "CREATE INDEX IF NOT EXISTS idx_sync_jobs_user ON sync_jobs(user_id)"
     )
@@ -212,22 +222,12 @@ def start_sync():
     data = request.get_json(silent=True) or {}
     direction = data.get("direction", _DEFAULT_DIRECTION)
     job_id = f"job-{uuid.uuid4()}"
-    created_at = int(time.time())
 
-    conn = _get_connection()
-    try:
-        _ensure_sync_jobs_table(conn)
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            INSERT INTO sync_jobs (job_id, user_id, status, direction, created_at)
-            VALUES (?, ?, ?, ?, ?)
-            """,
-            (job_id, g.user.id, "queued", direction, created_at),
-        )
-        conn.commit()
-    finally:
-        conn.close()
+    db_path = current_app.config["DB_PATH"]
+    create_sync_job(db_path, job_id, g.user.id, direction)
+    async_result = run_sync_job.delay(job_id, g.user.id, direction, db_path)
+    if async_result and async_result.id:
+        update_sync_job(db_path, job_id, g.user.id, task_id=async_result.id)
 
     return api_response({"job_id": job_id}, status=202)
 
@@ -235,34 +235,21 @@ def start_sync():
 @sync_bp.route("/<job_id>/status", methods=["GET"])
 @require_auth
 def sync_status(job_id: str):
-    conn = _get_connection()
-    try:
-        _ensure_sync_jobs_table(conn)
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            SELECT status, direction, created_at, started_at, completed_at, posts_synced, error_message
-            FROM sync_jobs
-            WHERE job_id = ? AND user_id = ?
-            """,
-            (job_id, g.user.id),
-        )
-        row = cursor.fetchone()
-        if not row:
-            return api_error("NOT_FOUND", "Sync job not found", status=404)
-        return api_response(
-            {
-                "status": row["status"],
-                "direction": row["direction"],
-                "created_at": row["created_at"],
-                "started_at": row["started_at"],
-                "completed_at": row["completed_at"],
-                "posts_synced": row["posts_synced"],
-                "error": row["error_message"],
-            }
-        )
-    finally:
-        conn.close()
+    job = get_sync_job(current_app.config["DB_PATH"], job_id, g.user.id)
+    if not job:
+        return api_error("NOT_FOUND", "Sync job not found", status=404)
+    return api_response(
+        {
+            "status": job["status"],
+            "direction": job["direction"],
+            "created_at": job["created_at"],
+            "started_at": job["started_at"],
+            "completed_at": job["completed_at"],
+            "posts_synced": job["posts_synced"],
+            "error": job["error_message"],
+            "task_id": job.get("task_id"),
+        }
+    )
 
 
 def _ensure_sync_config_table(conn):
