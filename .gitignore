@@ -83,3 +83,4 @@ tmpclaude-*
 # Claude Code
 CLAUDE.md
 .claude/
+coverage.xml
