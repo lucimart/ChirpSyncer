@@ -5,18 +5,6 @@
  * They mock the backend API responses to ensure proper request/response handling.
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React, { ReactNode } from 'react';
-
-// Test setup utilities
-const createTestQueryClient = () =>
-  new QueryClient({
-    defaultOptions: {
-      queries: { retry: false, gcTime: 0 },
-      mutations: { retry: false },
-    },
-  });
-
 // Mock fetch globally
 global.fetch = jest.fn();
 
