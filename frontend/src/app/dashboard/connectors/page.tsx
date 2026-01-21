@@ -698,7 +698,7 @@ export default function ConnectorsPage() {
                   title={!connector.capabilities.read ? 'Inbound sync not supported' : undefined}
                   onClick={() => handleChangeDirection(config, 'inbound')}
                 >
-                  {connector.name} -> Hub
+                  {connector.name} {'->'} Hub
                 </DirectionButton>
                 <DirectionButton
                   $active={config.direction === 'bidirectional'}
@@ -718,7 +718,7 @@ export default function ConnectorsPage() {
                   title={!connector.capabilities.publish ? 'Outbound sync not supported' : undefined}
                   onClick={() => handleChangeDirection(config, 'outbound')}
                 >
-                  Hub -> {connector.name}
+                  Hub {'->'} {connector.name}
                 </DirectionButton>
               </DirectionSelector>
 
