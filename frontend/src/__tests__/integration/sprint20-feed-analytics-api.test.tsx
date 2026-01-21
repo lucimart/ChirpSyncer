@@ -6,7 +6,6 @@
  * for analytics endpoints.
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { ReactNode } from 'react';
 
@@ -18,13 +17,6 @@ const createTestQueryClient = () =>
       mutations: { retry: false },
     },
   });
-
-const createWrapper = () => {
-  const queryClient = createTestQueryClient();
-  return ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
 
 // Mock fetch globally
 global.fetch = jest.fn();

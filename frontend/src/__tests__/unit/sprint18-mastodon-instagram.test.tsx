@@ -20,7 +20,6 @@ import {
   useFavouriteMastodonStatus,
   useBoostMastodonStatus,
   MastodonStatus,
-  MastodonAccount,
 } from '@/lib/mastodon';
 
 // Instagram imports

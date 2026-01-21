@@ -15,15 +15,12 @@ import {
   useDisconnectPlatform,
   useUpdateSyncConfig,
   PLATFORM_DEFAULTS,
-  AVAILABLE_CONNECTORS,
   getPlatformCapabilities,
   canPublishTo,
   getCharacterLimit,
   validatePostForPlatform,
   PlatformType,
-  PlatformCapabilities,
   CanonicalPost,
-  CanonicalMedia,
 } from '@/lib/connectors';
 
 const createTestQueryClient = () =>

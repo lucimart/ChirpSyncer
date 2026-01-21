@@ -29,7 +29,6 @@ import {
   useRepostBluesky,
   useBlueskyFeeds,
   ATProtoPost,
-  ATProtoFacet,
 } from '@/lib/bluesky';
 
 const createTestQueryClient = () =>

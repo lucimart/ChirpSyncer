@@ -4,8 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { theme } from '@/styles/theme';
 

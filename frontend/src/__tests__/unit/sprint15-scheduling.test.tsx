@@ -13,9 +13,6 @@ import {
   useEngagementPrediction,
   useCreateScheduledPost,
   useDeleteScheduledPost,
-  TimeSlot,
-  ScheduledPost,
-  EngagementPrediction,
 } from '@/lib/scheduling';
 
 // Create a fresh QueryClient for each test

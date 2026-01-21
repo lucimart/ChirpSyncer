@@ -148,7 +148,6 @@ describe('RuleBuilder Component', () => {
   });
 
   it('validates weight slider (-100 to +100)', async () => {
-    const user = userEvent.setup();
     renderWithTheme(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     const weightSlider = screen.getByLabelText(/weight/i);
@@ -531,8 +530,7 @@ describe('ConditionEditor Component', () => {
   });
 
   it('shows appropriate operators based on field type', async () => {
-    const user = userEvent.setup();
-    const { rerender, container } = renderWithTheme(
+    const { rerender } = renderWithTheme(
       <ConditionEditor
         condition={{ field: 'content', operator: 'contains', value: '' }}
         onChange={mockOnChange}

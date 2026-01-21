@@ -6,7 +6,7 @@
  * - src/components/ui/ConnectionStatus.tsx
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 
@@ -14,7 +14,6 @@ import {
   RealtimeProvider,
   useRealtime,
   useRealtimeMessage,
-  ConnectionStatus as ConnectionStatusType,
   SyncProgressPayload,
   CleanupProgressPayload,
 } from '@/providers/RealtimeProvider';
