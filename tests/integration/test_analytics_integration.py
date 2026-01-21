@@ -22,7 +22,6 @@ import os
 import sys
 import time
 import sqlite3
-from datetime import datetime
 from typing import Dict
 
 import pytest

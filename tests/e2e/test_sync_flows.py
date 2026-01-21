@@ -21,7 +21,7 @@ import sqlite3
 import tempfile
 import os
 import time
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch, MagicMock
 from datetime import datetime
 
 # Mock external dependencies before importing app modules

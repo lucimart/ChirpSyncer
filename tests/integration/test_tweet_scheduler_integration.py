@@ -65,7 +65,7 @@ class TestTweetSchedulerInitialization:
 
     def test_scheduler_database_initialization(self, test_db_path):
         """Test that database schema is properly initialized."""
-        _scheduler = TweetScheduler(db_path=test_db_path, master_key=None)
+        TweetScheduler(db_path=test_db_path, master_key=None)
 
         conn = sqlite3.connect(test_db_path)
         cursor = conn.cursor()
@@ -165,9 +165,9 @@ class TestCompleteSchedulingWorkflow:
         time_1 = datetime.now() + timedelta(hours=1)
         time_2 = datetime.now() + timedelta(hours=2)
 
-        _tweet_id_3 = scheduler.schedule_tweet(test_user["id"], "Tweet 3", time_3, [])
-        _tweet_id_1 = scheduler.schedule_tweet(test_user["id"], "Tweet 1", time_1, [])
-        _tweet_id_2 = scheduler.schedule_tweet(test_user["id"], "Tweet 2", time_2, [])
+        scheduler.schedule_tweet(test_user["id"], "Tweet 3", time_3, [])
+        scheduler.schedule_tweet(test_user["id"], "Tweet 1", time_1, [])
+        scheduler.schedule_tweet(test_user["id"], "Tweet 2", time_2, [])
 
         # Get all tweets and verify ordering
         tweets = scheduler.get_scheduled_tweets(test_user["id"])
