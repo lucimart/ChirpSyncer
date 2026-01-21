@@ -369,7 +369,7 @@ class TestNotificationServiceConnection(unittest.TestCase):
         result = service.test_connection()
         self.assertFalse(result)
 
-    @patch('notification_service.smtplib.SMTP')
+    @patch('app.services.notification_service.smtplib.SMTP')
     def test_test_connection_success(self, mock_smtp_class):
         """Test successful connection test"""
         mock_smtp = MagicMock()
@@ -383,7 +383,7 @@ class TestNotificationServiceConnection(unittest.TestCase):
         mock_smtp.starttls.assert_called_once()
         mock_smtp.login.assert_called_once()
 
-    @patch('notification_service.smtplib.SMTP')
+    @patch('app.services.notification_service.smtplib.SMTP')
     def test_test_connection_smtp_error(self, mock_smtp_class):
         """Test connection test with SMTP error"""
         mock_smtp_class.side_effect = smtplib.SMTPException('Connection failed')
@@ -423,7 +423,7 @@ class TestSendEmail(unittest.TestCase):
         result = service.send_email('to@test.com', 'Subject', 'Body')
         self.assertFalse(result)
 
-    @patch('notification_service.smtplib.SMTP')
+    @patch('app.services.notification_service.smtplib.SMTP')
     def test_send_email_plain_text(self, mock_smtp_class):
         """Test sending plain text email"""
         mock_smtp = MagicMock()
@@ -436,7 +436,7 @@ class TestSendEmail(unittest.TestCase):
         self.assertTrue(result)
         mock_smtp.send_message.assert_called_once()
 
-    @patch('notification_service.smtplib.SMTP')
+    @patch('app.services.notification_service.smtplib.SMTP')
     def test_send_email_html(self, mock_smtp_class):
         """Test sending HTML email"""
         mock_smtp = MagicMock()
@@ -449,7 +449,7 @@ class TestSendEmail(unittest.TestCase):
         self.assertTrue(result)
         mock_smtp.send_message.assert_called_once()
 
-    @patch('notification_service.smtplib.SMTP')
+    @patch('app.services.notification_service.smtplib.SMTP')
     def test_send_email_smtp_error(self, mock_smtp_class):
         """Test send_email with SMTP error"""
         mock_smtp_class.side_effect = smtplib.SMTPException('Send failed')

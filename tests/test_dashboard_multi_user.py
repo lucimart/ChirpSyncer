@@ -411,7 +411,7 @@ def test_dashboard_index_no_session(client):
 
 def test_create_app_generates_master_key(tmp_path, monkeypatch):
     """Test create_app generates master key when not in env"""
-    from app.dashboard import create_app
+    from app.web.dashboard import create_app
     db_path = str(tmp_path / 'test.db')
     
     # Clear MASTER_KEY from env

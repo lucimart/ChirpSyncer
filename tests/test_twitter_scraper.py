@@ -283,7 +283,7 @@ def test_fetch_tweets_uses_correct_username(mock_api_class, mock_tweet_data):
 @patch("app.twitter_scraper.API")
 def test_fetch_tweets_async_exception(mock_api_class, mock_is_tweet_seen, mock_mark_tweet_as_seen):
     """Test _fetch_tweets_async handles exceptions gracefully"""
-    from app.twitter_scraper import fetch_tweets
+    from app.integrations.twitter_scraper import fetch_tweets
     
     mock_api = AsyncMock()
     mock_api_class.return_value = mock_api
@@ -302,7 +302,7 @@ def test_fetch_tweets_async_exception(mock_api_class, mock_is_tweet_seen, mock_m
 @patch("app.twitter_scraper.API")
 def test_fetch_tweets_runtime_error_handling(mock_api_class):
     """Test fetch_tweets handles RuntimeError for running event loop"""
-    from app.twitter_scraper import fetch_tweets
+    from app.integrations.twitter_scraper import fetch_tweets
     
     mock_api = AsyncMock()
     mock_api_class.return_value = mock_api
@@ -320,7 +320,7 @@ def test_fetch_tweets_runtime_error_handling(mock_api_class):
 
 def test_tweet_adapter_repr():
     """Test TweetAdapter __repr__ method"""
-    from app.twitter_scraper import TweetAdapter
+    from app.integrations.twitter_scraper import TweetAdapter
     
     mock_tweet = MagicMock()
     mock_tweet.id = 12345
@@ -336,7 +336,7 @@ def test_tweet_adapter_repr():
 @pytest.mark.asyncio
 async def test_is_thread_true():
     """Test is_thread returns True when inReplyToTweetId is set"""
-    from app.twitter_scraper import is_thread
+    from app.integrations.twitter_scraper import is_thread
     
     mock_tweet = MagicMock()
     mock_tweet.inReplyToTweetId = 123456
@@ -348,7 +348,7 @@ async def test_is_thread_true():
 @pytest.mark.asyncio
 async def test_is_thread_false():
     """Test is_thread returns False when inReplyToTweetId is None"""
-    from app.twitter_scraper import is_thread
+    from app.integrations.twitter_scraper import is_thread
     
     mock_tweet = MagicMock()
     mock_tweet.inReplyToTweetId = None
@@ -361,7 +361,7 @@ async def test_is_thread_false():
 @patch("app.twitter_scraper.API")
 async def test_fetch_thread_exception(mock_api_class):
     """Test fetch_thread handles exceptions gracefully"""
-    from app.twitter_scraper import fetch_thread
+    from app.integrations.twitter_scraper import fetch_thread
     
     mock_api = AsyncMock()
     mock_api_class.return_value = mock_api
@@ -381,7 +381,7 @@ async def test_fetch_thread_exception(mock_api_class):
 @patch("app.twitter_scraper.API")
 async def test_fetch_thread_not_found(mock_api_class):
     """Test fetch_thread handles missing initial tweet"""
-    from app.twitter_scraper import fetch_thread
+    from app.integrations.twitter_scraper import fetch_thread
     
     mock_api = AsyncMock()
     mock_api_class.return_value = mock_api
@@ -401,7 +401,7 @@ async def test_fetch_thread_not_found(mock_api_class):
 @patch("app.twitter_scraper.API")
 async def test_fetch_thread_single_tweet(mock_api_class):
     """Test fetch_thread with single tweet (no thread)"""
-    from app.twitter_scraper import fetch_thread
+    from app.integrations.twitter_scraper import fetch_thread
     
     mock_api = AsyncMock()
     mock_api_class.return_value = mock_api
@@ -433,7 +433,7 @@ async def test_fetch_thread_single_tweet(mock_api_class):
 @patch("app.twitter_scraper.API")
 async def test_fetch_thread_with_parent(mock_api_class):
     """Test fetch_thread follows parent chain"""
-    from app.twitter_scraper import fetch_thread
+    from app.integrations.twitter_scraper import fetch_thread
     
     mock_api = AsyncMock()
     mock_api_class.return_value = mock_api
@@ -477,7 +477,7 @@ async def test_fetch_thread_with_parent(mock_api_class):
 @patch("app.twitter_scraper.API")
 async def test_fetch_thread_parent_not_found(mock_api_class):
     """Test fetch_thread handles missing parent tweet"""
-    from app.twitter_scraper import fetch_thread
+    from app.integrations.twitter_scraper import fetch_thread
     
     mock_api = AsyncMock()
     mock_api_class.return_value = mock_api

@@ -58,12 +58,16 @@ def setup_db(temp_db):
         """
         CREATE TABLE IF NOT EXISTS sync_stats (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            sync_type TEXT NOT NULL,
+            timestamp INTEGER NOT NULL,
+            source TEXT NOT NULL,
+            target TEXT NOT NULL,
             success INTEGER NOT NULL,
-            posts_synced INTEGER DEFAULT 0,
-            errors INTEGER DEFAULT 0,
-            created_at INTEGER NOT NULL
+            media_count INTEGER DEFAULT 0,
+            is_thread INTEGER DEFAULT 0,
+            error_type TEXT,
+            error_message TEXT,
+            duration_ms INTEGER,
+            user_id INTEGER
         )
     """
     )
@@ -77,7 +81,8 @@ def setup_db(temp_db):
             total_syncs INTEGER DEFAULT 0,
             successful_syncs INTEGER DEFAULT 0,
             failed_syncs INTEGER DEFAULT 0,
-            total_duration_ms INTEGER DEFAULT 0,
+            total_posts INTEGER DEFAULT 0,
+            created_at INTEGER NOT NULL,
             UNIQUE(date, user_id)
         )
     """
