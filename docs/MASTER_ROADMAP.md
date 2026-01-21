@@ -13,7 +13,7 @@
 
 ### Parcial / Pendiente
 - **Sync real-time jobs**: `/sync/start` es in-memory; no motor real.
-- **Protocolos descentralizados**: ActivityPub/Mastodon, DSNP, SSB, Matrix.
+- **Protocolos descentralizados adicionales**: DSNP, SSB, Matrix (Mastodon/ActivityPub ya implementado).
 
 ### Completado recientemente
 - **Search API filtros**: ✅ Sprint D - Integrado `search_with_filters` con filtros de fecha, engagement, media y plataforma.
@@ -21,6 +21,7 @@
 - **Feed Lab real**: ✅ Sprint E - Reemplazado datos mock con posts reales de `synced_posts`.
 - **ML Scheduling**: ✅ Sprint F - Predicción de engagement y tiempos óptimos basados en datos históricos.
 - **Multi-Platform Framework**: ✅ Sprint G - PlatformConnector interface, CanonicalPost, ConnectorRegistry, ConflictResolver con 5 estrategias.
+- **Mastodon/ActivityPub**: ✅ Sprint H - MastodonConnector con full CRUD, HTML stripping, instance-specific limits.
 
 ---
 
@@ -320,7 +321,8 @@ GET /api/v1/webhooks/:id/deliveries
 
 ---
 
-### Sprint H — Protocolos descentralizados
+### Sprint H — Protocolos descentralizados (Mastodon/ActivityPub)
+**Estado**: ✅ Implementado (MastodonConnector + TDD + 30 tests)
 **Motivo**: ActivityPub/DSNP/SSB/Matrix faltan.
 
 #### User Stories
@@ -340,6 +342,12 @@ GET /api/v1/webhooks/:id/deliveries
 #### TDD
 - Unit: parsing de eventos.
 - Integration: sync federado.
+
+#### Implementado
+- MastodonConnector con full CRUD (fetch, create, delete, edit)
+- HTML stripping para contenido
+- Soporte para límites de caracteres por instancia
+- 30 tests TDD
 
 ---
 
