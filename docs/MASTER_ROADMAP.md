@@ -85,6 +85,7 @@ Todo sprint debe:
 
 ### Sprint A — Sync Engine real (jobs, colas y progreso)
 **Motivo**: `/sync/start` hoy no ejecuta nada real y no persiste jobs.
+**Estado**: ✅ Implementado (persistencia + ejecución Celery)
 
 #### User Stories
 - **US-A1**: Como usuario quiero iniciar un sync y ver progreso real.

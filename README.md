@@ -48,6 +48,8 @@ docker-compose up -d
 
 Access dashboard at http://localhost:5000
 
+Note: Docker Compose also starts a Celery worker (`chirp-worker`) for sync jobs.
+
 ### Manual Installation
 
 ```bash
