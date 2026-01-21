@@ -46,6 +46,12 @@ Unimported files (reported, 71):
 
 ## Recommended Next Steps (Pending Decisions)
 
-- Decide the Workspace feature path (keep / remove / defer).
-- Decide the Algorithm Dashboard path (integrate / merge with Feed Lab / remove).
-- After decisions, re-run audit with an updated ignore list for App Router files.
+Decisions recorded in Integration Sprint I4:
+
+- Workspace feature: keep and implement.
+- Algorithm dashboard: integrate as `/dashboard/algorithm`.
+
+Next actions:
+
+- Re-run audit with updated ignore lists for App Router files.
+- Execute cleanup once workspace and algorithm integrations land.

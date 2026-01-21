@@ -282,6 +282,7 @@ interface FeedCondition {
 - Role-based access (admin, editor, viewer)
 - Shared credentials with audit
 - Activity feed per workspace
+Status: Implemented workspace management and activity feed via Integration Sprint I4.
 
 ---
 
@@ -463,6 +464,25 @@ interface FeedCondition {
 
 ### Search
 - `GET /api/v1/search` - Full-text search with filters
+
+### Algorithm Transparency
+- `GET /api/v1/algorithm/stats` - Algorithm transparency stats
+- `GET /api/v1/algorithm/settings` - Algorithm settings
+- `POST /api/v1/algorithm/settings` - Update algorithm settings
+
+### Workspaces
+- `GET /api/v1/workspaces/current` - Current workspace + list
+- `POST /api/v1/workspaces` - Create workspace
+- `POST /api/v1/workspaces/:id/switch` - Switch workspace
+- `GET /api/v1/workspaces/:id/members` - List members
+- `POST /api/v1/workspaces/:id/members/invite` - Invite member
+- `DELETE /api/v1/workspaces/:id/members/:memberId` - Remove member
+- `PATCH /api/v1/workspaces/:id/members/:memberId/role` - Update member role
+- `GET /api/v1/workspaces/:id/activity` - Activity feed
+- `GET /api/v1/workspaces/:id/shared-credentials` - Shared credentials
+- `POST /api/v1/workspaces/:id/shared-credentials` - Share credential
+- `PATCH /api/v1/workspaces/:id/shared-credentials/:credentialId` - Update access
+- `DELETE /api/v1/workspaces/:id/shared-credentials/:credentialId` - Revoke access
 
 ### Step-Up Auth
 - `POST /api/v1/danger/confirm` - Get danger_token

@@ -91,14 +91,20 @@ export function useAlgorithmStats(options: UseAlgorithmStatsOptions = {}): UseAl
     setError(null);
 
     try {
-      const url = userId ? `/api/algorithm/stats?userId=${userId}` : '/api/algorithm/stats';
+      const url = userId
+        ? `/api/v1/algorithm/stats?userId=${userId}`
+        : '/api/v1/algorithm/stats';
       const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const stats: AlgorithmStats = await response.json();
+      const payload = await response.json();
+      if (payload && payload.success === false) {
+        throw new Error(payload.error?.message || 'Failed to load stats');
+      }
+      const stats: AlgorithmStats = payload?.data ?? payload;
 
       // Only update if still mounted
       if (!mountedRef.current) return;

@@ -964,12 +964,14 @@ Decide fate of orphaned code and clean up technical debt.
 3. **Defer**: Keep code but mark as "future" in docs
 
 **Acceptance Criteria:**
-- [ ] Decision documented in MASTER_ROADMAP.md
-- [ ] If keeping: Create Sprint I5 for workspace implementation
+- [x] Decision documented in MASTER_ROADMAP.md
+- [x] Workspace API + dashboard integrated
 - [ ] If removing: Delete all workspace files
 - [ ] If deferring: Add `// TODO: Sprint 21` comments
 
-**Sprint:** I4 | **Priority:** P2 | **Status:** TODO
+**Decision:** Keep & implement via Integration Sprint I4
+
+**Sprint:** I4 | **Priority:** P2 | **Status:** DONE
 
 ---
 
@@ -982,10 +984,12 @@ Decide fate of orphaned code and clean up technical debt.
 3. **Remove**: Delete components
 
 **Acceptance Criteria:**
-- [ ] Decision documented
-- [ ] Code updated accordingly
+- [x] Decision documented
+- [x] Code updated accordingly
 
-**Sprint:** I4 | **Priority:** P2 | **Status:** TODO
+**Decision:** Integrate as dedicated `/dashboard/algorithm` page
+
+**Sprint:** I4 | **Priority:** P2 | **Status:** DONE
 
 ---
 
@@ -1034,11 +1038,11 @@ npx unimported
 Execute decisions from I4-01.
 
 **Acceptance:**
-- [ ] All decisions executed
-- [ ] Tests still pass
-- [ ] Build still works
+- [x] Workspace and algorithm decisions executed
+- [x] Tests still pass
+- [x] Build still works
 
-**Status:** TODO
+**Status:** DONE
 
 ---
 

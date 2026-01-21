@@ -623,7 +623,7 @@ describe('useAlgorithmStats Hook', () => {
   it('fetches algorithm statistics on mount', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockAlgorithmStats,
+      json: async () => ({ success: true, data: mockAlgorithmStats }),
     });
 
     const { result } = renderHook(() => useAlgorithmStats());
@@ -633,7 +633,7 @@ describe('useAlgorithmStats Hook', () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(global.fetch).toHaveBeenCalledWith('/api/algorithm/stats');
+    expect(global.fetch).toHaveBeenCalledWith('/api/v1/algorithm/stats');
     expect(result.current.loading).toBe(false);
     expect(result.current.data).toEqual(mockAlgorithmStats);
     expect(result.current.error).toBeNull();
@@ -642,7 +642,7 @@ describe('useAlgorithmStats Hook', () => {
   it('returns totalRules, activeRules, feedComposition, topRules', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockAlgorithmStats,
+      json: async () => ({ success: true, data: mockAlgorithmStats }),
     });
 
     const { result } = renderHook(() => useAlgorithmStats());
@@ -699,7 +699,7 @@ describe('useAlgorithmStats Hook', () => {
   it('refreshes on rule changes', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      json: async () => mockAlgorithmStats,
+      json: async () => ({ success: true, data: mockAlgorithmStats }),
     });
 
     const { result } = renderHook(() => useAlgorithmStats());
@@ -721,7 +721,7 @@ describe('useAlgorithmStats Hook', () => {
   it('provides refresh function', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockAlgorithmStats,
+      json: async () => ({ success: true, data: mockAlgorithmStats }),
     });
 
     const { result } = renderHook(() => useAlgorithmStats());
@@ -737,7 +737,7 @@ describe('useAlgorithmStats Hook', () => {
 
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      json: async () => mockAlgorithmStats,
+      json: async () => ({ success: true, data: mockAlgorithmStats }),
     });
 
     renderHook(() => useAlgorithmStats({ refetchInterval: 5000 }));
@@ -759,7 +759,7 @@ describe('useAlgorithmStats Hook', () => {
 
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      json: async () => mockAlgorithmStats,
+      json: async () => ({ success: true, data: mockAlgorithmStats }),
     });
 
     const { unmount } = renderHook(() => useAlgorithmStats({ refetchInterval: 5000 }));
@@ -780,7 +780,7 @@ describe('useAlgorithmStats Hook', () => {
   it('caches results to avoid unnecessary refetches', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockAlgorithmStats,
+      json: async () => ({ success: true, data: mockAlgorithmStats }),
     });
 
     const { result } = renderHook(() => useAlgorithmStats());
@@ -816,7 +816,7 @@ describe('useAlgorithmStats Hook', () => {
     renderHook(() => useAlgorithmStats({ userId }));
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(`/api/algorithm/stats?userId=${userId}`);
+      expect(global.fetch).toHaveBeenCalledWith(`/api/v1/algorithm/stats?userId=${userId}`);
     });
   });
 });
