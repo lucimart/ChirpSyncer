@@ -1471,7 +1471,9 @@ describe('useActivityFeed Hook', () => {
     await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
 
     // Advance 30 seconds
-    jest.advanceTimersByTime(30000);
+    act(() => {
+      jest.advanceTimersByTime(30000);
+    });
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(2));
 
@@ -1498,7 +1500,9 @@ describe('useActivityFeed Hook', () => {
     unmount();
 
     // Advance time - should not trigger more fetches
-    jest.advanceTimersByTime(60000);
+    act(() => {
+      jest.advanceTimersByTime(60000);
+    });
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
 

@@ -7,12 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:unit": "jest --testPathPattern=unit",
-    "test:integration": "jest --testPathPattern=integration",
-    "test:e2e": "jest --testPathPattern=e2e",
+    "test": "set NODE_OPTIONS=--no-deprecation && jest",
+    "test:watch": "set NODE_OPTIONS=--no-deprecation && jest --watch",
+    "test:coverage": "set NODE_OPTIONS=--no-deprecation && jest --coverage",
+    "test:unit": "set NODE_OPTIONS=--no-deprecation && jest --testPathPattern=unit",
+    "test:integration": "set NODE_OPTIONS=--no-deprecation && jest --testPathPattern=integration",
+    "test:e2e": "set NODE_OPTIONS=--no-deprecation && jest --testPathPattern=e2e",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

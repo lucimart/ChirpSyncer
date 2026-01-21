@@ -1,6 +1,7 @@
 /** @type {import('jest').Config} */
 const config = {
   testEnvironment: 'jsdom',
+  setupFiles: ['<rootDir>/src/__tests__/jest-setup.ts'],
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',

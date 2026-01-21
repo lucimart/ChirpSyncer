@@ -90,27 +90,27 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      label: 'Posts Synced',
-      value: stats?.total_synced ?? 0,
-      icon: CheckCircle,
+      label: 'Synced Today',
+      value: stats?.synced_today ?? 0,
+      icon: RefreshCw,
       color: '#22c55e',
     },
     {
-      label: 'Pending Sync',
-      value: stats?.pending_sync ?? 0,
-      icon: RefreshCw,
+      label: 'Synced This Week',
+      value: stats?.synced_week ?? 0,
+      icon: Calendar,
       color: '#f59e0b',
     },
     {
-      label: 'Credentials',
-      value: stats?.credentials_count ?? 0,
-      icon: Key,
+      label: 'Total Synced',
+      value: stats?.total_synced ?? 0,
+      icon: CheckCircle,
       color: '#3b82f6',
     },
     {
-      label: 'Scheduled',
-      value: stats?.scheduled_count ?? 0,
-      icon: Calendar,
+      label: 'Platforms Connected',
+      value: stats?.platforms_connected ?? 0,
+      icon: Key,
       color: '#8b5cf6',
     },
   ];

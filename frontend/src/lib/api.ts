@@ -1,6 +1,6 @@
 import type { ApiResponse, User, Session, DashboardStats, Credential } from '@/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
 class ApiClient {
   private token: string | null = null;
@@ -32,9 +32,14 @@ class ApiClient {
       const data = await response.json();
 
       if (!response.ok) {
+        const errorMessage =
+          typeof data?.error === 'string'
+            ? data.error
+            : data?.error?.message || `HTTP ${response.status}`;
         return {
           success: false,
-          error: data.error || `HTTP ${response.status}`,
+          error: errorMessage,
+          correlation_id: data?.correlation_id,
         };
       }
 
