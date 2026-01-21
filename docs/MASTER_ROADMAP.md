@@ -20,6 +20,7 @@
 - **Search API filtros**: ✅ Sprint D - Integrado `search_with_filters` con filtros de fecha, engagement, media y plataforma.
 - **Webhooks**: ✅ Sprint C - Webhooks de salida con firma HMAC-SHA256 y reintentos exponenciales.
 - **Feed Lab real**: ✅ Sprint E - Reemplazado datos mock con posts reales de `synced_posts`.
+- **ML Scheduling**: ✅ Sprint F - Predicción de engagement y tiempos óptimos basados en datos históricos.
 
 ---
 
@@ -265,6 +266,7 @@ GET /api/v1/webhooks/:id/deliveries
 ---
 
 ### Sprint F — ML Scheduling real
+**Estado**: ✅ Implementado (historical analysis + engagement prediction + confidence levels)
 **Motivo**: `/optimal-times` y `/predict` son placeholders.
 
 #### User Stories
