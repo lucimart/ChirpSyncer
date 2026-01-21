@@ -9,7 +9,7 @@ This module tests:
 All tests use mocks - no real API calls.
 """
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock, call
+from unittest.mock import patch, MagicMock
 import asyncio
 import sys
 

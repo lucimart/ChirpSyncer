@@ -19,7 +19,7 @@ import tempfile
 import time
 from datetime import datetime, timedelta
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch, MagicMock
 
 from app.features.tweet_scheduler import TweetScheduler
 

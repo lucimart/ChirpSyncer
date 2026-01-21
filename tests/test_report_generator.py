@@ -11,7 +11,7 @@ import io
 import tempfile
 import sqlite3
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from app.features.report_generator import ReportGenerator
 
 

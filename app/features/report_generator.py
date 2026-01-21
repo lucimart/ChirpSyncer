@@ -9,7 +9,7 @@ import sqlite3
 import json
 import csv
 import io
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from datetime import datetime
 import time
 

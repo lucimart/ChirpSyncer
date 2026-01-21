@@ -20,7 +20,7 @@ Usage:
 
 import pytest
 import asyncio
-from unittest.mock import MagicMock, patch, AsyncMock, Mock
+from unittest.mock import MagicMock, patch, AsyncMock
 
 # Import media handler functions
 from app.integrations.media_handler import (

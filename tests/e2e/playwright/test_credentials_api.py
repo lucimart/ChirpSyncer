@@ -5,7 +5,6 @@ Tests the credentials management endpoints with Flask test client (no browser re
 """
 
 import pytest
-import json
 
 # Skip marker for E2E tests
 pytestmark = pytest.mark.e2e
