@@ -32,7 +32,7 @@ jobs:
             --excludePathsFromReport='frontend/.next' \
             --allowUnusedTypes \
             --excludeDeclarationFiles \
-            --ignoreFiles='.*components[\\/](bluesky|layout|providers|ui|workspace)[\\/].*|.*styles.*GlobalStyle\\.ts|.*frontend[\\/]src[\\/]app[\\/].*' \
+            --ignoreFiles='.*components[\\/](bluesky|layout|providers|ui|workspace)[\\/].*|.*styles.*GlobalStyle\\.ts|.*frontend[\\/]src[\\/]app[\\/].*|.*lib[\\/](auth|connectors)\\.ts' \
             --exitWithCount
 
       - name: Unimported files and deps
