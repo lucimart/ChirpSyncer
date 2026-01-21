@@ -36,4 +36,4 @@ jobs:
             --exitWithCount
 
       - name: Unimported files and deps
-        run: npx --prefix frontend unimported frontend --config frontend/.unimportedrc.json
+        run: npx --prefix frontend unimported frontend --config frontend/.unimportedrc.json --show-unused-deps --show-unresolved-imports

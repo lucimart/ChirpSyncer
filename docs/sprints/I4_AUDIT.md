@@ -56,3 +56,9 @@ Next actions:
 
 - Re-run audit with updated ignore lists for App Router files.
 - Execute cleanup once workspace and algorithm integrations land.
+
+## Follow-up: CI unused checks (2026-01-21)
+
+- Added `unused-code` workflow to run `ts-unused-exports` plus `unimported`.
+- `unimported` is configured to report unused dependencies and unresolved imports only, since App Router entrypoints and path aliases still cause noisy unimported file reports.
+- Current `unimported` deps check: no unused deps detected (after ignore list updates for known false positives).

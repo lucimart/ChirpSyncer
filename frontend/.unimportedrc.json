@@ -7,15 +7,22 @@
     "**/*.spec.{js,jsx,ts,tsx}",
     "**/tests/**",
     "**/__tests__/**",
-    "src/app/**",
     "**/*.d.ts"
   ],
   "ignoreUnimported": [],
   "ignoreUnused": [
     "next",
     "react",
-    "react-dom"
+    "react-dom",
+    "@tanstack/react-query",
+    "lucide-react",
+    "styled-components",
+    "zod",
+    "zustand"
   ],
   "ignoreUnresolved": [],
-  "respectGitignore": true
+  "respectGitignore": true,
+  "pathTransforms": {
+    "^@/(.*)$": "./src/$1"
+  }
 }
