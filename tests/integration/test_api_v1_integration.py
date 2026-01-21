@@ -6,9 +6,6 @@ Follows TDD methodology from docs/sprints/INTEGRATION_SPRINTS.md.
 """
 
 import json
-import time
-import pytest
-from unittest.mock import patch, MagicMock
 
 
 class TestAuthAPI:

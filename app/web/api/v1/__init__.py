@@ -1,3 +1,4 @@
+import os
 import uuid
 
 from flask import Blueprint, g, request
@@ -34,7 +35,12 @@ def handle_http_error(error):
 
 @api_v1.errorhandler(Exception)
 def handle_unexpected_error(error):
-    return api_error("INTERNAL_ERROR", str(error), status=500)
+    # In production, hide error details to prevent information disclosure
+    if os.environ.get("FLASK_ENV") == "production":
+        message = "An unexpected error occurred"
+    else:
+        message = str(error)
+    return api_error("INTERNAL_ERROR", message, status=500)
 
 
 from app.web.api.v1.auth import auth_bp  # noqa: E402
