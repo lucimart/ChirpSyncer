@@ -1,10 +1,10 @@
 import asyncio
-import asyncio
 import os
 from typing import Optional
 
 from app.auth.credential_manager import CredentialManager
 from app.core.db_handler import should_sync_post, save_synced_post
+from app.core.logger import setup_logger
 from app.integrations import twitter_scraper
 from app.integrations.bluesky_handler import (
     fetch_posts_from_bluesky,
@@ -12,7 +12,12 @@ from app.integrations.bluesky_handler import (
     post_to_bluesky,
     post_thread_to_bluesky,
 )
-from app.integrations.twitter_api_handler import post_tweet_with_credentials
+from app.integrations.twitter_api_handler import (
+    post_tweet_with_credentials,
+    TwitterAPINotConfiguredError,
+)
+
+logger = setup_logger(__name__)
 
 
 def _run_async(coro):
@@ -99,6 +104,26 @@ def sync_twitter_to_bluesky(user_id: int, db_path: str) -> int:
 
 
 def sync_bluesky_to_twitter(user_id: int, db_path: str) -> int:
+    """
+    Sync posts from Bluesky to Twitter.
+
+    ⚠️  REQUIRES PAID TWITTER API SUBSCRIPTION ($100/month Basic tier)
+
+    This function requires Twitter API credentials to be configured.
+    If not configured, it will raise TwitterAPINotConfiguredError with
+    instructions on how to set it up.
+
+    Args:
+        user_id: User ID to sync for
+        db_path: Path to the database
+
+    Returns:
+        Number of posts synced
+
+    Raises:
+        TwitterAPINotConfiguredError: If Twitter API credentials are not configured
+        ValueError: If other required credentials are missing
+    """
     master_key = _load_master_key()
     if not master_key:
         raise ValueError("MASTER_KEY is not configured")
@@ -106,8 +131,22 @@ def sync_bluesky_to_twitter(user_id: int, db_path: str) -> int:
     credential_manager = CredentialManager(master_key, db_path)
     twitter_creds = credential_manager.get_credentials(user_id, "twitter", "api")
     bluesky_creds = credential_manager.get_credentials(user_id, "bluesky", "api")
-    if not twitter_creds or not bluesky_creds:
-        raise ValueError("Missing credentials for Twitter API or Bluesky")
+
+    if not bluesky_creds:
+        raise ValueError("Missing Bluesky credentials")
+
+    if not twitter_creds:
+        raise TwitterAPINotConfiguredError(
+            "Twitter API credentials not found for this user.\n\n"
+            "Bluesky → Twitter sync requires a paid Twitter API subscription.\n"
+            "Cost: $100/month (Basic tier)\n\n"
+            "To enable:\n"
+            "1. Subscribe at https://developer.twitter.com/\n"
+            "2. Create a Project and App\n"
+            "3. Generate API keys and Access tokens\n"
+            "4. Add credentials in Dashboard → Credentials → Twitter API\n\n"
+            "Note: Twitter → Bluesky sync works without this (free)."
+        )
 
     bsky_username = bluesky_creds.get("username")
     if not bsky_username:
@@ -120,15 +159,23 @@ def sync_bluesky_to_twitter(user_id: int, db_path: str) -> int:
         if not should_sync_post(post.text, "bluesky", post.uri, db_path=db_path):
             continue
 
-        tweet_id = post_tweet_with_credentials(twitter_creds, post.text)
-        save_synced_post(
-            twitter_id=str(tweet_id),
-            bluesky_uri=post.uri,
-            source="bluesky",
-            synced_to="twitter",
-            content=post.text,
-            db_path=db_path,
-        )
-        synced_count += 1
+        try:
+            tweet_id = post_tweet_with_credentials(twitter_creds, post.text)
+            save_synced_post(
+                twitter_id=str(tweet_id),
+                bluesky_uri=post.uri,
+                source="bluesky",
+                synced_to="twitter",
+                content=post.text,
+                db_path=db_path,
+            )
+            synced_count += 1
+        except TwitterAPINotConfiguredError:
+            # Re-raise with context
+            raise
+        except Exception as e:
+            logger.error(f"Failed to sync post to Twitter: {e}")
+            # Continue with other posts
+            continue
 
     return synced_count
