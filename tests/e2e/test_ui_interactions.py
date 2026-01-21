@@ -161,7 +161,7 @@ class TestModalInteractions:
         assert delete_response.status_code in [200, 302]
 
         # If successful, user should be deleted
-        _deleted_user = user_manager.get_user_by_id(user_to_delete_id)
+        user_manager.get_user_by_id(user_to_delete_id)
         # Either deleted or still exists (if confirmation modal prevented it)
 
 

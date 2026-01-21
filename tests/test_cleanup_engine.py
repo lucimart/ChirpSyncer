@@ -181,7 +181,7 @@ class TestRuleRetrieval:
 
     def test_get_user_rules_enabled_only(self, cleanup_engine):
         """Test getting only enabled rules"""
-        _rule_id1 = cleanup_engine.create_rule(1, 'Enabled', 'age', {'type': 'age', 'max_age_days': 30})
+        cleanup_engine.create_rule(1, 'Enabled', 'age', {'type': 'age', 'max_age_days': 30})
         rule_id2 = cleanup_engine.create_rule(1, 'Disabled', 'engagement', {'type': 'engagement', 'min_likes': 10})
 
         # Disable one rule

@@ -385,7 +385,7 @@ def test_twitter_api_handler_initialization():
         )
 
         # Test successful initialization
-        _handler = TwitterAPIHandler(
+        TwitterAPIHandler(
             api_key="test_key",
             api_secret="test_secret",
             access_token="test_token",

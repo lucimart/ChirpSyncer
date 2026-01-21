@@ -1537,7 +1537,7 @@ class TestFormatSpecific:
         )
         json_data = json.loads(json_report.decode("utf-8"))
 
-        _csv_report = report_generator.generate_engagement_report(
+        report_generator.generate_engagement_report(
             user_id=1, period="week", format="csv"
         )
 

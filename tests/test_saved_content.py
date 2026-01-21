@@ -164,7 +164,7 @@ def test_duplicate_save_prevention(manager, user1_id):
     assert result1 is True
 
     # Try to save again - should handle gracefully
-    _result2 = manager.save_tweet(user1_id, 'tweet999', notes='Updated notes')
+    manager.save_tweet(user1_id, 'tweet999', notes='Updated notes')
     # Implementation should either update or return False
     # Let's verify there's still only one entry
     saved_tweets = manager.get_saved_tweets(user1_id)
