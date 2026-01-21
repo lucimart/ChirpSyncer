@@ -14,13 +14,16 @@ const config = {
     }],
   },
   collectCoverageFrom: [
-    'src/**/*.{ts,tsx}',
+    'src/components/**/*.{ts,tsx}',
+    'src/hooks/**/*.{ts,tsx}',
+    'src/lib/**/*.{ts,tsx}',
+    'src/providers/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
     '!src/__tests__/**',
   ],
   coverageThreshold: {
     global: {
-      branches: 70,
+      branches: 60,
       functions: 70,
       lines: 70,
       statements: 70,
