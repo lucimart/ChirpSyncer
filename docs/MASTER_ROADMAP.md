@@ -22,6 +22,7 @@
 - **ML Scheduling**: ✅ Sprint F - Predicción de engagement y tiempos óptimos basados en datos históricos.
 - **Multi-Platform Framework**: ✅ Sprint G - PlatformConnector interface, CanonicalPost, ConnectorRegistry, ConflictResolver con 5 estrategias.
 - **Mastodon/ActivityPub**: ✅ Sprint H - MastodonConnector con full CRUD, HTML stripping, instance-specific limits.
+- **WebSockets Real-time**: ✅ Sprint B - Flask-SocketIO backend, RealtimeProvider, Toast notifications, ConnectionStatus.
 
 ---
 
@@ -136,6 +137,7 @@ GET /api/v1/sync/{job_id}/status
 ---
 
 ### Sprint B — WebSockets / SSE (Real-time UX)
+**Estado**: ✅ Implementado (Flask-SocketIO + RealtimeProvider + Toast + ConnectionStatus)
 **Motivo**: Progreso, notificaciones y jobs sin polling.
 
 #### User Stories
