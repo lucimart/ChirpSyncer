@@ -77,7 +77,8 @@ def register():
     try:
         user_id = user_manager.create_user(username, email, password, is_admin=False)
     except ValueError as exc:
-        return api_error("REGISTRATION_FAILED", str(exc), status=400)
+        # Do not expose internal error details to the client
+        return api_error("REGISTRATION_FAILED", "Unable to complete registration with the provided data.", status=400)
 
     user = user_manager.get_user_by_id(user_id)
     token = create_token(user.id, user.username, user.is_admin)

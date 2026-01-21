@@ -69,9 +69,12 @@ def create_credential():
     try:
         credential_manager.save_credentials(g.user.id, platform, credential_type, credentials)
     except ValueError as exc:
-        return api_error("INVALID_REQUEST", str(exc), status=400)
+        # Treat as a client error but do not expose internal validation details
+        return api_error("INVALID_REQUEST", "Invalid credential data provided.", status=400)
     except Exception as exc:
-        return api_error("CREDENTIAL_SAVE_FAILED", str(exc), status=500)
+        # Log full exception details on the server, return a generic error message to the client
+        current_app.logger.exception("Unexpected error while saving credentials")
+        return api_error("CREDENTIAL_SAVE_FAILED", "Failed to save credentials due to an internal error.", status=500)
 
     cred_list = credential_manager.list_user_credentials(g.user.id)
     created = next(
