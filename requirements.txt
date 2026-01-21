@@ -28,3 +28,6 @@ eventlet==0.35.2
 # Sprint Infra Dependencies
 redis==5.0.4
 celery==5.4.0
+
+# Sprint H Dependencies - Decentralized Protocols
+Mastodon.py==1.8.1         # Mastodon/ActivityPub client
