@@ -65,6 +65,7 @@ Todo sprint debe:
 ---
 
 ### Sprint J — Performance & Archival
+**Estado**: ✅ Implementado (ArchivalManager + @cached decorator + archival Celery task + 24 tests)
 **Motivo**: Manejo de gran volumen de datos (>1M tweets) y latencia API.
 
 #### User Stories
@@ -85,6 +86,14 @@ Todo sprint debe:
 #### TDD
 - Unit: ArchivalManager mueve data y marca `archived=True`.
 - Integration: Cache hit/miss metrics.
+
+#### Implementado
+- ArchivalManager con find_archivable_posts, archive_old_posts, restore_from_archive, get_archival_stats
+- @cached decorator con TTL, prefix, y graceful Redis error handling
+- Cache invalidation y statistics utilities
+- Celery task run_archival_job para scheduled archival
+- Archived indicator en search results (search_with_filters)
+- 24 TDD tests (12 archival + 12 cache)
 
 ---
 
