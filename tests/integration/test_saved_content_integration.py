@@ -20,8 +20,6 @@ import json
 import sqlite3
 import time
 
-import pytest
-
 # Add app directory to path for imports
 sys.path.insert(
     0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "app")
