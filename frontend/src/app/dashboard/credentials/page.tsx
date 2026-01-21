@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
-import { Plus, Trash2, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, XCircle, RefreshCw, Key } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Button, Card, Modal, Input } from '@/components/ui';
 import type { Credential } from '@/types';
