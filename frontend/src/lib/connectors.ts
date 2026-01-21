@@ -335,6 +335,19 @@ export function useSyncConfigs() {
         : [];
 
       // Map credentials to sync configs, using saved config if available
+      // Map backend direction values to frontend interface values
+      const mapDirection = (dir?: string): 'bidirectional' | 'inbound' | 'outbound' => {
+        if (dir === 'import_only') return 'inbound';
+        if (dir === 'export_only') return 'outbound';
+        return 'bidirectional';
+      };
+
+      const mapTruncateStrategy = (strategy?: string): 'smart' | 'cut' | 'thread' => {
+        if (strategy === 'truncate') return 'cut';
+        if (strategy === 'skip') return 'smart';
+        return strategy as 'smart' | 'cut' | 'thread' || 'smart';
+      };
+
       return credResponse.data
         .filter((cred) => cred.is_active)
         .map((cred) => {
@@ -342,7 +355,7 @@ export function useSyncConfigs() {
           return {
             platform: cred.platform as PlatformType,
             enabled: saved ? saved.enabled : true,
-            direction: (saved?.direction || 'bidirectional') as 'bidirectional' | 'import_only' | 'export_only',
+            direction: mapDirection(saved?.direction),
             filters: {
               include_replies: saved ? saved.sync_replies : false,
               include_reposts: saved ? saved.sync_reposts : false,
@@ -352,7 +365,7 @@ export function useSyncConfigs() {
               add_source_link: true,
               preserve_mentions: true,
               preserve_hashtags: saved ? saved.auto_hashtag : true,
-              truncate_strategy: (saved?.truncation_strategy || (cred.platform === 'bluesky' ? 'thread' : 'smart')) as 'thread' | 'smart' | 'truncate',
+              truncate_strategy: mapTruncateStrategy(saved?.truncation_strategy) || (cred.platform === 'bluesky' ? 'thread' : 'smart'),
             },
           };
         });
@@ -427,13 +440,26 @@ export function useUpdateSyncConfig() {
 
   return useMutation({
     mutationFn: async (config: PlatformSyncConfig) => {
+      // Map frontend direction values to backend values
+      const mapDirectionToBackend = (dir: 'bidirectional' | 'inbound' | 'outbound'): 'bidirectional' | 'import_only' | 'export_only' => {
+        if (dir === 'inbound') return 'import_only';
+        if (dir === 'outbound') return 'export_only';
+        return 'bidirectional';
+      };
+
+      const mapTruncateToBackend = (strategy: 'smart' | 'cut' | 'thread'): 'smart' | 'truncate' | 'skip' => {
+        if (strategy === 'cut') return 'truncate';
+        if (strategy === 'thread') return 'smart';
+        return strategy;
+      };
+
       const response = await api.saveSyncConfig({
         platform: config.platform,
         enabled: config.enabled,
-        direction: config.direction,
+        direction: mapDirectionToBackend(config.direction),
         sync_replies: config.filters.include_replies,
         sync_reposts: config.filters.include_reposts,
-        truncation_strategy: config.transform.truncate_strategy === 'thread' ? 'smart' : config.transform.truncate_strategy,
+        truncation_strategy: mapTruncateToBackend(config.transform.truncate_strategy),
         auto_hashtag: config.transform.preserve_hashtags,
       });
 

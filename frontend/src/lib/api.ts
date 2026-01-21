@@ -448,6 +448,59 @@ class ApiClient {
       body: JSON.stringify(config),
     });
   }
+
+  // Webhooks
+  async getWebhooks(): Promise<ApiResponse<{ webhooks: Webhook[]; count: number }>> {
+    return this.request('/webhooks');
+  }
+
+  async getWebhook(id: number): Promise<ApiResponse<Webhook>> {
+    return this.request(`/webhooks/${id}`);
+  }
+
+  async createWebhook(payload: {
+    url: string;
+    events: string[];
+    name?: string;
+  }): Promise<ApiResponse<Webhook>> {
+    return this.request('/webhooks', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async updateWebhook(
+    id: number,
+    payload: { url?: string; events?: string[]; name?: string; enabled?: boolean }
+  ): Promise<ApiResponse<Webhook>> {
+    return this.request(`/webhooks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteWebhook(id: number): Promise<ApiResponse<void>> {
+    return this.request(`/webhooks/${id}`, { method: 'DELETE' });
+  }
+
+  async regenerateWebhookSecret(id: number): Promise<ApiResponse<Webhook>> {
+    return this.request(`/webhooks/${id}/regenerate-secret`, { method: 'POST' });
+  }
+
+  async getWebhookDeliveries(
+    id: number,
+    limit = 50
+  ): Promise<ApiResponse<{ deliveries: WebhookDelivery[]; count: number }>> {
+    return this.request(`/webhooks/${id}/deliveries?limit=${limit}`);
+  }
+
+  async testWebhook(id: number): Promise<ApiResponse<WebhookTestResult>> {
+    return this.request(`/webhooks/${id}/test`, { method: 'POST' });
+  }
+
+  async getWebhookEventTypes(): Promise<ApiResponse<{ events: string[] }>> {
+    return this.request('/webhooks/events');
+  }
 }
 
 // Scheduling types
@@ -532,6 +585,37 @@ export interface SyncConfig {
   sync_reposts: boolean;
   truncation_strategy: 'smart' | 'truncate' | 'skip';
   auto_hashtag: boolean;
+}
+
+// Webhook types
+export interface Webhook {
+  id: number;
+  url: string;
+  events: string[];
+  name: string | null;
+  enabled: boolean;
+  secret?: string; // Only returned on create/regenerate
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WebhookDelivery {
+  id: number;
+  event_type: string;
+  payload: Record<string, unknown>;
+  status_code: number | null;
+  success: boolean;
+  error: string | null;
+  attempt: number;
+  created_at: string;
+}
+
+export interface WebhookTestResult {
+  success: boolean;
+  status_code: number | null;
+  error: string | null;
+  skipped: boolean;
+  reason: string | null;
 }
 
 export const api = new ApiClient();

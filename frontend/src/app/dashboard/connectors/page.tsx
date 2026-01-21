@@ -336,7 +336,8 @@ export default function ConnectorsPage() {
   };
 
   const getSyncConfig = (platform: PlatformType): PlatformSyncConfig | undefined => {
-    return syncConfigs?.find((c) => c.platform === platform);
+    if (!syncConfigs || !Array.isArray(syncConfigs)) return undefined;
+    return syncConfigs.find((c) => c.platform === platform);
   };
 
   const handleConnect = async () => {

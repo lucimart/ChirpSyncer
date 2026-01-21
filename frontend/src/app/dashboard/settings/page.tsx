@@ -130,7 +130,7 @@ const FormActions = styled.div`
 `;
 
 export default function SettingsPage() {
-  const { user, refreshUser } = useAuth();
+  const { user, checkAuth } = useAuth();
   const [username] = useState(user?.username || '');
   const [email, setEmail] = useState(user?.email || '');
   const [notifications, setNotifications] = useState({
@@ -168,7 +168,7 @@ export default function SettingsPage() {
     }
 
     setSaveSuccess(true);
-    refreshUser?.();
+    checkAuth();
     setTimeout(() => setSaveSuccess(false), 3000);
   };
 
@@ -230,7 +230,7 @@ export default function SettingsPage() {
               label="Username"
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              disabled
               fullWidth
             />
             <Input

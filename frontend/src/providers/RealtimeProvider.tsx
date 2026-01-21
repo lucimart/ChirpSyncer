@@ -192,7 +192,8 @@ export function useRealtimeMessage<T extends RealtimeMessage['type']>(
   useEffect(() => {
     return subscribe((message) => {
       if (message.type === type) {
-        handler(message.payload as Extract<RealtimeMessage, { type: T }>['payload']);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        handler(message.payload as any);
       }
     });
   }, [type, handler, subscribe]);

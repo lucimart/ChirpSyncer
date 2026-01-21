@@ -15,13 +15,13 @@
     "test:e2e": "set NODE_OPTIONS=--no-deprecation && jest --testPathPattern=e2e",
     "type-check": "tsc --noEmit"
   },
-"dependencies": {
+  "dependencies": {
     "@tanstack/react-query": "5.62.16",
     "lucide-react": "0.468.0",
     "next": "14.2.35",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "socket.io-client": "4.7.4",
+    "socket.io-client": "^4.7.4",
     "styled-components": "6.1.14",
     "zod": "3.24.1",
     "zustand": "5.0.2"

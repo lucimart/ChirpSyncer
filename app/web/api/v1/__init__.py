@@ -60,6 +60,7 @@ from app.web.api.v1.admin import admin_bp  # noqa: E402
 from app.web.api.v1.search import search_bp  # noqa: E402
 from app.web.api.v1.export import export_bp  # noqa: E402
 from app.web.api.v1.health import health_bp  # noqa: E402
+from app.web.api.v1.webhooks import webhooks_bp  # noqa: E402
 
 api_v1.register_blueprint(auth_bp)
 api_v1.register_blueprint(dashboard_bp)
@@ -76,3 +77,4 @@ api_v1.register_blueprint(admin_bp)
 api_v1.register_blueprint(search_bp)
 api_v1.register_blueprint(export_bp)
 api_v1.register_blueprint(health_bp)
+api_v1.register_blueprint(webhooks_bp)
