@@ -224,10 +224,10 @@ ChirpSyncer/
 ## Documentation
 
 - [Architecture Overview](docs/architecture/ARCHITECTURE.md)
-- [Deployment Guides](docs/)
+- [Master Roadmap](docs/MASTER_ROADMAP.md)
+- [Deployment Guides](docs/NAS_DEPLOYMENT_GUIDE.md)
 - [API Reference](docs/API.md)
 - [Database Schema](docs/DATABASE.md)
-- [Sprint Summaries](docs/sprints/summaries/)
 
 ## Deployment
 

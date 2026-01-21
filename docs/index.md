@@ -321,8 +321,7 @@ ChirpSyncer is built with production-ready technologies:
 
 ### Architecture & Development
 - [System Architecture](https://github.com/lucimart/ChirpSyncer/blob/main/docs/architecture/ARCHITECTURE.md)
-- [Architecture Decisions](https://github.com/lucimart/ChirpSyncer/blob/main/docs/architecture/decisions/SPRINT7_ARCHITECTURE_DECISIONS.md)
-- [Sprint Documentation](https://github.com/lucimart/ChirpSyncer/tree/main/docs/sprints)
+- [Master Roadmap](https://github.com/lucimart/ChirpSyncer/blob/main/docs/MASTER_ROADMAP.md)
 - [Testing Guide](https://github.com/lucimart/ChirpSyncer/blob/main/docs/testing/RUNNING_E2E_TESTS.md)
 
 ---
