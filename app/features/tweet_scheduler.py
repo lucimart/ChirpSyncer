@@ -4,6 +4,7 @@ TweetScheduler - Database-backed Tweet Scheduling System (SCHEDULE-001)
 Provides tweet scheduling with queue management for automated posting.
 Integrates with APScheduler for cron-based queue processing.
 """
+
 import json
 import sqlite3
 import time
@@ -24,7 +25,7 @@ class TweetScheduler:
     - Media attachment support
     """
 
-    def __init__(self, db_path: str = 'chirpsyncer.db', master_key: bytes = None):
+    def __init__(self, db_path: str = "chirpsyncer.db", master_key: bytes = None):
         """
         Initialize TweetScheduler.
 
@@ -43,7 +44,7 @@ class TweetScheduler:
         cursor = conn.cursor()
 
         # Create scheduled_tweets table (ADR-002 schema)
-        cursor.execute('''
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS scheduled_tweets (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
@@ -57,27 +58,28 @@ class TweetScheduler:
                 created_at INTEGER NOT NULL,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )
-        ''')
+        """)
 
         # Create indexes for performance
-        cursor.execute('''
+        cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_scheduled_user
             ON scheduled_tweets(user_id)
-        ''')
-        cursor.execute('''
+        """)
+        cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_scheduled_status
             ON scheduled_tweets(status)
-        ''')
-        cursor.execute('''
+        """)
+        cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_scheduled_time
             ON scheduled_tweets(scheduled_time)
-        ''')
+        """)
 
         conn.commit()
         conn.close()
 
-    def schedule_tweet(self, user_id: int, content: str,
-                      scheduled_time: datetime, media: List[str]) -> int:
+    def schedule_tweet(
+        self, user_id: int, content: str, scheduled_time: datetime, media: List[str]
+    ) -> int:
         """
         Schedule a tweet for future posting.
 
@@ -112,11 +114,14 @@ class TweetScheduler:
         cursor = conn.cursor()
 
         try:
-            cursor.execute('''
+            cursor.execute(
+                """
                 INSERT INTO scheduled_tweets
                 (user_id, content, media_paths, scheduled_time, status, created_at)
                 VALUES (?, ?, ?, ?, 'pending', ?)
-            ''', (user_id, content, media_json, scheduled_timestamp, created_timestamp))
+            """,
+                (user_id, content, media_json, scheduled_timestamp, created_timestamp),
+            )
 
             tweet_id = cursor.lastrowid
             conn.commit()
@@ -141,10 +146,13 @@ class TweetScheduler:
 
         try:
             # Check tweet exists and belongs to user
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT status FROM scheduled_tweets
                 WHERE id = ? AND user_id = ?
-            ''', (tweet_id, user_id))
+            """,
+                (tweet_id, user_id),
+            )
 
             row = cursor.fetchone()
             if not row:
@@ -153,15 +161,18 @@ class TweetScheduler:
             status = row[0]
 
             # Cannot cancel already posted tweets
-            if status == 'posted':
+            if status == "posted":
                 return False
 
             # Update status to cancelled
-            cursor.execute('''
+            cursor.execute(
+                """
                 UPDATE scheduled_tweets
                 SET status = 'cancelled'
                 WHERE id = ? AND user_id = ?
-            ''', (tweet_id, user_id))
+            """,
+                (tweet_id, user_id),
+            )
 
             affected = cursor.rowcount
             conn.commit()
@@ -187,17 +198,23 @@ class TweetScheduler:
 
         try:
             if status:
-                cursor.execute('''
+                cursor.execute(
+                    """
                     SELECT * FROM scheduled_tweets
                     WHERE user_id = ? AND status = ?
                     ORDER BY scheduled_time ASC
-                ''', (user_id, status))
+                """,
+                    (user_id, status),
+                )
             else:
-                cursor.execute('''
+                cursor.execute(
+                    """
                     SELECT * FROM scheduled_tweets
                     WHERE user_id = ?
                     ORDER BY scheduled_time ASC
-                ''', (user_id,))
+                """,
+                    (user_id,),
+                )
 
             rows = cursor.fetchall()
 
@@ -206,10 +223,10 @@ class TweetScheduler:
             for row in rows:
                 tweet = dict(row)
                 # Parse media_paths JSON
-                if tweet['media_paths']:
-                    tweet['media_paths'] = json.loads(tweet['media_paths'])
+                if tweet["media_paths"]:
+                    tweet["media_paths"] = json.loads(tweet["media_paths"])
                 else:
-                    tweet['media_paths'] = []
+                    tweet["media_paths"] = []
                 # Add twitter_id alias for TDD compatibility
                 tweet["twitter_id"] = tweet.get("tweet_id")
                 tweets.append(tweet)
@@ -233,11 +250,7 @@ class TweetScheduler:
                 'failed': int
             }
         """
-        stats = {
-            'processed': 0,
-            'successful': 0,
-            'failed': 0
-        }
+        stats = {"processed": 0, "successful": 0, "failed": 0}
 
         # Get all pending tweets that are due
         current_time = int(time.time())
@@ -247,12 +260,15 @@ class TweetScheduler:
         cursor = conn.cursor()
 
         try:
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT id FROM scheduled_tweets
                 WHERE status = 'pending'
                 AND scheduled_time <= ?
                 ORDER BY scheduled_time ASC
-            ''', (current_time,))
+            """,
+                (current_time,),
+            )
 
             due_tweets = cursor.fetchall()
 
@@ -261,16 +277,16 @@ class TweetScheduler:
 
         # Process each due tweet
         for row in due_tweets:
-            tweet_id = row['id']
-            stats['processed'] += 1
+            tweet_id = row["id"]
+            stats["processed"] += 1
 
             # Attempt to post the tweet
             success = self.post_scheduled_tweet(tweet_id)
 
             if success:
-                stats['successful'] += 1
+                stats["successful"] += 1
             else:
-                stats['failed'] += 1
+                stats["failed"] += 1
 
         return stats
 
@@ -290,9 +306,12 @@ class TweetScheduler:
         cursor = conn.cursor()
 
         try:
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT * FROM scheduled_tweets WHERE id = ?
-            ''', (scheduled_tweet_id,))
+            """,
+                (scheduled_tweet_id,),
+            )
 
             row = cursor.fetchone()
             if not row:
@@ -305,8 +324,8 @@ class TweetScheduler:
 
         # Parse media paths
         media_paths = []
-        if tweet_data['media_paths']:
-            media_paths = json.loads(tweet_data['media_paths'])
+        if tweet_data["media_paths"]:
+            media_paths = json.loads(tweet_data["media_paths"])
 
         try:
             # Get user's Twitter API credentials
@@ -317,13 +336,12 @@ class TweetScheduler:
                 )
 
             from app.auth.credential_manager import CredentialManager
+
             cred_manager = CredentialManager(self.master_key, self.db_path)
 
             # Get Twitter API credentials for the user
             credentials = cred_manager.get_credentials(
-                tweet_data['user_id'],
-                'twitter',
-                'api'
+                tweet_data["user_id"], "twitter", "api"
             )
 
             if not credentials:
@@ -334,23 +352,25 @@ class TweetScheduler:
 
             # Post the tweet using Twitter API
             tweet_id = self._post_to_twitter(
-                credentials,
-                tweet_data['content'],
-                media_paths
+                credentials, tweet_data["content"], media_paths
             )
 
             # Update status to posted
-            self.update_status(scheduled_tweet_id, 'posted', tweet_id=tweet_id)
+            self.update_status(scheduled_tweet_id, "posted", tweet_id=tweet_id)
             return True
 
         except Exception as e:
             # Update status to failed with error
             error_msg = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
-            self.update_status(scheduled_tweet_id, 'failed', error=error_msg)
+            self.update_status(scheduled_tweet_id, "failed", error=error_msg)
             return False
 
-    def _post_to_twitter(self, credentials: Dict[str, str], content: str,
-                        media_paths: Optional[List[str]] = None) -> str:
+    def _post_to_twitter(
+        self,
+        credentials: Dict[str, str],
+        content: str,
+        media_paths: Optional[List[str]] = None,
+    ) -> str:
         """
         Post tweet to Twitter using provided credentials.
 
@@ -377,8 +397,13 @@ class TweetScheduler:
         except Exception as e:
             raise Exception(f"Failed to post tweet to Twitter: {str(e)}") from e
 
-    def update_status(self, scheduled_tweet_id: int, status: str,
-                     tweet_id: str = None, error: str = None) -> bool:
+    def update_status(
+        self,
+        scheduled_tweet_id: int,
+        status: str,
+        tweet_id: str = None,
+        error: str = None,
+    ) -> bool:
         """
         Update the status of a scheduled tweet.
 
@@ -396,13 +421,16 @@ class TweetScheduler:
 
         try:
             # Build update query
-            posted_at = int(time.time()) if status == 'posted' else None
+            posted_at = int(time.time()) if status == "posted" else None
 
-            cursor.execute('''
+            cursor.execute(
+                """
                 UPDATE scheduled_tweets
                 SET status = ?, posted_at = ?, tweet_id = ?, error = ?
                 WHERE id = ?
-            ''', (status, posted_at, tweet_id, error, scheduled_tweet_id))
+            """,
+                (status, posted_at, tweet_id, error, scheduled_tweet_id),
+            )
 
             affected = cursor.rowcount
             conn.commit()
@@ -426,9 +454,12 @@ class TweetScheduler:
         cursor = conn.cursor()
 
         try:
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT * FROM scheduled_tweets WHERE id = ?
-            ''', (tweet_id,))
+            """,
+                (tweet_id,),
+            )
 
             row = cursor.fetchone()
             if not row:
@@ -436,10 +467,10 @@ class TweetScheduler:
 
             tweet = dict(row)
             # Parse media_paths JSON
-            if tweet['media_paths']:
-                tweet['media_paths'] = json.loads(tweet['media_paths'])
+            if tweet["media_paths"]:
+                tweet["media_paths"] = json.loads(tweet["media_paths"])
             else:
-                tweet['media_paths'] = []
+                tweet["media_paths"] = []
             return tweet
 
         finally:
@@ -467,13 +498,13 @@ class TweetScheduler:
             set_clauses = []
             values = []
 
-            if 'content' in updates:
-                set_clauses.append('content = ?')
-                values.append(updates['content'])
+            if "content" in updates:
+                set_clauses.append("content = ?")
+                values.append(updates["content"])
 
-            if 'scheduled_time' in updates:
-                set_clauses.append('scheduled_time = ?')
-                values.append(updates['scheduled_time'])
+            if "scheduled_time" in updates:
+                set_clauses.append("scheduled_time = ?")
+                values.append(updates["scheduled_time"])
 
             if not set_clauses:
                 return True
@@ -489,7 +520,9 @@ class TweetScheduler:
         finally:
             conn.close()
 
-    def get_all_scheduled_tweets(self, user_id: int, status: str = None) -> List[Dict]:
+    def get_all_scheduled_tweets(
+        self, user_id: int, status: str | None = None
+    ) -> List[Dict]:
         """
         Alias for get_scheduled_tweets for API compatibility.
 

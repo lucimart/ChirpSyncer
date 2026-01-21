@@ -1200,11 +1200,14 @@ def main():
     app = create_app()
     # Use environment variable for debug mode (defaults to False for security)
     debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    # Use socketio.run() for WebSocket support
     # nosemgrep: python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host
-    app.run(
+    socketio.run(
+        app,
         host="0.0.0.0",  # nosec B104 - binding to all interfaces intentional for containerized deployment
         port=5000,
         debug=debug_mode,
+        allow_unsafe_werkzeug=True,  # Allow Werkzeug in debug mode
     )
 
 
