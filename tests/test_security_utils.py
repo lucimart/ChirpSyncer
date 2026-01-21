@@ -15,7 +15,6 @@ import json
 import threading
 import tempfile
 import os
-from collections import defaultdict
 from unittest.mock import patch, MagicMock
 
 from app.auth.security_utils import (

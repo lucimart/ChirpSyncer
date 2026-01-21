@@ -4,7 +4,6 @@ Tests for Analytics Tracker (ANALYTICS-001)
 Test-Driven Development for Twitter analytics tracking and dashboard.
 Covers metric recording, retrieval, aggregations, and user isolation.
 """
-import os
 import pytest
 import sqlite3
 

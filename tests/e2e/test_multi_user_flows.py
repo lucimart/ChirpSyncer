@@ -15,10 +15,7 @@ Tests verify:
 """
 
 import pytest
-import json
 import sqlite3
-import hashlib
-from typing import Tuple
 
 
 # ============================================================================
