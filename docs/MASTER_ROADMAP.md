@@ -13,11 +13,13 @@
 
 ### Parcial / Pendiente
 - **Sync real-time jobs**: `/sync/start` es in-memory; no motor real.
-- **Search API filtros**: `search.py` no usa filtros persistentes (pendiente integración con `search_with_filters`).
-- **Feed Lab**: explainer usa datos simulados (`app/features/feed/explainer.py`).
 - **ML Scheduling**: `scheduling.py` responde con placeholders.
-- **WebSockets / Webhooks**: no implementados.
 - **Framework multi-plataforma + protocolos**: `app/protocols/*` no existe.
+
+### Completado recientemente
+- **Search API filtros**: ✅ Sprint D - Integrado `search_with_filters` con filtros de fecha, engagement, media y plataforma.
+- **Webhooks**: ✅ Sprint C - Webhooks de salida con firma HMAC-SHA256 y reintentos exponenciales.
+- **Feed Lab real**: ✅ Sprint E - Reemplazado datos mock con posts reales de `synced_posts`.
 
 ---
 
@@ -171,6 +173,7 @@ event: sync.progress
 ---
 
 ### Sprint C — Webhooks (in/out + integrados al producto)
+**Estado**: ✅ Implementado (HMAC signing + retry + UI)
 **Motivo**: Automatización real, integración con terceros.
 
 #### User Stories
@@ -210,6 +213,7 @@ GET /api/v1/webhooks/:id/deliveries
 ---
 
 ### Sprint D — Search filtros reales + enriquecimiento
+**Estado**: ✅ Implementado (date range, engagement, media, platform filters)
 **Motivo**: API search hoy no aplica filtros a DB.
 
 #### User Stories
@@ -235,6 +239,7 @@ GET /api/v1/webhooks/:id/deliveries
 ---
 
 ### Sprint E — Feed Lab real (no mock)
+**Estado**: ✅ Implementado (real posts + condition evaluation + scoring)
 **Motivo**: `explainer.py` usa sample posts.
 
 #### User Stories
