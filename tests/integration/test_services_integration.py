@@ -21,9 +21,7 @@ import sys
 import sqlite3
 import tempfile
 import time
-import json
-from unittest.mock import patch, MagicMock, Mock, call
-from datetime import datetime, timedelta
+from unittest.mock import patch, MagicMock, Mock
 import smtplib
 
 import pytest

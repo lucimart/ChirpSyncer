@@ -7,8 +7,6 @@ Covers metric recording, retrieval, aggregations, and user isolation.
 import os
 import pytest
 import sqlite3
-import time
-from datetime import datetime, timedelta
 
 
 @pytest.fixture

@@ -17,7 +17,6 @@ import sqlite3
 import shutil
 import tempfile
 import time
-import threading
 from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock
 

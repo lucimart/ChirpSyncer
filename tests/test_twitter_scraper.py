@@ -1,7 +1,6 @@
 """Test suite for twitter_scraper module using twscrape"""
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
-import asyncio
 from app.integrations.twitter_scraper import fetch_tweets
 
 @pytest.fixture

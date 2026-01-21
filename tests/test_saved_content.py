@@ -13,7 +13,6 @@ Comprehensive test suite for SavedContentManager with 60+ tests covering:
 - Edge cases and data persistence
 """
 import pytest
-import os
 import sqlite3
 import time
 from app.features.saved_content import SavedContentManager

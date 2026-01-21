@@ -8,7 +8,7 @@ Tests authentication decorators:
 """
 
 import pytest
-from flask import Flask, session
+from flask import Flask
 from markupsafe import escape
 from app.auth.auth_decorators import require_auth, require_admin, require_self_or_admin
 from app.auth.user_manager import UserManager

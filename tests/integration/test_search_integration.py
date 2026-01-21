@@ -28,9 +28,7 @@ import sys
 import sqlite3
 import time
 import hashlib
-from typing import Dict, List, Optional, Tuple
-from unittest.mock import patch, MagicMock
-from datetime import datetime, timedelta
+from typing import Optional
 
 import pytest
 

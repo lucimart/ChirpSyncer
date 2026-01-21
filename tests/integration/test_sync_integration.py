@@ -26,7 +26,6 @@ import os
 import sys
 import sqlite3
 import time
-import json
 import hashlib
 from unittest.mock import MagicMock, patch, call, ANY
 from typing import Dict, Tuple
