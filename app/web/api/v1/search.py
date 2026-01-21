@@ -19,11 +19,28 @@ def _get_search_engine():
     return SearchEngine(db_path)
 
 
+def _parse_date(date_str: str) -> int | None:
+    """Parse ISO date string to Unix timestamp."""
+    if not date_str:
+        return None
+    try:
+        from datetime import datetime
+
+        # Support both ISO format and simple date
+        if "T" in date_str:
+            dt = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+        else:
+            dt = datetime.strptime(date_str, "%Y-%m-%d")
+        return int(dt.timestamp())
+    except (ValueError, TypeError):
+        return None
+
+
 @search_bp.route("", methods=["GET"])
 @require_auth
 def search_posts():
     """
-    Search synced posts with full-text search.
+    Search synced posts with full-text search and filters.
 
     Query params:
         q: Search query (supports FTS5 syntax)
@@ -31,59 +48,94 @@ def search_posts():
         has_media: Filter by media presence (true/false)
         min_likes: Minimum likes count
         min_retweets: Minimum retweets count
-        date_from: Start date (ISO format)
-        date_to: End date (ISO format)
+        date_from: Start date (ISO format or YYYY-MM-DD)
+        date_to: End date (ISO format or YYYY-MM-DD)
         platform: Filter by platform (twitter/bluesky)
+        hashtag: Filter by hashtag (without #)
+        author: Filter by author username
     """
     query = request.args.get("q", "").strip()
     limit = min(int(request.args.get("limit", 50)), 100)
 
-    # Optional filters
-    has_media = request.args.get("has_media")
+    # Parse optional filters
+    has_media_param = request.args.get("has_media")
+    has_media = None
+    if has_media_param is not None:
+        has_media = has_media_param.lower() in ("true", "1", "yes")
+
     min_likes = request.args.get("min_likes", type=int)
     min_retweets = request.args.get("min_retweets", type=int)
-    date_from = request.args.get("date_from")
-    date_to = request.args.get("date_to")
+    date_from = _parse_date(request.args.get("date_from", ""))
+    date_to = _parse_date(request.args.get("date_to", ""))
     platform = request.args.get("platform")
+    hashtag = request.args.get("hashtag")
+    author = request.args.get("author")
 
     search_engine = _get_search_engine()
 
     try:
-        # Basic FTS search
-        results = search_engine.search(query, user_id=g.user.id, limit=limit * 2)  # Get extra for filtering
+        # Build filters dict for search_with_filters
+        filters = {}
 
-        # Apply additional filters in memory
-        filtered = []
-        for result in results:
-            # Get full post data from synced_posts if needed for filtering
-            if has_media is not None:
-                # Would need to join with synced_posts for this
-                pass
-            if min_likes is not None:
-                # Would need engagement data
-                pass
-            if min_retweets is not None:
-                # Would need engagement data
-                pass
+        if date_from is not None:
+            filters["date_from"] = date_from
+        if date_to is not None:
+            filters["date_to"] = date_to
+        if has_media is not None:
+            filters["has_media"] = has_media
+        if min_likes is not None:
+            filters["min_likes"] = min_likes
+        if min_retweets is not None:
+            filters["min_retweets"] = min_retweets
+        if hashtag:
+            filters["hashtags"] = [hashtag]
+        if author:
+            filters["author"] = author
 
-            filtered.append({
-                "id": result["tweet_id"],
-                "content": result["content"],
-                "created_at": result["posted_at"],
-                "platform": "twitter" if result["tweet_id"] and not result["tweet_id"].startswith("at://") else "bluesky",
-                "author": result["author"],
-                "hashtags": result["hashtags"].split() if result["hashtags"] else [],
-                "rank": result["rank"],
-            })
+        # Use search_with_filters for full filter support
+        results = search_engine.search_with_filters(
+            query=query, user_id=g.user.id, filters=filters if filters else None
+        )
 
-            if len(filtered) >= limit:
+        # Format results
+        formatted = []
+        for result in results[:limit]:
+            tweet_id = result["tweet_id"]
+            is_bluesky = tweet_id and tweet_id.startswith("at://")
+            result_platform = "bluesky" if is_bluesky else "twitter"
+
+            # Skip if platform filter doesn't match
+            if platform and result_platform != platform:
+                continue
+
+            formatted.append(
+                {
+                    "id": tweet_id,
+                    "content": result["content"],
+                    "created_at": result["posted_at"],
+                    "platform": result_platform,
+                    "author": result["author"],
+                    "hashtags": result["hashtags"].split()
+                    if result["hashtags"]
+                    else [],
+                    "rank": result["rank"],
+                    "has_media": result.get("has_media", False),
+                    "likes": result.get("likes", 0),
+                    "retweets": result.get("retweets", 0),
+                }
+            )
+
+            if len(formatted) >= limit:
                 break
 
-        return api_response({
-            "results": filtered,
-            "total": len(filtered),
-            "query": query,
-        })
+        return api_response(
+            {
+                "results": formatted,
+                "total": len(formatted),
+                "query": query,
+                "filters_applied": list(filters.keys()) if filters else [],
+            }
+        )
 
     except Exception as e:
         return api_error("SEARCH_ERROR", str(e), status=500)
@@ -121,9 +173,7 @@ def search_suggestions():
             if result["author"] and result["author"].lower().startswith(query.lower()):
                 suggestions.add(f"@{result['author']}")
 
-        return api_response({
-            "suggestions": list(suggestions)[:limit]
-        })
+        return api_response({"suggestions": list(suggestions)[:limit]})
 
     except Exception as e:
         return api_error("SUGGESTION_ERROR", str(e), status=500)

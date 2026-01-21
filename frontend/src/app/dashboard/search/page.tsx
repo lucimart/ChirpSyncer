@@ -250,12 +250,23 @@ function HighlightedContent({ content, query }: { content: string; query: string
 
 const PAGE_SIZE = 10;
 
+interface ExtendedFilters extends SearchFilters {
+  min_retweets?: number;
+  date_from?: string;
+  date_to?: string;
+  platform?: 'twitter' | 'bluesky';
+}
+
 export default function SearchPage() {
   const [query, setQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState<SearchFilters>({
+  const [filters, setFilters] = useState<ExtendedFilters>({
     has_media: false,
     min_likes: undefined,
+    min_retweets: undefined,
+    date_from: undefined,
+    date_to: undefined,
+    platform: undefined,
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -269,6 +280,10 @@ export default function SearchPage() {
         limit: 100,
         has_media: filters.has_media || undefined,
         min_likes: filters.min_likes,
+        min_retweets: filters.min_retweets,
+        date_from: filters.date_from,
+        date_to: filters.date_to,
+        platform: filters.platform,
       });
       if (!response.success || !response.data) {
         throw new Error(response.error || 'Search failed');
@@ -370,6 +385,71 @@ export default function SearchPage() {
               }
               placeholder="0"
             />
+          </FilterGroup>
+          <FilterGroup>
+            <Input
+              label="Minimum retweets"
+              type="number"
+              value={filters.min_retweets || ''}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  min_retweets: e.target.value ? parseInt(e.target.value) : undefined,
+                }))
+              }
+              placeholder="0"
+            />
+          </FilterGroup>
+          <FilterGroup>
+            <Input
+              label="From date"
+              type="date"
+              value={filters.date_from || ''}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  date_from: e.target.value || undefined,
+                }))
+              }
+            />
+          </FilterGroup>
+          <FilterGroup>
+            <Input
+              label="To date"
+              type="date"
+              value={filters.date_to || ''}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  date_to: e.target.value || undefined,
+                }))
+              }
+            />
+          </FilterGroup>
+          <FilterGroup>
+            <FilterLabel style={{ marginBottom: '4px', display: 'block' }}>Platform</FilterLabel>
+            <select
+              value={filters.platform || ''}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  platform: (e.target.value as 'twitter' | 'bluesky') || undefined,
+                }))
+              }
+              style={{
+                width: '100%',
+                height: '40px',
+                padding: '8px 12px',
+                fontSize: '14px',
+                border: '1px solid #e2e8f0',
+                borderRadius: '6px',
+                backgroundColor: 'white',
+              }}
+            >
+              <option value="">All platforms</option>
+              <option value="twitter">Twitter</option>
+              <option value="bluesky">Bluesky</option>
+            </select>
           </FilterGroup>
         </FiltersGrid>
       </FiltersCard>
