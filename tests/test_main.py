@@ -752,13 +752,22 @@ class TestEnsureAdminUserCreation:
         """Test password generation when ADMIN_PASSWORD not set"""
         from app.main import ensure_admin_user
 
-        with patch('app.main.UserManager') as mock_um,              patch('app.main.get_master_key', return_value=b'test_key'),              patch('app.main.CredentialManager') as mock_cm,              patch('app.main.os.getenv', return_value=None),              patch('app.main.TWITTER_USERNAME', None),              patch('app.main.TWITTER_PASSWORD', None),              patch('app.main.TWITTER_API_KEY', None),              patch('app.main.BSKY_USERNAME', None),              patch('app.main.BSKY_PASSWORD', None):
-            
+        with patch('app.main.UserManager') as mock_um, \
+             patch('app.main.get_master_key', return_value=b'test_key'), \
+             patch('app.main.CredentialManager') as mock_cm, \
+             patch('app.main.os.getenv', return_value=None), \
+             patch('app.main.TWITTER_USERNAME', None), \
+             patch('app.main.TWITTER_PASSWORD', None), \
+             patch('app.main.TWITTER_API_KEY', None), \
+             patch('app.main.BSKY_USERNAME', None), \
+             patch('app.main.BSKY_PASSWORD', None), \
+             patch('getpass.getpass', return_value='GeneratedPass123!'):
+
             mock_um.return_value.list_users.return_value = []
             mock_um.return_value.create_user.return_value = 1
-            
+
             ensure_admin_user()
-            
+
             mock_um.return_value.create_user.assert_called_once()
 
 
@@ -1030,17 +1039,18 @@ def test_ensure_admin_user_creates_admin():
 def test_ensure_admin_user_generates_password():
     """Test ensure_admin_user generates password when not in env"""
     from app.main import ensure_admin_user
-    
+
     with patch.dict('os.environ', {'SECRET_KEY': 'test_secret_key'}, clear=True):
         with patch('app.main.UserManager') as mock_um:
             with patch('app.main.CredentialManager'):
-                mock_um.return_value.list_users.return_value = []
-                mock_um.return_value.create_user.return_value = 1
-                
-                ensure_admin_user()
-                
-                # Should have created user with generated password
-                mock_um.return_value.create_user.assert_called_once()
+                with patch('getpass.getpass', return_value='GeneratedPass123!'):
+                    mock_um.return_value.list_users.return_value = []
+                    mock_um.return_value.create_user.return_value = 1
+
+                    ensure_admin_user()
+
+                    # Should have created user with generated password
+                    mock_um.return_value.create_user.assert_called_once()
 
 
 def test_ensure_admin_user_exception():
