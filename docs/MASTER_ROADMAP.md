@@ -11,11 +11,11 @@
 - **Auth + Credentials + Sync + Cleanup + Analytics + Feed + Workspaces + Export**: endpoints existentes.
 - **E2E/API tests**: `tests/e2e/` y `tests/e2e/playwright/`.
 
-### Parcial / Pendiente
-- **Sync real-time jobs**: `/sync/start` es in-memory; no motor real.
+### Pendiente (Backlog)
 - **Protocolos descentralizados adicionales**: DSNP, SSB, Matrix (Mastodon/ActivityPub ya implementado).
 
 ### Completado recientemente
+- **Performance & Archival**: ✅ Sprint J - ArchivalManager, @cached decorator, archival Celery task, archived indicator in search.
 - **Search API filtros**: ✅ Sprint D - Integrado `search_with_filters` con filtros de fecha, engagement, media y plataforma.
 - **Webhooks**: ✅ Sprint C - Webhooks de salida con firma HMAC-SHA256 y reintentos exponenciales.
 - **Feed Lab real**: ✅ Sprint E - Reemplazado datos mock con posts reales de `synced_posts`.
@@ -24,6 +24,7 @@
 - **Mastodon/ActivityPub**: ✅ Sprint H - MastodonConnector con full CRUD, HTML stripping, instance-specific limits.
 - **WebSockets Real-time**: ✅ Sprint B - Flask-SocketIO backend, RealtimeProvider, Toast notifications, ConnectionStatus.
 - **Core Infrastructure**: ✅ Sprint Infra - Redis client, Celery app, sync tasks, health check, docker-compose.
+- **Sync Engine real**: ✅ Sprint A - Celery-based sync jobs con persistencia y status tracking.
 
 ---
 
