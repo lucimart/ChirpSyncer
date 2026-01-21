@@ -81,7 +81,8 @@ def setup_db(temp_db):
             total_syncs INTEGER DEFAULT 0,
             successful_syncs INTEGER DEFAULT 0,
             failed_syncs INTEGER DEFAULT 0,
-            total_duration_ms INTEGER DEFAULT 0,
+            total_posts INTEGER DEFAULT 0,
+            created_at INTEGER NOT NULL,
             UNIQUE(date, user_id)
         )
     """

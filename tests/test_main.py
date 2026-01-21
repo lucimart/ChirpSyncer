@@ -1,3 +1,4 @@
+import pytest
 import sys
 import time
 from unittest.mock import patch, MagicMock
@@ -483,3 +484,583 @@ def test_sync_twitter_to_bluesky_handles_threads():
 
     # Assert: save_synced_post was called for each tweet in thread
     assert db_handler_mock.save_synced_post.call_count == 2
+
+
+# ===== SPRINT 6: Multi-User Support Tests =====
+
+class TestGetMasterKey:
+    """Tests for get_master_key function"""
+
+    def test_get_master_key_success(self):
+        """Test that get_master_key returns 32-byte key when SECRET_KEY is set"""
+        from app.main import get_master_key
+        with patch.dict('os.environ', {'SECRET_KEY': 'test-secret-key'}):
+            key = get_master_key()
+            assert len(key) == 32
+            assert isinstance(key, bytes)
+
+    def test_get_master_key_raises_on_missing_secret(self):
+        """Test that get_master_key raises ValueError when SECRET_KEY is missing"""
+        from app.main import get_master_key
+        with patch.dict('os.environ', {}, clear=True):
+            # Remove SECRET_KEY if it exists
+            import os
+            if 'SECRET_KEY' in os.environ:
+                del os.environ['SECRET_KEY']
+            try:
+                get_master_key()
+                assert False, "Expected ValueError"
+            except ValueError as e:
+                assert "SECRET_KEY" in str(e)
+
+
+class TestInitMultiUserSystem:
+    """Tests for init_multi_user_system function"""
+
+    def test_init_multi_user_system_creates_tables(self):
+        """Test that init_multi_user_system initializes all required tables"""
+        from app.main import init_multi_user_system
+        with patch('app.main.UserManager') as mock_um:
+            with patch('app.main.CredentialManager') as mock_cm:
+                with patch('app.main.UserSettings') as mock_us:
+                    with patch('app.main.get_master_key', return_value=b'x' * 32):
+                        init_multi_user_system()
+                        mock_um.return_value.init_db.assert_called_once()
+                        mock_cm.return_value.init_db.assert_called_once()
+                        mock_us.return_value.init_db.assert_called_once()
+
+
+class TestSyncBlueskyToTwitterNoCredentials:
+    """Test sync_bluesky_to_twitter without credentials"""
+
+    def test_sync_bluesky_to_twitter_skips_without_api_key(self):
+        """Test that sync skips gracefully when Twitter API key is missing"""
+        bluesky_handler_mock.reset_mock()
+        twitter_handler_mock.reset_mock()
+
+        with patch('app.main.TWITTER_API_KEY', None):
+            sync_bluesky_to_twitter()
+
+        # Should not fetch any posts or attempt to sync
+        bluesky_handler_mock.fetch_posts_from_bluesky.assert_not_called()
+        twitter_handler_mock.post_to_twitter.assert_not_called()
+
+
+
+class TestEnsureAdminUser:
+    """Tests for ensure_admin_user function"""
+
+    def test_ensure_admin_user_skips_if_users_exist(self):
+        """Test that ensure_admin_user skips creation if users already exist"""
+        from app.main import ensure_admin_user
+
+        mock_user = MagicMock()
+        mock_user.id = 1
+        mock_user.username = "existing_user"
+
+        with patch("app.main.UserManager") as mock_um:
+            mock_um.return_value.list_users.return_value = [mock_user]
+            ensure_admin_user()
+            mock_um.return_value.create_user.assert_not_called()
+
+
+class TestSyncUserTwitterToBluesky:
+    """Tests for sync_user_twitter_to_bluesky function"""
+
+    def test_sync_user_twitter_to_bluesky_syncs_tweets(self):
+        """Test that sync_user_twitter_to_bluesky syncs tweets for a user"""
+        from app.main import sync_user_twitter_to_bluesky
+
+        twitter_scraper_mock.reset_mock()
+        bluesky_handler_mock.reset_mock()
+        db_handler_mock.reset_mock()
+        db_handler_mock.should_sync_post.side_effect = None
+        twitter_scraper_mock.fetch_tweets.side_effect = None
+
+        mock_user = MagicMock()
+        mock_user.id = 1
+        mock_user.username = "testuser"
+
+        mock_tweet = MagicMock()
+        mock_tweet.id = "123456"
+        mock_tweet.text = "Test tweet"
+        mock_tweet._tweet = MagicMock()
+
+        twitter_scraper_mock.fetch_tweets.return_value = [mock_tweet]
+        db_handler_mock.should_sync_post.return_value = True
+        bluesky_handler_mock.post_to_bluesky.return_value = "at://test/uri"
+
+        twitter_creds = {"username": "twitter_user", "password": "twitter_pass"}
+        bluesky_creds = {"username": "bsky_user", "password": "bsky_pass"}
+
+        with patch("app.main.asyncio.run", return_value=False):
+            sync_user_twitter_to_bluesky(mock_user, twitter_creds, bluesky_creds)
+
+        bluesky_handler_mock.login_to_bluesky.assert_called_once()
+        bluesky_handler_mock.post_to_bluesky.assert_called_once_with("Test tweet")
+
+
+class TestSyncUserBlueskyToTwitter:
+    """Tests for sync_user_bluesky_to_twitter function"""
+
+    def test_sync_user_bluesky_to_twitter_skips_without_api_key(self):
+        """Test that sync skips when user has no Twitter API credentials"""
+        from app.main import sync_user_bluesky_to_twitter
+
+        bluesky_handler_mock.reset_mock()
+        twitter_handler_mock.reset_mock()
+
+        mock_user = MagicMock()
+        mock_user.id = 1
+        mock_user.username = "testuser"
+
+        twitter_api_creds = {}
+        bluesky_creds = {"username": "bsky_user", "password": "bsky_pass"}
+
+        sync_user_bluesky_to_twitter(mock_user, twitter_api_creds, bluesky_creds)
+
+        bluesky_handler_mock.fetch_posts_from_bluesky.assert_not_called()
+
+    def test_sync_user_bluesky_to_twitter_syncs_posts(self):
+        """Test that sync_user_bluesky_to_twitter syncs posts for a user"""
+        from app.main import sync_user_bluesky_to_twitter
+
+        bluesky_handler_mock.reset_mock()
+        twitter_handler_mock.reset_mock()
+        db_handler_mock.reset_mock()
+        db_handler_mock.should_sync_post.side_effect = None
+
+        mock_user = MagicMock()
+        mock_user.id = 1
+        mock_user.username = "testuser"
+
+        mock_post = MagicMock()
+        mock_post.uri = "at://test/post/123"
+        mock_post.text = "Test bluesky post"
+
+        bluesky_handler_mock.fetch_posts_from_bluesky.return_value = [mock_post]
+        db_handler_mock.should_sync_post.return_value = True
+        twitter_handler_mock.post_to_twitter.return_value = "987654"
+
+        twitter_api_creds = {"api_key": "key", "api_secret": "secret"}
+        bluesky_creds = {"username": "bsky_user", "password": "bsky_pass"}
+
+        sync_user_bluesky_to_twitter(mock_user, twitter_api_creds, bluesky_creds)
+
+        twitter_handler_mock.post_to_twitter.assert_called_once_with("Test bluesky post")
+
+
+class TestSyncAllUsers:
+    """Tests for sync_all_users function"""
+
+    def test_sync_all_users_skips_when_no_users(self):
+        """Test that sync_all_users handles empty user list"""
+        from app.main import sync_all_users
+
+        with patch("app.main.UserManager") as mock_um:
+            with patch("app.main.CredentialManager") as mock_cm:
+                with patch("app.main.UserSettings") as mock_us:
+                    with patch("app.main.get_master_key", return_value=b"x" * 32):
+                        mock_um.return_value.list_users.return_value = []
+
+                        sync_all_users()
+
+                        mock_um.return_value.list_users.assert_called_once_with(active_only=True)
+
+    def test_sync_all_users_skips_user_without_bluesky_creds(self):
+        """Test that sync_all_users skips users without Bluesky credentials"""
+        from app.main import sync_all_users
+
+        mock_user = MagicMock()
+        mock_user.id = 1
+        mock_user.username = "testuser"
+
+        with patch("app.main.UserManager") as mock_um:
+            with patch("app.main.CredentialManager") as mock_cm:
+                with patch("app.main.UserSettings") as mock_us:
+                    with patch("app.main.get_master_key", return_value=b"x" * 32):
+                        mock_um.return_value.list_users.return_value = [mock_user]
+                        mock_us.return_value.get_all.return_value = {}
+                        mock_cm.return_value.get_credentials.return_value = None
+
+                        sync_all_users()
+
+                        mock_cm.return_value.get_credentials.assert_any_call(1, "bluesky", "api")
+
+
+class TestMainMultiUserMode:
+    """Tests for main() in multi-user mode"""
+
+    def test_main_multi_user_mode_initializes_system(self):
+        """Test that main() in multi-user mode initializes multi-user system"""
+        validation_mock.reset_mock()
+        db_handler_mock.reset_mock()
+
+        with patch("app.main.MULTI_USER_ENABLED", True):
+            with patch("app.main.init_multi_user_system") as mock_init:
+                with patch("app.main.ensure_admin_user") as mock_admin:
+                    with patch("app.main.sync_all_users") as mock_sync:
+                        with patch("app.main.time.sleep") as mock_sleep:
+                            mock_sleep.side_effect = KeyboardInterrupt()
+
+                            try:
+                                main()
+                            except KeyboardInterrupt:
+                                pass
+
+                            mock_init.assert_called_once()
+                            mock_admin.assert_called_once()
+
+    def test_main_multi_user_mode_handles_init_error(self):
+        """Test that main() handles multi-user system init errors"""
+        validation_mock.reset_mock()
+
+        with patch("app.main.MULTI_USER_ENABLED", True):
+            with patch("app.main.init_multi_user_system") as mock_init:
+                mock_init.side_effect = Exception("Init failed")
+
+                try:
+                    main()
+                    assert False, "Expected exception"
+                except Exception as e:
+                    assert "Init failed" in str(e)
+
+
+class TestEnsureAdminUserCreation:
+    """Tests for ensure_admin_user when no users exist"""
+
+    def test_ensure_admin_user_creates_admin_when_no_users(self):
+        """Test admin user creation when no users exist"""
+        from app.main import ensure_admin_user
+
+        with patch('app.main.UserManager') as mock_um,              patch('app.main.get_master_key', return_value=b'test_key'),              patch('app.main.CredentialManager') as mock_cm,              patch('app.main.os.getenv') as mock_getenv,              patch('app.main.TWITTER_USERNAME', 'twitter_user'),              patch('app.main.TWITTER_PASSWORD', 'twitter_pass'),              patch('app.main.TWITTER_EMAIL', 'twitter@email.com'),              patch('app.main.TWITTER_EMAIL_PASSWORD', 'email_pass'),              patch('app.main.TWITTER_API_KEY', 'api_key'),              patch('app.main.BSKY_USERNAME', 'bsky_user'),              patch('app.main.BSKY_PASSWORD', 'bsky_pass'):
+            
+            mock_um.return_value.list_users.return_value = []
+            mock_um.return_value.create_user.return_value = 1
+            mock_getenv.side_effect = lambda k, default=None: {
+                'ADMIN_PASSWORD': 'TestP@ss123',
+                'ADMIN_EMAIL': 'admin@test.com'
+            }.get(k, default)
+            
+            ensure_admin_user()
+            
+            mock_um.return_value.create_user.assert_called_once()
+            assert mock_cm.return_value.save_credentials.call_count >= 1
+
+
+    def test_ensure_admin_user_generates_password_if_not_set(self):
+        """Test password generation when ADMIN_PASSWORD not set"""
+        from app.main import ensure_admin_user
+
+        with patch('app.main.UserManager') as mock_um, \
+             patch('app.main.get_master_key', return_value=b'test_key'), \
+             patch('app.main.CredentialManager') as mock_cm, \
+             patch('app.main.os.getenv', return_value=None), \
+             patch('app.main.TWITTER_USERNAME', None), \
+             patch('app.main.TWITTER_PASSWORD', None), \
+             patch('app.main.TWITTER_API_KEY', None), \
+             patch('app.main.BSKY_USERNAME', None), \
+             patch('app.main.BSKY_PASSWORD', None), \
+             patch('getpass.getpass', return_value='GeneratedPass123!'):
+
+            mock_um.return_value.list_users.return_value = []
+            mock_um.return_value.create_user.return_value = 1
+
+            ensure_admin_user()
+
+            mock_um.return_value.create_user.assert_called_once()
+
+
+class TestSyncAllUsersPaths:
+    """Additional tests for sync_all_users edge cases"""
+
+    def test_sync_all_users_with_twitter_disabled(self):
+        """Test sync when Twitter to Bluesky is disabled"""
+        from app.main import sync_all_users
+
+        mock_user = MagicMock()
+        mock_user.id = 1
+        mock_user.username = 'testuser'
+
+        mock_settings = {
+            'twitter_to_bluesky_enabled': False,
+            'bluesky_to_twitter_enabled': True
+        }
+
+        with patch('app.main.UserManager') as mock_um,              patch('app.main.get_master_key', return_value=b'test_key'),              patch('app.main.CredentialManager') as mock_cm,              patch('app.main.UserSettings') as mock_us,              patch('app.main.sync_user_twitter_to_bluesky') as mock_tw_to_bsky,              patch('app.main.sync_user_bluesky_to_twitter') as mock_bsky_to_tw,              patch('app.main.log_audit'):
+            
+            mock_um.return_value.list_users.return_value = [mock_user]
+            mock_us.return_value.get_all.return_value = mock_settings
+            mock_cm.return_value.get_credentials.side_effect = [
+                {'username': 'bsky_user', 'password': 'bsky_pass'},
+                None,
+                {'api_key': 'key', 'api_secret': 'secret'}
+            ]
+            
+            sync_all_users()
+            
+            mock_tw_to_bsky.assert_not_called()
+
+
+    def test_sync_all_users_with_sync_error(self):
+        """Test sync continues after user error"""
+        from app.main import sync_all_users
+
+        mock_user1 = MagicMock()
+        mock_user1.id = 1
+        mock_user1.username = 'user1'
+
+        mock_user2 = MagicMock()
+        mock_user2.id = 2
+        mock_user2.username = 'user2'
+
+        with patch('app.main.UserManager') as mock_um,              patch('app.main.get_master_key', return_value=b'test_key'),              patch('app.main.CredentialManager') as mock_cm,              patch('app.main.UserSettings') as mock_us,              patch('app.main.sync_user_twitter_to_bluesky', side_effect=Exception('Sync failed')),              patch('app.main.log_audit'):
+            
+            mock_um.return_value.list_users.return_value = [mock_user1, mock_user2]
+            mock_us.return_value.get_all.return_value = {
+                'twitter_to_bluesky_enabled': True,
+                'bluesky_to_twitter_enabled': False
+            }
+            mock_cm.return_value.get_credentials.side_effect = [
+                {'username': 'bsky_user', 'password': 'bsky_pass'},
+                {'username': 'tw_user', 'password': 'tw_pass'},
+                None,
+                {'username': 'bsky_user', 'password': 'bsky_pass'},
+                {'username': 'tw_user', 'password': 'tw_pass'},
+                None
+            ]
+            
+            sync_all_users()
+
+
+class TestMainSingleUserMode:
+    """Tests for main() in single-user mode"""
+
+    def test_main_single_user_mode_with_api_key(self):
+        """Test single-user mode with Twitter API key"""
+        from app.main import main
+
+        with patch('app.main.MULTI_USER_ENABLED', False),              patch('app.main.TWITTER_API_KEY', 'api_key'),              patch('app.main.validate_credentials'),              patch('app.main.migrate_database'),              patch('app.main.login_to_bluesky'),              patch('app.main.sync_twitter_to_bluesky'),              patch('app.main.sync_bluesky_to_twitter'),              patch('app.main.time.sleep', side_effect=KeyboardInterrupt):
+            
+            main()
+
+
+    def test_main_single_user_mode_without_api_key(self):
+        """Test single-user mode without Twitter API key"""
+        from app.main import main
+
+        with patch('app.main.MULTI_USER_ENABLED', False),              patch('app.main.TWITTER_API_KEY', None),              patch('app.main.validate_credentials'),              patch('app.main.migrate_database'),              patch('app.main.login_to_bluesky'),              patch('app.main.sync_twitter_to_bluesky'),              patch('app.main.sync_bluesky_to_twitter'),              patch('app.main.time.sleep', side_effect=KeyboardInterrupt):
+            
+            main()
+
+
+    def test_main_single_user_mode_sync_error_recovery(self):
+        """Test single-user mode handles sync error and recovers"""
+        from app.main import main
+
+        call_count = [0]
+        def mock_sleep(seconds):
+            call_count[0] += 1
+            if call_count[0] > 1:
+                raise KeyboardInterrupt
+            return None
+
+        with patch('app.main.MULTI_USER_ENABLED', False),              patch('app.main.TWITTER_API_KEY', None),              patch('app.main.validate_credentials'),              patch('app.main.migrate_database'),              patch('app.main.login_to_bluesky'),              patch('app.main.sync_twitter_to_bluesky', side_effect=Exception('Sync error')),              patch('app.main.sync_bluesky_to_twitter'),              patch('app.main.time.sleep', side_effect=mock_sleep):
+            
+            main()
+
+
+# ===== Additional Coverage Tests =====
+
+def test_sync_twitter_to_bluesky_thread_fallback():
+    """Test fallback when thread cannot be fetched"""
+    twitter_scraper_mock.reset_mock()
+    bluesky_handler_mock.reset_mock()
+    db_handler_mock.reset_mock()
+    
+    # Create mock tweet
+    mock_tweet = MagicMock()
+    mock_tweet.id = "12345"
+    mock_tweet.text = "Test tweet"
+    mock_tweet._tweet = MagicMock()
+    
+    twitter_scraper_mock.fetch_tweets.return_value = [mock_tweet]
+    db_handler_mock.should_sync_post.return_value = True
+    twitter_scraper_mock.is_thread.return_value = True
+    twitter_scraper_mock.fetch_thread.return_value = []  # Empty thread = fallback
+    bluesky_handler_mock.post_to_bluesky.return_value = "bsky://uri"
+    
+    with patch("app.main.asyncio.run") as mock_run:
+        mock_run.side_effect = [True, []]  # is_thread=True, fetch_thread=[]
+        
+        sync_twitter_to_bluesky()
+    
+    bluesky_handler_mock.post_to_bluesky.assert_called_once()
+
+
+def test_sync_twitter_to_bluesky_exception_fallback():
+    """Test exception handling with fallback to single tweet"""
+    twitter_scraper_mock.reset_mock()
+    bluesky_handler_mock.reset_mock()
+    db_handler_mock.reset_mock()
+    
+    mock_tweet = MagicMock()
+    mock_tweet.id = "12345"
+    mock_tweet.text = "Test tweet"
+    mock_tweet._tweet = MagicMock()
+    
+    twitter_scraper_mock.fetch_tweets.return_value = [mock_tweet]
+    db_handler_mock.should_sync_post.return_value = True
+    bluesky_handler_mock.post_to_bluesky.return_value = "bsky://uri"
+    
+    with patch("app.main.asyncio.run") as mock_run:
+        mock_run.side_effect = Exception("Thread check failed")
+        
+        sync_twitter_to_bluesky()
+    
+    # Fallback should post as single tweet
+    bluesky_handler_mock.post_to_bluesky.assert_called()
+
+
+def test_sync_twitter_to_bluesky_complete_failure():
+    """Test complete failure when even fallback fails"""
+    twitter_scraper_mock.reset_mock()
+    bluesky_handler_mock.reset_mock()
+    db_handler_mock.reset_mock()
+    
+    mock_tweet = MagicMock()
+    mock_tweet.id = "12345"
+    mock_tweet.text = "Test tweet"
+    mock_tweet._tweet = MagicMock()
+    
+    twitter_scraper_mock.fetch_tweets.return_value = [mock_tweet]
+    db_handler_mock.should_sync_post.return_value = True
+    bluesky_handler_mock.post_to_bluesky.side_effect = Exception("Post failed")
+    
+    with patch("app.main.asyncio.run") as mock_run:
+        mock_run.side_effect = Exception("Thread check failed")
+        
+        # Should not raise, just log error
+        sync_twitter_to_bluesky()
+
+
+def test_sync_bluesky_to_twitter_exception():
+    """Test exception handling in bluesky to twitter sync"""
+    bluesky_handler_mock.reset_mock()
+    twitter_handler_mock.reset_mock()
+    db_handler_mock.reset_mock()
+    
+    mock_post = MagicMock()
+    mock_post.uri = "at://did/post/123"
+    mock_post.text = "Test post"
+    
+    bluesky_handler_mock.fetch_posts_from_bluesky.return_value = [mock_post]
+    db_handler_mock.should_sync_post.return_value = True
+    twitter_handler_mock.post_to_twitter.side_effect = Exception("Twitter API error")
+    
+    # Should not raise
+    sync_bluesky_to_twitter()
+
+
+def test_get_master_key():
+    """Test get_master_key returns correct key"""
+    from app.main import get_master_key
+    
+    with patch.dict('os.environ', {'SECRET_KEY': 'test_secret_key'}):
+        key = get_master_key()
+        assert len(key) == 32  # SHA-256 = 32 bytes
+        assert isinstance(key, bytes)
+
+
+def test_get_master_key_missing():
+    """Test get_master_key raises when SECRET_KEY missing"""
+    from app.main import get_master_key
+    
+    with patch.dict('os.environ', {}, clear=True):
+        with pytest.raises(ValueError) as exc_info:
+            get_master_key()
+        assert 'SECRET_KEY' in str(exc_info.value)
+
+
+def test_init_multi_user_system():
+    """Test init_multi_user_system initializes all components"""
+    from app.main import init_multi_user_system
+    
+    with patch.dict('os.environ', {'SECRET_KEY': 'test_secret_key'}):
+        with patch('app.main.UserManager') as mock_um:
+            with patch('app.main.CredentialManager') as mock_cm:
+                with patch('app.main.UserSettings') as mock_us:
+                    init_multi_user_system()
+                    
+                    mock_um.return_value.init_db.assert_called_once()
+                    mock_cm.return_value.init_db.assert_called_once()
+                    mock_us.return_value.init_db.assert_called_once()
+
+
+def test_init_multi_user_system_exception():
+    """Test init_multi_user_system handles exceptions"""
+    from app.main import init_multi_user_system
+    
+    with patch.dict('os.environ', {'SECRET_KEY': 'test_secret_key'}):
+        with patch('app.main.UserManager') as mock_um:
+            mock_um.return_value.init_db.side_effect = Exception("DB error")
+            
+            with pytest.raises(Exception):
+                init_multi_user_system()
+
+
+def test_ensure_admin_user_existing_users():
+    """Test ensure_admin_user skips when users exist"""
+    from app.main import ensure_admin_user
+    
+    with patch('app.main.UserManager') as mock_um:
+        mock_um.return_value.list_users.return_value = [{'id': 1, 'username': 'admin'}]
+        
+        ensure_admin_user()
+        
+        mock_um.return_value.create_user.assert_not_called()
+
+
+def test_ensure_admin_user_creates_admin():
+    """Test ensure_admin_user creates admin when no users"""
+    from app.main import ensure_admin_user
+    
+    with patch.dict('os.environ', {'SECRET_KEY': 'test_secret_key', 'ADMIN_PASSWORD': 'testpass'}):
+        with patch('app.main.UserManager') as mock_um:
+            with patch('app.main.CredentialManager'):
+                mock_um.return_value.list_users.return_value = []
+                mock_um.return_value.create_user.return_value = 1
+                
+                ensure_admin_user()
+                
+                mock_um.return_value.create_user.assert_called_once()
+
+
+def test_ensure_admin_user_generates_password():
+    """Test ensure_admin_user generates password when not in env"""
+    from app.main import ensure_admin_user
+
+    with patch.dict('os.environ', {'SECRET_KEY': 'test_secret_key'}, clear=True):
+        with patch('app.main.UserManager') as mock_um:
+            with patch('app.main.CredentialManager'):
+                with patch('getpass.getpass', return_value='GeneratedPass123!'):
+                    mock_um.return_value.list_users.return_value = []
+                    mock_um.return_value.create_user.return_value = 1
+
+                    ensure_admin_user()
+
+                    # Should have created user with generated password
+                    mock_um.return_value.create_user.assert_called_once()
+
+
+def test_ensure_admin_user_exception():
+    """Test ensure_admin_user handles exceptions"""
+    from app.main import ensure_admin_user
+    
+    with patch.dict('os.environ', {'SECRET_KEY': 'test_secret_key', 'ADMIN_PASSWORD': 'testpass'}):
+        with patch('app.main.UserManager') as mock_um:
+            mock_um.return_value.list_users.return_value = []
+            mock_um.return_value.create_user.side_effect = Exception("User creation failed")
+            
+            with pytest.raises(Exception):
+                ensure_admin_user()

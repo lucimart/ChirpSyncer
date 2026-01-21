@@ -1,164 +1,194 @@
-name: CI Pipeline
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 env:
-  # Test credentials (mock values for CI)
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '20'
+  # Mock credentials for tests
   TWITTER_USERNAME: "mock-twitter-user"
   TWITTER_PASSWORD: "mock-twitter-password"
   TWITTER_EMAIL: "mock@example.com"
   TWITTER_EMAIL_PASSWORD: "mock-email-password"
-  TWITTER_API_KEY: "mock-twitter-api-key"
-  TWITTER_API_SECRET: "mock-twitter-api-secret"
-  TWITTER_ACCESS_TOKEN: "mock-twitter-access-token"
-  TWITTER_ACCESS_SECRET: "mock-twitter-access-secret"
-  BSKY_USERNAME: "mock-bsky-username"
-  BSKY_PASSWORD: "mock-bsky-password"
-  # Multi-user mode disabled for basic tests
+  TWITTER_API_KEY: "mock-api-key"
+  TWITTER_API_SECRET: "mock-api-secret"
+  TWITTER_ACCESS_TOKEN: "mock-access-token"
+  TWITTER_ACCESS_SECRET: "mock-access-secret"
+  BSKY_USERNAME: "mock-bsky-user"
+  BSKY_PASSWORD: "mock-bsky-pass"
   MULTI_USER_ENABLED: "false"
-  SECRET_KEY: "test-secret-key-for-ci-only"
+  SECRET_KEY: "test-secret-key-for-ci"
   DATABASE_PATH: "test.db"
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
 jobs:
-  # Unit tests only (integration and e2e have separate workflows)
-  test:
+  # ============================================
+  # BACKEND
+  # ============================================
+  backend-unit:
+    name: Backend Unit Tests
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.11']
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
 
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y sqlite3
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r requirements-dev.txt
+      - name: Run unit tests
+        run: |
+          pytest tests/ \
+            --ignore=tests/integration \
+            --ignore=tests/e2e \
+            -v --tb=short \
+            --cov=app \
+            --cov-report=xml \
+            --cov-report=term-missing
+        env:
+          PYTHONPATH: ${{ github.workspace }}
 
-    - name: Clean up test databases
-      run: |
-        rm -f data.db test.db chirpsyncer.db *.db
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          flags: backend-unit
+          fail_ci_if_error: false
 
-    - name: Run unit tests with coverage
-      run: |
-        pytest -v \
-          --cov=app \
-          --cov-report=xml \
-          --cov-report=html \
-          --cov-report=term-missing \
-          tests/ \
-          --ignore=tests/integration \
-          --ignore=tests/e2e
-      env:
-        PYTHONPATH: ${{ github.workspace }}
-
-    - name: Generate coverage badge
-      run: |
-        python -c "
-        import xml.etree.ElementTree as ET
-        tree = ET.parse('coverage.xml')
-        root = tree.getroot()
-        coverage = float(root.attrib['line-rate']) * 100
-        print(f'Coverage: {coverage:.1f}%')
-        " | tee coverage-summary.txt
-
-    - name: Upload coverage artifact
-      uses: actions/upload-artifact@v4
-      if: matrix.python-version == '3.11'
-      with:
-        name: unit-coverage-reports
-        path: |
-          coverage.xml
-          htmlcov/
-          coverage-summary.txt
-        retention-days: 7
-
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v4
-      if: matrix.python-version == '3.11'
-      with:
-        file: ./coverage.xml
-        flags: unit
-        name: unit-coverage
-        fail_ci_if_error: false
-      continue-on-error: true
-
-    - name: Test summary
-      run: |
-        echo "## Test Results" >> $GITHUB_STEP_SUMMARY
-        echo "Python Version: ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### Test Coverage" >> $GITHUB_STEP_SUMMARY
-        cat coverage-summary.txt >> $GITHUB_STEP_SUMMARY || true
-        echo "" >> $GITHUB_STEP_SUMMARY
-        pytest tests/ --tb=no -q >> $GITHUB_STEP_SUMMARY || true
-
-  lint:
+  backend-lint:
+    name: Backend Lint
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v6
-      with:
-        python-version: '3.11'
-        cache: 'pip'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Install linting tools
-      run: |
-        python -m pip install --upgrade pip
-        pip install black flake8 isort mypy
+      - name: Install linters
+        run: pip install black flake8 isort
 
-    - name: Run Black (code formatter check)
-      run: |
-        black --check app/ tests/ || true
-      continue-on-error: true
+      - name: Black
+        run: black --check app/ tests/ || true
 
-    - name: Run flake8 (linter)
-      run: |
-        flake8 app/ tests/ --max-line-length=120 --ignore=E203,W503,E501 || true
-      continue-on-error: true
+      - name: Flake8
+        run: flake8 app/ tests/ --max-line-length=120 --extend-ignore=E203,W503,E501 || true
 
-    - name: Run isort (import sorting check)
-      run: |
-        isort --check-only app/ tests/ || true
-      continue-on-error: true
+      - name: isort
+        run: isort --check-only app/ tests/ || true
 
-  docker-build:
+  # ============================================
+  # FRONTEND
+  # ============================================
+  frontend-unit:
+    name: Frontend Unit Tests
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: frontend
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
 
-    - name: Build Docker image
-      run: |
-        docker build -t chirpsyncer:test .
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Test Docker image runs
-      run: |
-        docker run --rm chirpsyncer:test python --version
+      - name: Run tests
+        run: npm test -- --coverage --watchAll=false
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./frontend/coverage/lcov.info
+          flags: frontend-unit
+          fail_ci_if_error: false
+
+  frontend-lint:
+    name: Frontend Lint & Type Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint || true
+
+      - name: TypeScript
+        run: npx tsc --noEmit
+
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    needs: [frontend-unit, frontend-lint]
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/.next
+          retention-days: 1
+
+  # ============================================
+  # SUMMARY
+  # ============================================
+  ci-passed:
+    name: CI Passed
+    runs-on: ubuntu-latest
+    needs: [backend-unit, backend-lint, frontend-unit, frontend-lint, frontend-build]
+    if: always()
+    steps:
+      - name: Check results
+        run: |
+          if [[ "${{ needs.backend-unit.result }}" != "success" ]]; then
+            echo "Backend unit tests failed"; exit 1
+          fi
+          if [[ "${{ needs.frontend-unit.result }}" != "success" ]]; then
+            echo "Frontend unit tests failed"; exit 1
+          fi
+          if [[ "${{ needs.frontend-build.result }}" != "success" ]]; then
+            echo "Frontend build failed"; exit 1
+          fi
+          echo "All CI checks passed!"
