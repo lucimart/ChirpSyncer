@@ -124,17 +124,27 @@ export default function FeedLabPage() {
     enabled: !isLoading,
   });
 
-  const handleCreate = (rule: Omit<FeedRule, 'id'>) => {
-    createRule.mutate(rule, {
+  const handleCreate = (rule: {
+    name: string;
+    type: 'boost' | 'demote' | 'filter';
+    weight: number;
+    conditions: FeedRule['conditions'];
+  }) => {
+    createRule.mutate({ ...rule, enabled: true }, {
       onSuccess: () => setEditingRuleId(null),
     });
   };
 
-  const handleUpdate = (rule: Omit<FeedRule, 'id'>) => {
+  const handleUpdate = (rule: {
+    name: string;
+    type: 'boost' | 'demote' | 'filter';
+    weight: number;
+    conditions: FeedRule['conditions'];
+  }) => {
     if (!editingRuleId) {
       return;
     }
-    updateRule.mutate({ id: editingRuleId, ...rule }, {
+    updateRule.mutate({ id: editingRuleId, enabled: editingRule?.enabled ?? true, ...rule }, {
       onSuccess: () => setEditingRuleId(null),
     });
   };
