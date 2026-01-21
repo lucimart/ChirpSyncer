@@ -23,6 +23,7 @@
 - **Multi-Platform Framework**: ✅ Sprint G - PlatformConnector interface, CanonicalPost, ConnectorRegistry, ConflictResolver con 5 estrategias.
 - **Mastodon/ActivityPub**: ✅ Sprint H - MastodonConnector con full CRUD, HTML stripping, instance-specific limits.
 - **WebSockets Real-time**: ✅ Sprint B - Flask-SocketIO backend, RealtimeProvider, Toast notifications, ConnectionStatus.
+- **Core Infrastructure**: ✅ Sprint Infra - Redis client, Celery app, sync tasks, health check, docker-compose.
 
 ---
 
@@ -38,6 +39,7 @@ Todo sprint debe:
 ## 3) Infra & Architecture Improvements (Scalability)
 
 ### Sprint Infra — Core Infrastructure (Redis + Celery)
+**Estado**: ✅ Implementado (Redis client + Celery app + sync tasks + health check + 23 tests)
 **Motivo**: Necesario para background jobs fiables (vs threads) y websockets.
 
 #### User Stories
