@@ -1,0 +1,62 @@
+{
+  "name": "chirpsyncer",
+  "version": "1.0.0",
+  "description": "Bidirectional sync platform for Twitter and Bluesky",
+  "private": true,
+  "scripts": {
+    "dev": "npm-run-all --parallel dev:*",
+    "dev:backend": "cd frontend && npm run dev",
+    "dev:api": "python -m app.web.dashboard",
+    
+    "start": "docker compose up -d",
+    "stop": "docker compose down",
+    "logs": "docker compose logs -f",
+    "restart": "docker compose restart",
+    
+    "start:dev": "docker compose -f docker-compose.dev.yml up -d",
+    "stop:dev": "docker compose -f docker-compose.dev.yml down",
+    "logs:dev": "docker compose -f docker-compose.dev.yml logs -f",
+    
+    "redis": "docker run -d --name chirp-redis -p 6379:6379 redis:7-alpine || docker start chirp-redis",
+    "redis:stop": "docker stop chirp-redis",
+    
+    "seed": "python scripts/seed_data.py",
+    "seed:clean": "python scripts/seed_data.py --clean",
+    
+    "test": "pytest tests/unit -v",
+    "test:all": "pytest tests/ -v",
+    "test:cov": "pytest tests/ --cov=app --cov-report=html",
+    
+    "lint": "black app tests && flake8 app tests",
+    "lint:check": "black --check app tests && flake8 app tests",
+    
+    "frontend": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "frontend:install": "cd frontend && npm install",
+    
+    "setup": "npm run setup:python && npm run frontend:install",
+    "setup:python": "pip install -r requirements.txt",
+    
+    "db:reset": "del chirpsyncer.db 2>nul || rm -f chirpsyncer.db",
+    "db:seed": "npm run seed:clean"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "python": ">=3.10.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lucimart/ChirpSyncer.git"
+  },
+  "keywords": [
+    "twitter",
+    "bluesky",
+    "sync",
+    "social-media"
+  ],
+  "author": "lucimart",
+  "license": "MIT"
+}

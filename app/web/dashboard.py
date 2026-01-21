@@ -24,6 +24,7 @@ from flask import (
     g,
 )
 from flask_session import Session
+from flask_cors import CORS
 from app.web.websocket import socketio
 from app.auth.user_manager import UserManager
 from app.auth.credential_manager import CredentialManager
@@ -73,6 +74,9 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
     # Initialize Flask-Session
     Session(app)
 
+    # Enable CORS for development
+    CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
+
     # Initialize SocketIO
     socketio.init_app(app)
 
@@ -103,6 +107,15 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
     analytics_tracker.init_db()
     init_feed_rules_db(db_path)
     init_workspace_db(db_path)
+
+    # ========================================================================
+    # HEALTH CHECK
+    # ========================================================================
+
+    @app.route("/health")
+    def health():
+        """Health check endpoint for container orchestration"""
+        return jsonify({"status": "healthy", "service": "chirpsyncer-api"})
 
     # ========================================================================
     # AUTHENTICATION ROUTES
