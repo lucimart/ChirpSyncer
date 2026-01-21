@@ -39,6 +39,16 @@ def handle_unexpected_error(error):
 
 from app.web.api.v1.auth import auth_bp  # noqa: E402
 from app.web.api.v1.dashboard import dashboard_bp  # noqa: E402
+from app.web.api.v1.credentials import credentials_bp  # noqa: E402
+from app.web.api.v1.sync import sync_bp  # noqa: E402
+from app.web.api.v1.cleanup import cleanup_bp  # noqa: E402
+from app.web.api.v1.bookmarks import bookmarks_bp  # noqa: E402
+from app.web.api.v1.analytics import analytics_bp  # noqa: E402
 
 api_v1.register_blueprint(auth_bp)
 api_v1.register_blueprint(dashboard_bp)
+api_v1.register_blueprint(credentials_bp)
+api_v1.register_blueprint(sync_bp)
+api_v1.register_blueprint(cleanup_bp)
+api_v1.register_blueprint(bookmarks_bp)
+api_v1.register_blueprint(analytics_bp)

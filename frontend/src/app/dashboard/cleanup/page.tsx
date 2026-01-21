@@ -16,6 +16,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { Button, Card, Modal, Input } from '@/components/ui';
+import { api } from '@/lib/api';
 
 const PageHeader = styled.div`
   display: flex;
@@ -205,27 +206,49 @@ export default function CleanupPage() {
   const { data: rules, isLoading } = useQuery<CleanupRule[]>({
     queryKey: ['cleanup-rules'],
     queryFn: async () => {
-      // Mock data
-      return [
-        {
-          id: 1,
-          name: 'Delete old tweets',
-          rule_type: 'age',
-          is_enabled: true,
-          total_deleted: 234,
-          last_run: new Date(Date.now() - 86400000).toISOString(),
-          config: { days: 90 },
-        },
-        {
-          id: 2,
-          name: 'Low engagement cleanup',
-          rule_type: 'engagement',
-          is_enabled: false,
-          total_deleted: 56,
-          last_run: new Date(Date.now() - 172800000).toISOString(),
-          config: { min_likes: 5 },
-        },
-      ];
+      const response = await api.getCleanupRules();
+      if (response.success && response.data) {
+        return response.data as CleanupRule[];
+      }
+      return [];
+    },
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async () => {
+      const config =
+        ruleType === 'age'
+          ? { max_age_days: parseInt(ageDays, 10) }
+          : ruleType === 'engagement'
+            ? { min_likes: parseInt(minLikes, 10) }
+            : {};
+      return api.createCleanupRule({
+        name: ruleName,
+        type: ruleType,
+        config,
+        enabled: true,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cleanup-rules'] });
+      setIsModalOpen(false);
+      setRuleName('');
+      setRuleType('age');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (ruleId: number) => api.deleteCleanupRule(ruleId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cleanup-rules'] });
+    },
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: (payload: { ruleId: number; enabled: boolean }) =>
+      api.updateCleanupRule(payload.ruleId, { enabled: payload.enabled }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cleanup-rules'] });
     },
   });
 
@@ -249,10 +272,7 @@ export default function CleanupPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: API call to create rule
-    setIsModalOpen(false);
-    setRuleName('');
-    setRuleType('age');
+    createMutation.mutate();
   };
 
   return (
@@ -314,10 +334,23 @@ export default function CleanupPage() {
                   >
                     <Eye size={16} />
                   </Button>
-                  <Button variant="ghost" size="sm">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      toggleMutation.mutate({
+                        ruleId: rule.id,
+                        enabled: !rule.is_enabled,
+                      })
+                    }
+                  >
                     {rule.is_enabled ? <Pause size={16} /> : <Play size={16} />}
                   </Button>
-                  <Button variant="ghost" size="sm">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteMutation.mutate(rule.id)}
+                  >
                     <Trash2 size={16} />
                   </Button>
                 </RuleActions>

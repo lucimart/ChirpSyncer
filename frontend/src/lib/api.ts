@@ -113,6 +113,112 @@ class ApiClient {
       method: 'POST',
     });
   }
+
+  // Sync
+  async getSyncStats(): Promise<ApiResponse<{ today: number; week: number; total: number; last_sync: string | null }>> {
+    return this.request('/sync/stats');
+  }
+
+  async getSyncHistory(page = 1, limit = 20): Promise<ApiResponse<{ items: unknown[]; total: number; page: number }>> {
+    return this.request(`/sync/history?page=${page}&limit=${limit}`);
+  }
+
+  async startSync(): Promise<ApiResponse<{ job_id: string }>> {
+    return this.request('/sync/start', { method: 'POST' });
+  }
+
+  // Cleanup
+  async getCleanupRules(): Promise<ApiResponse<unknown[]>> {
+    return this.request('/cleanup/rules');
+  }
+
+  async createCleanupRule(payload: {
+    name: string;
+    type: string;
+    config: Record<string, unknown>;
+    enabled: boolean;
+  }): Promise<ApiResponse<unknown>> {
+    return this.request('/cleanup/rules', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteCleanupRule(ruleId: number): Promise<ApiResponse<void>> {
+    return this.request(`/cleanup/rules/${ruleId}`, { method: 'DELETE' });
+  }
+
+  async updateCleanupRule(
+    ruleId: number,
+    payload: Record<string, unknown>
+  ): Promise<ApiResponse<unknown>> {
+    return this.request(`/cleanup/rules/${ruleId}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async previewCleanupRule(ruleId: number): Promise<ApiResponse<unknown>> {
+    return this.request(`/cleanup/rules/${ruleId}/preview`, { method: 'POST' });
+  }
+
+  async executeCleanupRule(ruleId: number, dangerToken: string): Promise<ApiResponse<unknown>> {
+    return this.request(`/cleanup/rules/${ruleId}/execute`, {
+      method: 'POST',
+      headers: { 'X-Danger-Token': dangerToken },
+    });
+  }
+
+  // Bookmarks
+  async getBookmarks(collectionId?: number): Promise<ApiResponse<unknown[]>> {
+    const param = collectionId ? `?collection_id=${collectionId}` : '';
+    return this.request(`/bookmarks${param}`);
+  }
+
+  async createBookmark(payload: {
+    tweet_id: string;
+    collection_id?: number | null;
+    notes?: string | null;
+  }): Promise<ApiResponse<unknown>> {
+    return this.request('/bookmarks', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteBookmark(bookmarkId: number): Promise<ApiResponse<void>> {
+    return this.request(`/bookmarks/${bookmarkId}`, { method: 'DELETE' });
+  }
+
+  async moveBookmark(bookmarkId: number, collectionId: number | null): Promise<ApiResponse<void>> {
+    return this.request(`/bookmarks/${bookmarkId}/collection`, {
+      method: 'PUT',
+      body: JSON.stringify({ collection_id: collectionId }),
+    });
+  }
+
+  async getCollections(): Promise<ApiResponse<unknown[]>> {
+    return this.request('/collections');
+  }
+
+  async createCollection(payload: {
+    name: string;
+    description?: string | null;
+  }): Promise<ApiResponse<unknown>> {
+    return this.request('/collections', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  // Analytics
+  async getAnalyticsOverview(period: string): Promise<ApiResponse<unknown>> {
+    return this.request(`/analytics/overview?period=${period}`);
+  }
+
+  async getAnalyticsTopTweets(period: string): Promise<ApiResponse<unknown>> {
+    return this.request(`/analytics/top-tweets?period=${period}`);
+  }
 }
 
 export const api = new ApiClient();
