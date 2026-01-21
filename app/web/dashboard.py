@@ -30,6 +30,7 @@ from app.auth.auth_decorators import require_auth, require_admin, require_self_o
 from app.auth.security_utils import validate_password
 from app.features.analytics_tracker import AnalyticsTracker
 from app.features.search_engine import SearchEngine
+from app.models.feed_rule import init_feed_rules_db
 from app.web.api.v1 import api_v1
 from app.web.api.v1.responses import api_error
 import uuid
@@ -93,6 +94,7 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
 
     analytics_tracker = AnalyticsTracker(db_path)
     analytics_tracker.init_db()
+    init_feed_rules_db(db_path)
 
     # ========================================================================
     # AUTHENTICATION ROUTES

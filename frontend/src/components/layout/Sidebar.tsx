@@ -16,6 +16,7 @@ import {
   Download,
   Calendar,
   Plug,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -157,6 +158,7 @@ const navItems = [
   { href: '/dashboard/cleanup', icon: Trash2, label: 'Cleanup' },
   { href: '/dashboard/search', icon: Search, label: 'Search' },
   { href: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
+  { href: '/dashboard/feed-lab', icon: Sparkles, label: 'Feed Lab' },
   { href: '/dashboard/bookmarks', icon: Bookmark, label: 'Bookmarks' },
   { href: '/dashboard/export', icon: Download, label: 'Export' },
 ];

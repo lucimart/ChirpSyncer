@@ -219,6 +219,53 @@ class ApiClient {
   async getAnalyticsTopTweets(period: string): Promise<ApiResponse<unknown>> {
     return this.request(`/analytics/top-tweets?period=${period}`);
   }
+
+  // Feed Lab
+  async getFeedRules(): Promise<ApiResponse<unknown[]>> {
+    return this.request('/feed-rules');
+  }
+
+  async createFeedRule(payload: {
+    name: string;
+    type: string;
+    conditions: Array<{ field: string; operator: string; value: string | number }>;
+    weight?: number;
+    enabled?: boolean;
+  }): Promise<ApiResponse<unknown>> {
+    return this.request('/feed-rules', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async updateFeedRule(
+    ruleId: number,
+    payload: Record<string, unknown>
+  ): Promise<ApiResponse<unknown>> {
+    return this.request(`/feed-rules/${ruleId}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteFeedRule(ruleId: number): Promise<ApiResponse<void>> {
+    return this.request(`/feed-rules/${ruleId}`, { method: 'DELETE' });
+  }
+
+  async toggleFeedRule(ruleId: number): Promise<ApiResponse<unknown>> {
+    return this.request(`/feed-rules/${ruleId}/toggle`, { method: 'PATCH' });
+  }
+
+  async previewFeed(rules: Array<Record<string, unknown>>): Promise<ApiResponse<unknown>> {
+    return this.request('/feed/preview', {
+      method: 'POST',
+      body: JSON.stringify({ rules }),
+    });
+  }
+
+  async explainFeed(postId: string): Promise<ApiResponse<unknown>> {
+    return this.request(`/feed/explain/${postId}`);
+  }
 }
 
 export const api = new ApiClient();

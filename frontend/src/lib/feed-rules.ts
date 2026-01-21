@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/lib/api';
 
 // ============================================================================
 // Types & Interfaces
@@ -28,58 +29,16 @@ export interface UseFeedRulesOptions {
   enabledOnly?: boolean;
 }
 
-// ============================================================================
-// Mock Data
-// ============================================================================
-
-const MOCK_FEED_RULES: FeedRule[] = [
-  {
-    id: 'rule-1',
-    name: 'Boost Tech Content',
-    type: 'boost',
-    conditions: [
-      {
-        field: 'content',
-        operator: 'contains',
-        value: 'programming',
-      },
-    ],
-    weight: 50,
-    enabled: true,
-  },
-  {
-    id: 'rule-2',
-    name: 'Demote Low Engagement',
-    type: 'demote',
-    conditions: [
-      {
-        field: 'engagement',
-        operator: 'lt',
-        value: 5,
-      },
-    ],
-    weight: -30,
-    enabled: true,
-  },
-  {
-    id: 'rule-3',
-    name: 'Filter Spam',
-    type: 'filter',
-    conditions: [
-      {
-        field: 'content',
-        operator: 'contains',
-        value: 'spam',
-      },
-    ],
-    weight: -100,
-    enabled: false,
-  },
-];
-
-// In-memory storage for tests
-let mockRules = [...MOCK_FEED_RULES];
-let nextId = 4;
+function normalizeFeedRule(raw: any): FeedRule {
+  return {
+    id: String(raw.id),
+    name: raw.name,
+    type: raw.type,
+    conditions: Array.isArray(raw.conditions) ? raw.conditions : [],
+    weight: typeof raw.weight === 'number' ? raw.weight : 0,
+    enabled: Boolean(raw.enabled),
+  };
+}
 
 // ============================================================================
 // Validation Functions
@@ -187,12 +146,13 @@ export function useFeedRules(options?: UseFeedRulesOptions) {
   return useQuery<FeedRule[]>({
     queryKey: ['feed-rules', options],
     queryFn: async () => {
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      const response = await api.getFeedRules();
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to load feed rules');
+      }
 
-      let rules = [...mockRules];
+      let rules = (response.data as any[]).map(normalizeFeedRule);
 
-      // Filter by enabled status if requested
       if (options?.enabledOnly) {
         rules = rules.filter((rule) => rule.enabled);
       }
@@ -214,17 +174,11 @@ export function useCreateFeedRule() {
         throw new Error(validation.errors.join(', '));
       }
 
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
-      const createdRule: FeedRule = {
-        ...newRule,
-        id: `rule-${nextId++}`,
-      };
-
-      mockRules.push(createdRule);
-
-      return createdRule;
+      const response = await api.createFeedRule(newRule);
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to create feed rule');
+      }
+      return normalizeFeedRule(response.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feed-rules'] });
@@ -237,28 +191,11 @@ export function useUpdateFeedRule() {
 
   return useMutation<FeedRule, Error, Partial<FeedRule> & { id: string }>({
     mutationFn: async (updates) => {
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
-      const index = mockRules.findIndex((rule) => rule.id === updates.id);
-      if (index === -1) {
-        throw new Error('Rule not found');
+      const response = await api.updateFeedRule(Number(updates.id), updates);
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to update feed rule');
       }
-
-      const updatedRule: FeedRule = {
-        ...mockRules[index],
-        ...updates,
-      };
-
-      // Validate updated rule
-      const validation = validateFeedRule(updatedRule);
-      if (!validation.isValid) {
-        throw new Error(validation.errors.join(', '));
-      }
-
-      mockRules[index] = updatedRule;
-
-      return updatedRule;
+      return normalizeFeedRule(response.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feed-rules'] });
@@ -271,16 +208,10 @@ export function useDeleteFeedRule() {
 
   return useMutation<{ success: boolean }, Error, string>({
     mutationFn: async (ruleId) => {
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
-      const index = mockRules.findIndex((rule) => rule.id === ruleId);
-      if (index === -1) {
-        throw new Error('Rule not found');
+      const response = await api.deleteFeedRule(Number(ruleId));
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to delete feed rule');
       }
-
-      mockRules.splice(index, 1);
-
       return { success: true };
     },
     onSuccess: () => {
@@ -294,20 +225,11 @@ export function useToggleFeedRule() {
 
   return useMutation<FeedRule, Error, { id: string; enabled: boolean }>({
     mutationFn: async ({ id, enabled }) => {
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
-      const index = mockRules.findIndex((rule) => rule.id === id);
-      if (index === -1) {
-        throw new Error('Rule not found');
+      const response = await api.updateFeedRule(Number(id), { enabled });
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to toggle feed rule');
       }
-
-      mockRules[index] = {
-        ...mockRules[index],
-        enabled,
-      };
-
-      return mockRules[index];
+      return normalizeFeedRule(response.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feed-rules'] });

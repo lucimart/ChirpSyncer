@@ -44,6 +44,7 @@ from app.web.api.v1.sync import sync_bp  # noqa: E402
 from app.web.api.v1.cleanup import cleanup_bp  # noqa: E402
 from app.web.api.v1.bookmarks import bookmarks_bp  # noqa: E402
 from app.web.api.v1.analytics import analytics_bp  # noqa: E402
+from app.web.api.v1.feed import feed_bp  # noqa: E402
 
 api_v1.register_blueprint(auth_bp)
 api_v1.register_blueprint(dashboard_bp)
@@ -52,3 +53,4 @@ api_v1.register_blueprint(sync_bp)
 api_v1.register_blueprint(cleanup_bp)
 api_v1.register_blueprint(bookmarks_bp)
 api_v1.register_blueprint(analytics_bp)
+api_v1.register_blueprint(feed_bp)
