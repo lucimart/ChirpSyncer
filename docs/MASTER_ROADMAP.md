@@ -13,14 +13,14 @@
 
 ### Parcial / Pendiente
 - **Sync real-time jobs**: `/sync/start` es in-memory; no motor real.
-- **ML Scheduling**: `scheduling.py` responde con placeholders.
-- **Framework multi-plataforma + protocolos**: `app/protocols/*` no existe.
+- **Protocolos descentralizados**: ActivityPub/Mastodon, DSNP, SSB, Matrix.
 
 ### Completado recientemente
 - **Search API filtros**: ✅ Sprint D - Integrado `search_with_filters` con filtros de fecha, engagement, media y plataforma.
 - **Webhooks**: ✅ Sprint C - Webhooks de salida con firma HMAC-SHA256 y reintentos exponenciales.
 - **Feed Lab real**: ✅ Sprint E - Reemplazado datos mock con posts reales de `synced_posts`.
 - **ML Scheduling**: ✅ Sprint F - Predicción de engagement y tiempos óptimos basados en datos históricos.
+- **Multi-Platform Framework**: ✅ Sprint G - PlatformConnector interface, CanonicalPost, ConnectorRegistry, ConflictResolver con 5 estrategias.
 
 ---
 
@@ -292,6 +292,7 @@ GET /api/v1/webhooks/:id/deliveries
 ---
 
 ### Sprint G — Framework Multi-Plataforma + Conflict Resolution
+**Estado**: ✅ Implementado (PlatformConnector + CanonicalPost + Registry + ConflictResolver)
 **Motivo**: Integraciones dispersas y manejo de conflictos en sync.
 
 #### User Stories
