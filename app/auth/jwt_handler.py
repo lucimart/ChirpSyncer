@@ -15,6 +15,11 @@ class AuthError(Exception):
 
 
 def _get_secret() -> str:
+    """Get JWT secret from environment or Flask config.
+
+    Raises:
+        RuntimeError: If no JWT_SECRET or SECRET_KEY is configured.
+    """
     secret = os.getenv("JWT_SECRET") or os.getenv("SECRET_KEY")
     if not secret:
         try:
@@ -22,7 +27,10 @@ def _get_secret() -> str:
         except RuntimeError:
             secret = None
     if not secret:
-        secret = os.urandom(32).hex()
+        raise RuntimeError(
+            "JWT_SECRET or SECRET_KEY must be configured. "
+            "Set JWT_SECRET environment variable or configure SECRET_KEY in Flask app."
+        )
     return secret
 
 

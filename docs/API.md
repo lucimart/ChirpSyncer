@@ -4224,6 +4224,80 @@ except Exception as e:
     # exc_info=True includes full traceback
 ```
 
+### API v1 Error Codes
+
+The REST API v1 uses standardized error responses with the following format:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable error message",
+    "details": { }
+  }
+}
+```
+
+All error responses include a `X-Correlation-Id` header for request tracing.
+
+#### Error Code Reference
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `INVALID_REQUEST` | 400 | Malformed request body or missing required fields |
+| `VALIDATION_ERROR` | 400 | Request data failed validation (details include field errors) |
+| `INVALID_CREDENTIALS` | 401 | Username or password is incorrect |
+| `TOKEN_EXPIRED` | 401 | JWT token has expired, client should re-authenticate |
+| `INVALID_TOKEN` | 401 | JWT token is malformed or signature invalid |
+| `UNAUTHORIZED` | 401 | Authentication required but not provided |
+| `FORBIDDEN` | 403 | Authenticated but lacking permission for this action |
+| `NOT_FOUND` | 404 | Requested resource does not exist |
+| `REGISTRATION_FAILED` | 400 | User registration failed (username/email taken, weak password) |
+| `RATE_LIMITED` | 429 | Too many requests, retry after cooldown |
+| `INTERNAL_ERROR` | 500 | Unexpected server error (details sanitized in production) |
+
+#### Example Error Responses
+
+**Invalid credentials:**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_CREDENTIALS",
+    "message": "Invalid username or password"
+  }
+}
+```
+
+**Validation error:**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Request validation failed",
+    "details": {
+      "fields": {
+        "email": "Invalid email format",
+        "password": "Password must be at least 8 characters"
+      }
+    }
+  }
+}
+```
+
+**Token expired:**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "TOKEN_EXPIRED",
+    "message": "Token has expired"
+  }
+}
+```
+
 ---
 
 ## Performance Optimization
