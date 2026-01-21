@@ -1127,7 +1127,7 @@ describe('useWorkspace Hook', () => {
   it('fetches current workspace on mount', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({ workspace: mockTeamWorkspace, workspaces: mockWorkspaces }),
+      json: () => Promise.resolve({ success: true, data: { workspace: mockTeamWorkspace, workspaces: mockWorkspaces } }),
     });
 
     const { result } = renderHook(() => useWorkspace());
@@ -1154,7 +1154,7 @@ describe('useWorkspace Hook', () => {
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ workspace: mockPersonalWorkspace, workspaces: mockWorkspaces }),
+        json: () => Promise.resolve({ success: true, data: { workspace: mockPersonalWorkspace, workspaces: mockWorkspaces } }),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -1162,7 +1162,7 @@ describe('useWorkspace Hook', () => {
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ workspace: mockTeamWorkspace, workspaces: mockWorkspaces }),
+        json: () => Promise.resolve({ success: true, data: { workspace: mockTeamWorkspace, workspaces: mockWorkspaces } }),
       });
 
     const { result } = renderHook(() => useWorkspace());
@@ -1180,11 +1180,15 @@ describe('useWorkspace Hook', () => {
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ workspace: mockPersonalWorkspace, workspaces: mockWorkspaces }),
+        json: () => Promise.resolve({ success: true, data: { workspace: mockPersonalWorkspace, workspaces: mockWorkspaces } }),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ workspace: { id: 'new-ws', name: 'New Workspace', type: 'team' } }),
+        json: () => Promise.resolve({ success: true, data: { workspace: { id: 'new-ws', name: 'New Workspace', type: 'team' } } }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ success: true, data: { workspace: mockPersonalWorkspace, workspaces: mockWorkspaces } }),
       });
 
     const { result } = renderHook(() => useWorkspace());
@@ -1200,7 +1204,7 @@ describe('useWorkspace Hook', () => {
   it('caches workspace data', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({ workspace: mockTeamWorkspace, workspaces: mockWorkspaces }),
+      json: () => Promise.resolve({ success: true, data: { workspace: mockTeamWorkspace, workspaces: mockWorkspaces } }),
     });
 
     // First render
@@ -1219,11 +1223,11 @@ describe('useWorkspace Hook', () => {
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ workspace: mockPersonalWorkspace, workspaces: mockWorkspaces }),
+        json: () => Promise.resolve({ success: true, data: { workspace: mockPersonalWorkspace, workspaces: mockWorkspaces } }),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ workspace: mockTeamWorkspace, workspaces: mockWorkspaces }),
+        json: () => Promise.resolve({ success: true, data: { workspace: mockTeamWorkspace, workspaces: mockWorkspaces } }),
       });
 
     const { result } = renderHook(() => useWorkspace());
@@ -1256,7 +1260,7 @@ describe('useWorkspaceMembers Hook', () => {
   it('fetches members for given workspace', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({ members: mockMembers }),
+      json: () => Promise.resolve({ success: true, data: { members: mockMembers } }),
     });
 
     const { result } = renderHook(() => useWorkspaceMembers(mockTeamWorkspace.id));
@@ -1265,7 +1269,7 @@ describe('useWorkspaceMembers Hook', () => {
 
     expect(result.current.members).toEqual(mockMembers);
     expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining(`/api/workspaces/${mockTeamWorkspace.id}/members`)
+      expect.stringContaining(`/api/v1/workspaces/${mockTeamWorkspace.id}/members`)
     );
   });
 
@@ -1282,11 +1286,11 @@ describe('useWorkspaceMembers Hook', () => {
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ members: mockMembers }),
+        json: () => Promise.resolve({ success: true, data: { members: mockMembers } }),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ success: true, member: { id: 'new-member' } }),
+        json: () => Promise.resolve({ success: true, data: { member: { id: 'new-member' } } }),
       });
 
     const { result } = renderHook(() => useWorkspaceMembers(mockTeamWorkspace.id));
@@ -1310,7 +1314,7 @@ describe('useWorkspaceMembers Hook', () => {
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ members: mockMembers }),
+        json: () => Promise.resolve({ success: true, data: { members: mockMembers } }),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -1335,7 +1339,7 @@ describe('useWorkspaceMembers Hook', () => {
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ members: mockMembers }),
+        json: () => Promise.resolve({ success: true, data: { members: mockMembers } }),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -1379,9 +1383,12 @@ describe('useActivityFeed Hook', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({
-        activities: mockActivityItems,
-        hasMore: true,
-        nextCursor: 'cursor-123',
+        success: true,
+        data: {
+          activities: mockActivityItems,
+          hasMore: true,
+          nextCursor: 'cursor-123',
+        },
       }),
     });
 
@@ -1410,17 +1417,23 @@ describe('useActivityFeed Hook', () => {
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
-          activities: mockActivityItems,
-          hasMore: true,
-          nextCursor: 'cursor-123',
+          success: true,
+          data: {
+            activities: mockActivityItems,
+            hasMore: true,
+            nextCursor: 'cursor-123',
+          },
         }),
       })
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
-          activities: moreActivities,
-          hasMore: false,
-          nextCursor: null,
+          success: true,
+          data: {
+            activities: moreActivities,
+            hasMore: false,
+            nextCursor: null,
+          },
         }),
       });
 
@@ -1440,8 +1453,11 @@ describe('useActivityFeed Hook', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({
-        activities: mockActivityItems.filter((a) => a.type === 'credential_added'),
-        hasMore: false,
+        success: true,
+        data: {
+          activities: mockActivityItems.filter((a) => a.type === 'credential_added'),
+          hasMore: false,
+        },
       }),
     });
 
@@ -1461,8 +1477,11 @@ describe('useActivityFeed Hook', () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({
-        activities: mockActivityItems,
-        hasMore: false,
+        success: true,
+        data: {
+          activities: mockActivityItems,
+          hasMore: false,
+        },
       }),
     });
 
@@ -1471,7 +1490,9 @@ describe('useActivityFeed Hook', () => {
     await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
 
     // Advance 30 seconds
-    jest.advanceTimersByTime(30000);
+    act(() => {
+      jest.advanceTimersByTime(30000);
+    });
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(2));
 
@@ -1484,8 +1505,11 @@ describe('useActivityFeed Hook', () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({
-        activities: mockActivityItems,
-        hasMore: false,
+        success: true,
+        data: {
+          activities: mockActivityItems,
+          hasMore: false,
+        },
       }),
     });
 
@@ -1498,7 +1522,9 @@ describe('useActivityFeed Hook', () => {
     unmount();
 
     // Advance time - should not trigger more fetches
-    jest.advanceTimersByTime(60000);
+    act(() => {
+      jest.advanceTimersByTime(60000);
+    });
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
 
@@ -1527,15 +1553,15 @@ describe('Team Collaboration Integration', () => {
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ workspace: mockPersonalWorkspace, workspaces: mockWorkspaces }),
+        json: () => Promise.resolve({ success: true, data: { workspace: mockPersonalWorkspace, workspaces: mockWorkspaces } }),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ members: mockMembers }),
+        json: () => Promise.resolve({ success: true, data: { members: mockMembers } }),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ activities: mockActivityItems, hasMore: false }),
+        json: () => Promise.resolve({ success: true, data: { activities: mockActivityItems, hasMore: false } }),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -1543,7 +1569,7 @@ describe('Team Collaboration Integration', () => {
       })
       .mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({ workspace: mockTeamWorkspace, workspaces: mockWorkspaces }),
+        json: () => Promise.resolve({ success: true, data: { workspace: mockTeamWorkspace, workspaces: mockWorkspaces } }),
       });
 
     // Render workspace hook

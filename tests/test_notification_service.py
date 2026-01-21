@@ -3,10 +3,8 @@ Unit tests for NotificationService class.
 Tests email notification functionality with mocked SMTP.
 """
 import unittest
-from unittest.mock import Mock, patch, MagicMock, call
+from unittest.mock import Mock, patch, MagicMock
 import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import os
 import sys
 

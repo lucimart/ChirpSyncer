@@ -105,6 +105,46 @@ const mockExplanationMixedRules = {
   ],
 };
 
+const mockApiExplanation = {
+  post_id: 'post-1',
+  base_score: 50,
+  final_score: 125,
+  rules_applied: [
+    {
+      rule_id: 'rule-1',
+      rule_name: 'Prioritize AI posts',
+      rule_type: 'boost',
+      contribution: 50,
+      percentage: 40,
+      matched_condition: { field: 'content', operator: 'contains', value: 'AI' },
+    },
+    {
+      rule_id: 'rule-2',
+      rule_name: 'Boost trending topics',
+      rule_type: 'boost',
+      contribution: 25,
+      percentage: 20,
+      matched_condition: { field: 'hashtags', operator: 'contains', value: '#trending' },
+    },
+  ],
+};
+
+const mockApiExplanationWithDemote = {
+  post_id: 'post-2',
+  base_score: 50,
+  final_score: 25,
+  rules_applied: [
+    {
+      rule_id: 'rule-3',
+      rule_name: 'Demote old content',
+      rule_type: 'demote',
+      contribution: -25,
+      percentage: -50,
+      matched_condition: { field: 'age', operator: 'greater_than', value: '30' },
+    },
+  ],
+};
+
 describe('WhyAmISeeingThis Component', () => {
   const mockOnClose = jest.fn();
 
@@ -141,8 +181,9 @@ describe('WhyAmISeeingThis Component', () => {
     await user.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText('Prioritize AI posts')).toBeInTheDocument();
-      expect(screen.getByText('Boost trending topics')).toBeInTheDocument();
+      const rulesList = screen.getByTestId('explanation-rules');
+      expect(within(rulesList).getByText('Prioritize AI posts')).toBeInTheDocument();
+      expect(within(rulesList).getByText('Boost trending topics')).toBeInTheDocument();
     });
   });
 
@@ -186,8 +227,9 @@ describe('WhyAmISeeingThis Component', () => {
     await user.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText(/\+50/)).toBeInTheDocument();
-      expect(screen.getByText(/\+25/)).toBeInTheDocument();
+      const rulesList = screen.getByTestId('explanation-rules');
+      expect(within(rulesList).getByText(/\+50/)).toBeInTheDocument();
+      expect(within(rulesList).getByText(/\+25/)).toBeInTheDocument();
     });
   });
 
@@ -201,8 +243,9 @@ describe('WhyAmISeeingThis Component', () => {
     await user.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText(/-25/)).toBeInTheDocument();
-      expect(screen.getByText('Demote old content')).toBeInTheDocument();
+      const rulesList = screen.getByTestId('explanation-rules');
+      expect(within(rulesList).getByText(/-25/)).toBeInTheDocument();
+      expect(within(rulesList).getByText('Demote old content')).toBeInTheDocument();
     });
   });
 
@@ -309,8 +352,9 @@ describe('WhyAmISeeingThis Component', () => {
     await user.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText(/base score: 50/i)).toBeInTheDocument();
-      expect(screen.getByText(/total score: 125/i)).toBeInTheDocument();
+      const scores = screen.getByTestId('explanation-scores');
+      expect(within(scores).getByText(/base score: 50/i)).toBeInTheDocument();
+      expect(within(scores).getByText(/total score: 125/i)).toBeInTheDocument();
     });
   });
 
@@ -645,7 +689,7 @@ describe('useFeedExplanation Hook', () => {
   it('fetches explanation for a given post ID', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockExplanation,
+      json: async () => ({ success: true, data: mockApiExplanation }),
     });
 
     const { result } = renderHook(() => useFeedExplanation('post-1'));
@@ -657,9 +701,10 @@ describe('useFeedExplanation Hook', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(result.current.data).toEqual(mockExplanation);
+    expect(result.current.data).toMatchObject(mockExplanation);
+    expect(result.current.data?.fetchedAt).toEqual(expect.any(String));
     expect(result.current.error).toBeNull();
-    expect(global.fetch).toHaveBeenCalledWith('/api/feed/explanation/post-1', expect.objectContaining({ signal: expect.any(Object) }));
+    expect(global.fetch).toHaveBeenCalledWith('/api/v1/feed/explain/post-1', expect.objectContaining({ signal: expect.any(Object) }));
   });
 
   it('returns loading state initially', () => {
@@ -705,7 +750,7 @@ describe('useFeedExplanation Hook', () => {
   it('caches explanations to avoid refetching', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      json: async () => mockExplanation,
+      json: async () => ({ success: true, data: mockApiExplanation }),
     });
 
     const { result: result1 } = renderHook(() => useFeedExplanation('post-1'));
@@ -725,18 +770,19 @@ describe('useFeedExplanation Hook', () => {
 
     // Should not fetch again (cached)
     expect(global.fetch).toHaveBeenCalledTimes(1);
-    expect(result2.current.data).toEqual(mockExplanation);
+    expect(result2.current.data).toMatchObject(mockExplanation);
+    expect(result2.current.data?.fetchedAt).toEqual(expect.any(String));
   });
 
   it('fetches different posts separately', async () => {
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => mockExplanation,
+        json: async () => ({ success: true, data: mockApiExplanation }),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => mockExplanationWithDemote,
+        json: async () => ({ success: true, data: mockApiExplanationWithDemote }),
       });
 
     const { result: result1 } = renderHook(() => useFeedExplanation('post-1'));
@@ -748,14 +794,16 @@ describe('useFeedExplanation Hook', () => {
     });
 
     expect(global.fetch).toHaveBeenCalledTimes(2);
-    expect(result1.current.data).toEqual(mockExplanation);
-    expect(result2.current.data).toEqual(mockExplanationWithDemote);
+    expect(result1.current.data).toMatchObject(mockExplanation);
+    expect(result1.current.data?.fetchedAt).toEqual(expect.any(String));
+    expect(result2.current.data).toMatchObject(mockExplanationWithDemote);
+    expect(result2.current.data?.fetchedAt).toEqual(expect.any(String));
   });
 
   it('includes matched conditions in response', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockExplanation,
+      json: async () => ({ success: true, data: mockApiExplanation }),
     });
 
     const { result } = renderHook(() => useFeedExplanation('post-1'));
@@ -772,7 +820,7 @@ describe('useFeedExplanation Hook', () => {
   it('refetch function forces new fetch even if cached', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      json: async () => mockExplanation,
+      json: async () => ({ success: true, data: mockApiExplanation }),
     });
 
     const { result } = renderHook(() => useFeedExplanation('post-1'));
@@ -798,7 +846,7 @@ describe('useFeedExplanation Hook', () => {
   it('clears cache when invalidate is called', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      json: async () => mockExplanation,
+      json: async () => ({ success: true, data: mockApiExplanation }),
     });
 
     const { result } = renderHook(() => useFeedExplanation('post-1'));
@@ -837,11 +885,11 @@ describe('useFeedExplanation Hook', () => {
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => mockExplanation,
+        json: async () => ({ success: true, data: mockApiExplanation }),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => mockExplanationWithDemote,
+        json: async () => ({ success: true, data: mockApiExplanationWithDemote }),
       });
 
     const { result, rerender } = renderHook(
@@ -853,7 +901,8 @@ describe('useFeedExplanation Hook', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(result.current.data).toEqual(mockExplanation);
+    expect(result.current.data).toMatchObject(mockExplanation);
+    expect(result.current.data?.fetchedAt).toEqual(expect.any(String));
 
     // Change postId
     rerender({ postId: 'post-2' });
@@ -864,7 +913,8 @@ describe('useFeedExplanation Hook', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(result.current.data).toEqual(mockExplanationWithDemote);
+    expect(result.current.data).toMatchObject(mockExplanationWithDemote);
+    expect(result.current.data?.fetchedAt).toEqual(expect.any(String));
     expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 
@@ -891,7 +941,7 @@ describe('useFeedExplanation Hook', () => {
 
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockExplanation,
+      json: async () => ({ success: true, data: mockApiExplanation }),
     });
 
     const { result } = renderHook(() => useFeedExplanation('post-1'));

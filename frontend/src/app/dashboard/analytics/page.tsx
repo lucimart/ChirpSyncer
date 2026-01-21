@@ -13,6 +13,7 @@ import {
   Download,
 } from 'lucide-react';
 import { Button, Card } from '@/components/ui';
+import { api } from '@/lib/api';
 
 const PageHeader = styled.div`
   display: flex;
@@ -233,38 +234,35 @@ export default function AnalyticsPage() {
   const { data: analytics } = useQuery<AnalyticsData>({
     queryKey: ['analytics', period],
     queryFn: async () => {
-      // Mock data
+      const [overviewResponse, topResponse] = await Promise.all([
+        api.getAnalyticsOverview(period),
+        api.getAnalyticsTopTweets(period),
+      ]);
+      if (!overviewResponse.success || !overviewResponse.data) {
+        throw new Error(overviewResponse.error || 'Failed to load analytics');
+      }
+      const overview = overviewResponse.data as {
+        total_impressions: number;
+        total_engagements: number;
+        avg_engagement_rate: number;
+        total_likes: number;
+        total_replies: number;
+      };
+      const topItems = (topResponse.success && topResponse.data
+        ? (topResponse.data as { items?: Array<{ tweet_id: string; likes: number; replies: number }> }).items
+        : []) ?? [];
       return {
-        followers: { value: 12847, change: 5.2 },
-        engagement: { value: 4.8, change: -0.3 },
-        impressions: { value: 458920, change: 12.5 },
-        interactions: { value: 8234, change: 8.1 },
-        topPosts: [
-          {
-            id: '1',
-            content:
-              'Excited to announce our new cross-platform sync feature! Now you can manage Twitter and Bluesky from one dashboard.',
-            likes: 342,
-            comments: 45,
-            date: '2024-01-10',
-          },
-          {
-            id: '2',
-            content:
-              'Thread: 10 tips for growing your social media presence in 2024...',
-            likes: 289,
-            comments: 67,
-            date: '2024-01-08',
-          },
-          {
-            id: '3',
-            content:
-              'New analytics dashboard is live! Track your engagement metrics in real-time.',
-            likes: 156,
-            comments: 23,
-            date: '2024-01-05',
-          },
-        ],
+        followers: { value: 0, change: 0 },
+        engagement: { value: overview.avg_engagement_rate ?? 0, change: 0 },
+        impressions: { value: overview.total_impressions ?? 0, change: 0 },
+        interactions: { value: overview.total_engagements ?? 0, change: 0 },
+        topPosts: topItems.map((item) => ({
+          id: item.tweet_id,
+          content: `Tweet ${item.tweet_id}`,
+          likes: item.likes ?? 0,
+          comments: item.replies ?? 0,
+          date: new Date().toISOString().split('T')[0],
+        })),
       };
     },
   });

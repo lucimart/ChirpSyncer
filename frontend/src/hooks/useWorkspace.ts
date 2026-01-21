@@ -5,6 +5,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Workspace } from '@/components/workspace/WorkspaceSwitcher';
+import { clearMembersCache } from '@/hooks/useWorkspaceMembers';
+import { clearActivityCache } from '@/hooks/useActivityFeed';
 
 export interface UseWorkspaceResult {
   currentWorkspace: Workspace | null;
@@ -45,12 +47,16 @@ export function useWorkspace(): UseWorkspaceResult {
     setError(null);
 
     try {
-      const response = await fetch('/api/workspaces/current');
+      const response = await fetch('/api/v1/workspaces/current');
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
 
-      const data = await response.json();
+      const payload = await response.json();
+      if (payload && payload.success === false) {
+        throw new Error(payload.error?.message || 'Failed to load workspaces');
+      }
+      const data = payload?.data ?? payload;
 
       if (!mountedRef.current) return;
 
@@ -82,16 +88,22 @@ export function useWorkspace(): UseWorkspaceResult {
 
   const switchWorkspace = useCallback(async (workspaceId: string) => {
     try {
-      const response = await fetch(`/api/workspaces/${workspaceId}/switch`, {
+      const response = await fetch(`/api/v1/workspaces/${workspaceId}/switch`, {
         method: 'POST',
       });
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
+      const payload = await response.json().catch(() => null);
+      if (payload && payload.success === false) {
+        throw new Error(payload.error?.message || 'Failed to switch workspace');
+      }
 
       // Clear cache and refetch
       clearWorkspaceCache();
+      clearMembersCache();
+      clearActivityCache();
       await fetchWorkspaces(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to switch workspace');
@@ -100,7 +112,7 @@ export function useWorkspace(): UseWorkspaceResult {
 
   const createWorkspace = useCallback(async (data: { name: string; type: 'personal' | 'team' }): Promise<Workspace | null> => {
     try {
-      const response = await fetch('/api/workspaces', {
+      const response = await fetch('/api/v1/workspaces', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -110,8 +122,16 @@ export function useWorkspace(): UseWorkspaceResult {
         throw new Error(`HTTP ${response.status}`);
       }
 
-      const result = await response.json();
-      return result.workspace;
+      const payload = await response.json();
+      if (payload && payload.success === false) {
+        throw new Error(payload.error?.message || 'Failed to create workspace');
+      }
+      const workspace = payload?.data?.workspace ?? payload.workspace;
+      clearWorkspaceCache();
+      clearMembersCache();
+      clearActivityCache();
+      await fetchWorkspaces(true);
+      return workspace;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create workspace');
       return null;

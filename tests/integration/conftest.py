@@ -24,11 +24,8 @@ import os
 import sys
 import sqlite3
 import tempfile
-import hashlib
-import json
-from pathlib import Path
-from unittest.mock import MagicMock, patch, Mock
-from typing import Dict, Optional, Tuple
+from unittest.mock import MagicMock
+from typing import Dict
 
 import pytest
 

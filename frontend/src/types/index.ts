@@ -3,14 +3,13 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  role: 'admin' | 'user';
+  is_admin: boolean;
   created_at: string;
 }
 
 export interface Session {
   token: string;
   user: User;
-  expires_at: string;
 }
 
 // Credential types
@@ -33,11 +32,14 @@ export interface ApiResponse<T> {
 
 // Dashboard stats
 export interface DashboardStats {
+  synced_today: number;
+  synced_week: number;
   total_synced: number;
-  pending_sync: number;
-  last_sync: string | null;
-  credentials_count: number;
-  scheduled_count: number;
+  platforms_connected: number;
+  last_sync_at: string | null;
+  next_sync_at: string | null;
+  storage_used_mb: number;
+  tweets_archived: number;
 }
 
 // Cleanup types

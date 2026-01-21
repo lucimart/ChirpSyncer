@@ -19,7 +19,7 @@ import tempfile
 import time
 from datetime import datetime, timedelta
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch, MagicMock
 
 from app.features.tweet_scheduler import TweetScheduler
 
@@ -454,8 +454,8 @@ class TestGetScheduledTweets:
         base_time = datetime.now() + timedelta(hours=1)
 
         # Create tweets with different statuses
-        id1 = scheduler.schedule_tweet(1, "Pending 1", base_time, [])
-        id2 = scheduler.schedule_tweet(
+        scheduler.schedule_tweet(1, "Pending 1", base_time, [])
+        scheduler.schedule_tweet(
             1, "Pending 2", base_time + timedelta(hours=1), []
         )
         id3 = scheduler.schedule_tweet(
@@ -472,7 +472,7 @@ class TestGetScheduledTweets:
         """Test filtering scheduled tweets by status"""
         base_time = datetime.now() + timedelta(hours=1)
 
-        id1 = scheduler.schedule_tweet(1, "Pending", base_time, [])
+        scheduler.schedule_tweet(1, "Pending", base_time, [])
         id2 = scheduler.schedule_tweet(1, "Posted", base_time, [])
         id3 = scheduler.schedule_tweet(1, "Failed", base_time, [])
 
@@ -518,7 +518,7 @@ class TestDatabasePersistence:
 
     def test_database_schema_created(self, temp_db, master_key):
         """Test that database schema is properly created"""
-        scheduler = TweetScheduler(temp_db, master_key=master_key)
+        TweetScheduler(temp_db, master_key=master_key)
 
         conn = sqlite3.connect(temp_db)
         cursor = conn.cursor()

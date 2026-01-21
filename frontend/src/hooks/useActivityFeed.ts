@@ -43,6 +43,13 @@ export function useActivityFeed(
   const cacheKey = `${workspaceId}-${filterType || 'all'}`;
 
   const fetchActivities = useCallback(async (skipCache = false, append = false) => {
+    if (!workspaceId) {
+      setActivities([]);
+      setHasMore(false);
+      setCursor(null);
+      setLoading(false);
+      return;
+    }
     if (!skipCache && !append) {
       const cached = activityCache.get(cacheKey);
       if (cached) {
@@ -63,14 +70,18 @@ export function useActivityFeed(
       if (append && cursor) params.set('cursor', cursor);
 
       const response = await fetch(
-        `/api/workspaces/${workspaceId}/activity?${params.toString()}`
+        `/api/v1/workspaces/${workspaceId}/activity?${params.toString()}`
       );
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
 
-      const data = await response.json();
+      const payload = await response.json();
+      if (payload && payload.success === false) {
+        throw new Error(payload.error?.message || 'Failed to load activity');
+      }
+      const data = payload?.data ?? payload;
 
       if (!mountedRef.current) return;
 

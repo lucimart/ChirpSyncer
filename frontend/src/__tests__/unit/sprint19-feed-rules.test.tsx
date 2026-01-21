@@ -39,7 +39,25 @@ const createWrapper = () => {
   );
 };
 
+const mockFetch = (response: any, status: number = 200) => {
+  (global.fetch as jest.Mock).mockResolvedValueOnce({
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => response,
+    headers: new Headers({ 'content-type': 'application/json' }),
+  });
+};
+
+const mockApiResponse = (data: any, status: number = 200) => {
+  mockFetch({ success: true, data }, status);
+};
+
 describe('Sprint 19: Feed Lab Foundation - Feed Rules', () => {
+  beforeEach(() => {
+    global.fetch = jest.fn();
+    jest.clearAllMocks();
+  });
+
   describe('US-050: Feed Lab - Rule Creation', () => {
     it('should create a new feed rule with name and type', async () => {
       const { result } = renderHook(() => useCreateFeedRule(), {
@@ -59,6 +77,8 @@ describe('Sprint 19: Feed Lab Foundation - Feed Rules', () => {
         weight: 50,
         enabled: true,
       };
+
+      mockApiResponse({ id: 1, ...newRule });
 
       act(() => {
         result.current.mutate(newRule);
@@ -149,6 +169,8 @@ describe('Sprint 19: Feed Lab Foundation - Feed Rules', () => {
         enabled: true,
       };
 
+      mockApiResponse({ id: 2, ...boostRule });
+
       act(() => {
         result.current.mutate(boostRule);
       });
@@ -180,6 +202,8 @@ describe('Sprint 19: Feed Lab Foundation - Feed Rules', () => {
         enabled: true,
       };
 
+      mockApiResponse({ id: 3, ...demoteRule });
+
       act(() => {
         result.current.mutate(demoteRule);
       });
@@ -210,6 +234,8 @@ describe('Sprint 19: Feed Lab Foundation - Feed Rules', () => {
         weight: -100,
         enabled: true,
       };
+
+      mockApiResponse({ id: 4, ...filterRule });
 
       act(() => {
         result.current.mutate(filterRule);
@@ -250,6 +276,8 @@ describe('Sprint 19: Feed Lab Foundation - Feed Rules', () => {
         weight: 60,
         enabled: true,
       };
+
+      mockApiResponse({ id: 5, ...multiConditionRule });
 
       act(() => {
         result.current.mutate(multiConditionRule);
@@ -345,6 +373,29 @@ describe('Sprint 19: Feed Lab Foundation - Feed Rules', () => {
 
   describe('Feed Rules CRUD Hooks', () => {
     it('should fetch all feed rules with useFeedRules', async () => {
+      mockApiResponse([
+        {
+          id: 1,
+          name: 'Boost Tech Content',
+          type: 'boost',
+          conditions: [
+            { field: 'content', operator: 'contains', value: 'programming' },
+          ],
+          weight: 50,
+          enabled: true,
+        },
+        {
+          id: 2,
+          name: 'Demote Low Engagement',
+          type: 'demote',
+          conditions: [
+            { field: 'engagement', operator: 'lt', value: 5 },
+          ],
+          weight: -30,
+          enabled: true,
+        },
+      ]);
+
       const { result } = renderHook(() => useFeedRules(), {
         wrapper: createWrapper(),
       });
@@ -369,6 +420,29 @@ describe('Sprint 19: Feed Lab Foundation - Feed Rules', () => {
     });
 
     it('should filter enabled rules only', async () => {
+      mockApiResponse([
+        {
+          id: 1,
+          name: 'Boost Tech Content',
+          type: 'boost',
+          conditions: [
+            { field: 'content', operator: 'contains', value: 'programming' },
+          ],
+          weight: 50,
+          enabled: true,
+        },
+        {
+          id: 2,
+          name: 'Filter Spam',
+          type: 'filter',
+          conditions: [
+            { field: 'content', operator: 'contains', value: 'spam' },
+          ],
+          weight: -100,
+          enabled: false,
+        },
+      ]);
+
       const { result } = renderHook(() => useFeedRules({ enabledOnly: true }), {
         wrapper: createWrapper(),
       });
@@ -390,10 +464,21 @@ describe('Sprint 19: Feed Lab Foundation - Feed Rules', () => {
 
       // Use an existing rule ID from mock data
       const updates = {
-        id: 'rule-1',
+        id: '1',
         name: 'Updated Rule Name',
         weight: 75,
       };
+
+      mockApiResponse({
+        id: 1,
+        name: 'Updated Rule Name',
+        type: 'boost',
+        conditions: [
+          { field: 'content', operator: 'contains', value: 'programming' },
+        ],
+        weight: 75,
+        enabled: true,
+      });
 
       act(() => {
         result.current.mutate(updates);
@@ -404,7 +489,7 @@ describe('Sprint 19: Feed Lab Foundation - Feed Rules', () => {
       });
 
       const updatedRule = result.current.data!;
-      expect(updatedRule.id).toBe('rule-1');
+      expect(updatedRule.id).toBe('1');
       expect(updatedRule.name).toBe('Updated Rule Name');
       expect(updatedRule.weight).toBe(75);
     });
@@ -415,8 +500,10 @@ describe('Sprint 19: Feed Lab Foundation - Feed Rules', () => {
       });
 
       // Use an existing rule ID from mock data
+      mockApiResponse({ deleted: true });
+
       act(() => {
-        result.current.mutate('rule-2');
+        result.current.mutate('2');
       });
 
       await waitFor(() => {
@@ -432,8 +519,19 @@ describe('Sprint 19: Feed Lab Foundation - Feed Rules', () => {
       });
 
       // Use an existing rule ID from mock data (rule-3 is disabled by default)
+      mockApiResponse({
+        id: 3,
+        name: 'Filter Spam',
+        type: 'filter',
+        conditions: [
+          { field: 'content', operator: 'contains', value: 'spam' },
+        ],
+        weight: -100,
+        enabled: true,
+      });
+
       act(() => {
-        result.current.mutate({ id: 'rule-3', enabled: true });
+        result.current.mutate({ id: '3', enabled: true });
       });
 
       await waitFor(() => {
@@ -441,7 +539,7 @@ describe('Sprint 19: Feed Lab Foundation - Feed Rules', () => {
       });
 
       const toggledRule = result.current.data!;
-      expect(toggledRule.id).toBe('rule-3');
+      expect(toggledRule.id).toBe('3');
       expect(toggledRule.enabled).toBe(true);
     });
 
@@ -451,8 +549,19 @@ describe('Sprint 19: Feed Lab Foundation - Feed Rules', () => {
       });
 
       // Toggle rule-1 (enabled by default) to disabled
+      mockApiResponse({
+        id: 1,
+        name: 'Boost Tech Content',
+        type: 'boost',
+        conditions: [
+          { field: 'content', operator: 'contains', value: 'programming' },
+        ],
+        weight: 50,
+        enabled: false,
+      });
+
       act(() => {
-        result.current.mutate({ id: 'rule-1', enabled: false });
+        result.current.mutate({ id: '1', enabled: false });
       });
 
       await waitFor(() => {

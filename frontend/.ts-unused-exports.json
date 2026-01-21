@@ -1,0 +1,12 @@
+{
+  "excludePathsFromReport": [".next"],
+  "allowUnusedTypes": true,
+  "excludeDeclarationFiles": true,
+  "ignoreFiles": [
+    ".*components/(bluesky|layout|providers|ui|workspace)/.*",
+    ".*styles/GlobalStyle\\.ts",
+    ".*/app/.*",
+    ".*lib/auth\\.ts",
+    ".*lib/connectors\\.ts"
+  ]
+}

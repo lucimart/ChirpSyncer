@@ -26,11 +26,9 @@ Module Coverage Target: app/features/report_generator.py (223 statements, 0% -> 
 import os
 import sys
 import time
-import sqlite3
 import json
-from datetime import datetime, timedelta
-from typing import Dict, List, Tuple
-from unittest.mock import MagicMock, patch, Mock
+from datetime import datetime
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -1539,7 +1537,7 @@ class TestFormatSpecific:
         )
         json_data = json.loads(json_report.decode("utf-8"))
 
-        csv_report = report_generator.generate_engagement_report(
+        report_generator.generate_engagement_report(
             user_id=1, period="week", format="csv"
         )
 

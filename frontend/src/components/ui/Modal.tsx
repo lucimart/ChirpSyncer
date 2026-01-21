@@ -3,7 +3,6 @@
 import styled, { keyframes } from 'styled-components';
 import { ReactNode, useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
-import { Button } from './Button';
 
 interface ModalProps {
   isOpen: boolean;

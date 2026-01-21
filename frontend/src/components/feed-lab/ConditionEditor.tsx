@@ -4,9 +4,9 @@ interface ConditionEditorProps {
   condition: {
     field: string;
     operator: string;
-    value: string;
+    value: string | number;
   };
-  onChange: (condition: { field: string; operator: string; value: string }) => void;
+  onChange: (condition: { field: string; operator: string; value: string | number }) => void;
   onRemove: () => void;
 }
 

@@ -232,8 +232,6 @@ export function extractUrls(text: string): string[] {
 
 // Convert AT Protocol post to Canonical format
 export function atProtoToCanonical(post: ATProtoPost): CanonicalPost {
-  const parsed = parseATUri(post.uri);
-
   return {
     id: post.uri,
     content: post.record.text,

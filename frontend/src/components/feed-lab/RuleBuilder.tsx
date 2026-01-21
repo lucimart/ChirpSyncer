@@ -4,7 +4,7 @@ import { ConditionEditor } from './ConditionEditor';
 interface Condition {
   field: string;
   operator: string;
-  value: string;
+  value: string | number;
 }
 
 interface ConditionWithId extends Condition {

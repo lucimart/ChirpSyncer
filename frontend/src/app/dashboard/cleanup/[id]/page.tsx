@@ -12,7 +12,6 @@ import {
   MessageSquare,
   Eye,
   Heart,
-  Play,
 } from 'lucide-react';
 import {
   Button,
@@ -27,6 +26,7 @@ import {
   useRealtimeMessage,
   CleanupProgressPayload,
 } from '@/providers/RealtimeProvider';
+import { api } from '@/lib/api';
 
 const PageHeader = styled.div`
   display: flex;
@@ -164,11 +164,11 @@ const MetaItem = styled.span`
 
 interface PreviewTweet {
   id: string;
-  content: string;
-  created_at: string;
+  text: string;
+  created_at: number;
   likes: number;
   retweets: number;
-  views: number;
+  replies: number;
 }
 
 interface CleanupRule {
@@ -245,55 +245,46 @@ export default function CleanupPreviewPage({
   const { data: rule } = useQuery<CleanupRule>({
     queryKey: ['cleanup-rule', id],
     queryFn: async () => {
-      // Mock data
-      return {
-        id: parseInt(id),
-        name: 'Delete old tweets',
-        rule_type: 'age',
-        config: { days: 90 },
-      };
+      const response = await api.getCleanupRules();
+      if (response.success && response.data) {
+        const rules = response.data as CleanupRule[];
+        const match = rules.find((item) => item.id === parseInt(id, 10));
+        if (!match) {
+          throw new Error('Cleanup rule not found');
+        }
+        return match;
+      }
+      throw new Error('Failed to load rule');
     },
   });
 
   const { data: preview, isLoading } = useQuery<PreviewTweet[]>({
     queryKey: ['cleanup-preview', id],
     queryFn: async () => {
-      // Mock data - tweets that match the rule
-      return Array.from({ length: 25 }, (_, i) => ({
-        id: `tweet-${i + 1}`,
-        content: `This is an old tweet #${i + 1} that will be deleted because it's older than 90 days and has low engagement...`,
-        created_at: new Date(
-          Date.now() - (100 + i * 5) * 24 * 60 * 60 * 1000
-        ).toISOString(),
-        likes: Math.floor(Math.random() * 10),
-        retweets: Math.floor(Math.random() * 3),
-        views: Math.floor(Math.random() * 500),
-      }));
+      const response = await api.previewCleanupRule(parseInt(id, 10));
+      if (response.success && response.data) {
+        const data = response.data as { tweets?: PreviewTweet[] };
+        return data.tweets ?? [];
+      }
+      return [];
     },
   });
 
   const executeMutation = useMutation({
     mutationFn: async (reason: string) => {
-      // Simulate execution with progress
-      const toDelete = selectedIds.size > 0 ? selectedIds.size : preview?.length ?? 0;
       setExecution({
         isRunning: true,
-        total: toDelete,
+        total: selectedIds.size > 0 ? selectedIds.size : preview?.length ?? 0,
         deleted: 0,
         failed: 0,
       });
-
-      for (let i = 0; i < toDelete; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 200));
-        setExecution((prev) => ({
-          ...prev,
-          deleted: prev.deleted + 1,
-          failed: Math.random() < 0.05 ? prev.failed + 1 : prev.failed,
-        }));
+      const response = await api.executeCleanupRule(parseInt(id, 10), reason);
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to execute cleanup');
       }
-
-      setExecution((prev) => ({ ...prev, isRunning: false }));
-      return { deleted: toDelete, reason };
+      const deleted = (response.data as { tweets_deleted?: number })?.tweets_deleted ?? 0;
+      setExecution((prev) => ({ ...prev, deleted, isRunning: false }));
+      return { deleted };
     },
   });
 
@@ -312,14 +303,14 @@ export default function CleanupPreviewPage({
     {
       key: 'content',
       header: 'Tweet',
-      render: (row) => <TweetContent>{row.content}</TweetContent>,
+      render: (row) => <TweetContent>{row.text}</TweetContent>,
     },
     {
       key: 'created_at',
       header: 'Date',
       sortable: true,
       width: '120px',
-      render: (row) => new Date(row.created_at).toLocaleDateString(),
+      render: (row) => new Date(row.created_at * 1000).toLocaleDateString(),
     },
     {
       key: 'engagement',
@@ -334,7 +325,7 @@ export default function CleanupPreviewPage({
             <MessageSquare size={12} /> {row.retweets}
           </MetaItem>
           <MetaItem>
-            <Eye size={12} /> {row.views}
+            <Eye size={12} /> {row.replies}
           </MetaItem>
         </TweetMeta>
       ),
@@ -389,7 +380,7 @@ export default function CleanupPreviewPage({
         <StatCard padding="md">
           <StatValue>
             {rule?.rule_type === 'age'
-              ? `${(rule.config.days as number) ?? 90} days`
+              ? `${(rule.config.max_age_days as number) ?? (rule.config.days as number) ?? 90} days`
               : rule?.rule_type === 'engagement'
                 ? `< ${(rule.config.min_likes as number) ?? 5} likes`
                 : 'Pattern'}

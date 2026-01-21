@@ -16,6 +16,7 @@ import {
   useRealtimeMessage,
   SyncProgressPayload,
 } from '@/providers/RealtimeProvider';
+import { api } from '@/lib/api';
 
 const PageHeader = styled.div`
   display: flex;
@@ -180,8 +181,6 @@ const EmptyState = styled.div`
 
 interface SyncStats {
   total_synced: number;
-  twitter_to_bluesky: number;
-  bluesky_to_twitter: number;
   last_sync: string | null;
   pending: number;
 }
@@ -240,52 +239,45 @@ export default function SyncPage() {
   const { data: stats } = useQuery<SyncStats>({
     queryKey: ['sync-stats'],
     queryFn: async () => {
-      // Mock data - replace with actual API call
-      return {
-        total_synced: 1247,
-        twitter_to_bluesky: 892,
-        bluesky_to_twitter: 355,
-        last_sync: new Date().toISOString(),
-        pending: 12,
-      };
+      const response = await api.getSyncStats();
+      if (response.success && response.data) {
+        return {
+          total_synced: response.data.total,
+          last_sync: response.data.last_sync ?? null,
+          pending: 0,
+        };
+      }
+      throw new Error(response.error || 'Failed to fetch sync stats');
     },
   });
 
   const { data: history } = useQuery<SyncHistory[]>({
     queryKey: ['sync-history'],
     queryFn: async () => {
-      // Mock data - replace with actual API call
-      return [
-        {
-          id: 1,
-          direction: 'Twitter → Bluesky',
-          status: 'success',
-          posts_synced: 15,
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: 2,
-          direction: 'Bluesky → Twitter',
-          status: 'success',
-          posts_synced: 8,
-          created_at: new Date(Date.now() - 3600000).toISOString(),
-        },
-        {
-          id: 3,
-          direction: 'Twitter → Bluesky',
-          status: 'failed',
-          posts_synced: 0,
-          created_at: new Date(Date.now() - 7200000).toISOString(),
-        },
-      ];
+      const response = await api.getSyncHistory();
+      if (response.success && response.data) {
+        return response.data.items as SyncHistory[];
+      }
+      return [];
     },
   });
 
+  const twitterToBluesky =
+    history?.filter((item) =>
+      item.direction.toLowerCase().startsWith('twitter')
+    ).length ?? 0;
+  const blueskyToTwitter =
+    history?.filter((item) =>
+      item.direction.toLowerCase().startsWith('bluesky')
+    ).length ?? 0;
+
   const syncMutation = useMutation({
     mutationFn: async (direction: string) => {
-      // Mock sync - replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      return { success: true };
+      const response = await api.startSync();
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to start sync');
+      }
+      return response.data;
     },
     onMutate: () => {
       setIsSyncing(true);
@@ -376,7 +368,7 @@ export default function SyncPage() {
           <DirectionStats>
             <DirectionStat>
               <DirectionStatValue>
-                {stats?.twitter_to_bluesky ?? 0}
+                {twitterToBluesky}
               </DirectionStatValue>
               <DirectionStatLabel>Posts Synced</DirectionStatLabel>
             </DirectionStat>
@@ -405,7 +397,7 @@ export default function SyncPage() {
           <DirectionStats>
             <DirectionStat>
               <DirectionStatValue>
-                {stats?.bluesky_to_twitter ?? 0}
+                {blueskyToTwitter}
               </DirectionStatValue>
               <DirectionStatLabel>Posts Synced</DirectionStatLabel>
             </DirectionStat>

@@ -21,6 +21,7 @@ from flask import (
     jsonify,
     flash,
     abort,
+    g,
 )
 from flask_session import Session
 from app.auth.user_manager import UserManager
@@ -29,6 +30,11 @@ from app.auth.auth_decorators import require_auth, require_admin, require_self_o
 from app.auth.security_utils import validate_password
 from app.features.analytics_tracker import AnalyticsTracker
 from app.features.search_engine import SearchEngine
+from app.models.feed_rule import init_feed_rules_db
+from app.models.workspace import init_workspace_db
+from app.web.api.v1 import api_v1
+from app.web.api.v1.responses import api_error
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +54,7 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
 
     # Configure app
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", os.urandom(32).hex())
+    app.config["JWT_SECRET"] = os.environ.get("JWT_SECRET", app.config["SECRET_KEY"])
     app.config["SESSION_TYPE"] = "filesystem"
     app.config["DB_PATH"] = db_path
 
@@ -65,6 +72,20 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
     # Initialize Flask-Session
     Session(app)
 
+    # Register API blueprint
+    app.register_blueprint(api_v1)
+
+    @app.before_request
+    def ensure_api_correlation_id():
+        if request.path.startswith("/api/v1") and not hasattr(g, "correlation_id"):
+            g.correlation_id = request.headers.get("X-Correlation-Id", str(uuid.uuid4()))
+
+    @app.errorhandler(404)
+    def handle_404(error):
+        if request.path.startswith("/api/v1"):
+            return api_error("NOT_FOUND", "Resource not found", status=404)
+        return error
+
     # Initialize database tables
     user_manager = UserManager(db_path)
     user_manager.init_db()
@@ -74,6 +95,8 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
 
     analytics_tracker = AnalyticsTracker(db_path)
     analytics_tracker.init_db()
+    init_feed_rules_db(db_path)
+    init_workspace_db(db_path)
 
     # ========================================================================
     # AUTHENTICATION ROUTES

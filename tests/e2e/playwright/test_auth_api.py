@@ -5,7 +5,6 @@ Tests the authentication endpoints with Flask test client (no browser required).
 """
 
 import pytest
-import time
 
 # Skip marker for E2E tests
 pytestmark = pytest.mark.e2e

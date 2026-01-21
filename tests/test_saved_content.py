@@ -13,7 +13,6 @@ Comprehensive test suite for SavedContentManager with 60+ tests covering:
 - Edge cases and data persistence
 """
 import pytest
-import os
 import sqlite3
 import time
 from app.features.saved_content import SavedContentManager
@@ -53,7 +52,6 @@ def test_init_db_creates_tables(db_path):
     manager = SavedContentManager(db_path)
     manager.init_db()
 
-    import sqlite3
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -166,7 +164,7 @@ def test_duplicate_save_prevention(manager, user1_id):
     assert result1 is True
 
     # Try to save again - should handle gracefully
-    result2 = manager.save_tweet(user1_id, 'tweet999', notes='Updated notes')
+    manager.save_tweet(user1_id, 'tweet999', notes='Updated notes')
     # Implementation should either update or return False
     # Let's verify there's still only one entry
     saved_tweets = manager.get_saved_tweets(user1_id)

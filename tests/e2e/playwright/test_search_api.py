@@ -7,7 +7,6 @@ Uses Flask test client for API-level testing (no browser required).
 
 import pytest
 import time
-import sqlite3
 
 # Skip marker for E2E tests
 pytestmark = pytest.mark.e2e

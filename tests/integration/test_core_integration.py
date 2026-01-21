@@ -13,12 +13,9 @@ Tests organized by module with real dependencies (SQLite, file I/O, etc.)
 """
 
 import os
-import sys
 import sqlite3
-import tempfile
-import json
 import time
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import pytest
 
 

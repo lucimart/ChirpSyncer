@@ -28,11 +28,8 @@ Test Coverage:
 import os
 import sys
 import time
-import sqlite3
-import bcrypt
 import secrets
-from typing import Dict, Optional
-from unittest.mock import patch, MagicMock
+from typing import Dict
 
 import pytest
 
@@ -41,7 +38,7 @@ sys.path.insert(
     0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "app")
 )
 
-from auth.user_manager import UserManager, User
+from auth.user_manager import UserManager
 from auth.credential_manager import CredentialManager
 
 

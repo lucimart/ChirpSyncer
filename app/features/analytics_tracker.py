@@ -7,7 +7,7 @@ Provides comprehensive analytics including top tweets, engagement rates, and per
 
 import sqlite3
 import time
-from typing import Optional, List, Dict
+from typing import Optional, List
 from datetime import datetime
 
 

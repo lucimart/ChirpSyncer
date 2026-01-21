@@ -1,5 +1,8 @@
 import os
 
+# JWT secret for API authentication
+JWT_SECRET = os.getenv("JWT_SECRET") or os.getenv("SECRET_KEY") or "dev-jwt-secret"
+
 # NEW: Twitter scraping credentials (for twscrape)
 # These are required for scraping Twitter without using the official API
 TWITTER_USERNAME = os.getenv("TWITTER_USERNAME")

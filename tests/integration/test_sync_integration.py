@@ -22,11 +22,11 @@ Usage:
     pytest tests/integration/test_sync_integration.py::test_twitter_to_bluesky_integration -v
 """
 
+import json
 import os
 import sys
 import sqlite3
 import time
-import json
 import hashlib
 from unittest.mock import MagicMock, patch, call, ANY
 from typing import Dict, Tuple
@@ -794,7 +794,6 @@ def test_sync_with_missing_twitter_credentials(test_db, test_user):
         assert result is None, "Twitter API credentials should not exist for test user"
 
         # Log the condition in audit log
-        import json
         cursor.execute('''
             INSERT INTO audit_log (user_id, action, success, details, timestamp)
             VALUES (?, ?, ?, ?, ?)

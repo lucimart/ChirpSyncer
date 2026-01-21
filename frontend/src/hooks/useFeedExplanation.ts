@@ -14,8 +14,9 @@ export interface MatchedCondition {
 export interface AppliedRule {
   ruleId: string;
   ruleName: string;
-  ruleType: 'boost' | 'demote' | 'filter';
+  type: 'boost' | 'demote' | 'filter';
   contribution: number;
+  percentage?: number;
   matchedConditions: MatchedCondition[];
 }
 
@@ -79,14 +80,42 @@ export function useFeedExplanation(postId: string | null | undefined): UseFeedEx
     setError(null);
 
     try {
-      const response = await fetch(`/api/feed/explanation/${postId}`, {
+      const response = await fetch(`/api/v1/feed/explain/${postId}`, {
         signal: abortController.signal,
       });
       if (!response.ok) {
         throw new Error(`Failed to fetch explanation: ${response.status}`);
       }
-      const explanation = await response.json();
-      explanation.fetchedAt = new Date().toISOString();
+      const payload = await response.json();
+      if (payload && payload.success === false) {
+        throw new Error(payload.error?.message || 'Failed to fetch explanation');
+      }
+      const raw = payload?.data ?? payload;
+      const explanation: FeedExplanation = {
+        postId: raw.post_id ?? postId,
+        baseScore: raw.base_score ?? 0,
+        totalScore: raw.final_score ?? raw.total_score ?? 0,
+        appliedRules: Array.isArray(raw.rules_applied)
+          ? raw.rules_applied.map((rule: any) => ({
+              ruleId: String(rule.rule_id ?? rule.ruleId),
+              ruleName: rule.rule_name ?? rule.ruleName ?? 'Rule',
+              type: rule.rule_type ?? rule.ruleType ?? 'boost',
+              contribution: rule.contribution ?? 0,
+              percentage: rule.percentage,
+              matchedConditions: rule.matched_condition
+                ? [
+                    {
+                      field: String(rule.matched_condition.field ?? ''),
+                      operator: String(rule.matched_condition.operator ?? ''),
+                      value: String(rule.matched_condition.value ?? ''),
+                    },
+                  ]
+                : rule.matchedConditions || [],
+            }))
+          : [],
+        feedPosition: raw.feed_position,
+        fetchedAt: new Date().toISOString(),
+      };
 
       // Cache the result
       explanationCache.set(postId, explanation);

@@ -1,6 +1,5 @@
 import pytest
 import sys
-import time
 from unittest.mock import patch, MagicMock
 
 # Create mock modules with necessary attributes

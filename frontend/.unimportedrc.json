@@ -1,0 +1,28 @@
+{
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/*.tests.{js,jsx,ts,tsx}",
+    "**/*.test.{js,jsx,ts,tsx}",
+    "**/*.spec.{js,jsx,ts,tsx}",
+    "**/tests/**",
+    "**/__tests__/**",
+    "**/*.d.ts"
+  ],
+  "ignoreUnimported": [],
+  "ignoreUnused": [
+    "next",
+    "react",
+    "react-dom",
+    "@tanstack/react-query",
+    "lucide-react",
+    "styled-components",
+    "zod",
+    "zustand"
+  ],
+  "ignoreUnresolved": [],
+  "respectGitignore": true,
+  "pathTransforms": {
+    "^@/(.*)$": "./src/$1"
+  }
+}

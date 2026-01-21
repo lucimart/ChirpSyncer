@@ -38,7 +38,7 @@ export function useWorkspaceMembers(
   const mountedRef = useRef(true);
 
   const fetchMembers = useCallback(async (skipCache = false) => {
-    if (isPersonal) {
+    if (isPersonal || !workspaceId) {
       setMembers([]);
       setLoading(false);
       return;
@@ -57,12 +57,16 @@ export function useWorkspaceMembers(
     setError(null);
 
     try {
-      const response = await fetch(`/api/workspaces/${workspaceId}/members`);
+      const response = await fetch(`/api/v1/workspaces/${workspaceId}/members`);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
 
-      const data = await response.json();
+      const payload = await response.json();
+      if (payload && payload.success === false) {
+        throw new Error(payload.error?.message || 'Failed to load members');
+      }
+      const data = payload?.data ?? payload;
 
       if (!mountedRef.current) return;
 
@@ -89,7 +93,7 @@ export function useWorkspaceMembers(
 
   const inviteMember = useCallback(async (data: InviteMemberData) => {
     try {
-      const response = await fetch(`/api/workspaces/${workspaceId}/members/invite`, {
+      const response = await fetch(`/api/v1/workspaces/${workspaceId}/members/invite`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -109,7 +113,7 @@ export function useWorkspaceMembers(
 
   const removeMember = useCallback(async (memberId: string) => {
     try {
-      const response = await fetch(`/api/workspaces/${workspaceId}/members/${memberId}`, {
+      const response = await fetch(`/api/v1/workspaces/${workspaceId}/members/${memberId}`, {
         method: 'DELETE',
       });
 
@@ -127,7 +131,7 @@ export function useWorkspaceMembers(
 
   const updateMemberRole = useCallback(async (memberId: string, role: MemberRole) => {
     try {
-      const response = await fetch(`/api/workspaces/${workspaceId}/members/${memberId}/role`, {
+      const response = await fetch(`/api/v1/workspaces/${workspaceId}/members/${memberId}/role`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role }),

@@ -5,8 +5,7 @@ functionality for bidirectional Twitter↔Bluesky media synchronization.
 """
 
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock, mock_open
-import io
+from unittest.mock import patch, MagicMock, AsyncMock
 
 
 @pytest.fixture

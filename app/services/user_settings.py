@@ -7,7 +7,7 @@ Settings are stored in SQLite with user isolation.
 import sqlite3
 import json
 import time
-from typing import Optional, Any, Dict
+from typing import Any, Dict
 
 
 class UserSettings:

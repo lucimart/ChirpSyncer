@@ -23,12 +23,11 @@ Usage:
 
 import os
 import sys
-import sqlite3
 import time
 import json
 import tempfile
 import asyncio
-from unittest.mock import MagicMock, patch, AsyncMock, call, Mock
+from unittest.mock import MagicMock, patch
 from typing import Dict, Optional, Tuple
 from datetime import datetime
 
@@ -386,7 +385,7 @@ def test_twitter_api_handler_initialization():
         )
 
         # Test successful initialization
-        handler = TwitterAPIHandler(
+        TwitterAPIHandler(
             api_key="test_key",
             api_secret="test_secret",
             access_token="test_token",

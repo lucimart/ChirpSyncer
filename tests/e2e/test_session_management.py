@@ -18,7 +18,6 @@ Tests verify:
 import pytest
 import json
 import time
-import sqlite3
 
 
 # ============================================================================

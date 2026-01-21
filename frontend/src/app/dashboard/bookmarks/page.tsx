@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
 import {
   Bookmark,
@@ -10,11 +10,10 @@ import {
   Heart,
   MessageCircle,
   Trash2,
-  MoreVertical,
-  Plus,
   ExternalLink,
 } from 'lucide-react';
 import { Button, Card, Modal, Input } from '@/components/ui';
+import { api } from '@/lib/api';
 
 const PageHeader = styled.div`
   display: flex;
@@ -255,24 +254,24 @@ const ColorOption = styled.button<{ $color: string; $selected: boolean }>`
   }
 `;
 
-interface Collection {
-  id: string;
+interface CollectionItem {
+  id: number | 'all';
   name: string;
   color: string;
   count: number;
 }
 
 interface SavedTweet {
-  id: string;
+  id: number;
   content: string;
   author_name: string;
   author_handle: string;
-  platform: 'twitter' | 'bluesky';
+  platform: 'twitter' | 'bluesky' | 'unknown';
   likes: number;
   comments: number;
   saved_at: string;
   original_date: string;
-  collection_id: string;
+  collection_id: number | null;
 }
 
 const COLORS = [
@@ -286,77 +285,68 @@ const COLORS = [
 
 export default function BookmarksPage() {
   const queryClient = useQueryClient();
-  const [activeCollection, setActiveCollection] = useState<string | null>(null);
+  const [activeCollection, setActiveCollection] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [collectionName, setCollectionName] = useState('');
   const [collectionColor, setCollectionColor] = useState(COLORS[0]);
 
-  const { data: collections } = useQuery<Collection[]>({
+  const { data: collections } = useQuery<CollectionItem[]>({
     queryKey: ['collections'],
     queryFn: async () => {
-      return [
-        { id: 'all', name: 'All Bookmarks', color: '#6b7280', count: 42 },
-        { id: '1', name: 'Tech Insights', color: '#3b82f6', count: 15 },
-        { id: '2', name: 'Design Inspiration', color: '#8b5cf6', count: 12 },
-        { id: '3', name: 'Read Later', color: '#22c55e', count: 8 },
-        { id: '4', name: 'Important', color: '#ef4444', count: 7 },
-      ];
+      const response = await api.getCollections();
+      if (!response.success || !response.data) {
+        return [{ id: 'all', name: 'All Bookmarks', color: '#6b7280', count: 0 }];
+      }
+      const base = response.data as Array<{ id: number; name: string }>;
+      const items = base.map((collection, index) => ({
+        id: collection.id,
+        name: collection.name,
+        color: COLORS[index % COLORS.length],
+        count: 0,
+      }));
+      return [{ id: 'all', name: 'All Bookmarks', color: '#6b7280', count: 0 }, ...items];
     },
   });
 
   const { data: bookmarks, isLoading } = useQuery<SavedTweet[]>({
     queryKey: ['bookmarks', activeCollection],
     queryFn: async () => {
-      return [
-        {
-          id: '1',
-          content:
-            'Just discovered an amazing technique for optimizing React renders. The key is to use useMemo strategically, not everywhere! Here\'s what I learned...',
-          author_name: 'Sarah Chen',
-          author_handle: '@sarahcodes',
-          platform: 'twitter',
-          likes: 234,
-          comments: 45,
-          saved_at: new Date(Date.now() - 3600000).toISOString(),
-          original_date: '2024-01-10',
-          collection_id: '1',
-        },
-        {
-          id: '2',
-          content:
-            'Thread: The future of decentralized social media is here. Here are 10 protocols you should know about in 2024... 🧵',
-          author_name: 'Alex Protocol',
-          author_handle: '@alexprotocol.bsky.social',
-          platform: 'bluesky',
-          likes: 567,
-          comments: 89,
-          saved_at: new Date(Date.now() - 86400000).toISOString(),
-          original_date: '2024-01-09',
-          collection_id: '1',
-        },
-        {
-          id: '3',
-          content:
-            'Beautiful minimal dashboard design. Love the use of whitespace and the subtle color palette. Definitely saving this for reference! #UIDesign #Inspiration',
-          author_name: 'Design Daily',
-          author_handle: '@designdaily',
-          platform: 'twitter',
-          likes: 1234,
-          comments: 156,
-          saved_at: new Date(Date.now() - 172800000).toISOString(),
-          original_date: '2024-01-08',
-          collection_id: '2',
-        },
-      ];
+      const response = await api.getBookmarks(activeCollection ?? undefined);
+      if (!response.success || !response.data) {
+        return [];
+      }
+      return (response.data as Array<{
+        id: number;
+        tweet_id: string;
+        collection_id: number | null;
+        notes?: string | null;
+        saved_at: number;
+      }>).map((item) => {
+        const savedAt = new Date(item.saved_at * 1000);
+        return {
+          id: item.id,
+          content: item.notes || item.tweet_id,
+          author_name: 'Saved Post',
+          author_handle: item.tweet_id,
+          platform: 'unknown',
+          likes: 0,
+          comments: 0,
+          saved_at: savedAt.toISOString(),
+          original_date: savedAt.toISOString().split('T')[0],
+          collection_id: item.collection_id,
+        };
+      });
     },
   });
 
   const handleCreateCollection = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: API call to create collection
-    setIsModalOpen(false);
-    setCollectionName('');
-    setCollectionColor(COLORS[0]);
+    api.createCollection({ name: collectionName, description: null }).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      setIsModalOpen(false);
+      setCollectionName('');
+      setCollectionColor(COLORS[0]);
+    });
   };
 
   const getInitials = (name: string) => {
@@ -443,7 +433,13 @@ export default function BookmarksPage() {
                       <ActionButton>
                         <ExternalLink size={16} />
                       </ActionButton>
-                      <ActionButton>
+                      <ActionButton
+                        onClick={() => {
+                          api.deleteBookmark(bookmark.id).then(() => {
+                            queryClient.invalidateQueries({ queryKey: ['bookmarks'] });
+                          });
+                        }}
+                      >
                         <Trash2 size={16} />
                       </ActionButton>
                     </BookmarkActions>

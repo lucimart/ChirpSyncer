@@ -2,12 +2,7 @@
 
 import styled from 'styled-components';
 import { Heart, MessageCircle, Repeat2, Quote, MoreHorizontal, ExternalLink } from 'lucide-react';
-import {
-  ATProtoPost,
-  getPostUrl,
-  getProfileUrl,
-  parseATUri,
-} from '@/lib/bluesky';
+import { ATProtoPost, getProfileUrl } from '@/lib/bluesky';
 
 const PostCard = styled.article`
   padding: ${({ theme }) => theme.spacing[4]};
@@ -268,8 +263,6 @@ export function BlueskyPost({
   isLiked,
   isReposted,
 }: BlueskyPostProps) {
-  const parsed = parseATUri(post.uri);
-  const postUrl = parsed ? getPostUrl(post.author.handle, parsed.rkey) : '#';
   const profileUrl = getProfileUrl(post.author.handle);
 
   const formatDate = (dateStr: string) => {
