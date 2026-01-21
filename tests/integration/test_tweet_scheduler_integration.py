@@ -241,7 +241,7 @@ class TestCredentialIntegration:
         master_key = os.urandom(32)
 
         # Initialize credential manager (database table already exists from conftest)
-        cred_manager = CredentialManager(master_key, test_db_path)
+        _cred_manager = CredentialManager(master_key, test_db_path)
 
         # Store test credentials in the existing table (manually since init_db expects different schema)
         cursor = test_db.cursor()
