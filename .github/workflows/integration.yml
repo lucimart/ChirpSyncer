@@ -65,6 +65,9 @@ jobs:
           flags: backend-integration
           fail_ci_if_error: false
 
+      - name: Check coverage threshold
+        run: coverage report --fail-under=70
+
   # ============================================
   # BACKEND E2E
   # ============================================

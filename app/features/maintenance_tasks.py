@@ -186,13 +186,13 @@ def aggregate_daily_stats(db_path: str = DB_PATH) -> Dict:
         now = int(time.time())
         cursor.execute('''
             INSERT OR REPLACE INTO daily_stats (date, user_id, total_syncs, successful_syncs, failed_syncs, total_posts, created_at)
-            SELECT date(created_at, 'unixepoch'), user_id, COUNT(*), 
+            SELECT date(timestamp, 'unixepoch'), COALESCE(user_id, 1), COUNT(*),
                    SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END),
                    SUM(CASE WHEN success = 0 THEN 1 ELSE 0 END),
-                   SUM(posts_synced),
+                   COUNT(*),
                    ?
             FROM sync_stats
-            GROUP BY date(created_at, 'unixepoch'), user_id
+            GROUP BY date(timestamp, 'unixepoch'), COALESCE(user_id, 1)
         ''', (now,))
 
         aggregated = cursor.rowcount
