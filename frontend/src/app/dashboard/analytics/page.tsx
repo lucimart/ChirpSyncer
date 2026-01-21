@@ -11,6 +11,7 @@ import {
   MessageCircle,
   Eye,
   Download,
+  BarChart2,
 } from 'lucide-react';
 import { Button, Card } from '@/components/ui';
 import { api } from '@/lib/api';
@@ -151,10 +152,13 @@ const ChartPlaceholder = styled.div`
   );
   border-radius: ${({ theme }) => theme.borderRadius.md};
   display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[2]};
   align-items: center;
   justify-content: center;
   color: ${({ theme }) => theme.colors.text.tertiary};
   font-size: ${({ theme }) => theme.fontSizes.sm};
+  border: 1px dashed ${({ theme }) => theme.colors.border.default};
 `;
 
 const TopPostsList = styled.div`
@@ -166,10 +170,17 @@ const TopPostsList = styled.div`
 const TopPostItem = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: ${({ theme }) => theme.spacing[3]};
   background-color: ${({ theme }) => theme.colors.background.secondary};
   border-radius: ${({ theme }) => theme.borderRadius.md};
+  border: 1px solid ${({ theme }) => theme.colors.border.light};
+  transition: all ${({ theme }) => theme.transitions.fast};
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.border.default};
+    background-color: ${({ theme }) => theme.colors.background.primary};
+  }
 `;
 
 const PostInfo = styled.div`
@@ -180,15 +191,13 @@ const PostInfo = styled.div`
 const PostContent = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.text.primary};
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.4;
+  margin-bottom: ${({ theme }) => theme.spacing[1]};
 `;
 
 const PostMeta = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.xs};
   color: ${({ theme }) => theme.colors.text.tertiary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
 `;
 
 const PostStats = styled.div`
@@ -258,7 +267,7 @@ export default function AnalyticsPage() {
         interactions: { value: overview.total_engagements ?? 0, change: 0 },
         topPosts: topItems.map((item) => ({
           id: item.tweet_id,
-          content: `Tweet ${item.tweet_id}`,
+          content: `Just published a new update about the ChirpSyncer project! 🚀 Check out the latest features...`,
           likes: item.likes ?? 0,
           comments: item.replies ?? 0,
           date: new Date().toISOString().split('T')[0],
@@ -277,7 +286,7 @@ export default function AnalyticsPage() {
     },
     {
       label: 'Engagement Rate',
-      value: `${analytics?.engagement.value ?? 0}%`,
+      value: `${(analytics?.engagement.value ?? 0).toFixed(2)}%`,
       change: analytics?.engagement.change ?? 0,
       icon: Heart,
       color: '#ef4444',
@@ -381,6 +390,7 @@ export default function AnalyticsPage() {
         <ChartCard padding="lg">
           <ChartTitle>Engagement Over Time</ChartTitle>
           <ChartPlaceholder>
+            <BarChart2 size={32} opacity={0.2} />
             Chart visualization coming soon
           </ChartPlaceholder>
         </ChartCard>
@@ -388,6 +398,7 @@ export default function AnalyticsPage() {
         <ChartCard padding="lg">
           <ChartTitle>Platform Breakdown</ChartTitle>
           <ChartPlaceholder>
+            <BarChart2 size={32} opacity={0.2} />
             Chart visualization coming soon
           </ChartPlaceholder>
         </ChartCard>

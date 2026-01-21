@@ -20,6 +20,8 @@ const StatusContainer = styled.div<{ $status: ConnectionStatusType }>`
   padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
   border-radius: ${({ theme }) => theme.borderRadius.full};
   font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  border: 1px solid transparent;
   background-color: ${({ $status, theme }) => {
     switch ($status) {
       case 'connected':
@@ -30,6 +32,18 @@ const StatusContainer = styled.div<{ $status: ConnectionStatusType }>`
         return theme.colors.danger[50];
       default:
         return theme.colors.neutral[100];
+    }
+  }};
+  border-color: ${({ $status, theme }) => {
+    switch ($status) {
+      case 'connected':
+        return theme.colors.success[200];
+      case 'connecting':
+        return theme.colors.warning[200];
+      case 'error':
+        return theme.colors.danger[200];
+      default:
+        return theme.colors.neutral[200];
     }
   }};
   color: ${({ $status, theme }) => {

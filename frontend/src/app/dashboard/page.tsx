@@ -2,10 +2,11 @@
 
 import { useQuery } from '@tanstack/react-query';
 import styled from 'styled-components';
-import { RefreshCw, Key, Calendar, CheckCircle } from 'lucide-react';
+import { RefreshCw, Key, Calendar, CheckCircle, Activity } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Card } from '@/components/ui';
+import { Card, Button } from '@/components/ui';
 import type { DashboardStats } from '@/types';
+import Link from 'next/link';
 
 const PageHeader = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing[6]};
@@ -71,9 +72,30 @@ const SectionTitle = styled.h2`
 `;
 
 const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.spacing[4]};
+  padding: ${({ theme }) => theme.spacing[12]} ${({ theme }) => theme.spacing[6]};
   text-align: center;
-  padding: ${({ theme }) => theme.spacing[10]};
   color: ${({ theme }) => theme.colors.text.secondary};
+  background-color: ${({ theme }) => theme.colors.background.secondary};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  border: 1px dashed ${({ theme }) => theme.colors.border.default};
+`;
+
+const EmptyStateIcon = styled.div`
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  background-color: ${({ theme }) => theme.colors.background.primary};
+  color: ${({ theme }) => theme.colors.primary[500]};
+  margin-bottom: ${({ theme }) => theme.spacing[2]};
+  box-shadow: ${({ theme }) => theme.shadows.sm};
 `;
 
 export default function DashboardPage() {
@@ -141,9 +163,19 @@ export default function DashboardPage() {
       </StatsGrid>
 
       <SectionTitle>Recent Activity</SectionTitle>
-      <Card padding="lg">
+      <Card padding="none">
         <EmptyState>
-          No recent activity. Start by adding credentials and syncing your accounts.
+          <EmptyStateIcon>
+            <Activity size={32} />
+          </EmptyStateIcon>
+          <h3>No recent activity</h3>
+          <p>Start by adding credentials and syncing your accounts.</p>
+          <Link href="/dashboard/credentials" passHref>
+            <Button variant="primary" style={{ marginTop: '16px' }}>
+              <Key size={16} />
+              Manage Credentials
+            </Button>
+          </Link>
         </EmptyState>
       </Card>
     </div>

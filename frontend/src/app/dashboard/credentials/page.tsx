@@ -83,9 +83,30 @@ const Actions = styled.div`
 `;
 
 const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.spacing[4]};
+  padding: ${({ theme }) => theme.spacing[12]} ${({ theme }) => theme.spacing[6]};
   text-align: center;
-  padding: ${({ theme }) => theme.spacing[10]};
   color: ${({ theme }) => theme.colors.text.secondary};
+  background-color: ${({ theme }) => theme.colors.background.secondary};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  border: 1px dashed ${({ theme }) => theme.colors.border.default};
+`;
+
+const EmptyStateIcon = styled.div`
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  background-color: ${({ theme }) => theme.colors.background.primary};
+  color: ${({ theme }) => theme.colors.primary[500]};
+  margin-bottom: ${({ theme }) => theme.spacing[2]};
+  box-shadow: ${({ theme }) => theme.shadows.sm};
 `;
 
 const Form = styled.form`
@@ -214,20 +235,22 @@ export default function CredentialsPage() {
       ) : credentials && credentials.length > 0 ? (
         <CredentialsList>
           {credentials.map((cred: Credential) => (
-            <CredentialCard key={cred.id} padding="md">
-              <CredentialInfo>
-                <PlatformBadge $platform={cred.platform}>
-                  {cred.platform}
-                </PlatformBadge>
-                <CredentialDetails>
-                  <CredentialType>{cred.credential_type}</CredentialType>
-                  <CredentialMeta>
-                    Added: {formatDate(cred.created_at)} · Last used:{' '}
-                    {formatDate(cred.last_used)}
-                  </CredentialMeta>
-                </CredentialDetails>
-              </CredentialInfo>
-              <Actions>
+              <CredentialCard key={cred.id} padding="md">
+                <CredentialInfo>
+                  <PlatformBadge $platform={cred.platform}>
+                    {cred.platform}
+                  </PlatformBadge>
+                  <CredentialDetails>
+                    <CredentialType>
+                      {cred.credential_type === 'api' ? 'API' : cred.credential_type}
+                    </CredentialType>
+                    <CredentialMeta>
+                      Added: {formatDate(cred.created_at)} · Last used:{' '}
+                      {formatDate(cred.last_used)}
+                    </CredentialMeta>
+                  </CredentialDetails>
+                </CredentialInfo>
+                <Actions>
                 <StatusBadge $active={cred.is_active}>
                   {cred.is_active ? (
                     <>
@@ -263,9 +286,17 @@ export default function CredentialsPage() {
           ))}
         </CredentialsList>
       ) : (
-        <Card padding="lg">
+        <Card padding="none">
           <EmptyState>
-            No credentials yet. Add your first credential to start syncing.
+            <EmptyStateIcon>
+              <Key size={32} />
+            </EmptyStateIcon>
+            <h3>No credentials yet</h3>
+            <p>Add your first credential to start syncing your social accounts.</p>
+            <Button onClick={() => setIsModalOpen(true)} style={{ marginTop: '16px' }}>
+              <Plus size={18} />
+              Add Credential
+            </Button>
           </EmptyState>
         </Card>
       )}

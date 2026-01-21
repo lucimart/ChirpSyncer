@@ -174,9 +174,33 @@ const HistoryMeta = styled.div`
 `;
 
 const EmptyState = styled.div`
-  text-align: center;
-  padding: ${({ theme }) => theme.spacing[8]};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.spacing[4]};
+  padding: ${({ theme }) => theme.spacing[12]} ${({ theme }) => theme.spacing[6]};
   color: ${({ theme }) => theme.colors.text.secondary};
+  background-color: ${({ theme }) => theme.colors.background.secondary};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  border: 1px dashed ${({ theme }) => theme.colors.border.default};
+`;
+
+const EmptyStateIcon = styled.div`
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  background-color: ${({ theme }) => theme.colors.background.primary};
+  color: ${({ theme }) => theme.colors.text.tertiary};
+`;
+
+const NeverSync = styled.span`
+  color: ${({ theme }) => theme.colors.text.tertiary};
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-style: italic;
 `;
 
 interface SyncStats {
@@ -351,7 +375,11 @@ export default function SyncPage() {
         </StatCard>
         <StatCard padding="md">
           <StatValue>
-            {stats?.last_sync ? formatDate(stats.last_sync).split(',')[0] : 'Never'}
+            {stats?.last_sync ? (
+              formatDate(stats.last_sync).split(',')[0]
+            ) : (
+              <NeverSync>Never</NeverSync>
+            )}
           </StatValue>
           <StatLabel>Last Sync</StatLabel>
         </StatCard>
@@ -439,7 +467,12 @@ export default function SyncPage() {
             ))}
           </HistoryList>
         ) : (
-          <EmptyState>No sync history yet</EmptyState>
+          <EmptyState>
+            <EmptyStateIcon>
+              <Clock size={24} />
+            </EmptyStateIcon>
+            No sync history available yet.
+          </EmptyState>
         )}
       </Card>
     </div>

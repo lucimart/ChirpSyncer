@@ -4,6 +4,7 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styled from 'styled-components';
+import { Repeat } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { Button, Input, Card } from '@/components/ui';
 
@@ -22,8 +23,22 @@ const LoginCard = styled(Card)`
 `;
 
 const Logo = styled.div`
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: ${({ theme }) => theme.spacing[6]};
+`;
+
+const LogoIcon = styled.div`
+  width: 48px;
+  height: 48px;
+  background-color: ${({ theme }) => theme.colors.primary[50]};
+  color: ${({ theme }) => theme.colors.primary[600]};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: ${({ theme }) => theme.spacing[3]};
 `;
 
 const LogoText = styled.h1`
@@ -92,6 +107,9 @@ export default function LoginPage() {
     <PageContainer>
       <LoginCard padding="lg">
         <Logo>
+          <LogoIcon>
+            <Repeat size={28} />
+          </LogoIcon>
           <LogoText>ChirpSyncer</LogoText>
           <Subtitle>Sign in to your account</Subtitle>
         </Logo>
