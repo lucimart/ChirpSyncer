@@ -143,9 +143,9 @@ const CapabilityBadge = styled.span<{ $enabled: boolean }>`
   gap: ${({ theme }) => theme.spacing[1]};
   padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
   background-color: ${({ $enabled, theme }) =>
-    $enabled ? theme.colors.success[50] : theme.colors.gray[100]};
+    $enabled ? theme.colors.success[50] : theme.colors.neutral[100]};
   color: ${({ $enabled, theme }) =>
-    $enabled ? theme.colors.success[700] : theme.colors.gray[500]};
+    $enabled ? theme.colors.success[700] : theme.colors.neutral[500]};
   border-radius: ${({ theme }) => theme.borderRadius.full};
   font-size: ${({ theme }) => theme.fontSizes.xs};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
@@ -269,7 +269,7 @@ const SyncToggle = styled.button<{ $enabled: boolean }>`
   border: none;
   border-radius: 12px;
   background-color: ${({ $enabled, theme }) =>
-    $enabled ? theme.colors.success[500] : theme.colors.gray[300]};
+    $enabled ? theme.colors.success[500] : theme.colors.neutral[300]};
   cursor: pointer;
   transition: background-color ${({ theme }) => theme.transitions.fast};
 
