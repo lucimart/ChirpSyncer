@@ -24,6 +24,7 @@ from flask import (
     g,
 )
 from flask_session import Session
+from app.web.websocket import socketio
 from app.auth.user_manager import UserManager
 from app.auth.credential_manager import CredentialManager
 from app.auth.auth_decorators import require_auth, require_admin, require_self_or_admin
@@ -72,13 +73,18 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
     # Initialize Flask-Session
     Session(app)
 
+    # Initialize SocketIO
+    socketio.init_app(app)
+
     # Register API blueprint
     app.register_blueprint(api_v1)
 
     @app.before_request
     def ensure_api_correlation_id():
         if request.path.startswith("/api/v1") and not hasattr(g, "correlation_id"):
-            g.correlation_id = request.headers.get("X-Correlation-Id", str(uuid.uuid4()))
+            g.correlation_id = request.headers.get(
+                "X-Correlation-Id", str(uuid.uuid4())
+            )
 
     @app.errorhandler(404)
     def handle_404(error):
@@ -1080,7 +1086,9 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
             # Get search query (required)
             query = request.args.get("q", "").strip()
             if not query:
-                return jsonify({"success": False, "error": "Query parameter 'q' is required"}), 400
+                return jsonify(
+                    {"success": False, "error": "Query parameter 'q' is required"}
+                ), 400
 
             # Build filters from query parameters
             filters = {}
@@ -1091,19 +1099,25 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
                 try:
                     filters["date_from"] = int(date_from)
                 except ValueError:
-                    return jsonify({"success": False, "error": "Invalid date_from format"}), 400
+                    return jsonify(
+                        {"success": False, "error": "Invalid date_from format"}
+                    ), 400
 
             date_to = request.args.get("date_to")
             if date_to:
                 try:
                     filters["date_to"] = int(date_to)
                 except ValueError:
-                    return jsonify({"success": False, "error": "Invalid date_to format"}), 400
+                    return jsonify(
+                        {"success": False, "error": "Invalid date_to format"}
+                    ), 400
 
             # Hashtags filter
             hashtags = request.args.get("hashtags")
             if hashtags:
-                filters["hashtags"] = [h.strip().lstrip("#") for h in hashtags.split(",") if h.strip()]
+                filters["hashtags"] = [
+                    h.strip().lstrip("#") for h in hashtags.split(",") if h.strip()
+                ]
 
             # Author filter
             author = request.args.get("author")
@@ -1121,14 +1135,18 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
                 try:
                     filters["min_likes"] = int(min_likes)
                 except ValueError:
-                    return jsonify({"success": False, "error": "Invalid min_likes format"}), 400
+                    return jsonify(
+                        {"success": False, "error": "Invalid min_likes format"}
+                    ), 400
 
             min_retweets = request.args.get("min_retweets")
             if min_retweets is not None:
                 try:
                     filters["min_retweets"] = int(min_retweets)
                 except ValueError:
-                    return jsonify({"success": False, "error": "Invalid min_retweets format"}), 400
+                    return jsonify(
+                        {"success": False, "error": "Invalid min_retweets format"}
+                    ), 400
 
             # Limit
             limit = request.args.get("limit", 50)
@@ -1144,13 +1162,15 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
             # Apply limit
             results = results[:limit]
 
-            return jsonify({
-                "success": True,
-                "query": query,
-                "filters": filters,
-                "results": results,
-                "count": len(results),
-            })
+            return jsonify(
+                {
+                    "success": True,
+                    "query": query,
+                    "filters": filters,
+                    "results": results,
+                    "count": len(results),
+                }
+            )
 
         except Exception as e:
             logger.error(f"Error in search: {str(e)}")

@@ -4,6 +4,8 @@ from typing import Optional
 
 from app.core.celery_app import celery_app
 from app.services.sync_jobs import update_sync_job
+from app.core.events import sync_progress_message
+from app.web.websocket import emit_sync_progress
 from app.services.sync_runner import sync_twitter_to_bluesky, sync_bluesky_to_twitter
 
 
@@ -41,6 +43,10 @@ def run_sync_job(self, job_id: str, user_id: int, direction: str, db_path: str) 
         started_at=started_at,
         task_id=self.request.id,
     )
+    emit_sync_progress(
+        user_id,
+        sync_progress_message(job_id, "running", current=0),
+    )
 
     try:
         posts_synced = 0
@@ -72,6 +78,10 @@ def run_sync_job(self, job_id: str, user_id: int, direction: str, db_path: str) 
             posts_synced=posts_synced,
             error_message=None,
         )
+        emit_sync_progress(
+            user_id,
+            sync_progress_message(job_id, "completed", current=posts_synced),
+        )
     except Exception as exc:
         if direction in {"both", "twitter_to_bluesky"}:
             _record_sync_stats(
@@ -98,5 +108,9 @@ def run_sync_job(self, job_id: str, user_id: int, direction: str, db_path: str) 
             status="failed",
             completed_at=int(time.time()),
             error_message=str(exc),
+        )
+        emit_sync_progress(
+            user_id,
+            sync_progress_message(job_id, "failed", current=0),
         )
         raise
