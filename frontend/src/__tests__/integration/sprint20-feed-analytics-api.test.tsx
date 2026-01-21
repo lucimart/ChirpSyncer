@@ -6,6 +6,9 @@
  * for analytics endpoints.
  */
 
+// This export makes the file a module, isolating its scope
+export {};
+
 // Mock fetch globally
 global.fetch = jest.fn();
 

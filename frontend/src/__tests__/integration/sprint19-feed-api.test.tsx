@@ -5,6 +5,9 @@
  * They mock the backend API responses to ensure proper request/response handling.
  */
 
+// This export makes the file a module, isolating its scope
+export {};
+
 // Mock fetch globally
 global.fetch = jest.fn();
 
