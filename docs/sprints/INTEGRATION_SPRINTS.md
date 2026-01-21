@@ -1,4 +1,4 @@
-# Integration Sprints - Frontend ↔ Backend Connectivity
+# Integration Sprints - Frontend ? Backend Connectivity
 
 > **Purpose**: Bridge the gap between Next.js frontend (Sprints 14-21) and Flask backend (Sprints 1-7)
 > **Context**: Analysis revealed 30+ missing API endpoints and 15+ orphaned components
@@ -1008,7 +1008,7 @@ Decide fate of orphaned code and clean up technical debt.
 **Story:** US-I4-003 | **Priority:** P2 | **Estimate:** S
 
 **Description:**
-Generate report of all orphaned code.
+Generate report of all orphaned code. Report stored in `docs/sprints/I4_AUDIT.md`.
 
 **Commands:**
 ```bash
@@ -1020,10 +1020,10 @@ npx unimported
 ```
 
 **Acceptance:**
-- [ ] Report generated
+- [x] Report generated (docs/sprints/I4_AUDIT.md)
 - [ ] Each item categorized (keep/remove/defer)
 
-**Status:** TODO
+**Status:** DONE
 
 ---
 
@@ -1046,27 +1046,27 @@ Execute decisions from I4-01.
 
 ```
 Week 1: Sprint I1 (Core API Layer)
-├── Day 1: TASK-I1-01, TASK-I1-03 (API Blueprint, JWT)
-├── Day 2: TASK-I1-02 (Auth Endpoints)
-├── Day 3: TASK-I1-04, TASK-I1-05 (Dashboard Stats, Frontend Update)
-└── Day 4: Integration testing
++-- Day 1: TASK-I1-01, TASK-I1-03 (API Blueprint, JWT)
++-- Day 2: TASK-I1-02 (Auth Endpoints)
++-- Day 3: TASK-I1-04, TASK-I1-05 (Dashboard Stats, Frontend Update)
++-- Day 4: Integration testing
 
 Week 2: Sprint I2 (Dashboard Integration)
-├── Day 1: TASK-I2-01 (Credentials API)
-├── Day 2: TASK-I2-02 (Sync API)
-├── Day 3: TASK-I2-03 (Cleanup API)
-├── Day 4: TASK-I2-04, TASK-I2-05 (Bookmarks, Analytics)
-└── Day 5: TASK-I2-06 (Frontend Pages)
++-- Day 1: TASK-I2-01 (Credentials API)
++-- Day 2: TASK-I2-02 (Sync API)
++-- Day 3: TASK-I2-03 (Cleanup API)
++-- Day 4: TASK-I2-04, TASK-I2-05 (Bookmarks, Analytics)
++-- Day 5: TASK-I2-06 (Frontend Pages)
 
 Week 3: Sprint I3 (Feed Lab Integration)
-├── Day 1: TASK-I3-01, TASK-I3-02 (Page, Schema)
-├── Day 2: TASK-I3-03 (Feed Rules API)
-├── Day 3: TASK-I3-04, TASK-I3-05 (Explainability)
-└── Day 4: Integration testing
++-- Day 1: TASK-I3-01, TASK-I3-02 (Page, Schema)
++-- Day 2: TASK-I3-03 (Feed Rules API)
++-- Day 3: TASK-I3-04, TASK-I3-05 (Explainability)
++-- Day 4: Integration testing
 
 Week 4: Sprint I4 (Cleanup)
-├── Day 1: TASK-I4-01 (Audit)
-└── Day 2: TASK-I4-02 (Execute)
++-- Day 1: TASK-I4-01 (Audit)
++-- Day 2: TASK-I4-02 (Execute)
 ```
 
 ---
@@ -1108,11 +1108,11 @@ After all Integration Sprints:
 
 | Metric | Before | After |
 |--------|--------|-------|
-| Working Login | ❌ | ✅ |
-| Dashboard Loads | ❌ | ✅ |
-| Credentials Page | ❌ | ✅ |
-| Analytics Real Data | ❌ | ✅ |
-| Feed Lab Accessible | ❌ | ✅ |
+| Working Login | ? | ? |
+| Dashboard Loads | ? | ? |
+| Credentials Page | ? | ? |
+| Analytics Real Data | ? | ? |
+| Feed Lab Accessible | ? | ? |
 | Missing Endpoints | 30+ | 0 |
 | Orphaned Components | 15+ | 0 |
 
