@@ -912,7 +912,7 @@ class TestIndexSynchronization:
         search_db.commit()
 
         # Insert another
-        t3 = insert_test_post(search_db, test_user_for_search, "Post 3")
+        _t3 = insert_test_post(search_db, test_user_for_search, "Post 3")
 
         # Should have 2 posts now
         assert get_index_entry_count(search_db, test_user_for_search) == 2
