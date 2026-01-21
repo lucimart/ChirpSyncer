@@ -3,7 +3,7 @@ import React from 'react';
 interface Condition {
   field: string;
   operator: string;
-  value: string;
+  value: string | number;
 }
 
 interface RuleListProps {

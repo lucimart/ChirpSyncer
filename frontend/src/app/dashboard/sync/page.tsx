@@ -288,9 +288,6 @@ export default function SyncPage() {
       queryClient.invalidateQueries({ queryKey: ['sync-history'] });
     },
   });
-      queryClient.invalidateQueries({ queryKey: ['sync-history'] });
-    },
-  });
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return 'Never';

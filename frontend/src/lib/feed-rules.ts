@@ -6,8 +6,8 @@ import { api } from '@/lib/api';
 // ============================================================================
 
 export interface FeedCondition {
-  field: 'author' | 'content' | 'engagement' | 'age' | 'platform';
-  operator: 'contains' | 'equals' | 'gt' | 'lt' | 'regex';
+  field: 'author' | 'content' | 'engagement' | 'age' | 'platform' | string;
+  operator: 'contains' | 'equals' | 'gt' | 'lt' | 'regex' | string;
   value: string | number;
 }
 
