@@ -135,9 +135,15 @@ def test_db(test_db_path):
             user_id INTEGER NOT NULL,
             platform TEXT NOT NULL,
             credential_type TEXT NOT NULL,
-            encrypted_data TEXT NOT NULL,
+            encrypted_data BLOB NOT NULL,
+            encryption_iv BLOB NOT NULL,
+            encryption_tag BLOB NOT NULL,
             created_at INTEGER NOT NULL,
             updated_at INTEGER NOT NULL,
+            last_used INTEGER,
+            is_active INTEGER DEFAULT 1,
+            is_shared INTEGER DEFAULT 0,
+            owner_user_id INTEGER,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             UNIQUE(user_id, platform, credential_type)
         )

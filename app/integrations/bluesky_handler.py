@@ -1,8 +1,17 @@
 import time
 import logging
+from typing import Optional
+
 from atproto import Client, models
-from tenacity import retry, stop_after_attempt, wait_exponential, before_sleep_log, after_log
-from config import BSKY_USERNAME, BSKY_PASSWORD
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    before_sleep_log,
+    after_log,
+)
+
+from app.core import config
 from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -10,15 +19,20 @@ logger = setup_logger(__name__)
 # Initialize Bluesky client
 bsky_client = Client()
 
+
 # Function to login (explicitly called when needed)
 @retry(
     stop=stop_after_attempt(2),
     wait=wait_exponential(multiplier=1, min=2, max=10),
     before_sleep=before_sleep_log(logger, logging.WARNING),
-    after=after_log(logger, logging.ERROR)
+    after=after_log(logger, logging.ERROR),
 )
-def login_to_bluesky():
-    bsky_client.login(BSKY_USERNAME, BSKY_PASSWORD)
+def login_to_bluesky(username: Optional[str] = None, password: Optional[str] = None):
+    target_username = username or config.BSKY_USERNAME
+    target_password = password or config.BSKY_PASSWORD
+    if not target_username or not target_password:
+        raise ValueError("Missing Bluesky credentials")
+    bsky_client.login(target_username, target_password)
 
 
 def validate_and_truncate_text(text: str, max_length: int = 300) -> str:
@@ -38,7 +52,7 @@ def validate_and_truncate_text(text: str, max_length: int = 300) -> str:
 
     # Log warning when truncating
     logger.warning(f"Text truncated from {len(text)} to {max_length} chars")
-    return text[:max_length - 3] + "..."
+    return text[: max_length - 3] + "..."
 
 
 # Post to Bluesky
@@ -46,15 +60,16 @@ def validate_and_truncate_text(text: str, max_length: int = 300) -> str:
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=2, max=10),
     before_sleep=before_sleep_log(logger, logging.WARNING),
-    after=after_log(logger, logging.ERROR)
+    after=after_log(logger, logging.ERROR),
 )
 def post_to_bluesky(content):
     # Validate length before posting
     validated_content = validate_and_truncate_text(content)
 
     try:
-        bsky_client.post(validated_content)
+        response = bsky_client.send_post(text=validated_content)
         logger.info(f"Posted to Bluesky: {validated_content[:50]}...")
+        return getattr(response, "uri", None)
     except Exception as e:
         logger.error(f"Error posting to Bluesky: {e}")
         raise  # Re-raise to allow retry mechanism to work
@@ -62,6 +77,7 @@ def post_to_bluesky(content):
 
 class Post:
     """Simple Post class for Bluesky posts with text and URI."""
+
     def __init__(self, uri: str, text: str):
         self.uri = uri
         self.text = text
@@ -74,7 +90,7 @@ class Post:
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=2, max=10),
     before_sleep=before_sleep_log(logger, logging.WARNING),
-    after=after_log(logger, logging.ERROR)
+    after=after_log(logger, logging.ERROR),
 )
 def fetch_posts_from_bluesky(username: str, count: int = 10) -> list:
     """
@@ -96,12 +112,11 @@ def fetch_posts_from_bluesky(username: str, count: int = 10) -> list:
 
         # Call Bluesky API to get author feed
         response = bsky_client.app.bsky.feed.get_author_feed(
-            actor=username,
-            limit=count
+            params={"actor": username, "limit": count}
         )
 
         # Extract posts from response
-        if not hasattr(response, 'feed') or not response.feed:
+        if not hasattr(response, "feed") or not response.feed:
             logger.info(f"No posts found for user: {username}")
             return []
 
@@ -113,14 +128,16 @@ def fetch_posts_from_bluesky(username: str, count: int = 10) -> list:
                 break
 
             # Skip reposts (reason != None indicates repost)
-            if item.get('reason') is not None:
+            if getattr(item, "reason", None) is not None:
                 continue
 
             # Extract post data
-            post_data = item.get('post', {})
-            record = post_data.get('record', {})
-            uri = post_data.get('uri', '')
-            text = record.get('text', '')
+            post_data = getattr(item, "post", None)
+            if not post_data:
+                continue
+            record = getattr(post_data, "record", None)
+            uri = getattr(post_data, "uri", "")
+            text = getattr(record, "text", "") if record else ""
 
             # Create Post object
             if uri and text:
@@ -180,31 +197,32 @@ def post_thread_to_bluesky(tweets: list) -> list:
                     # Create reply reference
                     reply_ref = models.AppBskyFeedPost.ReplyRef(
                         parent=parent_ref,
-                        root=posted_uris[0] if posted_uris else parent_ref
+                        root=posted_uris[0] if posted_uris else parent_ref,
                     )
                     response = bsky_client.send_post(
-                        text=validated_content,
-                        reply_to=reply_ref
+                        text=validated_content, reply_to=reply_ref
                     )
                 else:
                     # Fallback if parent_ref is missing
                     response = bsky_client.send_post(text=validated_content)
 
             # Store the URI and CID for the next reply
-            if hasattr(response, 'uri') and hasattr(response, 'cid'):
+            if hasattr(response, "uri") and hasattr(response, "cid"):
                 posted_uris.append(response.uri)
                 # Create reference for next tweet in thread
                 parent_ref = models.create_strong_ref(response)
-                logger.info(f"Posted tweet {i+1}/{len(tweets)} to Bluesky: {validated_content[:50]}...")
+                logger.info(
+                    f"Posted tweet {i + 1}/{len(tweets)} to Bluesky: {validated_content[:50]}..."
+                )
             else:
-                logger.warning(f"Response missing uri/cid for tweet {i+1}")
+                logger.warning(f"Response missing uri/cid for tweet {i + 1}")
 
             # Rate limiting: sleep between posts (except after last one)
             if i < len(tweets) - 1:
                 time.sleep(1)
 
         except Exception as e:
-            logger.error(f"Error posting tweet {i+1} in thread: {e}")
+            logger.error(f"Error posting tweet {i + 1} in thread: {e}")
             # Continue with next tweet even if one fails
             continue
 

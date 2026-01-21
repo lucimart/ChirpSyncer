@@ -12,10 +12,13 @@ Key features:
 """
 
 import asyncio
-from typing import List
+import sqlite3
+from typing import List, Optional
+
 from twscrape import API
-from db_handler import is_tweet_seen, mark_tweet_as_seen
-from config import TWITTER_USERNAME
+
+from app.core.db_handler import is_tweet_seen, mark_tweet_as_seen
+from app.core import config
 from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -43,7 +46,11 @@ class TweetAdapter:
         return f"TweetAdapter(id={self.id}, text='{self.text[:50]}...')"
 
 
-async def _fetch_tweets_async(count: int = 5) -> List[TweetAdapter]:
+async def _fetch_tweets_async(
+    count: int = 5,
+    username: Optional[str] = None,
+    db_path: Optional[str] = None,
+) -> List[TweetAdapter]:
     """Async implementation to fetch tweets using twscrape.
 
     This function uses twscrape to scrape recent tweets from the configured
@@ -67,7 +74,11 @@ async def _fetch_tweets_async(count: int = 5) -> List[TweetAdapter]:
     # Build search query to fetch tweets from specific user
     # -filter:replies excludes reply tweets
     # -filter:retweets excludes retweets
-    query = f"from:{TWITTER_USERNAME} -filter:replies -filter:retweets"
+    target_username = username or config.TWITTER_USERNAME
+    if not target_username:
+        logger.error("Twitter username not configured")
+        return []
+    query = f"from:{target_username} -filter:replies -filter:retweets"
 
     # Fetch tweets using twscrape
     tweets = []
@@ -84,18 +95,25 @@ async def _fetch_tweets_async(count: int = 5) -> List[TweetAdapter]:
 
     # Filter out already-seen tweets
     unseen_tweets = []
-    for tweet in tweets:
-        if not is_tweet_seen(tweet.id):
-            # Wrap in adapter for compatibility
-            adapted_tweet = TweetAdapter(tweet)
-            unseen_tweets.append(adapted_tweet)
-            # Mark as seen in database
-            mark_tweet_as_seen(tweet.id)
+    conn = sqlite3.connect(db_path) if db_path else None
+    try:
+        for tweet in tweets:
+            if not is_tweet_seen(tweet.id, conn=conn):
+                adapted_tweet = TweetAdapter(tweet)
+                unseen_tweets.append(adapted_tweet)
+                mark_tweet_as_seen(tweet.id, conn=conn)
+    finally:
+        if conn:
+            conn.close()
 
     return unseen_tweets
 
 
-def fetch_tweets(count: int = 5) -> List[TweetAdapter]:
+def fetch_tweets(
+    count: int = 5,
+    username: Optional[str] = None,
+    db_path: Optional[str] = None,
+) -> List[TweetAdapter]:
     """Fetch recent tweets using twscrape (synchronous wrapper).
 
     This is the main entry point for fetching tweets. It provides a synchronous
@@ -120,14 +138,18 @@ def fetch_tweets(count: int = 5) -> List[TweetAdapter]:
     """
     # Run the async function using asyncio.run for sync compatibility
     try:
-        return asyncio.run(_fetch_tweets_async(count))
+        return asyncio.run(
+            _fetch_tweets_async(count, username=username, db_path=db_path)
+        )
     except RuntimeError as e:
         # Handle case where event loop is already running
         # This can happen in some environments (e.g., Jupyter notebooks)
         if "asyncio.run() cannot be called from a running event loop" in str(e):
             # Get the current event loop and run the coroutine
             loop = asyncio.get_event_loop()
-            return loop.run_until_complete(_fetch_tweets_async(count))
+            return loop.run_until_complete(
+                _fetch_tweets_async(count, username=username, db_path=db_path)
+            )
         raise
 
 
@@ -183,9 +205,7 @@ async def fetch_thread(tweet_id: str, username: str) -> list:
         tweet_ids = [int(tweet_id)]
         fetched_tweet = None
 
-        async for tweet in api.tweet_details(tweet_ids):
-            fetched_tweet = tweet
-            break
+        fetched_tweet = await api.tweet_details(int(tweet_id))
 
         if not fetched_tweet:
             logger.warning(f"Could not fetch initial tweet {tweet_id}")
@@ -202,13 +222,11 @@ async def fetch_thread(tweet_id: str, username: str) -> list:
             reply_id = current_tweet.inReplyToTweetId
             parent_found = False
 
-            async for parent_tweet in api.tweet_details([int(reply_id)]):
-                # Check if parent is by same author (self-reply = thread)
-                if parent_tweet.user.username.lower() == username.lower():
-                    thread_tweets.insert(0, parent_tweet)  # Add to beginning
-                    current_tweet = parent_tweet
-                    parent_found = True
-                break
+            parent_tweet = await api.tweet_details(int(reply_id))
+            if parent_tweet and parent_tweet.user.username.lower() == username.lower():
+                thread_tweets.insert(0, parent_tweet)
+                current_tweet = parent_tweet
+                parent_found = True
 
             if not parent_found:
                 # Parent tweet not found or not by same author
@@ -225,7 +243,9 @@ async def fetch_thread(tweet_id: str, username: str) -> list:
 
         async for reply in api.search(query, limit=max_replies):
             # Check if this is a reply in our thread chain
-            if reply.inReplyToTweetId and reply.inReplyToTweetId in [t.id for t in thread_tweets]:
+            if reply.inReplyToTweetId and reply.inReplyToTweetId in [
+                t.id for t in thread_tweets
+            ]:
                 # Add to thread if not already present
                 if reply.id not in [t.id for t in thread_tweets]:
                     thread_tweets.append(reply)
