@@ -9,7 +9,6 @@ import {
   X,
   ChevronRight,
   Settings,
-  RefreshCw,
   AlertCircle,
   Clock,
 } from 'lucide-react';

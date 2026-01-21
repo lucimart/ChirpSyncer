@@ -9,7 +9,6 @@ import {
   Trash2,
   Play,
   Pause,
-  Clock,
   Calendar,
   MessageSquare,
   ThumbsUp,

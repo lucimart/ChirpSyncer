@@ -53,7 +53,6 @@ def test_init_db_creates_tables(db_path):
     manager = SavedContentManager(db_path)
     manager.init_db()
 
-    import sqlite3
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 

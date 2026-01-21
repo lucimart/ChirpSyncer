@@ -8,7 +8,6 @@ import {
   Plus,
   Trash2,
   TrendingUp,
-  Twitter,
   CheckCircle,
   AlertCircle,
   Sparkles,
@@ -21,7 +20,6 @@ import {
   useEngagementPrediction,
   useCreateScheduledPost,
   useDeleteScheduledPost,
-  ScheduledPost,
   TimeSlot,
 } from '@/lib/scheduling';
 

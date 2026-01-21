@@ -12,7 +12,6 @@ import {
   MessageSquare,
   Eye,
   Heart,
-  Play,
 } from 'lucide-react';
 import {
   Button,

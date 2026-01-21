@@ -61,8 +61,6 @@ export const ScoreExplainer: React.FC<ScoreExplainerProps> = ({ post }) => {
     // Calculate widths for visualization
     const maxScore = Math.max(200, totalScore); // Visual scale
     const baseWidth = (BASE_SCORE / maxScore) * 100;
-    const totalContribution = post.appliedRules.reduce((sum, r) => sum + r.contribution, 0);
-    const contributionWidth = (Math.abs(totalContribution) / maxScore) * 100;
 
     return (
       <div className="mt-4">

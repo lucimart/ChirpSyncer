@@ -485,7 +485,7 @@ def test_api_auth_check(client, regular_user):
 
 # ===== Registration Tests =====
 
-def test_register_get(client):
+def test_register_page_renders(client):
     """Test GET /register displays registration form"""
     response = client.get("/register")
     assert response.status_code == 200
@@ -535,12 +535,12 @@ def test_user_detail_page(client, admin_user, regular_user):
     assert response.status_code == 200
 
 
-def test_credentials_list(client, regular_user):
+def test_credentials_page_renders(client, regular_user):
     """Test credentials list page"""
     with client.session_transaction() as sess:
         sess["user_id"] = regular_user.id
         sess["username"] = regular_user.username
-    
+
     response = client.get("/credentials")
     assert response.status_code == 200
 
