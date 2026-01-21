@@ -22,6 +22,7 @@ Usage:
     pytest tests/integration/test_sync_integration.py::test_twitter_to_bluesky_integration -v
 """
 
+import json
 import os
 import sys
 import sqlite3
