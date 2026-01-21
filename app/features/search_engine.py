@@ -13,6 +13,7 @@ Features:
 - Author filtering
 - Index rebuild functionality
 """
+
 import sqlite3
 import time
 from typing import List, Dict, Optional, Any
@@ -33,7 +34,7 @@ class SearchEngine:
     - Multiple filter criteria (date, hashtag, author)
     """
 
-    def __init__(self, db_path: str = 'chirpsyncer.db'):
+    def __init__(self, db_path: str = "chirpsyncer.db"):
         """
         Initialize SearchEngine.
 
@@ -126,8 +127,15 @@ class SearchEngine:
             logger.error(f"Failed to initialize FTS index: {e}")
             return False
 
-    def index_tweet(self, tweet_id: str, user_id: int, content: str,
-                   hashtags: str, author: str, posted_at: Optional[int] = None) -> bool:
+    def index_tweet(
+        self,
+        tweet_id: str,
+        user_id: int,
+        content: str,
+        hashtags: str,
+        author: str,
+        posted_at: Optional[int] = None,
+    ) -> bool:
         """
         Index a single tweet for search.
 
@@ -150,21 +158,30 @@ class SearchEngine:
                 posted_at = int(time.time())
 
             # Check if tweet already indexed
-            cursor.execute("""
+            cursor.execute(
+                """
             SELECT rowid FROM tweet_search_index WHERE tweet_id = ? AND user_id = ?
-            """, (tweet_id, user_id))
+            """,
+                (tweet_id, user_id),
+            )
 
             if cursor.fetchone():
                 # Update existing entry
-                cursor.execute("""
+                cursor.execute(
+                    """
                 DELETE FROM tweet_search_index WHERE tweet_id = ? AND user_id = ?
-                """, (tweet_id, user_id))
+                """,
+                    (tweet_id, user_id),
+                )
 
             # Insert into FTS index
-            cursor.execute("""
+            cursor.execute(
+                """
             INSERT INTO tweet_search_index (tweet_id, user_id, content, hashtags, author, posted_at)
             VALUES (?, ?, ?, ?, ?, ?)
-            """, (tweet_id, user_id, content, hashtags, author, posted_at))
+            """,
+                (tweet_id, user_id, content, hashtags, author, posted_at),
+            )
 
             conn.commit()
             conn.close()
@@ -176,7 +193,9 @@ class SearchEngine:
             logger.error(f"Failed to index tweet {tweet_id}: {e}")
             return False
 
-    def search(self, query: str, user_id: Optional[int] = None, limit: int = 50) -> List[Dict]:
+    def search(
+        self, query: str, user_id: Optional[int] = None, limit: int = 50
+    ) -> List[Dict]:
         """
         Search tweets with full-text query.
 
@@ -200,47 +219,61 @@ class SearchEngine:
             if query.strip():
                 # Full-text search with ranking
                 if user_id:
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                     SELECT tweet_id, user_id, content, hashtags, author, posted_at, rank
                     FROM tweet_search_index
                     WHERE tweet_search_index MATCH ? AND user_id = ?
                     ORDER BY rank
                     LIMIT ?
-                    """, (query, user_id, limit))
+                    """,
+                        (query, user_id, limit),
+                    )
                 else:
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                     SELECT tweet_id, user_id, content, hashtags, author, posted_at, rank
                     FROM tweet_search_index
                     WHERE tweet_search_index MATCH ?
                     ORDER BY rank
                     LIMIT ?
-                    """, (query, limit))
+                    """,
+                        (query, limit),
+                    )
             else:
                 # Empty query - return all tweets for user
                 if user_id:
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                     SELECT tweet_id, user_id, content, hashtags, author, posted_at, 0 as rank
                     FROM tweet_search_index
                     WHERE user_id = ?
                     LIMIT ?
-                    """, (user_id, limit))
+                    """,
+                        (user_id, limit),
+                    )
                 else:
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                     SELECT tweet_id, user_id, content, hashtags, author, posted_at, 0 as rank
                     FROM tweet_search_index
                     LIMIT ?
-                    """, (limit,))
+                    """,
+                        (limit,),
+                    )
 
             for row in cursor.fetchall():
-                results.append({
-                    'tweet_id': row[0],
-                    'user_id': row[1],
-                    'content': row[2],
-                    'hashtags': row[3],
-                    'author': row[4],
-                    'posted_at': row[5],
-                    'rank': row[6]
-                })
+                results.append(
+                    {
+                        "tweet_id": row[0],
+                        "user_id": row[1],
+                        "content": row[2],
+                        "hashtags": row[3],
+                        "author": row[4],
+                        "posted_at": row[5],
+                        "rank": row[6],
+                    }
+                )
 
             conn.close()
 
@@ -251,8 +284,9 @@ class SearchEngine:
             logger.error(f"Search failed for query '{query}': {e}")
             return []
 
-    def search_with_filters(self, query: str, user_id: int,
-                           filters: Optional[Dict[str, Any]] = None) -> List[Dict]:
+    def search_with_filters(
+        self, query: str, user_id: int, filters: Optional[Dict[str, Any]] = None
+    ) -> List[Dict]:
         """
         Search with additional filters.
 
@@ -279,7 +313,9 @@ class SearchEngine:
             cursor = conn.cursor()
 
             # Check if we need to join with synced_posts for engagement/media filters
-            needs_join = any(key in filters for key in ['has_media', 'min_likes', 'min_retweets'])
+            needs_join = any(
+                key in filters for key in ["has_media", "min_likes", "min_retweets"]
+            )
 
             # Build query with filters
             where_clauses = []
@@ -290,40 +326,40 @@ class SearchEngine:
             params.append(user_id)
 
             # Date range filter
-            if 'date_from' in filters:
+            if "date_from" in filters:
                 where_clauses.append("tsi.posted_at >= ?")
-                params.append(filters['date_from'])
+                params.append(filters["date_from"])
 
-            if 'date_to' in filters:
+            if "date_to" in filters:
                 where_clauses.append("tsi.posted_at <= ?")
-                params.append(filters['date_to'])
+                params.append(filters["date_to"])
 
             # Hashtag filter
-            if 'hashtags' in filters and filters['hashtags']:
+            if "hashtags" in filters and filters["hashtags"]:
                 hashtag_conditions = []
-                for tag in filters['hashtags']:
+                for tag in filters["hashtags"]:
                     hashtag_conditions.append("tsi.hashtags LIKE ?")
                     params.append(f"%{tag}%")
                 where_clauses.append(f"({' OR '.join(hashtag_conditions)})")
 
             # Author filter
-            if 'author' in filters and filters['author']:
+            if "author" in filters and filters["author"]:
                 where_clauses.append("tsi.author = ?")
-                params.append(filters['author'])
+                params.append(filters["author"])
 
             # Media filter (requires join)
-            if 'has_media' in filters and filters['has_media'] is not None:
+            if "has_media" in filters and filters["has_media"] is not None:
                 where_clauses.append("sp.has_media = ?")
-                params.append(1 if filters['has_media'] else 0)
+                params.append(1 if filters["has_media"] else 0)
 
             # Engagement filters (requires join)
-            if 'min_likes' in filters and filters['min_likes'] is not None:
+            if "min_likes" in filters and filters["min_likes"] is not None:
                 where_clauses.append("COALESCE(sp.likes_count, 0) >= ?")
-                params.append(filters['min_likes'])
+                params.append(filters["min_likes"])
 
-            if 'min_retweets' in filters and filters['min_retweets'] is not None:
+            if "min_retweets" in filters and filters["min_retweets"] is not None:
                 where_clauses.append("COALESCE(sp.retweets_count, 0) >= ?")
-                params.append(filters['min_retweets'])
+                params.append(filters["min_retweets"])
 
             where_sql = " AND ".join(where_clauses)
 
@@ -338,7 +374,8 @@ class SearchEngine:
                            tsi.author, tsi.posted_at, rank,
                            COALESCE(sp.has_media, 0) as has_media,
                            COALESCE(sp.likes_count, 0) as likes,
-                           COALESCE(sp.retweets_count, 0) as retweets
+                           COALESCE(sp.retweets_count, 0) as retweets,
+                           COALESCE(sp.archived, 0) as archived
                     FROM tweet_search_index tsi
                     JOIN synced_posts sp ON (
                         tsi.tweet_id = sp.twitter_id OR tsi.tweet_id = sp.bluesky_uri
@@ -354,7 +391,8 @@ class SearchEngine:
                            tsi.author, tsi.posted_at, 0 as rank,
                            COALESCE(sp.has_media, 0) as has_media,
                            COALESCE(sp.likes_count, 0) as likes,
-                           COALESCE(sp.retweets_count, 0) as retweets
+                           COALESCE(sp.retweets_count, 0) as retweets,
+                           COALESCE(sp.archived, 0) as archived
                     FROM tweet_search_index tsi
                     JOIN synced_posts sp ON (
                         tsi.tweet_id = sp.twitter_id OR tsi.tweet_id = sp.bluesky_uri
@@ -366,18 +404,21 @@ class SearchEngine:
                     cursor.execute(sql, params)
 
                 for row in cursor.fetchall():
-                    results.append({
-                        'tweet_id': row[0],
-                        'user_id': row[1],
-                        'content': row[2],
-                        'hashtags': row[3],
-                        'author': row[4],
-                        'posted_at': row[5],
-                        'rank': row[6],
-                        'has_media': bool(row[7]),
-                        'likes': row[8],
-                        'retweets': row[9]
-                    })
+                    results.append(
+                        {
+                            "tweet_id": row[0],
+                            "user_id": row[1],
+                            "content": row[2],
+                            "hashtags": row[3],
+                            "author": row[4],
+                            "posted_at": row[5],
+                            "rank": row[6],
+                            "has_media": bool(row[7]),
+                            "likes": row[8],
+                            "retweets": row[9],
+                            "archived": bool(row[10]),
+                        }
+                    )
             else:
                 # Simple FTS query without join
                 # Replace tsi. prefix since we're not joining
@@ -403,15 +444,17 @@ class SearchEngine:
                     cursor.execute(sql, params)
 
                 for row in cursor.fetchall():
-                    results.append({
-                        'tweet_id': row[0],
-                        'user_id': row[1],
-                        'content': row[2],
-                        'hashtags': row[3],
-                        'author': row[4],
-                        'posted_at': row[5],
-                        'rank': row[6]
-                    })
+                    results.append(
+                        {
+                            "tweet_id": row[0],
+                            "user_id": row[1],
+                            "content": row[2],
+                            "hashtags": row[3],
+                            "author": row[4],
+                            "posted_at": row[5],
+                            "rank": row[6],
+                        }
+                    )
 
             conn.close()
 
@@ -438,13 +481,16 @@ class SearchEngine:
 
             # Clear existing index for user (or all)
             if user_id:
-                cursor.execute("DELETE FROM tweet_search_index WHERE user_id = ?", (user_id,))
+                cursor.execute(
+                    "DELETE FROM tweet_search_index WHERE user_id = ?", (user_id,)
+                )
             else:
                 cursor.execute("DELETE FROM tweet_search_index")
 
             # Reindex from synced_posts
             if user_id:
-                cursor.execute("""
+                cursor.execute(
+                    """
                 SELECT
                     COALESCE(twitter_id, bluesky_uri) as tweet_id,
                     user_id,
@@ -454,7 +500,9 @@ class SearchEngine:
                     COALESCE(posted_at, strftime('%s', 'now')) as posted_at
                 FROM synced_posts
                 WHERE user_id = ? AND user_id IS NOT NULL
-                """, (user_id,))
+                """,
+                    (user_id,),
+                )
             else:
                 cursor.execute("""
                 SELECT
@@ -472,10 +520,13 @@ class SearchEngine:
             count = 0
 
             for tweet in tweets:
-                cursor.execute("""
+                cursor.execute(
+                    """
                 INSERT INTO tweet_search_index (tweet_id, user_id, content, hashtags, author, posted_at)
                 VALUES (?, ?, ?, ?, ?, ?)
-                """, tweet)
+                """,
+                    tweet,
+                )
                 count += 1
 
             conn.commit()
@@ -505,28 +556,27 @@ class SearchEngine:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
             SELECT COUNT(*), MAX(posted_at)
             FROM tweet_search_index
             WHERE user_id = ?
-            """, (user_id,))
+            """,
+                (user_id,),
+            )
 
             row = cursor.fetchone()
             conn.close()
 
             return {
-                'user_id': user_id,
-                'total_indexed': row[0] or 0,
-                'last_indexed': row[1] or 0
+                "user_id": user_id,
+                "total_indexed": row[0] or 0,
+                "last_indexed": row[1] or 0,
             }
 
         except Exception as e:
             logger.error(f"Failed to get search stats: {e}")
-            return {
-                'user_id': user_id,
-                'total_indexed': 0,
-                'last_indexed': 0
-            }
+            return {"user_id": user_id, "total_indexed": 0, "last_indexed": 0}
 
     def remove_from_index(self, tweet_id: str) -> bool:
         """
@@ -542,7 +592,9 @@ class SearchEngine:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
 
-            cursor.execute("DELETE FROM tweet_search_index WHERE tweet_id = ?", (tweet_id,))
+            cursor.execute(
+                "DELETE FROM tweet_search_index WHERE tweet_id = ?", (tweet_id,)
+            )
             deleted = cursor.rowcount > 0
 
             conn.commit()
@@ -580,12 +632,15 @@ class SearchEngine:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
             SELECT DISTINCT content
             FROM tweet_search_index
             WHERE user_id = ? AND content LIKE ?
             LIMIT ?
-            """, (user_id, f"%{prefix}%", limit * 5))
+            """,
+                (user_id, f"%{prefix}%", limit * 5),
+            )
 
             suggestions = set()
             for row in cursor.fetchall():
@@ -605,7 +660,9 @@ class SearchEngine:
             logger.error(f"Failed to get suggestions: {e}")
             return []
 
-    def search_by_hashtag(self, user_id: int, hashtag: str, limit: int = 50) -> List[Dict]:
+    def search_by_hashtag(
+        self, user_id: int, hashtag: str, limit: int = 50
+    ) -> List[Dict]:
         """
         Search tweets by hashtag.
 
@@ -617,16 +674,16 @@ class SearchEngine:
         Returns:
             List of matching tweets
         """
-        if not hashtag.startswith('#'):
-            hashtag = f'#{hashtag}'
+        if not hashtag.startswith("#"):
+            hashtag = f"#{hashtag}"
 
         return self.search_with_filters(
-            query='',
-            user_id=user_id,
-            filters={'hashtags': [hashtag.lstrip('#')]}
+            query="", user_id=user_id, filters={"hashtags": [hashtag.lstrip("#")]}
         )
 
-    def search_by_author(self, user_id: int, author: str, limit: int = 50) -> List[Dict]:
+    def search_by_author(
+        self, user_id: int, author: str, limit: int = 50
+    ) -> List[Dict]:
         """
         Search tweets by author.
 
@@ -642,25 +699,30 @@ class SearchEngine:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
             SELECT tweet_id, user_id, content, hashtags, author, posted_at, 0 as rank
             FROM tweet_search_index
             WHERE user_id = ? AND author LIKE ?
             ORDER BY posted_at DESC
             LIMIT ?
-            """, (user_id, f"%{author}%", limit))
+            """,
+                (user_id, f"%{author}%", limit),
+            )
 
             results = []
             for row in cursor.fetchall():
-                results.append({
-                    'tweet_id': row[0],
-                    'user_id': row[1],
-                    'content': row[2],
-                    'hashtags': row[3],
-                    'author': row[4],
-                    'posted_at': row[5],
-                    'rank': row[6]
-                })
+                results.append(
+                    {
+                        "tweet_id": row[0],
+                        "user_id": row[1],
+                        "content": row[2],
+                        "hashtags": row[3],
+                        "author": row[4],
+                        "posted_at": row[5],
+                        "rank": row[6],
+                    }
+                )
 
             conn.close()
             return results
@@ -684,25 +746,32 @@ class SearchEngine:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
             SELECT hashtags FROM tweet_search_index
             WHERE user_id = ? AND hashtags != ''
-            """, (user_id,))
+            """,
+                (user_id,),
+            )
 
             hashtag_counts = {}
             for row in cursor.fetchall():
-                tags = row[0].replace(',', ' ').split()
+                tags = row[0].replace(",", " ").split()
                 for tag in tags:
                     tag = tag.strip().lower()
-                    if tag.startswith('#'):
+                    if tag.startswith("#"):
                         tag = tag[1:]
                     if tag:
                         hashtag_counts[tag] = hashtag_counts.get(tag, 0) + 1
 
             conn.close()
 
-            sorted_tags = sorted(hashtag_counts.items(), key=lambda x: x[1], reverse=True)
-            return [{'hashtag': tag, 'count': count} for tag, count in sorted_tags[:limit]]
+            sorted_tags = sorted(
+                hashtag_counts.items(), key=lambda x: x[1], reverse=True
+            )
+            return [
+                {"hashtag": tag, "count": count} for tag, count in sorted_tags[:limit]
+            ]
 
         except Exception as e:
             logger.error(f"Failed to get trending hashtags: {e}")

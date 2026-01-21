@@ -3,10 +3,13 @@ import time
 from typing import Optional
 
 from app.core.celery_app import celery_app
+from app.core.logger import setup_logger
 from app.services.sync_jobs import update_sync_job
 from app.core.events import sync_progress_message
 from app.web.websocket import emit_sync_progress
 from app.services.sync_runner import sync_twitter_to_bluesky, sync_bluesky_to_twitter
+
+logger = setup_logger(__name__)
 
 
 def _record_sync_stats(
@@ -113,4 +116,49 @@ def run_sync_job(self, job_id: str, user_id: int, direction: str, db_path: str) 
             user_id,
             sync_progress_message(job_id, "failed", current=0),
         )
+        raise
+
+
+@celery_app.task(bind=True)
+def run_archival_job(
+    self, user_id: int, db_path: str, archive_dir: str, retention_days: int = 365
+) -> dict:
+    """
+    Celery task to archive old posts for a user.
+
+    Archives posts older than retention_days to JSON cold storage.
+
+    Args:
+        user_id: User ID whose posts to archive.
+        db_path: Path to the SQLite database.
+        archive_dir: Directory to store archive files.
+        retention_days: Number of days before posts are eligible for archival.
+
+    Returns:
+        Dictionary with archived_count and archive_path.
+    """
+    from app.features.archival.manager import ArchivalManager
+
+    logger.info(
+        f"Starting archival job for user {user_id} (retention: {retention_days} days)"
+    )
+
+    try:
+        manager = ArchivalManager(
+            db_path=db_path,
+            archive_dir=archive_dir,
+            retention_days=retention_days,
+        )
+
+        result = manager.archive_old_posts(user_id=user_id)
+
+        logger.info(
+            f"Archival job completed for user {user_id}: "
+            f"{result['archived_count']} posts archived"
+        )
+
+        return result
+
+    except Exception as exc:
+        logger.error(f"Archival job failed for user {user_id}: {exc}")
         raise
