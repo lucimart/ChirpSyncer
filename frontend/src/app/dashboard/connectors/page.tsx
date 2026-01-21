@@ -26,6 +26,7 @@ import {
   useConnectPlatform,
   useDisconnectPlatform,
   useUpdateSyncConfig,
+  AVAILABLE_CONNECTORS,
   PlatformConnector,
   PlatformConnection,
   PlatformSyncConfig,
@@ -329,6 +330,8 @@ export default function ConnectorsPage() {
   const [connectModal, setConnectModal] = useState<PlatformConnector | null>(null);
   const [credentials, setCredentials] = useState<Record<string, string>>({});
 
+  const connectorsList = connectors ?? AVAILABLE_CONNECTORS;
+
   const getConnection = (platform: PlatformType): PlatformConnection | undefined => {
     return connections?.find((c) => c.platform === platform);
   };
@@ -573,7 +576,7 @@ export default function ConnectorsPage() {
 
       <SectionTitle>Available Platforms</SectionTitle>
       <ConnectorGrid>
-        {connectors?.map((connector) => {
+        {connectorsList.map((connector) => {
           const connection = getConnection(connector.platform);
           const isConnected = connection?.connected;
           const isComingSoon = connector.status === 'coming_soon';
@@ -666,7 +669,7 @@ export default function ConnectorsPage() {
         ?.filter((c) => c.connected)
         .map((connection) => {
           const config = getSyncConfig(connection.platform);
-          const connector = connectors?.find((c) => c.platform === connection.platform);
+          const connector = connectorsList.find((c) => c.platform === connection.platform);
 
           if (!config || !connector) return null;
 

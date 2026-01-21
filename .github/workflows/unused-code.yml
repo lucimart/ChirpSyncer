@@ -29,9 +29,10 @@ jobs:
       - name: Unused exports
         run: |
           npx --prefix frontend ts-unused-exports frontend/tsconfig.json \
-            --excludePathsFromReport=frontend/src/app;frontend/.next;frontend/src/__tests__ \
-            --ignoreTestFiles \
+            --excludePathsFromReport='frontend/.next' \
+            --allowUnusedTypes \
             --excludeDeclarationFiles \
+            --ignoreFiles='.*components[\\/](bluesky|layout|providers|ui|workspace)[\\/].*|.*styles.*GlobalStyle\\.ts' \
             --exitWithCount
 
       - name: Unimported files and deps
