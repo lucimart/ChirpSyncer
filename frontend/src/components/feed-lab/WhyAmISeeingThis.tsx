@@ -262,7 +262,7 @@ function ExplanationContent({ explanation }: ExplanationContentProps) {
   return (
     <div className="space-y-4">
       {/* Scores */}
-      <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+      <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg" data-testid="explanation-scores">
         <div>
           <p className="text-sm text-gray-600">Base Score: {baseScore}</p>
           <p className="text-lg font-semibold">Total Score: {totalScore}</p>
@@ -281,7 +281,7 @@ function ExplanationContent({ explanation }: ExplanationContentProps) {
 
       {/* Rules or Empty State */}
       {hasRules ? (
-        <div className="space-y-3">
+        <div className="space-y-3" data-testid="explanation-rules">
           <h3 className="font-medium text-gray-800">Applied Rules</h3>
           {appliedRules.map((rule) => (
             <RuleCard key={rule.ruleId} rule={rule} />

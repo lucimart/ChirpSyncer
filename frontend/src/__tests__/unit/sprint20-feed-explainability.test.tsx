@@ -181,8 +181,9 @@ describe('WhyAmISeeingThis Component', () => {
     await user.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText('Prioritize AI posts')).toBeInTheDocument();
-      expect(screen.getByText('Boost trending topics')).toBeInTheDocument();
+      const rulesList = screen.getByTestId('explanation-rules');
+      expect(within(rulesList).getByText('Prioritize AI posts')).toBeInTheDocument();
+      expect(within(rulesList).getByText('Boost trending topics')).toBeInTheDocument();
     });
   });
 
@@ -226,8 +227,9 @@ describe('WhyAmISeeingThis Component', () => {
     await user.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText(/\+50/)).toBeInTheDocument();
-      expect(screen.getByText(/\+25/)).toBeInTheDocument();
+      const rulesList = screen.getByTestId('explanation-rules');
+      expect(within(rulesList).getByText(/\+50/)).toBeInTheDocument();
+      expect(within(rulesList).getByText(/\+25/)).toBeInTheDocument();
     });
   });
 
@@ -241,8 +243,9 @@ describe('WhyAmISeeingThis Component', () => {
     await user.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText(/-25/)).toBeInTheDocument();
-      expect(screen.getByText('Demote old content')).toBeInTheDocument();
+      const rulesList = screen.getByTestId('explanation-rules');
+      expect(within(rulesList).getByText(/-25/)).toBeInTheDocument();
+      expect(within(rulesList).getByText('Demote old content')).toBeInTheDocument();
     });
   });
 
@@ -349,8 +352,9 @@ describe('WhyAmISeeingThis Component', () => {
     await user.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText(/base score: 50/i)).toBeInTheDocument();
-      expect(screen.getByText(/total score: 125/i)).toBeInTheDocument();
+      const scores = screen.getByTestId('explanation-scores');
+      expect(within(scores).getByText(/base score: 50/i)).toBeInTheDocument();
+      expect(within(scores).getByText(/total score: 125/i)).toBeInTheDocument();
     });
   });
 
