@@ -491,7 +491,7 @@ export default function SchedulerPage() {
           ) : (
             <Card padding="lg">
               <EmptyState>
-                No scheduled posts. Click "Schedule Post" to create one.
+                No scheduled posts. Click &quot;Schedule Post&quot; to create one.
               </EmptyState>
             </Card>
           )}

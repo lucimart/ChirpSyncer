@@ -166,4 +166,6 @@ export const Modal = ({
 };
 
 // Convenience sub-components for common patterns
-Modal.Footer = ({ children }: { children: ReactNode }) => <Footer>{children}</Footer>;
+const ModalFooter = ({ children }: { children: ReactNode }) => <Footer>{children}</Footer>;
+ModalFooter.displayName = 'ModalFooter';
+Modal.Footer = ModalFooter;

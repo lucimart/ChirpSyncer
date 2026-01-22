@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import {
   Search as SearchIcon,
   Filter,
-  Image,
+  Image as ImageIcon,
   Download,
   ChevronLeft,
   ChevronRight,
@@ -368,7 +368,7 @@ export default function SearchPage() {
                   setFilters((prev) => ({ ...prev, has_media: e.target.checked }))
                 }
               />
-              <Image size={16} />
+              <ImageIcon size={16} />
               Has media
             </FilterLabel>
           </FilterGroup>

@@ -67,6 +67,11 @@ class MockWebSocket {
 };
 
 global.WebSocket = MockWebSocket as unknown as typeof WebSocket;
+// Explicitly set on window for libraries checking window.WebSocket
+Object.defineProperty(window, 'WebSocket', {
+  value: MockWebSocket,
+  writable: true
+});
 
 // Mock localStorage
 const localStorageMock = {

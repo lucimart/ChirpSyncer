@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Twitter, Share2, FileText, Image } from 'lucide-react';
+import { Twitter, Share2, FileText, Image as ImageIcon } from 'lucide-react';
 import type { MemberRole } from './MemberManagement';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -195,7 +195,7 @@ const platformIcons: Record<Platform, React.ReactNode> = {
   twitter: <Twitter size={18} />,
   bluesky: <Share2 size={18} />,
   mastodon: <FileText size={18} />,
-  instagram: <Image size={18} />,
+  instagram: <ImageIcon size={18} />,
 };
 
 const accessLevelLabels: Record<AccessLevel, string> = {

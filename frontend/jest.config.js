@@ -1,6 +1,9 @@
 /** @type {import('jest').Config} */
 const config = {
   testEnvironment: 'jsdom',
+  testEnvironmentOptions: {
+    customExportConditions: ['browser', 'node'],
+  },
   setupFiles: ['<rootDir>/src/__tests__/jest-setup.ts'],
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   moduleNameMapper: {

@@ -102,7 +102,10 @@ export function FeedCompositionChart({
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   // Support both `data` and `composition` props (composition is an alias)
-  const safeData = data ?? composition ?? { boosted: 0, demoted: 0, filtered: 0, unaffected: 0 };
+  const safeData = useMemo(
+    () => data ?? composition ?? { boosted: 0, demoted: 0, filtered: 0, unaffected: 0 },
+    [data, composition]
+  );
 
   const total = useMemo(() => {
     return safeData.boosted + safeData.demoted + safeData.filtered + safeData.unaffected;

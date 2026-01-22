@@ -136,7 +136,7 @@ export function useWorkspace(): UseWorkspaceResult {
       setError(err instanceof Error ? err.message : 'Failed to create workspace');
       return null;
     }
-  }, []);
+  }, [fetchWorkspaces]);
 
   const refresh = useCallback(async () => {
     clearWorkspaceCache();

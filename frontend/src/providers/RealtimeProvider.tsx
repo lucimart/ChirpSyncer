@@ -84,7 +84,7 @@ export function RealtimeProvider({ children, userId }: RealtimeProviderProps) {
     setStatus('connecting');
 
     const socket = io(SOCKET_URL, {
-      transports: ['websocket', 'polling'],
+      transports: process.env.NODE_ENV === 'test' ? ['websocket'] : ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
       reconnectionDelay: 1000,
@@ -192,8 +192,8 @@ export function useRealtimeMessage<T extends RealtimeMessage['type']>(
   useEffect(() => {
     return subscribe((message) => {
       if (message.type === type) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        handler(message.payload as any);
+        // @ts-ignore
+        handler(message.payload);
       }
     });
   }, [type, handler, subscribe]);
