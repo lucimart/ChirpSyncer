@@ -24,7 +24,9 @@ class TestAdminApiE2E:
         """Helper to login and get auth token."""
         response = client.post(
             "/api/v1/auth/login",
-            data=json.dumps({"username": user["username"], "password": user["password"]}),
+            data=json.dumps(
+                {"username": user["username"], "password": user["password"]}
+            ),
             content_type="application/json",
         )
         data = response.get_json()
@@ -52,12 +54,16 @@ class TestAdminApiE2E:
             if method == "GET":
                 response = client.get(endpoint)
             elif method == "PUT":
-                response = client.put(endpoint, data=json.dumps({}), content_type="application/json")
+                response = client.put(
+                    endpoint, data=json.dumps({}), content_type="application/json"
+                )
             elif method == "DELETE":
                 response = client.delete(endpoint)
             elif method == "POST":
                 response = client.post(endpoint)
-            assert response.status_code == 401, f"{method} {endpoint} should require auth"
+            assert response.status_code == 401, (
+                f"{method} {endpoint} should require auth"
+            )
 
     def test_admin_endpoints_require_admin_role(self, client, test_db, test_user):
         """Admin endpoints require admin privileges."""
@@ -83,9 +89,12 @@ class TestAdminApiE2E:
         assert response.status_code == 200
         data = response.get_json()
         assert data["success"] is True
-        assert isinstance(data["data"], list)
+        # Response is now an object with users list and pagination metadata
+        assert isinstance(data["data"], dict)
+        assert "users" in data["data"]
+        assert isinstance(data["data"]["users"], list)
         # Should include both admin and regular user
-        assert len(data["data"]) >= 2
+        assert len(data["data"]["users"]) >= 2
 
     def test_list_users_structure(self, client, test_db, test_admin_user):
         """User objects have expected structure."""
@@ -94,7 +103,7 @@ class TestAdminApiE2E:
             "/api/v1/admin/users",
             headers=self._auth_headers(token),
         )
-        user = response.get_json()["data"][0]
+        user = response.get_json()["data"]["users"][0]
 
         # Required fields
         assert "id" in user
@@ -119,7 +128,9 @@ class TestAdminApiE2E:
             headers=self._auth_headers(token),
         )
         data = response.get_json()
-        assert any(u["username"] == test_user["username"] for u in data["data"])
+        assert any(
+            u["username"] == test_user["username"] for u in data["data"]["users"]
+        )
 
         # Search should be case insensitive
         response = client.get(
@@ -127,7 +138,9 @@ class TestAdminApiE2E:
             headers=self._auth_headers(token),
         )
         data = response.get_json()
-        assert any(u["username"] == test_user["username"] for u in data["data"])
+        assert any(
+            u["username"] == test_user["username"] for u in data["data"]["users"]
+        )
 
     def test_list_users_pagination(self, client, test_db, test_admin_user):
         """GET /api/v1/admin/users supports pagination params."""
@@ -139,7 +152,11 @@ class TestAdminApiE2E:
         )
         assert response.status_code == 200
         data = response.get_json()
-        assert len(data["data"]) <= 10
+        assert len(data["data"]["users"]) <= 10
+        # Verify pagination metadata is present
+        assert "total" in data["data"]
+        assert "page" in data["data"]
+        assert "limit" in data["data"]
 
     # =========================================================================
     # Get Single User
@@ -300,7 +317,9 @@ class TestAdminApiE2E:
     # User Journey: Complete Admin Workflow
     # =========================================================================
 
-    def test_admin_user_management_workflow(self, client, test_db, test_admin_user, test_user):
+    def test_admin_user_management_workflow(
+        self, client, test_db, test_admin_user, test_user
+    ):
         """
         Complete admin workflow:
         1. List users
@@ -328,19 +347,27 @@ class TestAdminApiE2E:
         assert user_data["is_admin"] is False
 
         # 3. Deactivate user
-        response = client.post(f"/api/v1/admin/users/{user_id}/toggle-active", headers=headers)
+        response = client.post(
+            f"/api/v1/admin/users/{user_id}/toggle-active", headers=headers
+        )
         assert response.get_json()["data"]["is_active"] is False
 
         # 4. Promote to admin
-        response = client.post(f"/api/v1/admin/users/{user_id}/toggle-admin", headers=headers)
+        response = client.post(
+            f"/api/v1/admin/users/{user_id}/toggle-admin", headers=headers
+        )
         assert response.get_json()["data"]["is_admin"] is True
 
         # 5. Demote from admin
-        response = client.post(f"/api/v1/admin/users/{user_id}/toggle-admin", headers=headers)
+        response = client.post(
+            f"/api/v1/admin/users/{user_id}/toggle-admin", headers=headers
+        )
         assert response.get_json()["data"]["is_admin"] is False
 
         # 6. Reactivate user
-        response = client.post(f"/api/v1/admin/users/{user_id}/toggle-active", headers=headers)
+        response = client.post(
+            f"/api/v1/admin/users/{user_id}/toggle-active", headers=headers
+        )
         assert response.get_json()["data"]["is_active"] is True
 
         # 7. Delete user

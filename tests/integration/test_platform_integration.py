@@ -397,14 +397,15 @@ def test_twitter_api_handler_initialization():
         mock_instance.get_me.assert_called_once()
 
     # Test missing credentials
-    with pytest.raises(ValueError) as exc_info:
+    from app.integrations.twitter_api_handler import TwitterAPINotConfiguredError
+
+    with pytest.raises(TwitterAPINotConfiguredError):
         TwitterAPIHandler(
             api_key="test_key",
             api_secret="test_secret",
             access_token="test_token",
             access_secret="",  # Missing
         )
-    assert "required" in str(exc_info.value).lower()
 
 
 @pytest.mark.integration
@@ -532,15 +533,15 @@ def test_twitter_api_handler_from_credentials_dict():
         assert handler is not None
 
     # Test missing credentials
-    with pytest.raises(ValueError) as exc_info:
+    from app.integrations.twitter_api_handler import TwitterAPINotConfiguredError
+
+    with pytest.raises(TwitterAPINotConfiguredError):
         bad_creds = {
             "api_key": "key123",
             "api_secret": "secret456",
             # Missing access_token and access_secret
         }
         TwitterAPIHandler.from_credentials_dict(bad_creds)
-
-    assert "Missing" in str(exc_info.value)
 
 
 @pytest.mark.integration
