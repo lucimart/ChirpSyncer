@@ -12,7 +12,7 @@ import {
   WorkspaceSettings,
   WorkspaceSwitcher,
 } from '@/components/workspace';
-import { Button, Card, Input, Modal } from '@/components/ui';
+import { Button, Card, Input, Modal, Tabs } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { useActivityFeed } from '@/hooks/useActivityFeed';
 import { useWorkspace } from '@/hooks/useWorkspace';
@@ -38,47 +38,8 @@ const PageDescription = styled.p`
   margin-top: ${({ theme }) => theme.spacing[1]};
 `;
 
-const TabsContainer = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[1]};
+const StyledTabs = styled(Tabs)`
   margin-bottom: ${({ theme }) => theme.spacing[6]};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
-  padding-bottom: ${({ theme }) => theme.spacing[1]};
-  overflow-x: auto;
-  
-  &::-webkit-scrollbar {
-    display: none;
-  }
-`;
-
-const Tab = styled.button<{ $active: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
-  border: none;
-  background: ${({ $active, theme }) => 
-    $active ? theme.colors.primary[50] : 'transparent'};
-  color: ${({ $active, theme }) => 
-    $active ? theme.colors.primary[700] : theme.colors.text.secondary};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.fast};
-  white-space: nowrap;
-  
-  &:hover {
-    background: ${({ $active, theme }) => 
-      $active ? theme.colors.primary[100] : theme.colors.background.secondary};
-    color: ${({ $active, theme }) => 
-      $active ? theme.colors.primary[700] : theme.colors.text.primary};
-  }
-  
-  svg {
-    width: 16px;
-    height: 16px;
-  }
 `;
 
 const TabContent = styled.div`
@@ -226,18 +187,12 @@ export default function WorkspacesPage() {
         </HeaderActions>
       </PageHeader>
 
-      <TabsContainer>
-        {tabs.map((tab) => (
-          <Tab
-            key={tab.id}
-            $active={activeTab === tab.id}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            <tab.icon />
-            {tab.label}
-          </Tab>
-        ))}
-      </TabsContainer>
+      <StyledTabs
+        items={tabs}
+        value={activeTab}
+        onChange={(id) => setActiveTab(id as TabType)}
+        variant="soft"
+      />
 
       <TabContent>
         {activeTab === 'settings' && (

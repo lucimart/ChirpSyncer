@@ -20,8 +20,10 @@ import {
   useEngagementPrediction,
   useCreateScheduledPost,
   useDeleteScheduledPost,
+  useHeatmapData,
   TimeSlot,
 } from '@/lib/scheduling';
+import { TimingHeatmap } from '@/components/scheduler/TimingHeatmap';
 
 const PageHeader = styled.div`
   display: flex;
@@ -319,6 +321,7 @@ export default function SchedulerPage() {
 
   const { data: optimalTimes } = useOptimalTimes();
   const { data: scheduledPosts, isLoading } = useScheduledPosts();
+  const { data: heatmapData, isLoading: heatmapLoading } = useHeatmapData();
   const engagementPrediction = useEngagementPrediction();
   const createPost = useCreateScheduledPost();
   const deletePost = useDeleteScheduledPost();
@@ -427,6 +430,16 @@ export default function SchedulerPage() {
 
   const pendingPosts = scheduledPosts?.filter((p) => p.status === 'pending') ?? [];
   const publishedPosts = scheduledPosts?.filter((p) => p.status !== 'pending') ?? [];
+
+  const handleHeatmapCellSelect = (cell: { day: number; hour: number; score: number }) => {
+    handleOptimalTimeSelect({
+      day: cell.day,
+      hour: cell.hour,
+      score: cell.score,
+      label: '',
+      estimated: false,
+    });
+  };
 
   return (
     <div>
@@ -570,6 +583,18 @@ export default function SchedulerPage() {
           </Card>
         </Sidebar>
       </GridLayout>
+
+      <Card padding="md" style={{ marginTop: '24px' }}>
+        <SectionTitle>
+          <TrendingUp size={20} />
+          Engagement Heatmap
+        </SectionTitle>
+        <TimingHeatmap
+          data={heatmapData}
+          onCellSelect={handleHeatmapCellSelect}
+          loading={heatmapLoading}
+        />
+      </Card>
 
       <Modal
         isOpen={isModalOpen}

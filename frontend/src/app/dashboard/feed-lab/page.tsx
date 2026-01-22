@@ -3,21 +3,97 @@
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
-import { List, Plus, Eye } from 'lucide-react';
+import { List, Plus, Eye, BookOpen } from 'lucide-react';
+import { Button, Tabs, Badge } from '@/components/ui';
 import { FeedPreview } from '@/components/feed-lab/FeedPreview';
 import { RuleBuilder } from '@/components/feed-lab/RuleBuilder';
 import { RuleList } from '@/components/feed-lab/RuleList';
+import { RecipeGallery, Recipe } from '@/components/feed-lab/RecipeGallery';
 import {
   useCreateFeedRule,
   useDeleteFeedRule,
   useFeedRules,
   useToggleFeedRule,
   useUpdateFeedRule,
+  useReorderFeedRules,
   FeedRule,
 } from '@/lib/feed-rules';
 import { api } from '@/lib/api';
 
-type TabId = 'rules' | 'create' | 'preview';
+type TabId = 'rules' | 'create' | 'preview' | 'recipes';
+
+// Pre-built recipe templates for common use cases
+const RECIPE_TEMPLATES: Recipe[] = [
+  {
+    id: 'recipe-1',
+    name: 'Boost Original Content',
+    description: 'Prioritize posts from accounts you follow that are original thoughts, not retweets or replies.',
+    category: 'engagement',
+    type: 'boost',
+    weight: 75,
+    conditions: [
+      { field: 'isRetweet', operator: 'equals', value: false },
+      { field: 'isReply', operator: 'equals', value: false },
+    ],
+    tags: ['original', 'quality'],
+    popularity: 92,
+  },
+  {
+    id: 'recipe-2',
+    name: 'Filter Low Engagement',
+    description: 'Hide posts with very low engagement to focus on quality content.',
+    category: 'filtering',
+    type: 'filter',
+    weight: 100,
+    conditions: [
+      { field: 'likeCount', operator: 'lessThan', value: 2 },
+      { field: 'age', operator: 'greaterThan', value: '24h' },
+    ],
+    tags: ['quality', 'cleanup'],
+    popularity: 78,
+  },
+  {
+    id: 'recipe-3',
+    name: 'Discover New Voices',
+    description: 'Boost content from accounts you don\'t follow but your network engages with.',
+    category: 'discovery',
+    type: 'boost',
+    weight: 50,
+    conditions: [
+      { field: 'isFollowing', operator: 'equals', value: false },
+      { field: 'networkEngagement', operator: 'greaterThan', value: 3 },
+    ],
+    tags: ['discovery', 'network'],
+    popularity: 65,
+  },
+  {
+    id: 'recipe-4',
+    name: 'Mute Promotional Content',
+    description: 'Demote posts that contain common promotional patterns like "giveaway" or "discount".',
+    category: 'filtering',
+    type: 'demote',
+    weight: 60,
+    conditions: [
+      { field: 'content', operator: 'contains', value: 'giveaway|discount|sale|promo' },
+    ],
+    tags: ['cleanup', 'ads'],
+    popularity: 85,
+  },
+  {
+    id: 'recipe-5',
+    name: 'Thread Booster',
+    description: 'Prioritize the start of long threads that often contain valuable insights.',
+    category: 'productivity',
+    type: 'boost',
+    weight: 40,
+    conditions: [
+      { field: 'isThreadStart', operator: 'equals', value: true },
+      { field: 'threadLength', operator: 'greaterThan', value: 3 },
+    ],
+    tags: ['threads', 'insights'],
+    popularity: 71,
+  },
+];
 
 const PageHeader = styled.div`
   display: flex;
@@ -39,51 +115,8 @@ const PageDescription = styled.p`
   margin-top: ${({ theme }) => theme.spacing[1]};
 `;
 
-const TabsContainer = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[1]};
+const StyledTabs = styled(Tabs)`
   margin-bottom: ${({ theme }) => theme.spacing[6]};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
-  padding-bottom: ${({ theme }) => theme.spacing[1]};
-`;
-
-const Tab = styled.button<{ $active: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme, $active }) =>
-    $active ? theme.colors.primary[500] : theme.colors.text.secondary};
-  background: ${({ theme, $active }) =>
-    $active ? theme.colors.primary[500] + '15' : 'transparent'};
-  border: none;
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: ${({ theme, $active }) =>
-      $active ? theme.colors.primary[500] + '20' : theme.colors.background.tertiary};
-    color: ${({ theme, $active }) =>
-      $active ? theme.colors.primary[500] : theme.colors.text.primary};
-  }
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-`;
-
-const TabBadge = styled.span`
-  background: ${({ theme }) => theme.colors.primary[500]};
-  color: white;
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  padding: 2px 6px;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  min-width: 20px;
-  text-align: center;
 `;
 
 const TabContent = styled.div`
@@ -129,29 +162,6 @@ const PromptText = styled.p`
   margin-bottom: ${({ theme }) => theme.spacing[4]};
 `;
 
-const CreateButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
-  background: ${({ theme }) => theme.colors.primary[500]};
-  color: white;
-  border: none;
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  cursor: pointer;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.primary[600]};
-  }
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-`;
-
 interface PreviewPost {
   id: string;
   content: string;
@@ -170,6 +180,7 @@ export default function FeedLabPage() {
   const updateRule = useUpdateFeedRule();
   const deleteRule = useDeleteFeedRule();
   const toggleRule = useToggleFeedRule();
+  const reorderRules = useReorderFeedRules();
 
   const editingRule = rules.find((rule) => rule.id === editingRuleId) || null;
 
@@ -239,6 +250,49 @@ export default function FeedLabPage() {
     });
   };
 
+  const handleApplyRecipe = (recipe: Recipe) => {
+    // Convert recipe to a new rule
+    createRule.mutate({
+      name: recipe.name,
+      type: recipe.type,
+      weight: recipe.weight,
+      conditions: recipe.conditions,
+      enabled: true,
+    }, {
+      onSuccess: () => setActiveTab('rules'),
+    });
+  };
+
+  const handleSelectRecipe = (recipe: Recipe) => {
+    // Could show a detail modal, for now just apply it
+    handleApplyRecipe(recipe);
+  };
+
+  const tabItems = [
+    {
+      id: 'rules',
+      label: 'My Rules',
+      icon: List,
+      badge: rules.length > 0 ? rules.length : undefined
+    },
+    {
+      id: 'create',
+      label: editingRuleId ? 'Edit Rule' : 'Create Rule',
+      icon: Plus
+    },
+    {
+      id: 'preview',
+      label: 'Preview',
+      icon: Eye
+    },
+    {
+      id: 'recipes',
+      label: 'Recipes',
+      icon: BookOpen,
+      badge: RECIPE_TEMPLATES.length,
+    }
+  ];
+
   return (
     <div>
       <PageHeader>
@@ -250,21 +304,12 @@ export default function FeedLabPage() {
         </HeaderLeft>
       </PageHeader>
 
-      <TabsContainer>
-        <Tab $active={activeTab === 'rules'} onClick={() => setActiveTab('rules')}>
-          <List />
-          My Rules
-          {rules.length > 0 && <TabBadge>{rules.length}</TabBadge>}
-        </Tab>
-        <Tab $active={activeTab === 'create'} onClick={() => setActiveTab('create')}>
-          <Plus />
-          {editingRuleId ? 'Edit Rule' : 'Create Rule'}
-        </Tab>
-        <Tab $active={activeTab === 'preview'} onClick={() => setActiveTab('preview')}>
-          <Eye />
-          Preview
-        </Tab>
-      </TabsContainer>
+      <StyledTabs
+        items={tabItems}
+        value={activeTab}
+        onChange={(id) => setActiveTab(id as TabId)}
+        variant="accent"
+      />
 
       <TabContent>
         {activeTab === 'rules' && (
@@ -277,10 +322,10 @@ export default function FeedLabPage() {
             {rules.length === 0 ? (
               <CreateRulePrompt>
                 <PromptText>No rules yet. Create your first rule to customize your feed.</PromptText>
-                <CreateButton onClick={() => setActiveTab('create')}>
-                  <Plus />
+                <Button variant="primary" size="md" onClick={() => setActiveTab('create')}>
+                  <Plus size={16} />
                   Create Rule
-                </CreateButton>
+                </Button>
               </CreateRulePrompt>
             ) : (
               <RuleList
@@ -291,6 +336,7 @@ export default function FeedLabPage() {
                   setActiveTab('create');
                 }}
                 onDelete={(id) => deleteRule.mutate(id)}
+                onReorder={(reordered) => reorderRules.mutate(reordered)}
               />
             )}
           </Section>
@@ -328,6 +374,22 @@ export default function FeedLabPage() {
             <FeedPreview
               posts={previewPosts}
               onPostClick={() => {}}
+            />
+          </Section>
+        )}
+
+        {activeTab === 'recipes' && (
+          <Section>
+            <SectionHeader>
+              <SectionTitle>Recipe Templates</SectionTitle>
+              <HelperText>Pre-built rule templates to quickly customize your feed.</HelperText>
+            </SectionHeader>
+
+            <RecipeGallery
+              recipes={RECIPE_TEMPLATES}
+              onSelectRecipe={handleSelectRecipe}
+              onApplyRecipe={handleApplyRecipe}
+              viewMode="grid"
             />
           </Section>
         )}

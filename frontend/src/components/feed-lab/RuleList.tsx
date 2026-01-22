@@ -2,7 +2,27 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { Pencil, Trash2, Zap, TrendingDown, Filter } from 'lucide-react';
+import { GripVertical, Pencil, Trash2, Zap, TrendingDown, Filter } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
+import { Switch } from '../ui/Switch';
 
 interface Condition {
   field: string;
@@ -10,18 +30,21 @@ interface Condition {
   value: string | number;
 }
 
+export interface Rule {
+  id: string;
+  name: string;
+  type: 'boost' | 'demote' | 'filter';
+  weight: number;
+  conditions: Condition[];
+  enabled: boolean;
+}
+
 interface RuleListProps {
-  rules: Array<{
-    id: string;
-    name: string;
-    type: 'boost' | 'demote' | 'filter';
-    weight: number;
-    conditions: Condition[];
-    enabled: boolean;
-  }>;
+  rules: Rule[];
   onToggle: (id: string, enabled: boolean) => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  onReorder?: (rules: Rule[]) => void;
 }
 
 const RulesContainer = styled.div`
@@ -30,14 +53,15 @@ const RulesContainer = styled.div`
   gap: ${({ theme }) => theme.spacing[3]};
 `;
 
-const RuleCard = styled.div<{ $enabled: boolean }>`
+const RuleCard = styled.div<{ $enabled: boolean; $isDragging?: boolean }>`
   background: ${({ theme }) => theme.colors.background.primary};
   border: 1px solid ${({ theme }) => theme.colors.border.light};
   border-radius: ${({ theme }) => theme.borderRadius.lg};
   padding: ${({ theme }) => theme.spacing[4]};
   transition: all ${({ theme }) => theme.transitions.fast};
-  opacity: ${({ $enabled }) => ($enabled ? 1 : 0.6)};
-  
+  opacity: ${({ $enabled, $isDragging }) => ($isDragging ? 0.5 : $enabled ? 1 : 0.6)};
+  cursor: ${({ $isDragging }) => ($isDragging ? 'grabbing' : 'default')};
+
   &:hover {
     border-color: ${({ theme }) => theme.colors.border.default};
     box-shadow: ${({ theme }) => theme.shadows.sm};
@@ -49,6 +73,26 @@ const RuleHeader = styled.div`
   align-items: flex-start;
   justify-content: space-between;
   gap: ${({ theme }) => theme.spacing[4]};
+`;
+
+const DragHandle = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${({ theme }) => theme.spacing[1]};
+  color: ${({ theme }) => theme.colors.text.tertiary};
+  cursor: grab;
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  transition: all ${({ theme }) => theme.transitions.fast};
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.text.secondary};
+    background: ${({ theme }) => theme.colors.background.tertiary};
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
 `;
 
 const RuleInfo = styled.div`
@@ -68,41 +112,6 @@ const RuleName = styled.h3`
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
   color: ${({ theme }) => theme.colors.text.primary};
   margin: 0;
-`;
-
-const RuleTypeBadge = styled.span<{ $type: 'boost' | 'demote' | 'filter' }>`
-  display: inline-flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[1]};
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  
-  ${({ $type, theme }) => {
-    switch ($type) {
-      case 'boost':
-        return `
-          background: ${theme.colors.success[50]};
-          color: ${theme.colors.success[700]};
-        `;
-      case 'demote':
-        return `
-          background: ${theme.colors.warning[50]};
-          color: ${theme.colors.warning[700]};
-        `;
-      case 'filter':
-        return `
-          background: ${theme.colors.danger[50]};
-          color: ${theme.colors.danger[700]};
-        `;
-    }
-  }}
-  
-  svg {
-    width: 12px;
-    height: 12px;
-  }
 `;
 
 const RuleMeta = styled.div`
@@ -125,79 +134,11 @@ const RuleActions = styled.div`
   gap: ${({ theme }) => theme.spacing[3]};
 `;
 
-const Toggle = styled.label`
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
-`;
-
-const ToggleInput = styled.input`
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-`;
-
-const ToggleSlider = styled.span<{ $checked: boolean }>`
-  width: 44px;
-  height: 24px;
-  background: ${({ $checked, theme }) =>
-    $checked ? theme.colors.primary[600] : theme.colors.neutral[300]};
-  border-radius: 12px;
-  position: relative;
-  transition: background ${({ theme }) => theme.transitions.fast};
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: ${({ $checked }) => ($checked ? '22px' : '2px')};
-    width: 20px;
-    height: 20px;
-    background: white;
-    border-radius: 50%;
-    transition: left ${({ theme }) => theme.transitions.fast};
-  }
-`;
-
-const ActionButton = styled.button<{ $variant?: 'default' | 'danger' }>`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${({ theme }) => theme.spacing[1]};
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[3]}`};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  border: none;
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.fast};
-  
-  ${({ $variant, theme }) =>
-    $variant === 'danger'
-      ? `
-          background: ${theme.colors.danger[50]};
-          color: ${theme.colors.danger[700]};
-          
-          &:hover {
-            background: ${theme.colors.danger[100]};
-          }
-        `
-      : `
-          background: ${theme.colors.background.secondary};
-          color: ${theme.colors.text.secondary};
-          
-          &:hover {
-            background: ${theme.colors.background.tertiary};
-            color: ${theme.colors.text.primary};
-          }
-        `}
-  
-  svg {
-    width: 14px;
-    height: 14px;
-  }
+const LeftSection = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.spacing[3]};
+  flex: 1;
 `;
 
 const EmptyState = styled.div`
@@ -221,20 +162,35 @@ const EmptyText = styled.p`
   margin-top: ${({ theme }) => theme.spacing[2]};
 `;
 
-export const RuleList: React.FC<RuleListProps> = ({
-  rules,
+// Sortable Rule Item Component
+interface SortableRuleItemProps {
+  rule: Rule;
+  onToggle: (id: string, enabled: boolean) => void;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
+  isDraggable: boolean;
+}
+
+const SortableRuleItem: React.FC<SortableRuleItemProps> = ({
+  rule,
   onToggle,
   onEdit,
   onDelete,
+  isDraggable,
 }) => {
-  if (rules.length === 0) {
-    return (
-      <EmptyState>
-        <EmptyTitle>No rules created yet</EmptyTitle>
-        <EmptyText>Create your first rule to customize your feed</EmptyText>
-      </EmptyState>
-    );
-  }
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: rule.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   const getRuleTypeLabel = (type: 'boost' | 'demote' | 'filter') => {
     return type.charAt(0).toUpperCase() + type.slice(1);
@@ -243,11 +199,11 @@ export const RuleList: React.FC<RuleListProps> = ({
   const getRuleTypeIcon = (type: 'boost' | 'demote' | 'filter') => {
     switch (type) {
       case 'boost':
-        return <Zap />;
+        return <Zap size={12} />;
       case 'demote':
-        return <TrendingDown />;
+        return <TrendingDown size={12} />;
       case 'filter':
-        return <Filter />;
+        return <Filter size={12} />;
     }
   };
 
@@ -256,21 +212,36 @@ export const RuleList: React.FC<RuleListProps> = ({
   };
 
   return (
-    <RulesContainer>
-      {rules.map((rule) => (
-        <RuleCard
-          key={rule.id}
-          $enabled={rule.enabled}
-          data-testid={`rule-item-${rule.id}`}
-        >
-          <RuleHeader>
+    <div ref={setNodeRef} style={style}>
+      <RuleCard
+        $enabled={rule.enabled}
+        $isDragging={isDragging}
+        data-testid={`rule-item-${rule.id}`}
+      >
+        <RuleHeader>
+          <LeftSection>
+            {isDraggable && (
+              <DragHandle {...attributes} {...listeners} aria-label="Drag to reorder">
+                <GripVertical size={18} />
+              </DragHandle>
+            )}
             <RuleInfo>
               <RuleTitleRow>
                 <RuleName>{rule.name}</RuleName>
-                <RuleTypeBadge $type={rule.type} data-testid={`rule-type-badge-${rule.id}`}>
+                <Badge
+                  variant={
+                    rule.type === 'boost'
+                      ? 'success'
+                      : rule.type === 'demote'
+                        ? 'warning'
+                        : 'danger'
+                  }
+                  size="sm"
+                  data-testid={`rule-type-badge-${rule.id}`}
+                >
                   {getRuleTypeIcon(rule.type)}
                   {getRuleTypeLabel(rule.type)}
-                </RuleTypeBadge>
+                </Badge>
               </RuleTitleRow>
 
               <RuleMeta>
@@ -280,35 +251,102 @@ export const RuleList: React.FC<RuleListProps> = ({
                 )}
               </RuleMeta>
             </RuleInfo>
+          </LeftSection>
 
-            <RuleActions>
-              <Toggle>
-                <ToggleInput
-                  type="checkbox"
-                  role="switch"
-                  checked={rule.enabled}
-                  onChange={(e) => onToggle(rule.id, e.target.checked)}
-                />
-                <ToggleSlider $checked={rule.enabled} />
-              </Toggle>
+          <RuleActions>
+            <Switch
+              checked={rule.enabled}
+              onChange={(e) => onToggle(rule.id, e.target.checked)}
+              aria-label="Toggle rule"
+              size="md"
+            />
 
-              <ActionButton onClick={() => onEdit(rule.id)} aria-label="Edit">
-                <Pencil />
-                Edit
-              </ActionButton>
+            <Button
+              variant="soft"
+              size="sm"
+              onClick={() => onEdit(rule.id)}
+              aria-label="Edit"
+            >
+              <Pencil size={14} />
+              Edit
+            </Button>
 
-              <ActionButton
-                $variant="danger"
-                onClick={() => onDelete(rule.id)}
-                aria-label="Delete"
-              >
-                <Trash2 />
-                Delete
-              </ActionButton>
-            </RuleActions>
-          </RuleHeader>
-        </RuleCard>
-      ))}
-    </RulesContainer>
+            <Button
+              variant="danger-soft"
+              size="sm"
+              onClick={() => onDelete(rule.id)}
+              aria-label="Delete"
+            >
+              <Trash2 size={14} />
+              Delete
+            </Button>
+          </RuleActions>
+        </RuleHeader>
+      </RuleCard>
+    </div>
+  );
+};
+
+export const RuleList: React.FC<RuleListProps> = ({
+  rules,
+  onToggle,
+  onEdit,
+  onDelete,
+  onReorder,
+}) => {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id && onReorder) {
+      const oldIndex = rules.findIndex((rule) => rule.id === active.id);
+      const newIndex = rules.findIndex((rule) => rule.id === over.id);
+      const reordered = arrayMove(rules, oldIndex, newIndex);
+      onReorder(reordered);
+    }
+  };
+
+  if (rules.length === 0) {
+    return (
+      <EmptyState>
+        <EmptyTitle>No rules created yet</EmptyTitle>
+        <EmptyText>Create your first rule to customize your feed</EmptyText>
+      </EmptyState>
+    );
+  }
+
+  const isDraggable = !!onReorder && rules.length > 1;
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext items={rules.map((r) => r.id)} strategy={verticalListSortingStrategy}>
+        <RulesContainer>
+          {rules.map((rule) => (
+            <SortableRuleItem
+              key={rule.id}
+              rule={rule}
+              onToggle={onToggle}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              isDraggable={isDraggable}
+            />
+          ))}
+        </RulesContainer>
+      </SortableContext>
+    </DndContext>
   );
 };

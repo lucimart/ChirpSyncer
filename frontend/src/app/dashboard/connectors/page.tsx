@@ -14,11 +14,16 @@ import {
   Clock,
 } from 'lucide-react';
 import {
+  Badge,
   Button,
   Card,
   Modal,
   useToast,
+  Input,
+  Switch,
+  Tabs,
 } from '@/components/ui';
+import { FlowDiagram, FlowDiagramData, Platform, SyncConnection } from '@/components/flow';
 import {
   useConnectors,
   useConnections,
@@ -138,24 +143,6 @@ const CapabilitySectionTitle = styled.h4`
   margin-bottom: ${({ theme }) => theme.spacing[2]};
 `;
 
-const CapabilityBadge = styled.span<{ $enabled: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[1]};
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  background-color: ${({ $enabled, theme }) =>
-    $enabled ? theme.colors.success[50] : theme.colors.neutral[100]};
-  color: ${({ $enabled, theme }) =>
-    $enabled ? theme.colors.success[700] : theme.colors.neutral[500]};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-
-  svg {
-    width: 12px;
-    height: 12px;
-  }
-`;
 
 const ConnectorActions = styled.div`
   display: flex;
@@ -195,17 +182,6 @@ const CapabilitiesWrapper = styled.div<{ $expanded: boolean }>`
   transition: max-height 0.3s ease, opacity 0.2s ease;
 `;
 
-const ComingSoonBadge = styled.span`
-  position: absolute;
-  top: ${({ theme }) => theme.spacing[3]};
-  right: ${({ theme }) => theme.spacing[3]};
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  background-color: ${({ theme }) => theme.colors.warning[100]};
-  color: ${({ theme }) => theme.colors.warning[700]};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-`;
 
 const ConnectionDetails = styled.div`
   padding: ${({ theme }) => theme.spacing[3]};
@@ -240,36 +216,8 @@ const ModalContent = styled.div`
   padding: ${({ theme }) => theme.spacing[4]};
 `;
 
-const FormGroup = styled.div`
+const SpacedInput = styled(Input)`
   margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const FormLabel = styled.label`
-  display: block;
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: ${({ theme }) => theme.spacing[2]};
-`;
-
-const FormInput = styled.input`
-  width: 100%;
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.primary[500]};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[100]};
-  }
-`;
-
-const FormHelp = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
 `;
 
 const ModalActions = styled.div`
@@ -296,28 +244,12 @@ const SyncConfigTitle = styled.div`
   gap: ${({ theme }) => theme.spacing[3]};
 `;
 
-const SyncToggle = styled.button<{ $enabled: boolean }>`
-  position: relative;
-  width: 44px;
-  height: 24px;
-  border: none;
-  border-radius: 12px;
-  background-color: ${({ $enabled, theme }) =>
-    $enabled ? theme.colors.success[500] : theme.colors.neutral[300]};
-  cursor: pointer;
-  transition: background-color ${({ theme }) => theme.transitions.fast};
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: ${({ $enabled }) => ($enabled ? '22px' : '2px')};
-    width: 20px;
-    height: 20px;
-    background-color: white;
-    border-radius: 50%;
-    transition: left ${({ theme }) => theme.transitions.fast};
-  }
+const FormLabel = styled.label`
+  display: block;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.text.primary};
+  margin-bottom: ${({ theme }) => theme.spacing[2]};
 `;
 
 const DirectionSelector = styled.div`
@@ -351,6 +283,8 @@ const DirectionButton = styled.button<{ $active: boolean; $disabled?: boolean }>
   `}
 `;
 
+type TabId = 'platforms' | 'flow';
+
 export default function ConnectorsPage() {
   const { addToast } = useToast();
   const { data: connectors } = useConnectors();
@@ -360,6 +294,7 @@ export default function ConnectorsPage() {
   const disconnectMutation = useDisconnectPlatform();
   const updateConfigMutation = useUpdateSyncConfig();
 
+  const [activeTab, setActiveTab] = useState<TabId>('platforms');
   const [connectModal, setConnectModal] = useState<PlatformConnector | null>(null);
   const [credentials, setCredentials] = useState<Record<string, string>>({});
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
@@ -374,6 +309,72 @@ export default function ConnectorsPage() {
   };
 
   const connectorsList = connectors ?? AVAILABLE_CONNECTORS;
+
+  // Transform connections to FlowDiagram format
+  const flowDiagramData: FlowDiagramData = {
+    platforms: (connections ?? [])
+      .filter((c) => c.connected)
+      .map((c) => {
+        const connector = connectorsList.find((con) => con.platform === c.platform);
+        return {
+          id: c.id,
+          name: connector?.name ?? c.platform,
+          icon: connector?.icon ?? c.platform[0].toUpperCase(),
+          color: connector?.color ?? '#6366F1',
+          status: c.sync_enabled ? ('active' as const) : ('paused' as const),
+          handle: c.handle,
+        };
+      }),
+    connections: (syncConfigs ?? [])
+      .filter((config) => config.enabled)
+      .flatMap((config) => {
+        const connection = connections?.find((c) => c.platform === config.platform);
+        if (!connection) return [];
+        const result: SyncConnection[] = [];
+        const hubId = 'hub-chirpsyncer';
+
+        if (config.direction === 'inbound' || config.direction === 'bidirectional') {
+          result.push({
+            id: `${connection.id}-inbound`,
+            sourceId: connection.id,
+            targetId: hubId,
+            direction: 'unidirectional',
+            status: 'active',
+          });
+        }
+        if (config.direction === 'outbound' || config.direction === 'bidirectional') {
+          result.push({
+            id: `${connection.id}-outbound`,
+            sourceId: hubId,
+            targetId: connection.id,
+            direction: 'unidirectional',
+            status: 'active',
+          });
+        }
+        return result;
+      }),
+  };
+
+  // Add hub node if there are connections
+  if (flowDiagramData.platforms.length > 0) {
+    flowDiagramData.platforms.unshift({
+      id: 'hub-chirpsyncer',
+      name: 'ChirpSyncer Hub',
+      icon: 'C',
+      color: '#6366F1',
+      status: 'active',
+    });
+  }
+
+  const handleNodeClick = (platform: Platform) => {
+    // Could open settings modal for the platform
+    console.log('Node clicked:', platform);
+  };
+
+  const handleEdgeClick = (connection: SyncConnection) => {
+    // Could show sync details
+    console.log('Edge clicked:', connection);
+  };
 
   const getConnection = (platform: PlatformType): PlatformConnection | undefined => {
     return connections?.find((c) => c.platform === platform);
@@ -444,97 +445,99 @@ export default function ConnectorsPage() {
 
   const renderCapabilities = (connector: PlatformConnector) => {
     const caps = connector.capabilities;
+    const enabledVariant = (enabled: boolean) => (enabled ? 'success' : 'neutral-soft');
+
     return (
       <>
         <CapabilitySection>
           <CapabilitySectionTitle>Core</CapabilitySectionTitle>
           <CapabilitiesGrid>
-            <CapabilityBadge $enabled={caps.publish}>
+            <Badge variant={enabledVariant(caps.publish)} size="sm">
               {caps.publish ? <Check /> : <X />}
               Publish
-            </CapabilityBadge>
-            <CapabilityBadge $enabled={caps.read}>
+            </Badge>
+            <Badge variant={enabledVariant(caps.read)} size="sm">
               {caps.read ? <Check /> : <X />}
               Read
-            </CapabilityBadge>
-            <CapabilityBadge $enabled={caps.edit}>
+            </Badge>
+            <Badge variant={enabledVariant(caps.edit)} size="sm">
               {caps.edit ? <Check /> : <X />}
               Edit
-            </CapabilityBadge>
-            <CapabilityBadge $enabled={caps.delete}>
+            </Badge>
+            <Badge variant={enabledVariant(caps.delete)} size="sm">
               {caps.delete ? <Check /> : <X />}
               Delete
-            </CapabilityBadge>
-            <CapabilityBadge $enabled={caps.metrics}>
+            </Badge>
+            <Badge variant={enabledVariant(caps.metrics)} size="sm">
               {caps.metrics ? <Check /> : <X />}
               Metrics
-            </CapabilityBadge>
-            <CapabilityBadge $enabled={caps.schedule}>
+            </Badge>
+            <Badge variant={enabledVariant(caps.schedule)} size="sm">
               {caps.schedule ? <Check /> : <X />}
               Schedule
-            </CapabilityBadge>
-            <CapabilityBadge $enabled={caps.threads}>
+            </Badge>
+            <Badge variant={enabledVariant(caps.threads)} size="sm">
               {caps.threads ? <Check /> : <X />}
               Threads
-            </CapabilityBadge>
+            </Badge>
           </CapabilitiesGrid>
         </CapabilitySection>
 
         <CapabilitySection>
           <CapabilitySectionTitle>Media</CapabilitySectionTitle>
           <CapabilitiesGrid>
-            <CapabilityBadge $enabled={caps.media.images}>
+            <Badge variant={enabledVariant(caps.media.images)} size="sm">
               {caps.media.images ? <Check /> : <X />}
               Images ({caps.media.maxImages})
-            </CapabilityBadge>
-            <CapabilityBadge $enabled={caps.media.videos}>
+            </Badge>
+            <Badge variant={enabledVariant(caps.media.videos)} size="sm">
               {caps.media.videos ? <Check /> : <X />}
               Videos
-            </CapabilityBadge>
-            <CapabilityBadge $enabled={caps.media.gifs}>
+            </Badge>
+            <Badge variant={enabledVariant(caps.media.gifs)} size="sm">
               {caps.media.gifs ? <Check /> : <X />}
               GIFs
-            </CapabilityBadge>
+            </Badge>
           </CapabilitiesGrid>
         </CapabilitySection>
 
         <CapabilitySection>
           <CapabilitySectionTitle>Interactions</CapabilitySectionTitle>
           <CapabilitiesGrid>
-            <CapabilityBadge $enabled={caps.interactions.like}>
+            <Badge variant={enabledVariant(caps.interactions.like)} size="sm">
               {caps.interactions.like ? <Check /> : <X />}
               Like
-            </CapabilityBadge>
-            <CapabilityBadge $enabled={caps.interactions.repost}>
+            </Badge>
+            <Badge variant={enabledVariant(caps.interactions.repost)} size="sm">
               {caps.interactions.repost ? <Check /> : <X />}
               Repost
-            </CapabilityBadge>
-            <CapabilityBadge $enabled={caps.interactions.reply}>
+            </Badge>
+            <Badge variant={enabledVariant(caps.interactions.reply)} size="sm">
               {caps.interactions.reply ? <Check /> : <X />}
               Reply
-            </CapabilityBadge>
-            <CapabilityBadge $enabled={caps.interactions.quote}>
+            </Badge>
+            <Badge variant={enabledVariant(caps.interactions.quote)} size="sm">
               {caps.interactions.quote ? <Check /> : <X />}
               Quote
-            </CapabilityBadge>
-            <CapabilityBadge $enabled={caps.interactions.bookmark}>
+            </Badge>
+            <Badge variant={enabledVariant(caps.interactions.bookmark)} size="sm">
               {caps.interactions.bookmark ? <Check /> : <X />}
               Bookmark
-            </CapabilityBadge>
+            </Badge>
           </CapabilitiesGrid>
         </CapabilitySection>
 
         <CapabilitySection>
           <CapabilitySectionTitle>Limits</CapabilitySectionTitle>
           <CapabilitiesGrid>
-            <CapabilityBadge $enabled={true}>
+            <Badge variant="success" size="sm">
               <Check />
               {caps.characterLimit} chars
-            </CapabilityBadge>
-            <CapabilityBadge $enabled={true}>
+            </Badge>
+            <Badge variant="success" size="sm">
               <Check />
               {caps.altTextLimit} alt text
-            </CapabilityBadge>
+            </Badge>
           </CapabilitiesGrid>
         </CapabilitySection>
       </>
@@ -548,61 +551,56 @@ export default function ConnectorsPage() {
       case 'session':
         return (
           <>
-            <FormGroup>
-              <FormLabel>Username</FormLabel>
-              <FormInput
-                type="text"
-                value={credentials.username || ''}
-                onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-                placeholder="@username"
-              />
-            </FormGroup>
-            <FormGroup>
-              <FormLabel>Password</FormLabel>
-              <FormInput
-                type="password"
-                value={credentials.password || ''}
-                onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-              />
-              <FormHelp>Your credentials are encrypted with AES-256-GCM</FormHelp>
-            </FormGroup>
+            <SpacedInput
+              label="Username"
+              type="text"
+              value={credentials.username || ''}
+              onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+              placeholder="@username"
+              fullWidth
+            />
+            <SpacedInput
+              label="Password"
+              type="password"
+              value={credentials.password || ''}
+              onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+              hint="Your credentials are encrypted with AES-256-GCM"
+              fullWidth
+            />
           </>
         );
       case 'atproto':
         return (
           <>
-            <FormGroup>
-              <FormLabel>Handle</FormLabel>
-              <FormInput
-                type="text"
-                value={credentials.handle || ''}
-                onChange={(e) => setCredentials({ ...credentials, handle: e.target.value })}
-                placeholder="yourname.bsky.social"
-              />
-            </FormGroup>
-            <FormGroup>
-              <FormLabel>App Password</FormLabel>
-              <FormInput
-                type="password"
-                value={credentials.app_password || ''}
-                onChange={(e) => setCredentials({ ...credentials, app_password: e.target.value })}
-              />
-              <FormHelp>Create an app password at bsky.app/settings/app-passwords</FormHelp>
-            </FormGroup>
+            <SpacedInput
+              label="Handle"
+              type="text"
+              value={credentials.handle || ''}
+              onChange={(e) => setCredentials({ ...credentials, handle: e.target.value })}
+              placeholder="yourname.bsky.social"
+              fullWidth
+            />
+            <SpacedInput
+              label="App Password"
+              type="password"
+              value={credentials.app_password || ''}
+              onChange={(e) => setCredentials({ ...credentials, app_password: e.target.value })}
+              hint="Create an app password at bsky.app/settings/app-passwords"
+              fullWidth
+            />
           </>
         );
       case 'oauth2':
         return (
-          <FormGroup>
-            <FormLabel>Instance URL (for Mastodon)</FormLabel>
-            <FormInput
-              type="text"
-              value={credentials.instance || ''}
-              onChange={(e) => setCredentials({ ...credentials, instance: e.target.value })}
-              placeholder="mastodon.social"
-            />
-            <FormHelp>You&apos;ll be redirected to authorize the app</FormHelp>
-          </FormGroup>
+          <SpacedInput
+            label="Instance URL (for Mastodon)"
+            type="text"
+            value={credentials.instance || ''}
+            onChange={(e) => setCredentials({ ...credentials, instance: e.target.value })}
+            placeholder="mastodon.social"
+            hint="You'll be redirected to authorize the app"
+            fullWidth
+          />
         );
       default:
         return null;
@@ -618,8 +616,28 @@ export default function ConnectorsPage() {
         </PageDescription>
       </PageHeader>
 
-      <SectionTitle>Available Platforms</SectionTitle>
-      <ConnectorGrid>
+      <Tabs
+        tabs={[
+          { id: 'platforms', label: 'Platforms', badge: String(connectorsList.filter(c => c.status !== 'coming_soon').length) },
+          { id: 'flow', label: 'Flow View', badge: String(flowDiagramData.platforms.length - 1) },
+        ]}
+        activeTab={activeTab}
+        onTabChange={(id) => setActiveTab(id as 'platforms' | 'flow')}
+        variant="soft"
+      />
+
+      {activeTab === 'flow' ? (
+        <div style={{ marginTop: '24px' }}>
+          <FlowDiagram
+            data={flowDiagramData}
+            onNodeClick={handleNodeClick}
+            onEdgeClick={handleEdgeClick}
+          />
+        </div>
+      ) : (
+        <>
+          <SectionTitle style={{ marginTop: '24px' }}>Available Platforms</SectionTitle>
+          <ConnectorGrid>
         {connectorsList.map((connector) => {
           const connection = getConnection(connector.platform);
           const isConnected = connection?.connected;
@@ -632,7 +650,13 @@ export default function ConnectorsPage() {
               $connected={isConnected}
               $comingSoon={isComingSoon}
             >
-              {isComingSoon && <ComingSoonBadge>Coming Soon</ComingSoonBadge>}
+              {isComingSoon && (
+                <div style={{ position: 'absolute', top: 16, right: 16 }}>
+                  <Badge variant="warning-soft" size="sm">
+                    Coming Soon
+                  </Badge>
+                </div>
+              )}
               <ConnectorHeader>
                 <PlatformIcon $color={connector.color}>{connector.icon}</PlatformIcon>
                 <ConnectorInfo>
@@ -743,9 +767,9 @@ export default function ConnectorsPage() {
                     <ConnectionLabel>{connection.handle}</ConnectionLabel>
                   </div>
                 </SyncConfigTitle>
-                <SyncToggle
-                  $enabled={config.enabled}
-                  onClick={() => handleToggleSync(config)}
+                <Switch
+                  checked={config.enabled}
+                  onChange={() => handleToggleSync(config)}
                   title={config.enabled ? 'Disable sync' : 'Enable sync'}
                 />
               </SyncConfigHeader>
@@ -792,12 +816,14 @@ export default function ConnectorsPage() {
         })}
 
       {connections?.filter((c) => c.connected).length === 0 && (
-        <Card padding="lg">
-          <div style={{ textAlign: 'center', color: '#666' }}>
-            <AlertCircle size={48} style={{ marginBottom: 16, opacity: 0.5 }} />
-            <p>Connect a platform above to configure sync settings</p>
-          </div>
-        </Card>
+          <Card padding="lg">
+            <div style={{ textAlign: 'center', color: '#666' }}>
+              <AlertCircle size={48} style={{ marginBottom: 16, opacity: 0.5 }} />
+              <p>Connect a platform above to configure sync settings</p>
+            </div>
+          </Card>
+        )}
+        </>
       )}
 
       <Modal

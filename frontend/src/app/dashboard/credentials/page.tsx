@@ -5,7 +5,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
 import { Plus, Trash2, CheckCircle, XCircle, RefreshCw, Key } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Button, Card, Modal, Input } from '@/components/ui';
+import { Button, Card, Modal, Input, EmptyState } from '@/components/ui';
+import { ApiErrorDisplay } from '@/components/error-resolution';
 import type { Credential } from '@/types';
 
 const PageHeader = styled.div`
@@ -82,33 +83,6 @@ const Actions = styled.div`
   gap: ${({ theme }) => theme.spacing[2]};
 `;
 
-const EmptyState = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: ${({ theme }) => theme.spacing[4]};
-  padding: ${({ theme }) => theme.spacing[12]} ${({ theme }) => theme.spacing[6]};
-  text-align: center;
-  color: ${({ theme }) => theme.colors.text.secondary};
-  background-color: ${({ theme }) => theme.colors.background.secondary};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  border: 1px dashed ${({ theme }) => theme.colors.border.default};
-`;
-
-const EmptyStateIcon = styled.div`
-  width: 56px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  background-color: ${({ theme }) => theme.colors.background.primary};
-  color: ${({ theme }) => theme.colors.primary[500]};
-  margin-bottom: ${({ theme }) => theme.spacing[2]};
-  box-shadow: ${({ theme }) => theme.shadows.sm};
-`;
-
 const Form = styled.form`
   display: flex;
   flex-direction: column;
@@ -155,6 +129,8 @@ export default function CredentialsPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [testingId, setTestingId] = useState<number | null>(null);
+  const [testError, setTestError] = useState<string | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
 
   const { data: credentials, isLoading } = useQuery({
     queryKey: ['credentials'],
@@ -175,10 +151,18 @@ export default function CredentialsPage() {
         credentials: { username, password },
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['credentials'] });
-      setIsModalOpen(false);
-      resetForm();
+    onSuccess: (response) => {
+      if (response.success) {
+        queryClient.invalidateQueries({ queryKey: ['credentials'] });
+        setIsModalOpen(false);
+        resetForm();
+        setAddError(null);
+      } else {
+        setAddError(response.error || 'Failed to add credential');
+      }
+    },
+    onError: (error) => {
+      setAddError(error instanceof Error ? error.message : 'Failed to add credential');
     },
   });
 
@@ -191,6 +175,18 @@ export default function CredentialsPage() {
 
   const testMutation = useMutation({
     mutationFn: (id: number) => api.testCredential(id),
+    onSuccess: (response) => {
+      if (!response.success) {
+        setTestError(response.error || 'Credential test failed');
+      } else if (response.data && !response.data.valid) {
+        setTestError(response.data.message || 'Credential is invalid');
+      } else {
+        setTestError(null);
+      }
+    },
+    onError: (error) => {
+      setTestError(error instanceof Error ? error.message : 'Credential test failed');
+    },
     onSettled: () => {
       setTestingId(null);
     },
@@ -228,9 +224,16 @@ export default function CredentialsPage() {
         </Button>
       </PageHeader>
 
+      {/* Contextual Error Display */}
+      <ApiErrorDisplay
+        error={testError}
+        onRetry={testingId ? () => handleTest(testingId) : undefined}
+        onDismiss={() => setTestError(null)}
+      />
+
       {isLoading ? (
         <Card padding="lg">
-          <EmptyState>Loading credentials...</EmptyState>
+          <EmptyState title="Loading credentials..." />
         </Card>
       ) : credentials && credentials.length > 0 ? (
         <CredentialsList>
@@ -287,17 +290,17 @@ export default function CredentialsPage() {
         </CredentialsList>
       ) : (
         <Card padding="none">
-          <EmptyState>
-            <EmptyStateIcon>
-              <Key size={32} />
-            </EmptyStateIcon>
-            <h3>No credentials yet</h3>
-            <p>Add your first credential to start syncing your social accounts.</p>
-            <Button onClick={() => setIsModalOpen(true)} style={{ marginTop: '16px' }}>
-              <Plus size={18} />
-              Add Credential
-            </Button>
-          </EmptyState>
+          <EmptyState
+            icon={Key}
+            title="No credentials yet"
+            description="Add your first credential to start syncing your social accounts."
+            action={
+              <Button onClick={() => setIsModalOpen(true)}>
+                <Plus size={18} />
+                Add Credential
+              </Button>
+            }
+          />
         </Card>
       )}
 
@@ -320,6 +323,11 @@ export default function CredentialsPage() {
         }
       >
         <Form onSubmit={handleSubmit}>
+          {/* Error display in modal */}
+          <ApiErrorDisplay
+            error={addError}
+            onDismiss={() => setAddError(null)}
+          />
           <FieldGroup>
             <Label>Platform</Label>
             <Select

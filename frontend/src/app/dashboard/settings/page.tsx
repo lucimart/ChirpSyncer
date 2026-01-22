@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Save, Bell, Shield, Palette, Lock, Sun, Moon, Monitor } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
-import { Button, Card, Input } from '@/components/ui';
+import { Button, Card, Input, Switch } from '@/components/ui';
 import { useTheme, type ThemeMode } from '@/styles/ThemeContext';
 
 const PageHeader = styled.div`
@@ -95,30 +95,6 @@ const SettingHint = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.xs};
   color: ${({ theme }) => theme.colors.text.tertiary};
   margin-top: ${({ theme }) => theme.spacing[1]};
-`;
-
-const Toggle = styled.button<{ $active: boolean }>`
-  width: 44px;
-  height: 24px;
-  border-radius: 12px;
-  border: none;
-  background-color: ${({ $active, theme }) =>
-    $active ? theme.colors.primary[600] : theme.colors.neutral[300]};
-  position: relative;
-  cursor: pointer;
-  transition: background-color ${({ theme }) => theme.transitions.fast};
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: ${({ $active }) => ($active ? '22px' : '2px')};
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background-color: white;
-    transition: left ${({ theme }) => theme.transitions.fast};
-  }
 `;
 
 const ThemeSwitcher = styled.div`
@@ -354,9 +330,9 @@ export default function SettingsPage() {
               <SettingLabel>Sync Completed</SettingLabel>
               <SettingHint>Get notified when a sync completes</SettingHint>
             </SettingInfo>
-            <Toggle
-              $active={notifications.syncComplete}
-              onClick={() =>
+            <Switch
+              checked={notifications.syncComplete}
+              onChange={() =>
                 setNotifications((prev) => ({
                   ...prev,
                   syncComplete: !prev.syncComplete,
@@ -370,9 +346,9 @@ export default function SettingsPage() {
               <SettingLabel>Sync Failed</SettingLabel>
               <SettingHint>Get notified when a sync fails</SettingHint>
             </SettingInfo>
-            <Toggle
-              $active={notifications.syncFailed}
-              onClick={() =>
+            <Switch
+              checked={notifications.syncFailed}
+              onChange={() =>
                 setNotifications((prev) => ({
                   ...prev,
                   syncFailed: !prev.syncFailed,
@@ -386,9 +362,9 @@ export default function SettingsPage() {
               <SettingLabel>Weekly Report</SettingLabel>
               <SettingHint>Receive a weekly summary of your activity</SettingHint>
             </SettingInfo>
-            <Toggle
-              $active={notifications.weeklyReport}
-              onClick={() =>
+            <Switch
+              checked={notifications.weeklyReport}
+              onChange={() =>
                 setNotifications((prev) => ({
                   ...prev,
                   weeklyReport: !prev.weeklyReport,

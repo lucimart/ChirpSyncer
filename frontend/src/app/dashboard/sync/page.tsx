@@ -11,9 +11,10 @@ import {
   ArrowRight,
   Play,
 } from 'lucide-react';
-import { Button, Card, Progress, useToast, ConnectionStatus } from '@/components/ui';
+import { Button, Card, Progress, useToast, ConnectionStatus, EmptyState } from '@/components/ui';
 import {
   useRealtimeMessage,
+
   SyncProgressPayload,
 } from '@/providers/RealtimeProvider';
 import { api } from '@/lib/api';
@@ -170,30 +171,6 @@ const HistoryTitle = styled.div`
 
 const HistoryMeta = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const EmptyState = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: ${({ theme }) => theme.spacing[4]};
-  padding: ${({ theme }) => theme.spacing[12]} ${({ theme }) => theme.spacing[6]};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  background-color: ${({ theme }) => theme.colors.background.secondary};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  border: 1px dashed ${({ theme }) => theme.colors.border.default};
-`;
-
-const EmptyStateIcon = styled.div`
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  background-color: ${({ theme }) => theme.colors.background.primary};
   color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
@@ -467,12 +444,11 @@ export default function SyncPage() {
             ))}
           </HistoryList>
         ) : (
-          <EmptyState>
-            <EmptyStateIcon>
-              <Clock size={24} />
-            </EmptyStateIcon>
-            No sync history available yet.
-          </EmptyState>
+          <EmptyState
+            icon={Clock}
+            title="No sync history available yet"
+            size="md"
+          />
         )}
       </Card>
     </div>

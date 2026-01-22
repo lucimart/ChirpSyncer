@@ -5,7 +5,7 @@ import Link from 'next/link';
 import styled from 'styled-components';
 import { Repeat, ArrowLeft, Mail, CheckCircle } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Button, Input, Card } from '@/components/ui';
+import { Button, Input, Card, Alert } from '@/components/ui';
 
 const PageContainer = styled.div`
   display: flex;
@@ -24,6 +24,10 @@ const ForgotCard = styled(Card)`
   width: 100%;
   max-width: 400px;
   box-shadow: ${({ theme }) => theme.shadows.xl};
+`;
+
+const ForgotCardContent = styled(Card.Content)`
+  padding: 2rem;
 `;
 
 const Logo = styled.div`
@@ -65,14 +69,6 @@ const Form = styled.form`
   gap: ${({ theme }) => theme.spacing[4]};
 `;
 
-const ErrorMessage = styled.div`
-  padding: ${({ theme }) => theme.spacing[3]};
-  background-color: ${({ theme }) => theme.colors.danger[50]};
-  border: 1px solid ${({ theme }) => theme.colors.danger[500]};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  color: ${({ theme }) => theme.colors.danger[700]};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-`;
 
 const SuccessMessage = styled.div`
   display: flex;
@@ -104,20 +100,10 @@ const SuccessText = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.sm};
 `;
 
-const DevNote = styled.div`
-  margin-top: ${({ theme }) => theme.spacing[4]};
-  padding: ${({ theme }) => theme.spacing[3]};
-  background-color: ${({ theme }) => theme.colors.warning[50]};
-  border: 1px solid ${({ theme }) => theme.colors.warning[500]};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.warning[700]};
-  
-  a {
-    color: ${({ theme }) => theme.colors.primary[600]};
-    font-weight: ${({ theme }) => theme.fontWeights.medium};
-    word-break: break-all;
-  }
+const DevNoteLink = styled(Link)`
+  color: ${({ theme }) => theme.colors.primary[600]};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  word-break: break-all;
 `;
 
 const BackLink = styled(Link)`
@@ -162,72 +148,73 @@ export default function ForgotPasswordPage() {
 
   return (
     <PageContainer>
-      <ForgotCard padding="lg">
-        <Logo>
-          <LogoIcon>
-            <Repeat size={28} />
-          </LogoIcon>
-          <LogoText>ChirpSyncer</LogoText>
-          {!isSuccess && (
-            <Subtitle>
-              Enter your email address and we&apos;ll send you a link to reset your password.
-            </Subtitle>
-          )}
-        </Logo>
-
-        {isSuccess ? (
-          <SuccessMessage>
-            <SuccessIcon>
-              <CheckCircle size={32} />
-            </SuccessIcon>
-            <SuccessTitle>Check your email</SuccessTitle>
-            <SuccessText>
-              If an account with that email exists, we&apos;ve sent you a password reset link.
-              Please check your inbox and spam folder.
-            </SuccessText>
-            
-            {devResetUrl && (
-              <DevNote>
-                <strong>Development Mode:</strong> Email sending is disabled. 
-                Use this link to reset your password:
-                <br />
-                <Link href={devResetUrl}>{devResetUrl}</Link>
-              </DevNote>
+      <ForgotCard padding="none">
+        <ForgotCardContent>
+          <Logo>
+            <LogoIcon>
+              <Repeat size={28} />
+            </LogoIcon>
+            <LogoText>ChirpSyncer</LogoText>
+            {!isSuccess && (
+              <Subtitle>
+                Enter your email address and we&apos;ll send you a link to reset your password.
+              </Subtitle>
             )}
-            
-            <BackLink href="/login">
-              <ArrowLeft size={16} />
-              Back to sign in
-            </BackLink>
-          </SuccessMessage>
-        ) : (
-          <>
-            <Form onSubmit={handleSubmit}>
-              {error && <ErrorMessage>{error}</ErrorMessage>}
+          </Logo>
 
-              <Input
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email address"
-                required
-                fullWidth
-                autoComplete="email"
-              />
+          {isSuccess ? (
+            <SuccessMessage>
+              <SuccessIcon>
+                <CheckCircle size={32} />
+              </SuccessIcon>
+              <SuccessTitle>Check your email</SuccessTitle>
+              <SuccessText>
+                If an account with that email exists, we&apos;ve sent you a password reset link.
+                Please check your inbox and spam folder.
+              </SuccessText>
+              
+              {devResetUrl && (
+                <Alert variant="warning" title="Development Mode">
+                  Email sending is disabled. Use this link to reset your password:
+                  <br />
+                  <DevNoteLink href={devResetUrl}>{devResetUrl}</DevNoteLink>
+                </Alert>
+              )}
+              
+              <BackLink href="/login">
+                <ArrowLeft size={16} />
+                Back to sign in
+              </BackLink>
+            </SuccessMessage>
+          ) : (
+            <>
+              <Form onSubmit={handleSubmit}>
+              {error && <Alert variant="error">{error}</Alert>}
 
-              <Button type="submit" fullWidth isLoading={isLoading}>
-                <Mail size={18} />
-                Send Reset Link
-              </Button>
-            </Form>
+                <Input
+                  label="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  required
+                  fullWidth
+                  autoComplete="email"
+                />
 
-            <BackLink href="/login">
-              <ArrowLeft size={16} />
-              Back to sign in
-            </BackLink>
-          </>
-        )}
+                <Button type="submit" fullWidth isLoading={isLoading}>
+                  <Mail size={18} />
+                  Send Reset Link
+                </Button>
+              </Form>
+
+              <BackLink href="/login">
+                <ArrowLeft size={16} />
+                Back to sign in
+              </BackLink>
+            </>
+          )}
+        </ForgotCardContent>
       </ForgotCard>
     </PageContainer>
   );

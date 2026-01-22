@@ -6,7 +6,7 @@ import Link from 'next/link';
 import styled from 'styled-components';
 import { Repeat, ArrowLeft, Lock, CheckCircle, AlertCircle } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Button, Input, Card } from '@/components/ui';
+import { Button, Input, Card, Alert } from '@/components/ui';
 
 const PageContainer = styled.div`
   display: flex;
@@ -25,6 +25,10 @@ const ResetCard = styled(Card)`
   width: 100%;
   max-width: 400px;
   box-shadow: ${({ theme }) => theme.shadows.xl};
+`;
+
+const ResetCardContent = styled(Card.Content)`
+  padding: 2rem;
 `;
 
 const Logo = styled.div`
@@ -66,14 +70,6 @@ const Form = styled.form`
   gap: ${({ theme }) => theme.spacing[4]};
 `;
 
-const ErrorMessage = styled.div`
-  padding: ${({ theme }) => theme.spacing[3]};
-  background-color: ${({ theme }) => theme.colors.danger[50]};
-  border: 1px solid ${({ theme }) => theme.colors.danger[500]};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  color: ${({ theme }) => theme.colors.danger[700]};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-`;
 
 const StatusMessage = styled.div`
   display: flex;
@@ -198,16 +194,18 @@ function ResetPasswordContent() {
   if (isValidating) {
     return (
       <PageContainer>
-        <ResetCard padding="lg">
-          <Logo>
-            <LogoIcon>
-              <Repeat size={28} />
-            </LogoIcon>
-            <LogoText>ChirpSyncer</LogoText>
-          </Logo>
-          <LoadingState>
-            <p>Validating reset link...</p>
-          </LoadingState>
+        <ResetCard padding="none">
+          <ResetCardContent>
+            <Logo>
+              <LogoIcon>
+                <Repeat size={28} />
+              </LogoIcon>
+              <LogoText>ChirpSyncer</LogoText>
+            </Logo>
+            <LoadingState>
+              <p>Validating reset link...</p>
+            </LoadingState>
+          </ResetCardContent>
         </ResetCard>
       </PageContainer>
     );
@@ -216,30 +214,32 @@ function ResetPasswordContent() {
   if (!isTokenValid) {
     return (
       <PageContainer>
-        <ResetCard padding="lg">
-          <Logo>
-            <LogoIcon>
-              <Repeat size={28} />
-            </LogoIcon>
-            <LogoText>ChirpSyncer</LogoText>
-          </Logo>
-          <StatusMessage>
-            <StatusIcon $variant="error">
-              <AlertCircle size={32} />
-            </StatusIcon>
-            <StatusTitle>Invalid or Expired Link</StatusTitle>
-            <StatusText>
-              This password reset link is invalid or has expired.
-              Please request a new one.
-            </StatusText>
-            <Link href="/forgot-password">
-              <Button>Request New Link</Button>
-            </Link>
-            <BackLink href="/login">
-              <ArrowLeft size={16} />
-              Back to sign in
-            </BackLink>
-          </StatusMessage>
+        <ResetCard padding="none">
+          <ResetCardContent>
+            <Logo>
+              <LogoIcon>
+                <Repeat size={28} />
+              </LogoIcon>
+              <LogoText>ChirpSyncer</LogoText>
+            </Logo>
+            <StatusMessage>
+              <StatusIcon $variant="error">
+                <AlertCircle size={32} />
+              </StatusIcon>
+              <StatusTitle>Invalid or Expired Link</StatusTitle>
+              <StatusText>
+                This password reset link is invalid or has expired.
+                Please request a new one.
+              </StatusText>
+              <Link href="/forgot-password">
+                <Button>Request New Link</Button>
+              </Link>
+              <BackLink href="/login">
+                <ArrowLeft size={16} />
+                Back to sign in
+              </BackLink>
+            </StatusMessage>
+          </ResetCardContent>
         </ResetCard>
       </PageContainer>
     );
@@ -248,25 +248,27 @@ function ResetPasswordContent() {
   if (isSuccess) {
     return (
       <PageContainer>
-        <ResetCard padding="lg">
-          <Logo>
-            <LogoIcon>
-              <Repeat size={28} />
-            </LogoIcon>
-            <LogoText>ChirpSyncer</LogoText>
-          </Logo>
-          <StatusMessage>
-            <StatusIcon $variant="success">
-              <CheckCircle size={32} />
-            </StatusIcon>
-            <StatusTitle>Password Reset Successfully</StatusTitle>
-            <StatusText>
-              Your password has been reset. You will be redirected to the login page shortly.
-            </StatusText>
-            <Link href="/login">
-              <Button>Sign In Now</Button>
-            </Link>
-          </StatusMessage>
+        <ResetCard padding="none">
+          <ResetCardContent>
+            <Logo>
+              <LogoIcon>
+                <Repeat size={28} />
+              </LogoIcon>
+              <LogoText>ChirpSyncer</LogoText>
+            </Logo>
+            <StatusMessage>
+              <StatusIcon $variant="success">
+                <CheckCircle size={32} />
+              </StatusIcon>
+              <StatusTitle>Password Reset Successfully</StatusTitle>
+              <StatusText>
+                Your password has been reset. You will be redirected to the login page shortly.
+              </StatusText>
+              <Link href="/login">
+                <Button>Sign In Now</Button>
+              </Link>
+            </StatusMessage>
+          </ResetCardContent>
         </ResetCard>
       </PageContainer>
     );
@@ -274,53 +276,55 @@ function ResetPasswordContent() {
 
   return (
     <PageContainer>
-      <ResetCard padding="lg">
-        <Logo>
-          <LogoIcon>
-            <Repeat size={28} />
-          </LogoIcon>
-          <LogoText>ChirpSyncer</LogoText>
-          <Subtitle>
-            Create a new password for {userEmail}
-          </Subtitle>
-        </Logo>
+      <ResetCard padding="none">
+        <ResetCardContent>
+          <Logo>
+            <LogoIcon>
+              <Repeat size={28} />
+            </LogoIcon>
+            <LogoText>ChirpSyncer</LogoText>
+            <Subtitle>
+              Create a new password for {userEmail}
+            </Subtitle>
+          </Logo>
 
-        <Form onSubmit={handleSubmit}>
-          {error && <ErrorMessage>{error}</ErrorMessage>}
+          <Form onSubmit={handleSubmit}>
+            {error && <Alert variant="error">{error}</Alert>}
 
-          <Input
-            label="New Password"
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="Enter new password"
-            hint="At least 8 characters"
-            required
-            fullWidth
-            autoComplete="new-password"
-          />
+            <Input
+              label="New Password"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Enter new password"
+              hint="At least 8 characters"
+              required
+              fullWidth
+              autoComplete="new-password"
+            />
 
-          <Input
-            label="Confirm Password"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm new password"
-            required
-            fullWidth
-            autoComplete="new-password"
-          />
+            <Input
+              label="Confirm Password"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm new password"
+              required
+              fullWidth
+              autoComplete="new-password"
+            />
 
-          <Button type="submit" fullWidth isLoading={isLoading}>
-            <Lock size={18} />
-            Reset Password
-          </Button>
-        </Form>
+            <Button type="submit" fullWidth isLoading={isLoading}>
+              <Lock size={18} />
+              Reset Password
+            </Button>
+          </Form>
 
-        <BackLink href="/login">
-          <ArrowLeft size={16} />
-          Back to sign in
-        </BackLink>
+          <BackLink href="/login">
+            <ArrowLeft size={16} />
+            Back to sign in
+          </BackLink>
+        </ResetCardContent>
       </ResetCard>
     </PageContainer>
   );
@@ -330,10 +334,12 @@ export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
       <PageContainer>
-        <ResetCard padding="lg">
-          <LoadingState>
-            <p>Loading...</p>
-          </LoadingState>
+        <ResetCard padding="none">
+          <ResetCardContent>
+            <LoadingState>
+              <p>Loading...</p>
+            </LoadingState>
+          </ResetCardContent>
         </ResetCard>
       </PageContainer>
     }>

@@ -1,16 +1,46 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import { Menu } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { Sidebar } from './Sidebar';
+import { PageTransition } from './PageTransition';
+import { NotificationCenter, Notification } from '@/components/notifications';
 import { layout, breakpoints } from '@/styles/tokens/spacing';
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
+
+// Mock notifications - replace with real API hook when available
+const MOCK_NOTIFICATIONS: Notification[] = [
+  {
+    id: '1',
+    type: 'success',
+    title: 'Sync Complete',
+    message: '15 posts synced successfully from Twitter to Bluesky',
+    timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+    read: false,
+  },
+  {
+    id: '2',
+    type: 'warning',
+    title: 'Rate Limit Warning',
+    message: 'Approaching API rate limit on Twitter (80% used)',
+    timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+    read: false,
+  },
+  {
+    id: '3',
+    type: 'info',
+    title: 'New Feature',
+    message: 'Check out our new scheduling feature!',
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    read: true,
+  },
+];
 
 const LayoutContainer = styled.div`
   display: flex;
@@ -57,6 +87,28 @@ const MobileTitle = styled.h1`
   font-weight: ${({ theme }) => theme.fontWeights.bold};
   color: ${({ theme }) => theme.colors.primary[600]};
   margin: 0;
+`;
+
+const HeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+`;
+
+const DesktopHeader = styled.header`
+  display: none;
+  align-items: center;
+  justify-content: flex-end;
+  padding: ${({ theme }) => `${theme.spacing[3]} ${theme.spacing[6]}`};
+  background-color: ${({ theme }) => theme.colors.background.primary};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
+  position: sticky;
+  top: 0;
+  z-index: 20;
+
+  @media (min-width: ${breakpoints.md}) {
+    display: flex;
+  }
 `;
 
 const MainContent = styled.main`
@@ -119,6 +171,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const { isAuthenticated, isLoading, checkAuth } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
+
+  const handleMarkAsRead = useCallback((id: string) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+  }, []);
+
+  const handleMarkAllAsRead = useCallback(() => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  }, []);
+
+  const handleDismiss = useCallback((id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  }, []);
 
   // Swipe handling state
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -198,8 +265,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <MobileHeader>
-          <MenuButton 
-            onClick={toggleMobileMenu} 
+          <MenuButton
+            onClick={toggleMobileMenu}
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
             aria-controls="sidebar-nav"
@@ -207,10 +274,28 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <Menu size={24} />
           </MenuButton>
           <MobileTitle>ChirpSyncer</MobileTitle>
-          <div style={{ width: 40 }} /> {/* Spacer for centering */}
+          <HeaderActions>
+            <NotificationCenter
+              notifications={notifications}
+              onMarkAsRead={handleMarkAsRead}
+              onMarkAllAsRead={handleMarkAllAsRead}
+              onDismiss={handleDismiss}
+            />
+          </HeaderActions>
         </MobileHeader>
-        
-        <MainContent>{children}</MainContent>
+
+        <DesktopHeader>
+          <NotificationCenter
+            notifications={notifications}
+            onMarkAsRead={handleMarkAsRead}
+            onMarkAllAsRead={handleMarkAllAsRead}
+            onDismiss={handleDismiss}
+          />
+        </DesktopHeader>
+
+        <MainContent>
+          <PageTransition>{children}</PageTransition>
+        </MainContent>
       </div>
     </LayoutContainer>
   );

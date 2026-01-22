@@ -16,7 +16,7 @@ import {
   AlertCircle,
   Webhook,
 } from 'lucide-react';
-import { Button, Card, Modal, Input } from '@/components/ui';
+import { Button, Card, Modal, Input, Badge, EmptyState } from '@/components/ui';
 import { api, Webhook as WebhookType, WebhookDelivery } from '@/lib/api';
 
 const PageHeader = styled.div`
@@ -129,32 +129,6 @@ const EventBadges = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing[2]};
   flex-wrap: wrap;
-`;
-
-const EventBadge = styled.span`
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  background-color: ${({ theme }) => theme.colors.neutral[100]};
-  color: ${({ theme }) => theme.colors.neutral[700]};
-`;
-
-const StatusBadge = styled.span<{ $enabled: boolean }>`
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  background-color: ${({ $enabled, theme }) =>
-    $enabled ? theme.colors.success[100] : theme.colors.neutral[200]};
-  color: ${({ $enabled, theme }) =>
-    $enabled ? theme.colors.success[700] : theme.colors.neutral[600]};
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: ${({ theme }) => theme.spacing[10]};
-  color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
 const Form = styled.form`
@@ -476,7 +450,7 @@ export default function WebhooksPage() {
 
       {isLoading ? (
         <Card padding="lg">
-          <EmptyState>Loading webhooks...</EmptyState>
+          <EmptyState title="Loading webhooks..." />
         </Card>
       ) : webhooks.length > 0 ? (
         <WebhooksList>
@@ -495,9 +469,9 @@ export default function WebhooksPage() {
                   </WebhookDetails>
                 </WebhookInfo>
                 <WebhookActions>
-                  <StatusBadge $enabled={webhook.enabled}>
+                  <Badge variant={webhook.enabled ? 'success-soft' : 'neutral'} size="sm">
                     {webhook.enabled ? 'Enabled' : 'Disabled'}
-                  </StatusBadge>
+                  </Badge>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -549,7 +523,7 @@ export default function WebhooksPage() {
               <WebhookMeta>
                 <EventBadges>
                   {webhook.events.map((event) => (
-                    <EventBadge key={event}>{event}</EventBadge>
+                    <Badge variant="default" size="sm" key={event}>{event}</Badge>
                   ))}
                 </EventBadges>
                 <MetaItem>Created: {formatDate(webhook.created_at)}</MetaItem>
@@ -559,9 +533,10 @@ export default function WebhooksPage() {
         </WebhooksList>
       ) : (
         <Card padding="lg">
-          <EmptyState>
-            No webhooks yet. Create your first webhook to receive notifications.
-          </EmptyState>
+          <EmptyState
+             title="No webhooks yet"
+             description="Create your first webhook to receive notifications."
+          />
         </Card>
       )}
 
@@ -683,7 +658,7 @@ export default function WebhooksPage() {
             ))}
           </DeliveryList>
         ) : (
-          <EmptyState>No deliveries yet for this webhook.</EmptyState>
+          <EmptyState title="No deliveries yet for this webhook." size="sm" />
         )}
       </Modal>
 
