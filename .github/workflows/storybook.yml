@@ -1,0 +1,37 @@
+name: Storybook Regression
+
+on:
+  pull_request:
+    paths:
+      - 'frontend/src/components/**'
+      - 'frontend/src/styles/**'
+      - 'frontend/.storybook/**'
+      - 'frontend/package.json'
+      - 'frontend/package-lock.json'
+  workflow_dispatch:
+
+jobs:
+  storybook:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Storybook
+        run: npm run build-storybook
+
+      - name: Run Storybook interaction tests
+        run: npx concurrently -k -s first "npm run storybook -- --ci --quiet" "npx wait-on http://localhost:6006 && npm run test-storybook"
