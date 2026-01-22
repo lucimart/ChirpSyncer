@@ -98,7 +98,7 @@ function getStatusText(status: ConnectionStatusType): string {
   }
 }
 
-interface ConnectionStatusProps {
+export interface ConnectionStatusProps {
   showText?: boolean;
   showIcon?: boolean;
 }
