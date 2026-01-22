@@ -3,10 +3,40 @@ import os
 from flask import g, jsonify
 
 
+def _contains_stack_trace(obj, depth=0):
+    """Check if object might contain stack trace information."""
+    if depth > 5:  # Prevent infinite recursion
+        return False
+    if obj is None:
+        return False
+    if isinstance(obj, str):
+        # Check for common stack trace patterns
+        trace_indicators = ["Traceback", 'File "', "line ", "Error:", "Exception:"]
+        return any(indicator in obj for indicator in trace_indicators)
+    if isinstance(obj, dict):
+        return any(_contains_stack_trace(v, depth + 1) for v in obj.values())
+    if isinstance(obj, (list, tuple)):
+        return any(_contains_stack_trace(item, depth + 1) for item in obj)
+    return False
+
+
+def _sanitize_response_data(data):
+    """Sanitize response data to avoid exposing stack traces in production."""
+    if os.environ.get("FLASK_ENV") != "production":
+        return data
+    if data is None:
+        return None
+    if _contains_stack_trace(data):
+        # In production, don't expose data that looks like it contains stack traces
+        return {"error": "An internal error occurred"}
+    return data
+
+
 def api_response(data=None, status: int = 200):
+    sanitized_data = _sanitize_response_data(data)
     payload = {
         "success": True,
-        "data": data,
+        "data": sanitized_data,
         "correlation_id": getattr(g, "correlation_id", None),
     }
     return jsonify(payload), status

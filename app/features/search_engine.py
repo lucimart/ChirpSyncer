@@ -277,11 +277,11 @@ class SearchEngine:
 
             conn.close()
 
-            logger.debug(f"Search query '{query}' returned {len(results)} results")
+            logger.debug("Search query returned %d results", len(results))
             return results
 
         except Exception as e:
-            logger.error(f"Search failed for query '{query}': {e}")
+            logger.error("Search failed: %s", str(e))
             return []
 
     def search_with_filters(
