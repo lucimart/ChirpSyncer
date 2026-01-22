@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import { AlertTriangle } from 'lucide-react';
-import { Modal } from './Modal';
-import { Button } from './Button';
-import { Input } from './Input';
+import { Modal } from '../Modal';
+import { Button } from '../Button';
+import { Input } from '../Input';
 
 const WarningIcon = styled.div`
   display: flex;
