@@ -38,9 +38,9 @@ class TestTwitterAPIHandler:
 
     def test_init_missing_credentials(self):
         """Test initialization with missing credentials"""
-        with pytest.raises(
-            ValueError, match="All Twitter API credentials are required"
-        ):
+        from app.integrations.twitter_api_handler import TwitterAPINotConfiguredError
+
+        with pytest.raises(TwitterAPINotConfiguredError):
             TwitterAPIHandler(
                 api_key="",
                 api_secret="test_secret",

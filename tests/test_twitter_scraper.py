@@ -189,9 +189,10 @@ def test_fetch_tweets_filters_seen_tweets(
     assert mock_is_tweet_seen.call_count == 3
 
     # Verify mark_tweet_as_seen was only called for unseen tweets
+    # Note: mark_tweet_as_seen is called with (tweet_id, conn) - conn is None in tests
     assert mock_mark_tweet_as_seen.call_count == 2
-    mock_mark_tweet_as_seen.assert_any_call(123456789)
-    mock_mark_tweet_as_seen.assert_any_call(111222333)
+    mock_mark_tweet_as_seen.assert_any_call(123456789, None)
+    mock_mark_tweet_as_seen.assert_any_call(111222333, None)
 
     # Verify the seen tweet (987654321) is not in results
     result_ids = [tweet.id for tweet in result]
