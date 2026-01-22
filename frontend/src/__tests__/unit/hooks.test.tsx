@@ -43,7 +43,7 @@ const createTestQueryClient = () =>
 // Wrapper with all providers
 const createWrapper = () => {
   const queryClient = createTestQueryClient();
-  return ({ children }: { children: ReactNode }) => (
+  const TestWrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <ToastProvider>
@@ -52,6 +52,8 @@ const createWrapper = () => {
       </ThemeProvider>
     </QueryClientProvider>
   );
+  TestWrapper.displayName = 'TestWrapper';
+  return TestWrapper;
 };
 
 describe('useAdminUsers Hook', () => {

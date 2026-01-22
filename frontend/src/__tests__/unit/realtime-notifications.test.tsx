@@ -13,13 +13,15 @@ import { useRealtimeNotifications, useNotify } from '@/hooks/useRealtimeNotifica
 
 // Wrapper with all providers
 const createWrapper = () => {
-  return ({ children }: { children: ReactNode }) => (
+  const TestWrapper = ({ children }: { children: ReactNode }) => (
     <ThemeProvider theme={theme}>
       <ToastProvider>
         <RealtimeProvider>{children}</RealtimeProvider>
       </ToastProvider>
     </ThemeProvider>
   );
+  TestWrapper.displayName = 'TestWrapper';
+  return TestWrapper;
 };
 
 describe('useRealtimeNotifications Hook', () => {

@@ -44,9 +44,11 @@ const createTestQueryClient = () =>
 // Wrapper with QueryClient
 const createWrapper = () => {
   const queryClient = createTestQueryClient();
-  return ({ children }: { children: ReactNode }) => (
+  const TestWrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  TestWrapper.displayName = 'TestWrapper';
+  return TestWrapper;
 };
 
 describe('useOptimalTimes Hook', () => {
