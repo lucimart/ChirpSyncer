@@ -396,16 +396,17 @@ def test_twitter_api_handler_initialization():
         mock_client.assert_called_once()
         mock_instance.get_me.assert_called_once()
 
-    # Test missing credentials
+    # Test missing credentials - no mock needed as validation happens before tweepy is used
     from app.integrations.twitter_api_handler import TwitterAPINotConfiguredError
 
-    with pytest.raises(TwitterAPINotConfiguredError):
-        TwitterAPIHandler(
-            api_key="test_key",
-            api_secret="test_secret",
-            access_token="test_token",
-            access_secret="",  # Missing
-        )
+    with patch("app.integrations.twitter_api_handler.tweepy.Client"):
+        with pytest.raises(TwitterAPINotConfiguredError):
+            TwitterAPIHandler(
+                api_key="test_key",
+                api_secret="test_secret",
+                access_token="test_token",
+                access_secret="",  # Missing
+            )
 
 
 @pytest.mark.integration
@@ -532,16 +533,17 @@ def test_twitter_api_handler_from_credentials_dict():
         handler = TwitterAPIHandler.from_credentials_dict(creds)
         assert handler is not None
 
-    # Test missing credentials
+    # Test missing credentials - no mock needed as validation happens before tweepy is used
     from app.integrations.twitter_api_handler import TwitterAPINotConfiguredError
 
-    with pytest.raises(TwitterAPINotConfiguredError):
-        bad_creds = {
-            "api_key": "key123",
-            "api_secret": "secret456",
-            # Missing access_token and access_secret
-        }
-        TwitterAPIHandler.from_credentials_dict(bad_creds)
+    with patch("app.integrations.twitter_api_handler.tweepy.Client"):
+        with pytest.raises(TwitterAPINotConfiguredError):
+            bad_creds = {
+                "api_key": "key123",
+                "api_secret": "secret456",
+                # Missing access_token and access_secret
+            }
+            TwitterAPIHandler.from_credentials_dict(bad_creds)
 
 
 @pytest.mark.integration

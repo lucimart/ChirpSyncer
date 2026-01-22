@@ -15,7 +15,9 @@ class TestAdminUsersAPI:
         """Helper to get auth token."""
         login_resp = test_client.post(
             "/api/v1/auth/login",
-            data=json.dumps({"username": user["username"], "password": user["password"]}),
+            data=json.dumps(
+                {"username": user["username"], "password": user["password"]}
+            ),
             content_type="application/json",
         )
         return login_resp.get_json()["data"]["token"]
@@ -47,11 +49,14 @@ class TestAdminUsersAPI:
         assert response.status_code == 200
         data = response.get_json()
         assert data["success"] is True
-        assert isinstance(data["data"], list)
+        # Response is now an object with users list and pagination metadata
+        assert isinstance(data["data"], dict)
+        assert "users" in data["data"]
+        assert isinstance(data["data"]["users"], list)
         # Should include at least the admin user
-        assert len(data["data"]) >= 1
+        assert len(data["data"]["users"]) >= 1
         # Check user structure
-        user = data["data"][0]
+        user = data["data"]["users"][0]
         assert "id" in user
         assert "username" in user
         assert "email" in user
@@ -92,7 +97,9 @@ class TestAdminUsersAPI:
         )
         assert response.status_code == 404
 
-    def test_update_user_as_admin(self, test_client, test_db, test_admin_user, test_user):
+    def test_update_user_as_admin(
+        self, test_client, test_db, test_admin_user, test_user
+    ):
         """PUT /api/v1/admin/users/:id updates user."""
         token = self._get_auth_token(test_client, test_admin_user)
         response = test_client.put(
@@ -117,7 +124,9 @@ class TestAdminUsersAPI:
         )
         assert response.status_code == 403
 
-    def test_delete_user_as_admin(self, test_client, test_db, test_admin_user, test_user):
+    def test_delete_user_as_admin(
+        self, test_client, test_db, test_admin_user, test_user
+    ):
         """DELETE /api/v1/admin/users/:id deletes user."""
         token = self._get_auth_token(test_client, test_admin_user)
         response = test_client.delete(
@@ -203,7 +212,9 @@ class TestAdminUsersAPI:
         data = response.get_json()
         assert data["success"] is False
 
-    def test_list_users_with_search(self, test_client, test_db, test_admin_user, test_user):
+    def test_list_users_with_search(
+        self, test_client, test_db, test_admin_user, test_user
+    ):
         """GET /api/v1/admin/users?search=term filters users."""
         token = self._get_auth_token(test_client, test_admin_user)
 
@@ -216,7 +227,9 @@ class TestAdminUsersAPI:
         data = response.get_json()
         assert data["success"] is True
         # Should find at least the test user
-        found = any(u["username"] == test_user["username"] for u in data["data"])
+        found = any(
+            u["username"] == test_user["username"] for u in data["data"]["users"]
+        )
         assert found is True
 
     def test_list_users_pagination(self, test_client, test_db, test_admin_user):
@@ -230,4 +243,10 @@ class TestAdminUsersAPI:
         assert response.status_code == 200
         data = response.get_json()
         assert data["success"] is True
-        assert isinstance(data["data"], list)
+        assert isinstance(data["data"], dict)
+        assert "users" in data["data"]
+        assert isinstance(data["data"]["users"], list)
+        # Verify pagination metadata
+        assert "total" in data["data"]
+        assert "page" in data["data"]
+        assert "limit" in data["data"]
