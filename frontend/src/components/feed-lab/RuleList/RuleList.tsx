@@ -20,9 +20,9 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Button } from '../ui/Button';
-import { Badge } from '../ui/Badge';
-import { Switch } from '../ui/Switch';
+import { Button } from '../../ui/Button';
+import { Badge } from '../../ui/Badge';
+import { Switch } from '../../ui/Switch';
 
 interface Condition {
   field: string;

@@ -11,68 +11,29 @@ import {
   ArrowRight,
   Play,
 } from 'lucide-react';
-import { Button, Card, Progress, useToast, ConnectionStatus, EmptyState } from '@/components/ui';
+import {
+  Button,
+  Card,
+  Progress,
+  useToast,
+  ConnectionStatus,
+  EmptyState,
+  PageHeader,
+  StatCard,
+  PlatformIcon,
+  SectionTitle,
+} from '@/components/ui';
 import {
   useRealtimeMessage,
-
   SyncProgressPayload,
 } from '@/providers/RealtimeProvider';
 import { api } from '@/lib/api';
-
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const HeaderLeft = styled.div``;
-
-const HeaderRight = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[3]};
-  align-items: center;
-`;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
 
 const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: ${({ theme }) => theme.spacing[4]};
   margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const StatCard = styled(Card)`
-  text-align: center;
-`;
-
-const StatValue = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes['3xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.primary[600]};
-`;
-
-const StatLabel = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
-
-const SectionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes.xl};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
 `;
 
 const SyncDirections = styled.div`
@@ -93,19 +54,6 @@ const DirectionHeader = styled.div`
   align-items: center;
   justify-content: center;
   gap: ${({ theme }) => theme.spacing[3]};
-`;
-
-const PlatformIcon = styled.div<{ $color: string }>`
-  width: 48px;
-  height: 48px;
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  background-color: ${({ $color }) => $color};
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  font-size: ${({ theme }) => theme.fontSizes.lg};
 `;
 
 const DirectionStats = styled.div`
@@ -172,12 +120,6 @@ const HistoryTitle = styled.div`
 const HistoryMeta = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.xs};
   color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const NeverSync = styled.span`
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-style: italic;
 `;
 
 interface SyncStats {
@@ -309,24 +251,22 @@ export default function SyncPage() {
 
   return (
     <div>
-      <PageHeader>
-        <HeaderLeft>
-          <PageTitle>Sync Dashboard</PageTitle>
-          <PageDescription>
-            Manage synchronization between Twitter and Bluesky
-          </PageDescription>
-        </HeaderLeft>
-        <HeaderRight>
-          <ConnectionStatus />
-          <Button
-            onClick={() => syncMutation.mutate('both')}
-            isLoading={isSyncing}
-          >
-            <RefreshCw size={18} />
-            Sync Now
-          </Button>
-        </HeaderRight>
-      </PageHeader>
+      <PageHeader
+        title="Sync Dashboard"
+        description="Manage synchronization between Twitter and Bluesky"
+        actions={
+          <>
+            <ConnectionStatus />
+            <Button
+              onClick={() => syncMutation.mutate('both')}
+              isLoading={isSyncing}
+            >
+              <RefreshCw size={18} />
+              Sync Now
+            </Button>
+          </>
+        }
+      />
 
       {syncProgress && (
         <Card padding="md" style={{ marginBottom: '24px' }}>
@@ -342,33 +282,30 @@ export default function SyncPage() {
       )}
 
       <StatsGrid>
-        <StatCard padding="md">
-          <StatValue>{stats?.total_synced.toLocaleString() ?? 0}</StatValue>
-          <StatLabel>Total Synced</StatLabel>
-        </StatCard>
-        <StatCard padding="md">
-          <StatValue>{stats?.pending ?? 0}</StatValue>
-          <StatLabel>Pending</StatLabel>
-        </StatCard>
-        <StatCard padding="md">
-          <StatValue>
-            {stats?.last_sync ? (
-              formatDate(stats.last_sync).split(',')[0]
-            ) : (
-              <NeverSync>Never</NeverSync>
-            )}
-          </StatValue>
-          <StatLabel>Last Sync</StatLabel>
-        </StatCard>
+        <StatCard
+          value={stats?.total_synced ?? 0}
+          label="Total Synced"
+          variant="centered"
+        />
+        <StatCard
+          value={stats?.pending ?? 0}
+          label="Pending"
+          variant="centered"
+        />
+        <StatCard
+          value={stats?.last_sync ? formatDate(stats.last_sync).split(',')[0] : 'Never'}
+          label="Last Sync"
+          variant="centered"
+        />
       </StatsGrid>
 
       <SectionTitle>Sync Directions</SectionTitle>
       <SyncDirections>
         <DirectionCard padding="md">
           <DirectionHeader>
-            <PlatformIcon $color="#1DA1F2">T</PlatformIcon>
+            <PlatformIcon icon="T" color="#1DA1F2" />
             <ArrowRight size={24} />
-            <PlatformIcon $color="#0085FF">B</PlatformIcon>
+            <PlatformIcon icon="B" color="#0085FF" />
           </DirectionHeader>
           <DirectionStats>
             <DirectionStat>
@@ -395,9 +332,9 @@ export default function SyncPage() {
 
         <DirectionCard padding="md">
           <DirectionHeader>
-            <PlatformIcon $color="#0085FF">B</PlatformIcon>
+            <PlatformIcon icon="B" color="#0085FF" />
             <ArrowRight size={24} />
-            <PlatformIcon $color="#1DA1F2">T</PlatformIcon>
+            <PlatformIcon icon="T" color="#1DA1F2" />
           </DirectionHeader>
           <DirectionStats>
             <DirectionStat>

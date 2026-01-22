@@ -2,6 +2,7 @@
 
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
+import { Spinner } from '@/components/ui';
 
 export interface WidgetConfig {
   id: string;
@@ -122,21 +123,6 @@ const LoadingContainer = styled.div`
   padding: ${({ theme }) => theme.spacing[8]};
 `;
 
-const LoadingSpinner = styled.div`
-  width: 32px;
-  height: 32px;
-  border: 3px solid ${({ theme }) => theme.colors.neutral[200]};
-  border-top-color: ${({ theme }) => theme.colors.primary[500]};
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-`;
-
 const ErrorContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -241,7 +227,7 @@ export const Widget: React.FC<WidgetProps> = ({
       <WidgetContent>
         {isLoading ? (
           <LoadingContainer data-testid="widget-loading">
-            <LoadingSpinner />
+            <Spinner size="md" />
           </LoadingContainer>
         ) : error ? (
           <ErrorContainer>

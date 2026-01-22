@@ -5,8 +5,12 @@ import styled, { css } from 'styled-components';
 
 export interface Platform {
   id: string;
-  name: 'twitter' | 'bluesky';
+  name: string;
   connected: boolean;
+  icon?: string;
+  color?: string;
+  status?: 'active' | 'paused';
+  handle?: string;
   lastSync?: string;
   postsCount?: number;
 }

@@ -2,10 +2,10 @@
 
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { Spinner } from '@/components/ui/Spinner';
 import { useSyncPreview } from '@/hooks/useSyncPreview';
 import { SyncPreviewList } from './SyncPreviewList';
-import { Loader2 } from 'lucide-react';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 import type { SyncPreviewItemData } from '@/lib/api';
 
 interface SyncPreviewModalProps {
@@ -13,11 +13,6 @@ interface SyncPreviewModalProps {
   onClose: () => void;
   onSync: (selectedItems: SyncPreviewItemData[]) => void;
 }
-
-const spin = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`;
 
 const ItemCount = styled.span`
   font-size: ${({ theme }) => theme.fontSizes.sm};
@@ -36,11 +31,6 @@ const LoadingContainer = styled.div`
   justify-content: center;
   padding: ${({ theme }) => theme.spacing[12]};
   gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const Spinner = styled(Loader2)`
-  animation: ${spin} 1s linear infinite;
-  color: ${({ theme }) => theme.colors.primary[600]};
 `;
 
 const LoadingText = styled.span`
@@ -91,7 +81,7 @@ export function SyncPreviewModal({ isOpen, onClose, onSync }: SyncPreviewModalPr
     if (isLoading) {
       return (
         <LoadingContainer data-testid="sync-preview-loading">
-          <Spinner size={32} data-testid="loading-spinner" role="progressbar" />
+          <Spinner size="md" data-testid="loading-spinner" />
           <LoadingText>Loading preview...</LoadingText>
         </LoadingContainer>
       );

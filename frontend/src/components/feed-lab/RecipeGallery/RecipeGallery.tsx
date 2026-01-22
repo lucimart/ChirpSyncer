@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { Search, ChevronDown } from 'lucide-react';
-import { RecipeCard, Recipe, RecipeCondition } from './RecipeCard';
+import { RecipeCard, Recipe, RecipeCondition } from '../RecipeCard';
 
 export type { Recipe, RecipeCondition };
 

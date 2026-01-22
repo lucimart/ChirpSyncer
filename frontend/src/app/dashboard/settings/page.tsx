@@ -5,23 +5,8 @@ import styled from 'styled-components';
 import { Save, Bell, Shield, Palette, Lock, Sun, Moon, Monitor } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
-import { Button, Card, Input, Switch } from '@/components/ui';
+import { Button, Card, Input, Switch, PageHeader, SettingRow } from '@/components/ui';
 import { useTheme, type ThemeMode } from '@/styles/ThemeContext';
-
-const PageHeader = styled.div`
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
 
 const SettingsSections = styled.div`
   display: flex;
@@ -69,32 +54,6 @@ const SettingsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const SettingItem = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: ${({ theme }) => theme.spacing[3]} 0;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
-
-  &:last-child {
-    border-bottom: none;
-  }
-`;
-
-const SettingInfo = styled.div``;
-
-const SettingLabel = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const SettingHint = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
 `;
 
 const ThemeSwitcher = styled.div`
@@ -220,10 +179,10 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <PageHeader>
-        <PageTitle>Settings</PageTitle>
-        <PageDescription>Manage your account and preferences</PageDescription>
-      </PageHeader>
+      <PageHeader
+        title="Settings"
+        description="Manage your account and preferences"
+      />
 
       <SettingsSections>
         <SectionCard padding="lg">
@@ -325,11 +284,10 @@ export default function SettingsPage() {
             </SectionInfo>
           </SectionHeader>
 
-          <SettingItem>
-            <SettingInfo>
-              <SettingLabel>Sync Completed</SettingLabel>
-              <SettingHint>Get notified when a sync completes</SettingHint>
-            </SettingInfo>
+          <SettingRow
+            label="Sync Completed"
+            hint="Get notified when a sync completes"
+          >
             <Switch
               checked={notifications.syncComplete}
               onChange={() =>
@@ -339,13 +297,12 @@ export default function SettingsPage() {
                 }))
               }
             />
-          </SettingItem>
+          </SettingRow>
 
-          <SettingItem>
-            <SettingInfo>
-              <SettingLabel>Sync Failed</SettingLabel>
-              <SettingHint>Get notified when a sync fails</SettingHint>
-            </SettingInfo>
+          <SettingRow
+            label="Sync Failed"
+            hint="Get notified when a sync fails"
+          >
             <Switch
               checked={notifications.syncFailed}
               onChange={() =>
@@ -355,13 +312,12 @@ export default function SettingsPage() {
                 }))
               }
             />
-          </SettingItem>
+          </SettingRow>
 
-          <SettingItem>
-            <SettingInfo>
-              <SettingLabel>Weekly Report</SettingLabel>
-              <SettingHint>Receive a weekly summary of your activity</SettingHint>
-            </SettingInfo>
+          <SettingRow
+            label="Weekly Report"
+            hint="Receive a weekly summary of your activity"
+          >
             <Switch
               checked={notifications.weeklyReport}
               onChange={() =>
@@ -371,7 +327,7 @@ export default function SettingsPage() {
                 }))
               }
             />
-          </SettingItem>
+          </SettingRow>
         </SectionCard>
 
         <SectionCard padding="lg">
@@ -387,11 +343,10 @@ export default function SettingsPage() {
             </SectionInfo>
           </SectionHeader>
 
-          <SettingItem>
-            <SettingInfo>
-              <SettingLabel>Theme</SettingLabel>
-              <SettingHint>Choose your preferred color scheme</SettingHint>
-            </SettingInfo>
+          <SettingRow
+            label="Theme"
+            hint="Choose your preferred color scheme"
+          >
             <ThemeSwitcher>
               <ThemeOption
                 $active={mode === 'light'}
@@ -418,7 +373,7 @@ export default function SettingsPage() {
                 System
               </ThemeOption>
             </ThemeSwitcher>
-          </SettingItem>
+          </SettingRow>
         </SectionCard>
       </SettingsSections>
     </div>

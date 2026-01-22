@@ -67,7 +67,9 @@ const DEFAULT_STEPS: Omit<OnboardingStep, 'status'>[] = [
   },
 ];
 
-const OnboardingContext = createContext<OnboardingContextValue | null>(null);
+export const OnboardingContext = createContext<OnboardingContextValue | null>(null);
+
+export type OnboardingContextType = OnboardingContextValue;
 
 function loadState(): OnboardingState {
   if (typeof window === 'undefined') {

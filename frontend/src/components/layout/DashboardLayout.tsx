@@ -5,42 +5,22 @@ import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import { Menu } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
+import {
+  useNotifications,
+  useMarkAllNotificationsRead,
+  useMarkNotificationRead,
+  useDismissNotification,
+} from '@/lib/notifications';
 import { Sidebar } from './Sidebar';
 import { PageTransition } from './PageTransition';
-import { NotificationCenter, Notification } from '@/components/notifications';
+import { NotificationCenter } from '@/components/notifications';
+import { Spinner } from '@/components/ui';
 import { layout, breakpoints } from '@/styles/tokens/spacing';
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
-// Mock notifications - replace with real API hook when available
-const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: '1',
-    type: 'success',
-    title: 'Sync Complete',
-    message: '15 posts synced successfully from Twitter to Bluesky',
-    timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-    read: false,
-  },
-  {
-    id: '2',
-    type: 'warning',
-    title: 'Rate Limit Warning',
-    message: 'Approaching API rate limit on Twitter (80% used)',
-    timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-    read: false,
-  },
-  {
-    id: '3',
-    type: 'info',
-    title: 'New Feature',
-    message: 'Check out our new scheduling feature!',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    read: true,
-  },
-];
 
 const LayoutContainer = styled.div`
   display: flex;
@@ -152,40 +132,32 @@ const LoadingContainer = styled.div`
   min-height: 100vh;
 `;
 
-const Spinner = styled.div`
-  width: 40px;
-  height: 40px;
-  border: 3px solid ${({ theme }) => theme.colors.border.light};
-  border-top-color: ${({ theme }) => theme.colors.primary[600]};
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-`;
-
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const { isAuthenticated, isLoading, checkAuth } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
+  const { data: notifications = [] } = useNotifications();
+  const markAsRead = useMarkNotificationRead();
+  const markAllAsRead = useMarkAllNotificationsRead();
+  const dismissNotification = useDismissNotification();
 
-  const handleMarkAsRead = useCallback((id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-  }, []);
+  const handleMarkAsRead = useCallback(
+    (id: string) => {
+      markAsRead.mutate(id);
+    },
+    [markAsRead]
+  );
 
   const handleMarkAllAsRead = useCallback(() => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  }, []);
+    markAllAsRead.mutate();
+  }, [markAllAsRead]);
 
-  const handleDismiss = useCallback((id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  }, []);
+  const handleDismiss = useCallback(
+    (id: string) => {
+      dismissNotification.mutate(id);
+    },
+    [dismissNotification]
+  );
 
   // Swipe handling state
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -245,7 +217,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   if (isLoading) {
     return (
       <LoadingContainer>
-        <Spinner />
+        <Spinner size="lg" />
       </LoadingContainer>
     );
   }

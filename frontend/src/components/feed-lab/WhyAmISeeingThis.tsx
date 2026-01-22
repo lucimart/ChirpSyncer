@@ -4,9 +4,10 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import styled, { css, keyframes } from 'styled-components';
+import styled, { css } from 'styled-components';
 import { RuleContributionChart } from '@/components/feed-lab/RuleContributionChart';
 import { useFeedExplanation } from '@/hooks/useFeedExplanation';
+import { Spinner } from '@/components/ui';
 
 export interface MatchedCondition {
   field: string;
@@ -40,11 +41,6 @@ export interface WhyAmISeeingThisProps {
   variant?: 'button' | 'inline';
 }
 
-const spin = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`;
-
 const TriggerButton = styled.button`
   display: inline-flex;
   align-items: center;
@@ -63,15 +59,6 @@ const InlineLoading = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.spacing[2]};
   color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const InlineSpinner = styled.div`
-  width: 16px;
-  height: 16px;
-  border: 2px solid ${({ theme }) => theme.colors.neutral[300]};
-  border-top-color: ${({ theme }) => theme.colors.primary[500]};
-  border-radius: 50%;
-  animation: ${spin} 0.8s linear infinite;
 `;
 
 const InlineError = styled.div`
@@ -142,15 +129,6 @@ const ContentLoading = styled.div`
   align-items: center;
   justify-content: center;
   padding: ${({ theme }) => theme.spacing[8]} 0;
-`;
-
-const ContentSpinner = styled.div`
-  width: 32px;
-  height: 32px;
-  border: 4px solid ${({ theme }) => theme.colors.neutral[300]};
-  border-top-color: ${({ theme }) => theme.colors.primary[500]};
-  border-radius: 50%;
-  animation: ${spin} 0.8s linear infinite;
 `;
 
 const ContentError = styled.div`
@@ -405,7 +383,7 @@ export function WhyAmISeeingThis({
     return (
       <div data-testid="why-seeing-this">
         <InlineLoading data-testid="explanation-loading">
-          <InlineSpinner />
+          <Spinner size="xs" />
           Loading...
         </InlineLoading>
       </div>
@@ -481,7 +459,7 @@ export function WhyAmISeeingThis({
               <ModalContent>
                 {hookIsLoading ? (
                   <ContentLoading data-testid="explanation-loading">
-                    <ContentSpinner />
+                    <Spinner size="md" />
                   </ContentLoading>
                 ) : hookError ? (
                   <ContentError>{hookError}</ContentError>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { WhyAmISeeingThis } from '@/components/feed-lab/WhyAmISeeingThis';
+import { WhyAmISeeingThis } from '../WhyAmISeeingThis';
 
 interface Post {
   id: string;

@@ -3,8 +3,8 @@
 import styled from 'styled-components';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
-import { useOnboarding } from './OnboardingProvider';
-import { OnboardingStep } from './OnboardingStep';
+import { useOnboarding } from '../OnboardingProvider';
+import { OnboardingStep } from '../OnboardingStep';
 
 const ChecklistCard = styled.div`
   background-color: ${({ theme }) => theme.colors.background.primary};

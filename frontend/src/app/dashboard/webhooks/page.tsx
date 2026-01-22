@@ -16,47 +16,14 @@ import {
   AlertCircle,
   Webhook,
 } from 'lucide-react';
-import { Button, Card, Modal, Input, Badge, EmptyState } from '@/components/ui';
+import { Button, Card, Modal, Input, Badge, EmptyState, PageHeader, StatCard } from '@/components/ui';
 import { api, Webhook as WebhookType, WebhookDelivery } from '@/lib/api';
-
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
 
 const StatsRow = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: ${({ theme }) => theme.spacing[4]};
   margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const StatCard = styled(Card)`
-  text-align: center;
-`;
-
-const StatValue = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.primary[600]};
-`;
-
-const StatLabel = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
 const WebhooksList = styled.div`
@@ -420,32 +387,33 @@ export default function WebhooksPage() {
 
   return (
     <div>
-      <PageHeader>
-        <div>
-          <PageTitle>Webhooks</PageTitle>
-          <PageDescription>
-            Receive real-time notifications when events occur
-          </PageDescription>
-        </div>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus size={18} />
-          Create Webhook
-        </Button>
-      </PageHeader>
+      <PageHeader
+        title="Webhooks"
+        description="Receive real-time notifications when events occur"
+        actions={
+          <Button onClick={() => setIsCreateModalOpen(true)}>
+            <Plus size={18} />
+            Create Webhook
+          </Button>
+        }
+      />
 
       <StatsRow>
-        <StatCard padding="md">
-          <StatValue>{webhooks.length}</StatValue>
-          <StatLabel>Total Webhooks</StatLabel>
-        </StatCard>
-        <StatCard padding="md">
-          <StatValue>{enabledCount}</StatValue>
-          <StatLabel>Enabled</StatLabel>
-        </StatCard>
-        <StatCard padding="md">
-          <StatValue>{eventTypes.length}</StatValue>
-          <StatLabel>Event Types</StatLabel>
-        </StatCard>
+        <StatCard
+          value={webhooks.length}
+          label="Total Webhooks"
+          variant="centered"
+        />
+        <StatCard
+          value={enabledCount}
+          label="Enabled"
+          variant="centered"
+        />
+        <StatCard
+          value={eventTypes.length}
+          label="Event Types"
+          variant="centered"
+        />
       </StatsRow>
 
       {isLoading ? (

@@ -22,6 +22,10 @@ import {
   Input,
   Switch,
   Tabs,
+  PageHeader,
+  PlatformIcon,
+  DetailsList,
+  SectionTitle,
 } from '@/components/ui';
 import { FlowDiagram, FlowDiagramData, Platform, SyncConnection } from '@/components/flow';
 import {
@@ -37,28 +41,6 @@ import {
   PlatformSyncConfig,
   PlatformType,
 } from '@/lib/connectors';
-
-const PageHeader = styled.div`
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
-
-const SectionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
 
 const ConnectorGrid = styled.div`
   display: grid;
@@ -85,19 +67,6 @@ const ConnectorHeader = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing[4]};
 `;
 
-const PlatformIcon = styled.div<{ $color: string }>`
-  width: 48px;
-  height: 48px;
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  background-color: ${({ $color }) => $color};
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  font-size: ${({ theme }) => theme.fontSizes.xl};
-`;
-
 const ConnectorInfo = styled.div`
   flex: 1;
 `;
@@ -106,6 +75,12 @@ const ConnectorName = styled.h3`
   font-size: ${({ theme }) => theme.fontSizes.md};
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
   color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const ConnectionLabel = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  margin-top: ${({ theme }) => theme.spacing[1]};
 `;
 
 const ConnectorStatus = styled.span<{ $status: 'connected' | 'disconnected' | 'coming_soon' }>`
@@ -121,6 +96,10 @@ const ConnectorStatus = styled.span<{ $status: 'connected' | 'disconnected' | 'c
 const ConnectorDescription = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.text.secondary};
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
+`;
+
+const StyledDetailsList = styled(DetailsList)`
   margin-bottom: ${({ theme }) => theme.spacing[4]};
 `;
 
@@ -182,35 +161,6 @@ const CapabilitiesWrapper = styled.div<{ $expanded: boolean }>`
   transition: max-height 0.3s ease, opacity 0.2s ease;
 `;
 
-
-const ConnectionDetails = styled.div`
-  padding: ${({ theme }) => theme.spacing[3]};
-  background-color: ${({ theme }) => theme.colors.background.secondary};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const ConnectionRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: ${({ theme }) => `${theme.spacing[1]} 0`};
-
-  &:not(:last-child) {
-    border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
-  }
-`;
-
-const ConnectionLabel = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-const ConnectionValue = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
 
 const ModalContent = styled.div`
   padding: ${({ theme }) => theme.spacing[4]};
@@ -322,6 +272,7 @@ export default function ConnectorsPage() {
           icon: connector?.icon ?? c.platform[0].toUpperCase(),
           color: connector?.color ?? '#6366F1',
           status: c.sync_enabled ? ('active' as const) : ('paused' as const),
+          connected: c.connected,
           handle: c.handle,
         };
       }),
@@ -363,6 +314,7 @@ export default function ConnectorsPage() {
       icon: 'C',
       color: '#6366F1',
       status: 'active',
+      connected: true,
     });
   }
 
@@ -609,20 +561,18 @@ export default function ConnectorsPage() {
 
   return (
     <div>
-      <PageHeader>
-        <PageTitle>Platform Connectors</PageTitle>
-        <PageDescription>
-          Connect your social media accounts and configure sync settings
-        </PageDescription>
-      </PageHeader>
+      <PageHeader
+        title="Platform Connectors"
+        description="Connect your social media accounts and configure sync settings"
+      />
 
       <Tabs
-        tabs={[
+        items={[
           { id: 'platforms', label: 'Platforms', badge: String(connectorsList.filter(c => c.status !== 'coming_soon').length) },
           { id: 'flow', label: 'Flow View', badge: String(flowDiagramData.platforms.length - 1) },
         ]}
-        activeTab={activeTab}
-        onTabChange={(id) => setActiveTab(id as 'platforms' | 'flow')}
+        value={activeTab}
+        onChange={(id) => setActiveTab(id as TabId)}
         variant="soft"
       />
 
@@ -658,7 +608,7 @@ export default function ConnectorsPage() {
                 </div>
               )}
               <ConnectorHeader>
-                <PlatformIcon $color={connector.color}>{connector.icon}</PlatformIcon>
+                <PlatformIcon icon={connector.icon} color={connector.color} size="lg" />
                 <ConnectorInfo>
                   <ConnectorName>{connector.name}</ConnectorName>
                   <ConnectorStatus
@@ -678,23 +628,26 @@ export default function ConnectorsPage() {
               <ConnectorDescription>{connector.description}</ConnectorDescription>
 
               {isConnected && connection && (
-                <ConnectionDetails>
-                  <ConnectionRow>
-                    <ConnectionLabel>Last Sync</ConnectionLabel>
-                    <ConnectionValue>
-                      <Clock size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                      {connection.last_sync
-                        ? new Date(connection.last_sync).toLocaleString()
-                        : 'Never'}
-                    </ConnectionValue>
-                  </ConnectionRow>
-                  <ConnectionRow>
-                    <ConnectionLabel>Sync Status</ConnectionLabel>
-                    <ConnectionValue>
-                      {connection.sync_enabled ? 'Enabled' : 'Disabled'}
-                    </ConnectionValue>
-                  </ConnectionRow>
-                </ConnectionDetails>
+                <StyledDetailsList
+                  variant="compact"
+                  items={[
+                    {
+                      label: 'Last Sync',
+                      value: (
+                        <>
+                          <Clock size={14} />
+                          {connection.last_sync
+                            ? new Date(connection.last_sync).toLocaleString()
+                            : 'Never'}
+                        </>
+                      ),
+                    },
+                    {
+                      label: 'Sync Status',
+                      value: connection.sync_enabled ? 'Enabled' : 'Disabled',
+                    },
+                  ]}
+                />
               )}
 
               <ExpandButton onClick={() => toggleExpand(connector.id)}>
@@ -761,7 +714,7 @@ export default function ConnectorsPage() {
             <SyncConfigCard key={connection.id} padding="md">
               <SyncConfigHeader>
                 <SyncConfigTitle>
-                  <PlatformIcon $color={connector.color}>{connector.icon}</PlatformIcon>
+                  <PlatformIcon icon={connector.icon} color={connector.color} size="lg" />
                   <div>
                     <ConnectorName>{connector.name}</ConnectorName>
                     <ConnectionLabel>{connection.handle}</ConnectionLabel>

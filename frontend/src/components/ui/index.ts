@@ -24,6 +24,29 @@ export type { ConnectionStatusProps } from './ConnectionStatus';
 export { CollapsibleMenu } from './CollapsibleMenu';
 export type { CollapsibleMenuProps } from './CollapsibleMenu';
 
+// Layout & Page components
+export { PageHeader } from './PageHeader';
+export type { PageHeaderProps } from './PageHeader';
+export { StatCard } from './StatCard';
+export type { StatCardProps } from './StatCard';
+export { PlatformIcon } from './PlatformIcon';
+export type { PlatformIconProps } from './PlatformIcon';
+export { SettingRow } from './SettingRow';
+export type { SettingRowProps } from './SettingRow';
+export { DetailsList } from './DetailsList';
+export type { DetailsListProps, DetailsItem } from './DetailsList';
+
+// Typography
+export {
+  Typography,
+  SectionTitle,
+  PageTitle,
+  Text,
+  SmallText,
+  Caption,
+} from './Typography';
+export type { TypographyProps } from './Typography';
+
 // Complex components (not yet fully migrated)
 export { CommandPalette } from './CommandPalette';
 export { ErrorResolution } from './ErrorResolution';

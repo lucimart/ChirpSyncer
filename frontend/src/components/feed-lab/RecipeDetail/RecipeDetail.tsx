@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Recipe, RecipeCondition } from './RecipeCard';
+import { Recipe, RecipeCondition } from '../RecipeCard';
 
 // Re-export types for consumers
 export type { Recipe, RecipeCondition };

@@ -13,7 +13,7 @@ import {
   Sparkles,
   Target,
 } from 'lucide-react';
-import { Button, Card, Input, Modal, useToast } from '@/components/ui';
+import { Button, Card, Input, Modal, useToast, PageHeader, SectionTitle } from '@/components/ui';
 import {
   useOptimalTimes,
   useScheduledPosts,
@@ -24,26 +24,6 @@ import {
   TimeSlot,
 } from '@/lib/scheduling';
 import { TimingHeatmap } from '@/components/scheduler/TimingHeatmap';
-
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const HeaderLeft = styled.div``;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
 
 const GridLayout = styled.div`
   display: grid;
@@ -63,11 +43,7 @@ const Sidebar = styled.div`
   gap: ${({ theme }) => theme.spacing[4]};
 `;
 
-const SectionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
+const StyledSectionTitle = styled(SectionTitle)`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing[2]};
@@ -443,25 +419,23 @@ export default function SchedulerPage() {
 
   return (
     <div>
-      <PageHeader>
-        <HeaderLeft>
-          <PageTitle>Scheduler</PageTitle>
-          <PageDescription>
-            Schedule posts with AI-powered optimal timing suggestions
-          </PageDescription>
-        </HeaderLeft>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus size={18} />
-          Schedule Post
-        </Button>
-      </PageHeader>
+      <PageHeader
+        title="Scheduler"
+        description="Schedule posts with AI-powered optimal timing suggestions"
+        actions={
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus size={18} />
+            Schedule Post
+          </Button>
+        }
+      />
 
       <GridLayout>
         <MainContent>
-          <SectionTitle>
+          <StyledSectionTitle>
             <Clock size={20} />
             Upcoming Posts ({pendingPosts.length})
-          </SectionTitle>
+          </StyledSectionTitle>
 
           {isLoading ? (
             <Card padding="lg">
@@ -543,10 +517,10 @@ export default function SchedulerPage() {
 
         <Sidebar>
           <Card padding="md">
-            <SectionTitle>
+            <StyledSectionTitle>
               <Sparkles size={20} />
               Optimal Times
-            </SectionTitle>
+            </StyledSectionTitle>
             {optimalTimes ? (
               <>
                 <OptimalTimesList>
@@ -585,10 +559,10 @@ export default function SchedulerPage() {
       </GridLayout>
 
       <Card padding="md" style={{ marginTop: '24px' }}>
-        <SectionTitle>
+        <StyledSectionTitle>
           <TrendingUp size={20} />
           Engagement Heatmap
-        </SectionTitle>
+        </StyledSectionTitle>
         <TimingHeatmap
           data={heatmapData}
           onCellSelect={handleHeatmapCellSelect}

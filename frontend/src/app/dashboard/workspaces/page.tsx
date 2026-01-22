@@ -12,31 +12,11 @@ import {
   WorkspaceSettings,
   WorkspaceSwitcher,
 } from '@/components/workspace';
-import { Button, Card, Input, Modal, Tabs } from '@/components/ui';
+import { Button, Card, Input, Modal, Tabs, PageHeader, SectionTitle, SmallText } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { useActivityFeed } from '@/hooks/useActivityFeed';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { useWorkspaceMembers } from '@/hooks/useWorkspaceMembers';
-
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const TitleSection = styled.div``;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
 
 const StyledTabs = styled(Tabs)`
   margin-bottom: ${({ theme }) => theme.spacing[6]};
@@ -48,15 +28,7 @@ const TabContent = styled.div`
   gap: ${({ theme }) => theme.spacing[4]};
 `;
 
-const SectionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const SectionDescription = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
+const SectionDescription = styled(SmallText)`
   margin-bottom: ${({ theme }) => theme.spacing[4]};
 `;
 
@@ -164,28 +136,26 @@ export default function WorkspacesPage() {
 
   return (
     <div>
-      <PageHeader>
-        <TitleSection>
-          <PageTitle>Workspaces</PageTitle>
-          <PageDescription>
-            Collaborate with your team, share credentials, and manage roles.
-          </PageDescription>
-        </TitleSection>
-        <HeaderActions>
-          {currentWorkspace && (
-            <WorkspaceSwitcher
-              workspaces={workspaces}
-              currentWorkspace={currentWorkspace}
-              onSwitch={switchWorkspace}
-              onCreateWorkspace={() => setIsCreateOpen(true)}
-            />
-          )}
-          <Button variant="secondary" onClick={() => setIsCreateOpen(true)}>
-            <Plus size={16} />
-            New Workspace
-          </Button>
-        </HeaderActions>
-      </PageHeader>
+      <PageHeader
+        title="Workspaces"
+        description="Collaborate with your team, share credentials, and manage roles."
+        actions={
+          <>
+            {currentWorkspace && (
+              <WorkspaceSwitcher
+                workspaces={workspaces}
+                currentWorkspace={currentWorkspace}
+                onSwitch={switchWorkspace}
+                onCreateWorkspace={() => setIsCreateOpen(true)}
+              />
+            )}
+            <Button variant="secondary" onClick={() => setIsCreateOpen(true)}>
+              <Plus size={16} />
+              New Workspace
+            </Button>
+          </>
+        }
+      />
 
       <StyledTabs
         items={tabs}
