@@ -88,7 +88,7 @@ const DetailLabel = styled.div`
   color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
-interface ProgressProps {
+export interface ProgressProps {
   value: number;
   max?: number;
   label?: string;

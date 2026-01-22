@@ -3,8 +3,17 @@
 import styled, { css } from 'styled-components';
 import { forwardRef, ButtonHTMLAttributes } from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
-type ButtonSize = 'sm' | 'md' | 'lg';
+type ButtonVariant = 
+  | 'primary' 
+  | 'secondary' 
+  | 'ghost' 
+  | 'danger' 
+  | 'outline' 
+  | 'soft' 
+  | 'danger-soft' 
+  | 'dashed';
+
+type ButtonSize = 'sm' | 'md' | 'lg' | 'icon';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -53,6 +62,45 @@ const variantStyles = {
       border-color: ${({ theme }) => theme.colors.danger[700]};
     }
   `,
+  outline: css`
+    background-color: transparent;
+    color: ${({ theme }) => theme.colors.primary[600]};
+    border: 1px solid ${({ theme }) => theme.colors.border.light};
+
+    &:hover:not(:disabled) {
+      background-color: ${({ theme }) => theme.colors.primary[50]};
+      border-color: ${({ theme }) => theme.colors.primary[500]};
+    }
+  `,
+  soft: css`
+    background-color: ${({ theme }) => theme.colors.background.secondary};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    border: 1px solid transparent;
+
+    &:hover:not(:disabled) {
+      background-color: ${({ theme }) => theme.colors.background.tertiary};
+      color: ${({ theme }) => theme.colors.text.primary};
+    }
+  `,
+  'danger-soft': css`
+    background-color: ${({ theme }) => theme.colors.danger[50]};
+    color: ${({ theme }) => theme.colors.danger[700]};
+    border: 1px solid transparent;
+
+    &:hover:not(:disabled) {
+      background-color: ${({ theme }) => theme.colors.danger[100]};
+    }
+  `,
+  dashed: css`
+    background-color: transparent;
+    color: ${({ theme }) => theme.colors.primary[600]};
+    border: 1px dashed ${({ theme }) => theme.colors.primary[200]};
+
+    &:hover:not(:disabled) {
+      background-color: ${({ theme }) => theme.colors.primary[50]};
+      border-color: ${({ theme }) => theme.colors.primary[400]};
+    }
+  `,
 };
 
 const sizeStyles = {
@@ -70,6 +118,14 @@ const sizeStyles = {
     padding: ${({ theme }) => `${theme.spacing[3]} ${theme.spacing[6]}`};
     font-size: ${({ theme }) => theme.fontSizes.lg};
     height: 48px;
+  `,
+  icon: css`
+    padding: ${({ theme }) => theme.spacing[2]};
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   `,
 };
 

@@ -3,8 +3,23 @@
 import styled, { css } from 'styled-components';
 import { HTMLAttributes, ReactNode } from 'react';
 
-type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
-type BadgeSize = 'sm' | 'md' | 'lg';
+type BadgeVariant =
+  | 'default'
+  | 'primary'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'info'
+  | 'neutral'
+  | 'neutral-soft'
+  | 'success-soft'
+  | 'warning-soft'
+  | 'text'
+  | 'status-success'
+  | 'status-warning'
+  | 'status-danger'
+  | 'status-primary';
+type BadgeSize = 'xs' | 'sm' | 'md' | 'lg';
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   children: ReactNode;
@@ -12,6 +27,7 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   size?: BadgeSize;
   dot?: boolean;
   outline?: boolean;
+  dotColor?: string;
 }
 
 const variantStyles = {
@@ -45,9 +61,59 @@ const variantStyles = {
     color: ${({ theme }) => theme.colors.primary[700]};
     border-color: ${({ theme }) => theme.colors.primary[100]};
   `,
+  neutral: css`
+    background-color: ${({ theme }) => theme.colors.neutral[200]};
+    color: ${({ theme }) => theme.colors.neutral[600]};
+    border-color: ${({ theme }) => theme.colors.neutral[200]};
+  `,
+  'neutral-soft': css`
+    background-color: ${({ theme }) => theme.colors.neutral[100]};
+    color: ${({ theme }) => theme.colors.neutral[500]};
+    border-color: ${({ theme }) => theme.colors.neutral[100]};
+  `,
+  'success-soft': css`
+    background-color: ${({ theme }) => theme.colors.success[100]};
+    color: ${({ theme }) => theme.colors.success[700]};
+    border-color: ${({ theme }) => theme.colors.success[100]};
+  `,
+  'warning-soft': css`
+    background-color: ${({ theme }) => theme.colors.warning[100]};
+    color: ${({ theme }) => theme.colors.warning[700]};
+    border-color: ${({ theme }) => theme.colors.warning[100]};
+  `,
+  text: css`
+    background-color: transparent;
+    color: ${({ theme }) => theme.colors.text.secondary};
+    border-color: transparent;
+  `,
+  'status-success': css`
+    background-color: ${({ theme }) => theme.colors.success[500]};
+    color: ${({ theme }) => theme.colors.text.inverse};
+    border-color: transparent;
+  `,
+  'status-warning': css`
+    background-color: ${({ theme }) => theme.colors.warning[500]};
+    color: ${({ theme }) => theme.colors.text.inverse};
+    border-color: transparent;
+  `,
+  'status-danger': css`
+    background-color: ${({ theme }) => theme.colors.danger[500]};
+    color: ${({ theme }) => theme.colors.text.inverse};
+    border-color: transparent;
+  `,
+  'status-primary': css`
+    background-color: ${({ theme }) => theme.colors.primary[500]};
+    color: white;
+    border-color: transparent;
+  `,
 };
 
 const sizeStyles = {
+  xs: css`
+    padding: 2px 8px;
+    font-size: ${({ theme }) => theme.fontSizes.xs};
+    gap: 4px;
+  `,
   sm: css`
     padding: 2px 6px;
     font-size: ${({ theme }) => theme.fontSizes.xs};
@@ -91,11 +157,11 @@ const StyledBadge = styled.span<{
     `}
 `;
 
-const Dot = styled.span<{ $variant: BadgeVariant }>`
+const Dot = styled.span<{ $variant: BadgeVariant; $dotColor?: string }>`
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: currentColor;
+  background-color: ${({ $dotColor }) => $dotColor ?? 'currentColor'};
 `;
 
 export const Badge = ({
@@ -104,11 +170,12 @@ export const Badge = ({
   size = 'md',
   dot = false,
   outline = false,
+  dotColor,
   ...props
 }: BadgeProps) => {
   return (
     <StyledBadge $variant={variant} $size={size} $outline={outline} {...props}>
-      {dot && <Dot $variant={variant} />}
+      {dot && <Dot $variant={variant} $dotColor={dotColor} />}
       {children}
     </StyledBadge>
   );

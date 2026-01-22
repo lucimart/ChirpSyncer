@@ -14,6 +14,7 @@ import {
   XCircle
 } from 'lucide-react';
 import { Badge } from './Badge';
+import { Button } from './Button/Button';
 
 // --- Types ---
 
@@ -193,25 +194,12 @@ const OptionCard = styled.div<{ $recommended?: boolean }>`
   }
 `;
 
-const RecommendedBadge = styled.div`
+const PositionedBadge = styled(Badge)`
   position: absolute;
   top: -10px;
   right: 12px;
-  background-color: ${({ theme }) => theme.colors.success[600]};
-  color: white;
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  padding: 2px 8px;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  display: flex;
-  align-items: center;
-  gap: 4px;
   box-shadow: ${({ theme }) => theme.shadows.sm};
-
-  svg {
-    width: 12px;
-    height: 12px;
-  }
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
 `;
 
 const OptionTitle = styled.h5`
@@ -227,58 +215,6 @@ const OptionDescription = styled.p`
   color: ${({ theme }) => theme.colors.text.secondary};
   line-height: 1.5;
   flex: 1;
-`;
-
-const ActionButton = styled.button<{ $variant: 'auto' | 'manual' | 'link'; $loading?: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-  padding: ${({ theme }) => theme.spacing[2]} ${({ theme }) => theme.spacing[4]};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.fast};
-  width: 100%;
-  
-  ${({ $variant, theme }) => {
-    switch ($variant) {
-      case 'auto':
-        return css`
-          background-color: ${theme.colors.primary[600]};
-          color: white;
-          border: 1px solid transparent;
-          &:hover {
-            background-color: ${theme.colors.primary[700]};
-          }
-          &:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-          }
-        `;
-      case 'manual':
-        return css`
-          background-color: ${theme.colors.background.primary};
-          color: ${theme.colors.text.primary};
-          border: 1px solid ${theme.colors.border.default};
-          &:hover {
-            background-color: ${theme.colors.background.secondary};
-            border-color: ${theme.colors.border.dark};
-          }
-        `;
-      default: // link
-        return css`
-          background-color: transparent;
-          color: ${theme.colors.primary[600]};
-          border: 1px dashed ${theme.colors.primary[200]};
-          &:hover {
-            background-color: ${theme.colors.primary[50]};
-            border-color: ${theme.colors.primary[400]};
-          }
-        `;
-    }
-  }}
 `;
 
 const TipSection = styled.div`
@@ -413,15 +349,20 @@ export const ErrorResolution: React.FC<ErrorResolutionProps> = ({
           {options.map((option) => (
             <OptionCard key={option.id} $recommended={option.recommended}>
               {option.recommended && (
-                <RecommendedBadge>
-                  <Lightbulb /> Recommended
-                </RecommendedBadge>
+                <PositionedBadge variant="status-success" size="sm">
+                  <Lightbulb size={12} /> Recommended
+                </PositionedBadge>
               )}
               <OptionTitle>{option.title}</OptionTitle>
               <OptionDescription>{option.description}</OptionDescription>
-              <ActionButton 
-                $variant={option.action.type}
-                $loading={loadingId === option.id}
+              <Button 
+                variant={
+                  option.action.type === 'auto' ? 'primary' : 
+                  option.action.type === 'manual' ? 'secondary' : 'dashed'
+                }
+                size="sm"
+                fullWidth
+                isLoading={loadingId === option.id}
                 disabled={loadingId !== null}
                 onClick={() => handleAction(option)}
               >
@@ -435,7 +376,7 @@ export const ErrorResolution: React.FC<ErrorResolutionProps> = ({
                     {option.action.label}
                   </>
                 )}
-              </ActionButton>
+              </Button>
             </OptionCard>
           ))}
         </OptionsGrid>

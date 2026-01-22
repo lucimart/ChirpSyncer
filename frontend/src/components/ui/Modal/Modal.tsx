@@ -4,7 +4,7 @@ import styled, { keyframes } from 'styled-components';
 import { ReactNode, useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
 
-interface ModalProps {
+export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;

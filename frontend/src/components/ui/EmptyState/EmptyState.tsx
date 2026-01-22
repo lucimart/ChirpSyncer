@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { ReactNode } from 'react';
 import { LucideIcon } from 'lucide-react';
 
-interface EmptyStateProps {
+export interface EmptyStateProps {
   icon?: LucideIcon;
   title: string;
   description?: string;

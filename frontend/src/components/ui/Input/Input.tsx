@@ -8,6 +8,8 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   hint?: string;
   fullWidth?: boolean;
+  startIcon?: React.ReactNode;
+  textAlign?: 'left' | 'center' | 'right';
 }
 
 const InputWrapper = styled.div<{ $fullWidth: boolean }>`
@@ -23,16 +25,36 @@ const Label = styled.label`
   color: ${({ theme }) => theme.colors.text.primary};
 `;
 
-const StyledInput = styled.input<{ $hasError: boolean }>`
+const InputContainer = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const IconWrapper = styled.div`
+  position: absolute;
+  top: 50%;
+  left: ${({ theme }) => theme.spacing[3]};
+  transform: translateY(-50%);
+  color: ${({ theme }) => theme.colors.text.tertiary};
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+`;
+
+const StyledInput = styled.input<{ $hasError: boolean; $hasStartIcon?: boolean; $textAlign?: string }>`
   width: 100%;
   height: 40px;
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
+  padding: ${({ theme, $hasStartIcon }) =>
+    $hasStartIcon
+      ? `${theme.spacing[2]} ${theme.spacing[3]} ${theme.spacing[2]} ${theme.spacing[10]}`
+      : `${theme.spacing[2]} ${theme.spacing[3]}`};
   font-size: ${({ theme }) => theme.fontSizes.base};
   color: ${({ theme }) => theme.colors.text.primary};
   background-color: ${({ theme }) => theme.colors.background.primary};
   border: 1px solid ${({ theme }) => theme.colors.border.default};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   transition: all ${({ theme }) => theme.transitions.fast};
+  text-align: ${({ $textAlign }) => $textAlign || 'left'};
 
   &::placeholder {
     color: ${({ theme }) => theme.colors.text.tertiary};
@@ -77,13 +99,23 @@ const ErrorText = styled.span`
 `;
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, hint, fullWidth = false, id, ...props }, ref) => {
+  ({ label, error, hint, fullWidth = false, startIcon, textAlign, id, className, ...props }, ref) => {
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
 
     return (
-      <InputWrapper $fullWidth={fullWidth}>
+      <InputWrapper $fullWidth={fullWidth} className={className}>
         {label && <Label htmlFor={inputId}>{label}</Label>}
-        <StyledInput ref={ref} id={inputId} $hasError={!!error} {...props} />
+        <InputContainer>
+          {startIcon && <IconWrapper>{startIcon}</IconWrapper>}
+          <StyledInput
+            ref={ref}
+            id={inputId}
+            $hasError={!!error}
+            $hasStartIcon={!!startIcon}
+            $textAlign={textAlign}
+            {...props}
+          />
+        </InputContainer>
         {error && <ErrorText>{error}</ErrorText>}
         {hint && !error && <HintText>{hint}</HintText>}
       </InputWrapper>

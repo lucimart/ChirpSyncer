@@ -10,7 +10,7 @@ const config = {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   testMatch: [
-    '<rootDir>/src/__tests__/**/*.test.{ts,tsx}',
+    '<rootDir>/src/**/*.test.{ts,tsx}',
   ],
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
