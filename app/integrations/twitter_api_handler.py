@@ -33,16 +33,19 @@ logger = setup_logger(__name__)
 
 # Lazy import tweepy to make it optional
 _tweepy = None
+tweepy = None
 
 
 def _get_tweepy():
     """Lazy load tweepy to make it optional."""
     global _tweepy
+    global tweepy
     if _tweepy is None:
         try:
             import tweepy
 
             _tweepy = tweepy
+            tweepy = _tweepy
         except ImportError:
             raise ImportError(
                 "tweepy is not installed. Install it with: pip install tweepy\n"
@@ -56,7 +59,7 @@ def _get_tweepy():
 class TwitterAPINotConfiguredError(Exception):
     """Raised when Twitter API credentials are not configured."""
 
-    def __init__(self, message: str = None):
+    def __init__(self, message: Optional[str] = None):
         default_message = (
             "Twitter API credentials not configured.\n\n"
             "To enable Bluesky → Twitter sync:\n"
@@ -148,7 +151,8 @@ class TwitterAPIHandler:
             # Post tweet
             response = self.client.create_tweet(text=content, media_ids=media_ids)
 
-            tweet_id = str(response.data["id"])
+            response_data = getattr(response, "data", None) or {}
+            tweet_id = str(response_data.get("id"))
             logger.info(f"Tweet posted successfully: {tweet_id}")
             return tweet_id
 

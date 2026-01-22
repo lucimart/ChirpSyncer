@@ -370,10 +370,20 @@ class TestCredentialIntegration:
         cursor.execute(
             """
             INSERT INTO user_credentials
-            (user_id, platform, credential_type, encrypted_data, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?)
+            (user_id, platform, credential_type, encrypted_data, encryption_iv, encryption_tag,
+             created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
-            (test_user["id"], "twitter", "api", json.dumps(invalid_creds), now, now),
+            (
+                test_user["id"],
+                "twitter",
+                "api",
+                json.dumps(invalid_creds),
+                os.urandom(12),
+                os.urandom(16),
+                now,
+                now,
+            ),
         )
 
         test_db.commit()
@@ -658,7 +668,7 @@ class TestQueueProcessing:
         for i in range(3):
             scheduled_time = datetime.now() + timedelta(hours=i + 1)
             tweet_id = scheduler.schedule_tweet(
-                test_user["id"], f"Tweet {i+1}", scheduled_time, []
+                test_user["id"], f"Tweet {i + 1}", scheduled_time, []
             )
             tweet_ids.append(tweet_id)
 
@@ -726,7 +736,7 @@ class TestQueueProcessing:
         for i in range(3):
             scheduled_time = datetime.now() + timedelta(hours=i + 1)
             tweet_id = scheduler.schedule_tweet(
-                test_user["id"], f"Tweet {i+1}", scheduled_time, []
+                test_user["id"], f"Tweet {i + 1}", scheduled_time, []
             )
             ids.append(tweet_id)
 
@@ -1032,7 +1042,7 @@ class TestErrorHandlingAndEdgeCases:
         ids = []
         for i in range(5):
             tweet_id = scheduler.schedule_tweet(
-                test_user["id"], f"Tweet {i+1}", scheduled_time, []
+                test_user["id"], f"Tweet {i + 1}", scheduled_time, []
             )
             ids.append(tweet_id)
 

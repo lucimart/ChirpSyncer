@@ -13,7 +13,7 @@ Key features:
 
 import asyncio
 import sqlite3
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from twscrape import API
 
@@ -98,10 +98,10 @@ async def _fetch_tweets_async(
     conn = sqlite3.connect(db_path) if db_path else None
     try:
         for tweet in tweets:
-            if not is_tweet_seen(tweet.id, conn=conn):
+            if not is_tweet_seen(tweet.id, conn):
                 adapted_tweet = TweetAdapter(tweet)
                 unseen_tweets.append(adapted_tweet)
-                mark_tweet_as_seen(tweet.id, conn=conn)
+                mark_tweet_as_seen(tweet.id, conn)
     finally:
         if conn:
             conn.close()
@@ -205,7 +205,25 @@ async def fetch_thread(tweet_id: str, username: str) -> list:
         tweet_ids = [int(tweet_id)]
         fetched_tweet = None
 
-        fetched_tweet = await api.tweet_details(int(tweet_id))
+        async def _get_tweet_details(tweet_id_value: int):
+            tweet_details = getattr(api, "tweet_details")
+            result: Any
+            try:
+                result = tweet_details([tweet_id_value])
+            except TypeError:
+                result = tweet_details(tweet_id_value)
+
+            if asyncio.iscoroutine(result):
+                result = await result
+
+            if hasattr(result, "__aiter__"):
+                async for item in result:
+                    return item
+                return None
+
+            return result
+
+        fetched_tweet = await _get_tweet_details(int(tweet_id))
 
         if not fetched_tweet:
             logger.warning(f"Could not fetch initial tweet {tweet_id}")
@@ -222,7 +240,7 @@ async def fetch_thread(tweet_id: str, username: str) -> list:
             reply_id = current_tweet.inReplyToTweetId
             parent_found = False
 
-            parent_tweet = await api.tweet_details(int(reply_id))
+            parent_tweet = await _get_tweet_details(int(reply_id))
             if parent_tweet and parent_tweet.user.username.lower() == username.lower():
                 thread_tweets.insert(0, parent_tweet)
                 current_tweet = parent_tweet

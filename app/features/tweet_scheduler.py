@@ -25,7 +25,9 @@ class TweetScheduler:
     - Media attachment support
     """
 
-    def __init__(self, db_path: str = "chirpsyncer.db", master_key: bytes = None):
+    def __init__(
+        self, db_path: str = "chirpsyncer.db", master_key: Optional[bytes] = None
+    ):
         """
         Initialize TweetScheduler.
 
@@ -124,6 +126,8 @@ class TweetScheduler:
             )
 
             tweet_id = cursor.lastrowid
+            if tweet_id is None:
+                raise RuntimeError("Failed to schedule tweet")
             conn.commit()
             return tweet_id
 
@@ -181,7 +185,9 @@ class TweetScheduler:
         finally:
             conn.close()
 
-    def get_scheduled_tweets(self, user_id: int, status: str = None) -> List[dict]:
+    def get_scheduled_tweets(
+        self, user_id: int, status: Optional[str] = None
+    ) -> List[dict]:
         """
         Get scheduled tweets for a user.
 
@@ -401,8 +407,8 @@ class TweetScheduler:
         self,
         scheduled_tweet_id: int,
         status: str,
-        tweet_id: str = None,
-        error: str = None,
+        tweet_id: Optional[str] = None,
+        error: Optional[str] = None,
     ) -> bool:
         """
         Update the status of a scheduled tweet.
@@ -510,7 +516,7 @@ class TweetScheduler:
                 return True
 
             values.append(tweet_id)
-            query = f"UPDATE scheduled_tweets SET {', '.join(set_clauses)} WHERE id = ?"
+            query = f"UPDATE scheduled_tweets SET {', '.join(set_clauses)} WHERE id = ?"  # nosec B608 - set_clauses built from known fields
 
             cursor.execute(query, values)
             affected = cursor.rowcount

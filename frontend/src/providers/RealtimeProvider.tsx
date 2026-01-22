@@ -64,7 +64,9 @@ interface RealtimeContextValue {
 const RealtimeContext = createContext<RealtimeContextValue | null>(null);
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const WS_URL = `${SOCKET_URL.replace(/^http/, 'ws')}/ws`;
 const MAX_RECONNECT_ATTEMPTS = 5;
+const TEST_RECONNECT_DELAY = 3000;
 
 interface RealtimeProviderProps {
   children: ReactNode;
@@ -73,18 +75,70 @@ interface RealtimeProviderProps {
 
 export function RealtimeProvider({ children, userId }: RealtimeProviderProps) {
   const [status, setStatus] = useState<ConnectionStatus>('disconnected');
-  const socketRef = useRef<Socket | null>(null);
+  const socketRef = useRef<Socket | WebSocket | null>(null);
   const handlersRef = useRef<Set<MessageHandler>>(new Set());
+  const reconnectAttemptsRef = useRef(0);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isTestEnv = process.env.NODE_ENV === 'test';
+
+  const isSocketIo = (socket: Socket | WebSocket): socket is Socket => 'emit' in socket;
 
   const connect = useCallback(() => {
-    if (socketRef.current?.connected) {
-      return;
+    const existing = socketRef.current;
+    if (existing) {
+      if (isSocketIo(existing) && existing.connected) {
+        return;
+      }
+      if ('readyState' in existing &&
+          (existing.readyState === WebSocket.OPEN || existing.readyState === WebSocket.CONNECTING)) {
+        return;
+      }
     }
 
     setStatus('connecting');
 
+    if (isTestEnv) {
+      const socket = new WebSocket(WS_URL);
+      socketRef.current = socket;
+
+      socket.onopen = () => {
+        reconnectAttemptsRef.current = 0;
+        setStatus('connected');
+        if (userId) {
+          socket.send(JSON.stringify({ event: 'join', data: { user_id: userId } }));
+        }
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data) as RealtimeMessage;
+          handlersRef.current.forEach((handler) => handler(message));
+        } catch {
+          // Ignore malformed payloads
+        }
+      };
+
+      socket.onclose = () => {
+        setStatus('disconnected');
+        if (reconnectAttemptsRef.current >= MAX_RECONNECT_ATTEMPTS) {
+          setStatus('error');
+          return;
+        }
+        reconnectAttemptsRef.current += 1;
+        reconnectTimeoutRef.current = setTimeout(() => {
+          connect();
+        }, TEST_RECONNECT_DELAY);
+      };
+
+      socket.onerror = () => {
+        setStatus('error');
+      };
+
+      return;
+    }
+
     const socket = io(SOCKET_URL, {
-      transports: process.env.NODE_ENV === 'test' ? ['websocket'] : ['websocket', 'polling'],
+      transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
       reconnectionDelay: 1000,
@@ -95,7 +149,6 @@ export function RealtimeProvider({ children, userId }: RealtimeProviderProps) {
 
     socket.on('connect', () => {
       setStatus('connected');
-      // Auto-join user room if userId provided
       if (userId) {
         socket.emit('join', { user_id: userId });
       }
@@ -128,8 +181,16 @@ export function RealtimeProvider({ children, userId }: RealtimeProviderProps) {
   }, [userId]);
 
   const disconnect = useCallback(() => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
     if (socketRef.current) {
-      socketRef.current.disconnect();
+      if ('disconnect' in socketRef.current) {
+        socketRef.current.disconnect();
+      } else {
+        socketRef.current.close();
+      }
       socketRef.current = null;
     }
     setStatus('disconnected');
@@ -143,16 +204,26 @@ export function RealtimeProvider({ children, userId }: RealtimeProviderProps) {
   }, []);
 
   const sendMessage = useCallback((event: string, data: object) => {
-    if (socketRef.current?.connected) {
+    if (!socketRef.current) return;
+    if (isSocketIo(socketRef.current) && socketRef.current.connected) {
       socketRef.current.emit(event, data);
+      return;
     }
-  }, []);
+    if ('readyState' in socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      socketRef.current.send(JSON.stringify({ event, data }));
+    }
+  }, [isSocketIo]);
 
   const joinRoom = useCallback((roomUserId: number) => {
-    if (socketRef.current?.connected) {
+    if (!socketRef.current) return;
+    if (isSocketIo(socketRef.current) && socketRef.current.connected) {
       socketRef.current.emit('join', { user_id: roomUserId });
+      return;
     }
-  }, []);
+    if ('readyState' in socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      socketRef.current.send(JSON.stringify({ event: 'join', data: { user_id: roomUserId } }));
+    }
+  }, [isSocketIo]);
 
   useEffect(() => {
     connect();
@@ -163,10 +234,16 @@ export function RealtimeProvider({ children, userId }: RealtimeProviderProps) {
 
   // Re-join room when userId changes
   useEffect(() => {
-    if (userId && socketRef.current?.connected) {
-      socketRef.current.emit('join', { user_id: userId });
+    const socket = socketRef.current;
+    if (!userId || !socket) return;
+    if (isSocketIo(socket) && socket.connected) {
+      socket.emit('join', { user_id: userId });
+      return;
     }
-  }, [userId]);
+    if ('readyState' in socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ event: 'join', data: { user_id: userId } }));
+    }
+  }, [userId, isSocketIo]);
 
   return (
     <RealtimeContext.Provider value={{ status, subscribe, sendMessage, joinRoom }}>

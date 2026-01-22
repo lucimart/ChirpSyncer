@@ -84,13 +84,26 @@ def update_sync_job(
     try:
         ensure_sync_jobs_table(conn)
         cursor = conn.cursor()
+        allowed_fields = {
+            "status",
+            "started_at",
+            "completed_at",
+            "error_message",
+            "posts_synced",
+            "task_id",
+            "direction",
+        }
         set_clauses = []
         values = []
         for key, value in updates.items():
+            if key not in allowed_fields:
+                continue
             set_clauses.append(f"{key} = ?")
             values.append(value)
+        if not set_clauses:
+            return
         values.extend([job_id, user_id])
-        query = f"UPDATE sync_jobs SET {', '.join(set_clauses)} WHERE job_id = ? AND user_id = ?"
+        query = f"UPDATE sync_jobs SET {', '.join(set_clauses)} WHERE job_id = ? AND user_id = ?"  # nosec B608 - set_clauses built from allowed fields
         cursor.execute(query, values)
         conn.commit()
     finally:

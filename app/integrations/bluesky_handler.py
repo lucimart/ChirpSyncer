@@ -67,7 +67,11 @@ def post_to_bluesky(content):
     validated_content = validate_and_truncate_text(content)
 
     try:
-        response = bsky_client.send_post(text=validated_content)
+        post_func = getattr(bsky_client, "post", None)
+        if callable(post_func):
+            response = post_func(validated_content)
+        else:
+            response = bsky_client.send_post(text=validated_content)
         logger.info(f"Posted to Bluesky: {validated_content[:50]}...")
         return getattr(response, "uri", None)
     except Exception as e:
@@ -111,9 +115,11 @@ def fetch_posts_from_bluesky(username: str, count: int = 10) -> list:
         logger.info(f"Fetching posts from Bluesky user: {username} (limit: {count})")
 
         # Call Bluesky API to get author feed
-        response = bsky_client.app.bsky.feed.get_author_feed(
-            params={"actor": username, "limit": count}
-        )
+        get_author_feed = getattr(bsky_client.app.bsky.feed, "get_author_feed")
+        try:
+            response = get_author_feed(actor=username, limit=count)
+        except TypeError:
+            response = get_author_feed(params={"actor": username, "limit": count})
 
         # Extract posts from response
         if not hasattr(response, "feed") or not response.feed:
@@ -128,16 +134,28 @@ def fetch_posts_from_bluesky(username: str, count: int = 10) -> list:
                 break
 
             # Skip reposts (reason != None indicates repost)
-            if getattr(item, "reason", None) is not None:
+            if isinstance(item, dict):
+                reason = item.get("reason")
+                post_data = item.get("post")
+            else:
+                reason = getattr(item, "reason", None)
+                post_data = getattr(item, "post", None)
+            if reason is not None:
                 continue
 
             # Extract post data
-            post_data = getattr(item, "post", None)
             if not post_data:
                 continue
-            record = getattr(post_data, "record", None)
-            uri = getattr(post_data, "uri", "")
-            text = getattr(record, "text", "") if record else ""
+            if isinstance(post_data, dict):
+                record = post_data.get("record")
+                uri = post_data.get("uri", "")
+            else:
+                record = getattr(post_data, "record", None)
+                uri = getattr(post_data, "uri", "")
+            if isinstance(record, dict):
+                text = record.get("text", "")
+            else:
+                text = getattr(record, "text", "") if record else ""
 
             # Create Post object
             if uri and text:

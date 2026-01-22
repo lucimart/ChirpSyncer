@@ -58,6 +58,14 @@ class SearchEngine:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
 
+            cursor.execute("PRAGMA table_info(synced_posts)")
+            has_archived = any(row[1] == "archived" for row in cursor.fetchall())
+            archived_select = (
+                "COALESCE(sp.archived, 0) as archived"
+                if has_archived
+                else "0 as archived"
+            )
+
             # Create FTS5 virtual table with porter tokenizer
             cursor.execute("""
             CREATE VIRTUAL TABLE IF NOT EXISTS tweet_search_index USING fts5(
@@ -312,6 +320,14 @@ class SearchEngine:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
 
+            cursor.execute("PRAGMA table_info(synced_posts)")
+            has_archived = any(row[1] == "archived" for row in cursor.fetchall())
+            archived_select = (
+                "COALESCE(sp.archived, 0) as archived"
+                if has_archived
+                else "0 as archived"
+            )
+
             # Check if we need to join with synced_posts for engagement/media filters
             needs_join = any(
                 key in filters for key in ["has_media", "min_likes", "min_retweets"]
@@ -375,7 +391,7 @@ class SearchEngine:
                            COALESCE(sp.has_media, 0) as has_media,
                            COALESCE(sp.likes_count, 0) as likes,
                            COALESCE(sp.retweets_count, 0) as retweets,
-                           COALESCE(sp.archived, 0) as archived
+                           {archived_select}
                     FROM tweet_search_index tsi
                     JOIN synced_posts sp ON (
                         tsi.tweet_id = sp.twitter_id OR tsi.tweet_id = sp.bluesky_uri
@@ -392,7 +408,7 @@ class SearchEngine:
                            COALESCE(sp.has_media, 0) as has_media,
                            COALESCE(sp.likes_count, 0) as likes,
                            COALESCE(sp.retweets_count, 0) as retweets,
-                           COALESCE(sp.archived, 0) as archived
+                           {archived_select}
                     FROM tweet_search_index tsi
                     JOIN synced_posts sp ON (
                         tsi.tweet_id = sp.twitter_id OR tsi.tweet_id = sp.bluesky_uri

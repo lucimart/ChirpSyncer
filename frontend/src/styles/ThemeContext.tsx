@@ -13,7 +13,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme, colors } from './tokens/colors';
-import { shadows, shadowsDark } from './tokens/shadows';
+import { ShadowTokens, shadows, shadowsDark } from './tokens/shadows';
 import { spacing, breakpoints } from './tokens/spacing';
 import { fontSize, fontWeight } from './tokens/typography';
 import { radii } from './tokens/radii';
@@ -78,7 +78,7 @@ export interface LegacyTheme {
   };
   fontSizes: typeof fontSize;
   fontWeights: typeof fontWeight;
-  shadows: typeof shadows;
+  shadows: ShadowTokens;
   transitions: {
     fast: string;
     default: string;

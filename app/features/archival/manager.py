@@ -139,6 +139,7 @@ class ArchivalManager:
                 SET archived = 1, archived_at = ?, archive_path = ?
                 WHERE id IN ({placeholders})
                 """,
+                # nosec B608 - placeholders are generated from archived post ids
                 [archived_at, archive_path] + post_ids,
             )
             conn.commit()
@@ -179,6 +180,7 @@ class ArchivalManager:
                 SET archived = 0, archived_at = NULL, archive_path = NULL
                 WHERE id IN ({placeholders})
                 """,
+                # nosec B608 - placeholders are generated from archived post ids
                 post_ids,
             )
             conn.commit()

@@ -43,7 +43,7 @@ def generate_cache_key(func_name: str, args: tuple, kwargs: dict) -> str:
     )
 
     # Hash for shorter keys
-    key_hash = hashlib.md5(key_data.encode()).hexdigest()
+    key_hash = hashlib.sha256(key_data.encode()).hexdigest()
     return f"{func_name}:{key_hash}"
 
 

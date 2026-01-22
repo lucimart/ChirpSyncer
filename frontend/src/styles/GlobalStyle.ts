@@ -9,7 +9,7 @@ import type { LegacyTheme } from './ThemeContext';
  * Base styles that apply to the entire application.
  * Uses legacy theme structure for backward compatibility with existing components.
  */
-export const GlobalStyle = createGlobalStyle<{ theme: LegacyTheme }>`
+export const GlobalStyle = createGlobalStyle<{ theme?: LegacyTheme }>`
   /* CSS Reset */
   *, *::before, *::after {
     box-sizing: border-box;

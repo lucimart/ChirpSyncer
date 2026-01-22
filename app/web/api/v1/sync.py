@@ -226,10 +226,15 @@ def start_sync():
 
     db_path = current_app.config["DB_PATH"]
     create_sync_job(db_path, job_id, g.user.id, direction)
-    async_result = celery_app.send_task(
-        _SYNC_TASK_NAME,
-        args=[job_id, g.user.id, direction, db_path],
-    )
+    async_result = None
+    try:
+        async_result = celery_app.send_task(
+            _SYNC_TASK_NAME,
+            args=[job_id, g.user.id, direction, db_path],
+        )
+    except Exception as exc:
+        current_app.logger.warning(f"Failed to enqueue sync job: {exc}")
+
     if async_result and async_result.id:
         update_sync_job(db_path, job_id, g.user.id, task_id=async_result.id)
 

@@ -196,7 +196,7 @@ class WebhookService:
         url: str,
         events: List[str],
         name: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> Optional[Dict[str, Any]]:
         """
         Create a new webhook.
 
@@ -224,6 +224,8 @@ class WebhookService:
             conn.commit()
             webhook_id = cursor.lastrowid
 
+            if webhook_id is None:
+                return None
             return self.get_webhook(webhook_id, user_id)
         finally:
             self._close_conn(conn)
@@ -326,7 +328,7 @@ class WebhookService:
         conn = self._get_conn()
         try:
             conn.execute(
-                f"UPDATE webhooks SET {', '.join(updates)} WHERE id = ? AND user_id = ?",
+                f"UPDATE webhooks SET {', '.join(updates)} WHERE id = ? AND user_id = ?",  # nosec B608 - updates built from known fields
                 params,
             )
             conn.commit()

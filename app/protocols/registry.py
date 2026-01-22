@@ -5,9 +5,12 @@ Manages registration and retrieval of platform connectors.
 Provides a central point for discovering available platforms and their capabilities.
 """
 
+import logging
 from typing import Dict, List, Optional, Type
 
 from app.protocols.base import PlatformConnector, PlatformCapabilities, ConnectorStatus
+
+logger = logging.getLogger(__name__)
 
 
 class ConnectorRegistry:
@@ -182,8 +185,8 @@ class ConnectorRegistry:
         for connector in self._connectors.values():
             try:
                 connector.disconnect()
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("Failed to disconnect connector: %s", exc)
         self._connectors.clear()
 
     def to_dict(self) -> Dict[str, dict]:

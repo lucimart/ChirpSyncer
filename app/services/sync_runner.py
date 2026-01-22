@@ -85,9 +85,9 @@ def sync_twitter_to_bluesky(user_id: int, db_path: str) -> int:
                         )
                     synced_count += len(thread)
                     continue
-        except Exception:
+        except Exception as exc:
             # Fall back to single tweet if thread logic fails
-            pass
+            logger.warning("Thread fetch failed, falling back to single tweet: %s", exc)
 
         uri = post_to_bluesky(tweet.text)
         save_synced_post(

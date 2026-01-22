@@ -343,7 +343,8 @@ class ApiClient {
     if (params?.page) searchParams.set('page', String(params.page));
     if (params?.limit) searchParams.set('limit', String(params.limit));
     const query = searchParams.toString();
-    return this.request(`/admin/users${query ? `?${query}` : ''}`);
+    const suffix = query ? `?${query}` : '';
+    return this.request(`/admin/users${suffix}`);
   }
 
   async getAdminUser(id: string): Promise<ApiResponse<AdminUser>> {
@@ -393,7 +394,8 @@ class ApiClient {
     if (params.date_to) searchParams.set('date_to', params.date_to);
     if (params.platform) searchParams.set('platform', params.platform);
     const query = searchParams.toString();
-    return this.request(`/search${query ? `?${query}` : ''}`);
+    const suffix = query ? `?${query}` : '';
+    return this.request(`/search${suffix}`);
   }
 
   async searchSuggestions(q: string, limit = 10): Promise<ApiResponse<{ suggestions: string[] }>> {

@@ -1,4 +1,5 @@
 """Export API endpoints for data export functionality."""
+
 import csv
 import io
 import json
@@ -40,7 +41,9 @@ def _get_date_filter(date_range: str):
     return None
 
 
-def _fetch_posts(user_id: int, platform: str, date_cutoff: float | None, include_deleted: bool):
+def _fetch_posts(
+    user_id: int, platform: str, date_cutoff: float | None, include_deleted: bool
+):
     """Fetch posts from database with filters."""
     conn = _get_connection()
     try:
@@ -60,7 +63,7 @@ def _fetch_posts(user_id: int, platform: str, date_cutoff: float | None, include
 
         where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
 
-        query = f"""
+        query = f"""  # nosec B608 - where_clause built from validated filters
             SELECT id, twitter_id, bluesky_uri, source, content_hash,
                    synced_to, synced_at, original_text
             FROM synced_posts
@@ -97,13 +100,28 @@ def _format_json(posts: list, include_media: bool, include_metrics: bool) -> str
         if include_metrics:
             item["metrics"] = {"likes": 0, "reposts": 0, "replies": 0}
         formatted.append(item)
-    return json.dumps({"posts": formatted, "exported_at": datetime.utcnow().isoformat(), "total": len(formatted)}, indent=2)
+    return json.dumps(
+        {
+            "posts": formatted,
+            "exported_at": datetime.utcnow().isoformat(),
+            "total": len(formatted),
+        },
+        indent=2,
+    )
 
 
 def _format_csv(posts: list, include_media: bool, include_metrics: bool) -> str:
     """Format posts as CSV."""
     output = io.StringIO()
-    fieldnames = ["id", "content", "source", "synced_to", "synced_at", "twitter_id", "bluesky_uri"]
+    fieldnames = [
+        "id",
+        "content",
+        "source",
+        "synced_to",
+        "synced_at",
+        "twitter_id",
+        "bluesky_uri",
+    ]
     if include_metrics:
         fieldnames.extend(["likes", "reposts", "replies"])
 
@@ -169,7 +187,9 @@ def export_data():
 
     export_format = data.get("format", "json")
     if export_format not in ("json", "csv", "txt"):
-        return api_error("INVALID_FORMAT", "Format must be json, csv, or txt", status=400)
+        return api_error(
+            "INVALID_FORMAT", "Format must be json, csv, or txt", status=400
+        )
 
     date_range = data.get("date_range", "all")
     platform = data.get("platform", "all")
@@ -223,11 +243,13 @@ def export_preview():
         "txt": len(posts) * 150,
     }
 
-    return api_response({
-        "total_posts": len(posts),
-        "estimated_sizes": {
-            fmt: f"~{size // 1024} KB" if size > 1024 else f"~{size} bytes"
-            for fmt, size in estimated_sizes.items()
-        },
-        "sample": posts[:3] if posts else [],
-    })
+    return api_response(
+        {
+            "total_posts": len(posts),
+            "estimated_sizes": {
+                fmt: f"~{size // 1024} KB" if size > 1024 else f"~{size} bytes"
+                for fmt, size in estimated_sizes.items()
+            },
+            "sample": posts[:3] if posts else [],
+        }
+    )

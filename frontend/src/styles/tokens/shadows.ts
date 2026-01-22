@@ -5,8 +5,22 @@
  * Separate values for light and dark themes.
  */
 
+export interface ShadowTokens {
+  none: string;
+  xs: string;
+  sm: string;
+  md: string;
+  lg: string;
+  xl: string;
+  '2xl': string;
+  inner: string;
+  focusRing: string;
+  focusRingError: string;
+  focusRingSuccess: string;
+}
+
 // Light theme shadows
-export const shadows = {
+export const shadows: ShadowTokens = {
   none: 'none',
   xs: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
   sm: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
@@ -20,10 +34,10 @@ export const shadows = {
   focusRing: '0 0 0 2px rgb(59 130 246 / 0.5)',
   focusRingError: '0 0 0 2px rgb(239 68 68 / 0.5)',
   focusRingSuccess: '0 0 0 2px rgb(34 197 94 / 0.5)',
-} as const;
+};
 
 // Dark theme shadows (more subtle, darker)
-export const shadowsDark = {
+export const shadowsDark: ShadowTokens = {
   none: 'none',
   xs: '0 1px 2px 0 rgb(0 0 0 / 0.2)',
   sm: '0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3)',
@@ -37,7 +51,7 @@ export const shadowsDark = {
   focusRing: '0 0 0 2px rgb(96 165 250 / 0.5)',
   focusRingError: '0 0 0 2px rgb(248 113 113 / 0.5)',
   focusRingSuccess: '0 0 0 2px rgb(74 222 128 / 0.5)',
-} as const;
+};
 
 // Semantic shadow mapping
 export const elevation = {
