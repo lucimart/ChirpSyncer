@@ -421,8 +421,8 @@ def app_server(flask_app, test_db_path):
     """
     Start Flask application server in background for E2E testing.
 
-    Starts the Flask development server on port 5000 before tests and stops it
-    after tests complete. Waits for server to be ready before returning.
+    If USE_EXISTING_SERVER env var is set, assumes server is already running
+    (e.g. in Docker) and just waits for it to be ready.
 
     Args:
         flask_app: Flask application instance
@@ -431,6 +431,27 @@ def app_server(flask_app, test_db_path):
     Yields:
         None: Server is running in background
     """
+    if os.environ.get("USE_EXISTING_SERVER"):
+        # Wait for existing server to be ready
+        max_retries = 30
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+                    result = sock.connect_ex(("localhost", 5000))
+                    if result == 0:
+                        break
+            except Exception:
+                pass
+            time.sleep(1)
+            retry_count += 1
+
+        if retry_count >= max_retries:
+            raise TimeoutError("Existing server did not respond on port 5000")
+
+        yield
+        return
+
     # Set environment variables for the subprocess
     env = os.environ.copy()
     env["DB_PATH"] = test_db_path
