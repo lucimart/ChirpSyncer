@@ -32,3 +32,14 @@ Este archivo no es la fuente de verdad. Cualquier detalle de alcance, tareas, cr
 ## Proxima accion
 
 - Cualquier cambio debe aplicarse en `docs/UI_UX_REDESIGN_PLAN.md` y luego reflejarse aqui solo como resumen.
+
+---
+
+## Plan de Implementacion Detallado
+
+Ver **`docs/UI_UX_INNOVATIONS_IMPLEMENTATION.md`** para:
+- Arquitectura de cada innovacion
+- Tareas desglosadas con estimaciones
+- Dependencias entre innovaciones
+- Timeline sugerido (~26 dias para todas)
+- Metricas de exito
