@@ -34,6 +34,7 @@ from app.features.analytics_tracker import AnalyticsTracker
 from app.features.search_engine import SearchEngine
 from app.models.feed_rule import init_feed_rules_db
 from app.models.workspace import init_workspace_db
+from app.services.user_settings import UserSettings
 from app.web.api.v1 import api_v1
 from app.web.api.v1.responses import api_error
 import uuid
@@ -107,6 +108,10 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
     analytics_tracker.init_db()
     init_feed_rules_db(db_path)
     init_workspace_db(db_path)
+
+    # Initialize user settings table for algorithm preferences
+    user_settings = UserSettings(db_path)
+    user_settings.init_db()
 
     # ========================================================================
     # HEALTH CHECK
