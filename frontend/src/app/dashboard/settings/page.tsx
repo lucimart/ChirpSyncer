@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import styled from 'styled-components';
-import { Save, Bell, Shield, Palette, Lock } from 'lucide-react';
+import { Save, Bell, Shield, Palette, Lock, Sun, Moon, Monitor } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { Button, Card, Input } from '@/components/ui';
+import { useTheme, type ThemeMode } from '@/styles/ThemeContext';
 
 const PageHeader = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing[6]};
@@ -120,6 +121,42 @@ const Toggle = styled.button<{ $active: boolean }>`
   }
 `;
 
+const ThemeSwitcher = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing[2]};
+  background-color: ${({ theme }) => theme.colors.background.secondary};
+  padding: ${({ theme }) => theme.spacing[1]};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+`;
+
+const ThemeOption = styled.button<{ $active: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+  padding: ${({ theme }) => theme.spacing[2]} ${({ theme }) => theme.spacing[3]};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  border: none;
+  background-color: ${({ $active, theme }) =>
+    $active ? theme.colors.background.primary : 'transparent'};
+  color: ${({ $active, theme }) =>
+    $active ? theme.colors.text.primary : theme.colors.text.secondary};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.fast};
+  box-shadow: ${({ $active, theme }) =>
+    $active ? theme.shadows?.sm || '0 1px 2px rgba(0,0,0,0.1)' : 'none'};
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.text.primary};
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
 const FormActions = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -131,6 +168,7 @@ const FormActions = styled.div`
 
 export default function SettingsPage() {
   const { user, checkAuth } = useAuth();
+  const { mode, setMode } = useTheme();
   const [username] = useState(user?.username || '');
   const [email, setEmail] = useState(user?.email || '');
   const [notifications, setNotifications] = useState({
@@ -375,10 +413,35 @@ export default function SettingsPage() {
 
           <SettingItem>
             <SettingInfo>
-              <SettingLabel>Dark Mode</SettingLabel>
-              <SettingHint>Coming soon</SettingHint>
+              <SettingLabel>Theme</SettingLabel>
+              <SettingHint>Choose your preferred color scheme</SettingHint>
             </SettingInfo>
-            <Toggle $active={false} disabled />
+            <ThemeSwitcher>
+              <ThemeOption
+                $active={mode === 'light'}
+                onClick={() => setMode('light')}
+                aria-label="Light theme"
+              >
+                <Sun />
+                Light
+              </ThemeOption>
+              <ThemeOption
+                $active={mode === 'dark'}
+                onClick={() => setMode('dark')}
+                aria-label="Dark theme"
+              >
+                <Moon />
+                Dark
+              </ThemeOption>
+              <ThemeOption
+                $active={mode === 'system'}
+                onClick={() => setMode('system')}
+                aria-label="System theme"
+              >
+                <Monitor />
+                System
+              </ThemeOption>
+            </ThemeSwitcher>
           </SettingItem>
         </SectionCard>
       </SettingsSections>

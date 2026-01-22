@@ -1,134 +1,140 @@
+/**
+ * Theme Configuration - ChirpSyncer Design System
+ * 
+ * This file re-exports the new token-based theme system
+ * while maintaining backward compatibility with existing components.
+ * 
+ * MIGRATION: Components should gradually migrate to using
+ * tokens directly from './tokens' or theme from ThemeContext.
+ */
+
+import { lightTheme, darkTheme, colors, type Theme } from './tokens/colors';
+import { spacing, layout, breakpoints } from './tokens/spacing';
+import { fontSize, fontWeight } from './tokens/typography';
+import { shadows, shadowsDark } from './tokens/shadows';
+import { radii } from './tokens/radii';
+import { transition } from './tokens/transitions';
+
+// Legacy theme structure for backward compatibility
+// This maps the old theme structure to new tokens
 export const theme = {
   colors: {
-    // Primary - Social Hub Blue
-    primary: {
-      50: '#eff6ff',
-      100: '#dbeafe',
-      200: '#bfdbfe',
-      300: '#93c5fd',
-      400: '#60a5fa',
-      500: '#3b82f6',
-      600: '#2563eb',
-      700: '#1d4ed8',
-      800: '#1e40af',
-      900: '#1e3a8a',
-    },
-    // Neutral - Gray scale
-    neutral: {
-      50: '#fafafa',
-      100: '#f4f4f5',
-      200: '#e4e4e7',
-      300: '#d4d4d8',
-      400: '#a1a1aa',
-      500: '#71717a',
-      600: '#52525b',
-      700: '#3f3f46',
-      800: '#27272a',
-      900: '#18181b',
-    },
+    // Primary - Social Hub Blue (mapped from new tokens)
+    primary: colors.blue,
+    // Neutral - Gray scale (mapped from new tokens)
+    neutral: colors.slate,
     // Success - Green
     success: {
-      50: '#f0fdf4',
-      100: '#dcfce7',
-      500: '#22c55e',
-      600: '#16a34a',
-      700: '#15803d',
+      50: colors.green[50],
+      100: colors.green[100],
+      500: colors.green[500],
+      600: colors.green[600],
+      700: colors.green[700],
     },
     // Warning - Amber
     warning: {
-      50: '#fffbeb',
-      100: '#fef3c7',
-      500: '#f59e0b',
-      600: '#d97706',
-      700: '#b45309',
+      50: colors.yellow[50],
+      100: colors.yellow[100],
+      500: colors.yellow[500],
+      600: colors.yellow[600],
+      700: colors.yellow[700],
     },
     // Danger - Red
     danger: {
-      50: '#fef2f2',
-      100: '#fee2e2',
-      500: '#ef4444',
-      600: '#dc2626',
-      700: '#b91c1c',
+      50: colors.red[50],
+      100: colors.red[100],
+      500: colors.red[500],
+      600: colors.red[600],
+      700: colors.red[700],
     },
-    // Background
+    // Background (light theme defaults for legacy)
     background: {
-      primary: '#ffffff',
-      secondary: '#f4f4f5',
-      tertiary: '#e4e4e7',
+      primary: lightTheme.bg.secondary,
+      secondary: lightTheme.bg.primary,
+      tertiary: lightTheme.bg.tertiary,
     },
     // Text
     text: {
-      primary: '#18181b',
-      secondary: '#52525b',
-      tertiary: '#a1a1aa',
-      inverse: '#ffffff',
+      primary: lightTheme.text.primary,
+      secondary: lightTheme.text.secondary,
+      tertiary: lightTheme.text.tertiary,
+      inverse: lightTheme.text.inverse,
     },
     // Borders
     border: {
-      light: '#e4e4e7',
-      default: '#d4d4d8',
-      dark: '#a1a1aa',
+      light: lightTheme.border.light,
+      default: lightTheme.border.medium,
+      dark: lightTheme.border.heavy,
     },
   },
   spacing: {
-    0: '0',
-    1: '0.25rem',
-    2: '0.5rem',
-    3: '0.75rem',
-    4: '1rem',
-    5: '1.25rem',
-    6: '1.5rem',
-    8: '2rem',
-    10: '2.5rem',
-    12: '3rem',
-    16: '4rem',
-    20: '5rem',
-    24: '6rem',
+    0: spacing[0],
+    1: spacing[1],
+    2: spacing[2],
+    3: spacing[3],
+    4: spacing[4],
+    5: spacing[5],
+    6: spacing[6],
+    8: spacing[8],
+    10: spacing[10],
+    12: spacing[12],
+    16: spacing[16],
+    20: spacing[20],
+    24: spacing[24],
   },
   borderRadius: {
-    none: '0',
-    sm: '0.25rem',
-    default: '0.375rem',
-    md: '0.5rem',
-    lg: '0.75rem',
-    xl: '1rem',
-    full: '9999px',
+    none: radii.none,
+    sm: radii.sm,
+    default: radii.md,
+    md: radii.md,
+    lg: radii.lg,
+    xl: radii.xl,
+    full: radii.full,
   },
   fontSizes: {
-    xs: '0.75rem',
-    sm: '0.875rem',
-    base: '1rem',
-    lg: '1.125rem',
-    xl: '1.25rem',
-    '2xl': '1.5rem',
-    '3xl': '1.875rem',
-    '4xl': '2.25rem',
+    xs: fontSize.xs,
+    sm: fontSize.sm,
+    base: fontSize.base,
+    lg: fontSize.lg,
+    xl: fontSize.xl,
+    '2xl': fontSize['2xl'],
+    '3xl': fontSize['3xl'],
+    '4xl': fontSize['4xl'],
   },
   fontWeights: {
-    normal: 400,
-    medium: 500,
-    semibold: 600,
-    bold: 700,
+    normal: fontWeight.normal,
+    medium: fontWeight.medium,
+    semibold: fontWeight.semibold,
+    bold: fontWeight.bold,
   },
   shadows: {
-    sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-    default: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-    md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-    lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-    xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+    sm: shadows.sm,
+    default: shadows.sm,
+    md: shadows.md,
+    lg: shadows.lg,
+    xl: shadows.xl,
   },
   transitions: {
-    fast: '150ms ease',
-    default: '200ms ease',
-    slow: '300ms ease',
+    fast: transition.allFast,
+    default: transition.all,
+    slow: transition.allSlow,
   },
   breakpoints: {
-    sm: '640px',
-    md: '768px',
-    lg: '1024px',
-    xl: '1280px',
-    '2xl': '1536px',
+    sm: breakpoints.sm,
+    md: breakpoints.md,
+    lg: breakpoints.lg,
+    xl: breakpoints.xl,
+    '2xl': breakpoints['2xl'],
   },
 } as const;
 
-export type Theme = typeof theme;
+// Export legacy theme type
+export type LegacyTheme = typeof theme;
+
+// Re-export new theme types for gradual migration
+export { lightTheme, darkTheme, type Theme };
+export { spacing, layout, breakpoints };
+export { fontSize, fontWeight };
+export { shadows, shadowsDark };
+export { radii };
+export { transition };

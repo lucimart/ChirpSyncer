@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Providers } from '@/components/providers';
+import { themeInitScript } from '@/styles/ThemeContext';
 
 export const metadata: Metadata = {
   title: 'ChirpSyncer - Social Hub Dashboard',
@@ -12,7 +13,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body>
         <Providers>{children}</Providers>
       </body>

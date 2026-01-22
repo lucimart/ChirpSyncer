@@ -8,3 +8,8 @@ export { DangerConfirm } from './DangerConfirm';
 export { Progress } from './Progress';
 export { ToastProvider, useToast } from './Toast';
 export { ConnectionStatus } from './ConnectionStatus';
+export { Badge } from './Badge';
+export { EmptyState } from './EmptyState';
+export { CollapsibleMenu } from './CollapsibleMenu';
+export { CommandPalette } from './CommandPalette';
+export { ErrorResolution } from './ErrorResolution';

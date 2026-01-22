@@ -21,6 +21,7 @@ Comprehensive documentation for ChirpSyncer - Cross-Platform Social Media Manage
 
 ### Architecture & Design
 - [System Architecture](./architecture/ARCHITECTURE.md) - Complete system design and architecture
+- [UI/UX Redesign Plan](./UI_UX_REDESIGN_PLAN.md) - Dark theme, design system, and navigation improvements
 
 ### Technical Reference
 - [API Documentation](./API.md) - Complete REST API reference

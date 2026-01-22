@@ -30,6 +30,11 @@ def _load_rules(user_id: int):
         rows = cursor.fetchall()
         rules = []
         for row in rows:
+            raw_conditions = row["conditions"]
+            try:
+                parsed_conditions = json.loads(raw_conditions or "[]")
+            except (TypeError, json.JSONDecodeError):
+                parsed_conditions = []
             rules.append(
                 {
                     "id": str(row["id"]),
@@ -37,7 +42,7 @@ def _load_rules(user_id: int):
                     "type": row["type"],
                     "weight": row["weight"],
                     "enabled": bool(row["enabled"]),
-                    "conditions": json.loads(row["conditions"] or "[]"),
+                    "conditions": parsed_conditions,
                 }
             )
         return rules
