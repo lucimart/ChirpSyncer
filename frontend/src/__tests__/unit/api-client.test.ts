@@ -106,4 +106,121 @@ describe('ApiClient', () => {
     expect(response.success).toBe(false);
     expect(response.error).toBe('Network down');
   });
+
+  it('calls logout endpoint', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const { api } = await import('@/lib/api');
+    await api.logout();
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/auth/logout', expect.objectContaining({ method: 'POST' }));
+  });
+
+  it('calls register endpoint', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { id: 1, username: 'newuser' } }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const { api } = await import('@/lib/api');
+    await api.register('newuser', 'test@example.com', 'password123');
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/auth/register', expect.any(Object));
+  });
+
+  it('calls getCurrentUser endpoint', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { id: 1, username: 'user' } }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const { api } = await import('@/lib/api');
+    await api.getCurrentUser();
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/auth/me', expect.any(Object));
+  });
+
+  it('calls getCredentials endpoint', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: [] }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const { api } = await import('@/lib/api');
+    await api.getCredentials();
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/credentials', expect.any(Object));
+  });
+
+  it('calls addCredential endpoint', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { id: 1 } }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const { api } = await import('@/lib/api');
+    await api.addCredential({ platform: 'twitter', credential_type: 'api', credentials: { key: 'value' } });
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/credentials', expect.objectContaining({ method: 'POST' }));
+  });
+
+  it('calls deleteCredential endpoint', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const { api } = await import('@/lib/api');
+    await api.deleteCredential(1);
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/credentials/1', expect.objectContaining({ method: 'DELETE' }));
+  });
+
+  it('calls testCredential endpoint', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { valid: true, message: 'OK' } }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const { api } = await import('@/lib/api');
+    await api.testCredential(1);
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/credentials/1/test', expect.objectContaining({ method: 'POST' }));
+  });
+
+  it('calls updateProfile endpoint', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { id: 1 } }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const { api } = await import('@/lib/api');
+    await api.updateProfile({ email: 'new@example.com' });
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/auth/me', expect.objectContaining({ method: 'PUT' }));
+  });
+
+  it('calls changePassword endpoint', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { success: true } }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const { api } = await import('@/lib/api');
+    await api.changePassword('oldpass', 'newpass');
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/auth/change-password', expect.objectContaining({ method: 'POST' }));
+  });
 });

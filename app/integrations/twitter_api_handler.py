@@ -33,26 +33,26 @@ logger = setup_logger(__name__)
 
 # Lazy import tweepy to make it optional
 _tweepy = None
-tweepy = None
+
+# Try to import tweepy at module level for test patching compatibility
+try:
+    import tweepy
+except ImportError:
+    tweepy = None  # type: ignore
 
 
 def _get_tweepy():
     """Lazy load tweepy to make it optional."""
     global _tweepy
-    global tweepy
     if _tweepy is None:
-        try:
-            import tweepy
-
-            _tweepy = tweepy
-            tweepy = _tweepy
-        except ImportError:
+        if tweepy is None:
             raise ImportError(
                 "tweepy is not installed. Install it with: pip install tweepy\n"
                 "Note: Twitter API requires a paid subscription ($100/month Basic tier).\n"
                 "This is only needed for Bluesky → Twitter sync.\n"
                 "Twitter → Bluesky sync uses free twscrape and doesn't require tweepy."
             )
+        _tweepy = tweepy
     return _tweepy
 
 

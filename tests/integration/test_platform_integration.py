@@ -443,14 +443,13 @@ def test_twitter_api_handler_post_tweet_with_media():
     """Test posting a tweet with media."""
     from app.integrations.twitter_api_handler import TwitterAPIHandler
 
-    with patch(
-        "app.integrations.twitter_api_handler.tweepy.Client"
-    ) as mock_client, patch(
-        "app.integrations.twitter_api_handler.tweepy.OAuth1UserHandler"
-    ) as mock_auth, patch(
-        "app.integrations.twitter_api_handler.tweepy.API"
-    ) as mock_api_class:
-
+    with (
+        patch("app.integrations.twitter_api_handler.tweepy.Client") as mock_client,
+        patch(
+            "app.integrations.twitter_api_handler.tweepy.OAuth1UserHandler"
+        ) as mock_auth,
+        patch("app.integrations.twitter_api_handler.tweepy.API") as mock_api_class,
+    ):
         mock_client_instance = MagicMock()
         mock_client.return_value = mock_client_instance
         mock_client_instance.get_me.return_value = MagicMock()
@@ -629,12 +628,10 @@ def test_twitter_api_handler_upload_media_error():
     """Test TwitterAPIHandler media upload error handling."""
     from app.integrations.twitter_api_handler import TwitterAPIHandler
 
-    with patch(
-        "app.integrations.twitter_api_handler.tweepy.Client"
-    ) as mock_client, patch(
-        "app.integrations.twitter_api_handler.tweepy.API"
-    ) as mock_api_class:
-
+    with (
+        patch("app.integrations.twitter_api_handler.tweepy.Client") as mock_client,
+        patch("app.integrations.twitter_api_handler.tweepy.API") as mock_api_class,
+    ):
         mock_client_instance = MagicMock()
         mock_client.return_value = mock_client_instance
         mock_client_instance.get_me.return_value = MagicMock()
@@ -665,14 +662,13 @@ def test_post_tweet_with_credentials():
         post_tweet_with_credentials,
     )
 
-    with patch(
-        "app.integrations.twitter_api_handler.TwitterAPIHandler"
-    ) as mock_handler_class, patch(
-        "app.integrations.twitter_api_handler.tweepy.OAuth1UserHandler"
-    ), patch(
-        "app.integrations.twitter_api_handler.tweepy.API"
+    with (
+        patch(
+            "app.integrations.twitter_api_handler.TwitterAPIHandler"
+        ) as mock_handler_class,
+        patch("app.integrations.twitter_api_handler.tweepy.OAuth1UserHandler"),
+        patch("app.integrations.twitter_api_handler.tweepy.API"),
     ):
-
         mock_handler = MagicMock()
         mock_handler_class.from_credentials_dict.return_value = mock_handler
         mock_handler.post_tweet.return_value = "tweet123"
@@ -696,14 +692,15 @@ def test_post_tweet_with_credentials_and_media():
         post_tweet_with_credentials,
     )
 
-    with patch(
-        "app.integrations.twitter_api_handler.TwitterAPIHandler"
-    ) as mock_handler_class, patch(
-        "app.integrations.twitter_api_handler.tweepy.OAuth1UserHandler"
-    ) as mock_auth, patch(
-        "app.integrations.twitter_api_handler.tweepy.API"
-    ) as mock_api_class:
-
+    with (
+        patch(
+            "app.integrations.twitter_api_handler.TwitterAPIHandler"
+        ) as mock_handler_class,
+        patch(
+            "app.integrations.twitter_api_handler.tweepy.OAuth1UserHandler"
+        ) as mock_auth,
+        patch("app.integrations.twitter_api_handler.tweepy.API") as mock_api_class,
+    ):
         mock_handler = MagicMock()
         mock_handler_class.from_credentials_dict.return_value = mock_handler
         mock_handler.post_tweet.return_value = "tweet456"
@@ -780,12 +777,11 @@ def test_twitter_scraper_fetch_tweets():
     """Test fetch_tweets synchronous wrapper function."""
     from app.integrations.twitter_scraper import fetch_tweets, _fetch_tweets_async
 
-    with patch("app.integrations.twitter_scraper.API") as mock_api_class, patch(
-        "app.integrations.twitter_scraper.is_tweet_seen"
-    ) as mock_is_seen, patch(
-        "app.integrations.twitter_scraper.mark_tweet_as_seen"
-    ) as mock_mark_seen:
-
+    with (
+        patch("app.integrations.twitter_scraper.API") as mock_api_class,
+        patch("app.integrations.twitter_scraper.is_tweet_seen") as mock_is_seen,
+        patch("app.integrations.twitter_scraper.mark_tweet_as_seen") as mock_mark_seen,
+    ):
         mock_api_instance = MagicMock()
         mock_api_class.return_value = mock_api_instance
 
@@ -825,12 +821,11 @@ def test_twitter_scraper_fetch_tweets_with_filtering():
     """Test tweet filtering for already-seen tweets."""
     from app.integrations.twitter_scraper import fetch_tweets
 
-    with patch("app.integrations.twitter_scraper.API") as mock_api_class, patch(
-        "app.integrations.twitter_scraper.is_tweet_seen"
-    ) as mock_is_seen, patch(
-        "app.integrations.twitter_scraper.mark_tweet_as_seen"
-    ) as mock_mark_seen:
-
+    with (
+        patch("app.integrations.twitter_scraper.API") as mock_api_class,
+        patch("app.integrations.twitter_scraper.is_tweet_seen") as mock_is_seen,
+        patch("app.integrations.twitter_scraper.mark_tweet_as_seen") as mock_mark_seen,
+    ):
         mock_api_instance = MagicMock()
         mock_api_class.return_value = mock_api_instance
 
@@ -858,7 +853,10 @@ def test_twitter_scraper_fetch_tweets_with_filtering():
         # Only unseen tweet should be returned
         assert len(tweets) == 1
         assert tweets[0].id == 1001
-        mock_mark_seen.assert_called_once_with(1001)
+        # mark_tweet_as_seen is called with (tweet_id, conn) - conn can be None
+        mock_mark_seen.assert_called_once()
+        call_args = mock_mark_seen.call_args[0]
+        assert call_args[0] == 1001  # First arg is tweet_id
 
 
 @pytest.mark.integration
@@ -914,10 +912,10 @@ def test_twitter_scraper_fetch_tweets_async_with_empty_tweets():
     from app.integrations.twitter_scraper import _fetch_tweets_async
 
     async def test_async():
-        with patch("app.integrations.twitter_scraper.API") as mock_api_class, patch(
-            "app.integrations.twitter_scraper.is_tweet_seen"
+        with (
+            patch("app.integrations.twitter_scraper.API") as mock_api_class,
+            patch("app.integrations.twitter_scraper.is_tweet_seen"),
         ):
-
             mock_api_instance = MagicMock()
             mock_api_class.return_value = mock_api_instance
 
@@ -941,10 +939,12 @@ def test_twitter_scraper_fetch_error_with_async_loop():
     """Test fetch_tweets error handling when asyncio.run() raises RuntimeError."""
     from app.integrations.twitter_scraper import fetch_tweets
 
-    with patch("app.integrations.twitter_scraper.asyncio.run") as mock_run, patch(
-        "app.integrations.twitter_scraper.asyncio.get_event_loop"
-    ) as mock_get_loop:
-
+    with (
+        patch("app.integrations.twitter_scraper.asyncio.run") as mock_run,
+        patch(
+            "app.integrations.twitter_scraper.asyncio.get_event_loop"
+        ) as mock_get_loop,
+    ):
         # First call to asyncio.run() raises RuntimeError
         mock_run.side_effect = RuntimeError(
             "asyncio.run() cannot be called from a running event loop"
@@ -971,10 +971,10 @@ def test_twitter_scraper_fetch_tweets_no_results_on_exception():
     """Test that fetch_tweets returns empty list on exception."""
     from app.integrations.twitter_scraper import fetch_tweets
 
-    with patch("app.integrations.twitter_scraper.API") as mock_api_class, patch(
-        "app.integrations.twitter_scraper.is_tweet_seen"
+    with (
+        patch("app.integrations.twitter_scraper.API") as mock_api_class,
+        patch("app.integrations.twitter_scraper.is_tweet_seen"),
     ):
-
         mock_api_instance = MagicMock()
         mock_api_class.return_value = mock_api_instance
 
@@ -1513,10 +1513,12 @@ def test_validate_twitter_scraping_with_event_loop():
     """Test Twitter scraping validation when asyncio.run() fails with RuntimeError."""
     from app.integrations.credential_validator import validate_twitter_scraping
 
-    with patch("app.integrations.credential_validator.asyncio.run") as mock_run, patch(
-        "app.integrations.credential_validator.asyncio.get_event_loop"
-    ) as mock_get_loop:
-
+    with (
+        patch("app.integrations.credential_validator.asyncio.run") as mock_run,
+        patch(
+            "app.integrations.credential_validator.asyncio.get_event_loop"
+        ) as mock_get_loop,
+    ):
         # First call raises RuntimeError (event loop already running)
         mock_run.side_effect = RuntimeError(
             "asyncio.run() cannot be called from a running event loop"

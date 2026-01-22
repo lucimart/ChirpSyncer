@@ -63,13 +63,13 @@ def _fetch_posts(
 
         where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
 
-        query = f"""  # nosec B608 - where_clause built from validated filters
+        query = f"""
             SELECT id, twitter_id, bluesky_uri, source, content_hash,
                    synced_to, synced_at, original_text
             FROM synced_posts
             {where_clause}
             ORDER BY synced_at DESC
-        """
+        """  # nosec B608
 
         cursor.execute(query, params)
         rows = cursor.fetchall()

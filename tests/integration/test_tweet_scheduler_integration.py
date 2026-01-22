@@ -28,6 +28,31 @@ from app.features.tweet_scheduler import TweetScheduler
 from app.auth.credential_manager import CredentialManager
 
 
+def _insert_test_credentials(
+    cursor, user_id: int, platform: str, cred_type: str, data: dict
+):
+    """Helper to insert test credentials with required encryption fields."""
+    now = int(time.time())
+    cursor.execute(
+        """
+        INSERT INTO user_credentials
+        (user_id, platform, credential_type, encrypted_data, encryption_iv, encryption_tag,
+         created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            user_id,
+            platform,
+            cred_type,
+            json.dumps(data),
+            os.urandom(12),
+            os.urandom(16),
+            now,
+            now,
+        ),
+    )
+
+
 # =============================================================================
 # TWEET SCHEDULER INITIALIZATION TESTS
 # =============================================================================
@@ -256,13 +281,17 @@ class TestCredentialIntegration:
             }
         )
 
-        cursor.execute(
-            """
-            INSERT INTO user_credentials
-            (user_id, platform, credential_type, encrypted_data, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """,
-            (test_user["id"], "twitter", "api", credentials_json, now, now),
+        _insert_test_credentials(
+            cursor,
+            test_user["id"],
+            "twitter",
+            "api",
+            {
+                "api_key": "test_api_key",
+                "api_secret": "test_api_secret",
+                "access_token": "test_access_token",
+                "access_secret": "test_access_secret",
+            },
         )
 
         test_db.commit()
@@ -587,14 +616,7 @@ class TestQueueProcessing:
             "access_secret": "test_secret",
         }
 
-        cursor.execute(
-            """
-            INSERT INTO user_credentials
-            (user_id, platform, credential_type, encrypted_data, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """,
-            (test_user["id"], "twitter", "api", json.dumps(credentials), now, now),
-        )
+        _insert_test_credentials(cursor, test_user["id"], "twitter", "api", credentials)
 
         test_db.commit()
 
@@ -652,14 +674,7 @@ class TestQueueProcessing:
             "access_secret": "test_secret",
         }
 
-        cursor.execute(
-            """
-            INSERT INTO user_credentials
-            (user_id, platform, credential_type, encrypted_data, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """,
-            (test_user["id"], "twitter", "api", json.dumps(credentials), now, now),
-        )
+        _insert_test_credentials(cursor, test_user["id"], "twitter", "api", credentials)
 
         test_db.commit()
 
@@ -720,14 +735,7 @@ class TestQueueProcessing:
             "access_secret": "test_secret",
         }
 
-        cursor.execute(
-            """
-            INSERT INTO user_credentials
-            (user_id, platform, credential_type, encrypted_data, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """,
-            (test_user["id"], "twitter", "api", json.dumps(credentials), now, now),
-        )
+        _insert_test_credentials(cursor, test_user["id"], "twitter", "api", credentials)
 
         test_db.commit()
 
@@ -845,14 +853,7 @@ class TestQueueProcessing:
             "access_secret": "test_secret",
         }
 
-        cursor.execute(
-            """
-            INSERT INTO user_credentials
-            (user_id, platform, credential_type, encrypted_data, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """,
-            (test_user["id"], "twitter", "api", json.dumps(credentials), now, now),
-        )
+        _insert_test_credentials(cursor, test_user["id"], "twitter", "api", credentials)
 
         test_db.commit()
 
@@ -1134,14 +1135,7 @@ class TestIntegrationWorkflow:
             "access_secret": "test_secret",
         }
 
-        cursor.execute(
-            """
-            INSERT INTO user_credentials
-            (user_id, platform, credential_type, encrypted_data, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """,
-            (test_user["id"], "twitter", "api", json.dumps(credentials), now, now),
-        )
+        _insert_test_credentials(cursor, test_user["id"], "twitter", "api", credentials)
 
         test_db.commit()
 
