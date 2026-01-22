@@ -1,4 +1,5 @@
 import json
+import json
 import sqlite3
 from datetime import datetime
 
@@ -42,6 +43,9 @@ def _format_timestamp(value):
 
 
 def _normalize_rule(row):
+    position = None
+    if hasattr(row, "keys") and "position" in row.keys():
+        position = row["position"]
     return {
         "id": row["id"],
         "name": row["name"],
@@ -49,6 +53,7 @@ def _normalize_rule(row):
         "conditions": json.loads(row["conditions"] or "[]"),
         "weight": row["weight"],
         "enabled": bool(row["enabled"]),
+        "position": position,
         "created_at": _format_timestamp(row["created_at"]),
         "updated_at": _format_timestamp(row["updated_at"]),
     }
@@ -91,7 +96,10 @@ def _load_rules(user_id: int):
     conn = _get_conn()
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM feed_rules WHERE user_id = ?", (user_id,))
+        cursor.execute(
+            "SELECT * FROM feed_rules WHERE user_id = ? ORDER BY position ASC, id ASC",
+            (user_id,),
+        )
         return [_normalize_rule(row) for row in cursor.fetchall()]
     finally:
         conn.close()
@@ -119,9 +127,14 @@ def create_rule():
     try:
         cursor = conn.cursor()
         cursor.execute(
+            "SELECT COALESCE(MAX(position), 0) FROM feed_rules WHERE user_id = ?",
+            (g.user.id,),
+        )
+        next_position = cursor.fetchone()[0] + 1
+        cursor.execute(
             """
-            INSERT INTO feed_rules (user_id, name, type, conditions, weight, enabled)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO feed_rules (user_id, name, type, conditions, weight, enabled, position)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 g.user.id,
@@ -130,6 +143,7 @@ def create_rule():
                 json.dumps(data.get("conditions") or []),
                 data.get("weight", 0),
                 1 if data.get("enabled", True) else 0,
+                next_position,
             ),
         )
         rule_id = cursor.lastrowid
@@ -169,6 +183,13 @@ def update_rule(rule_id: int):
     if "enabled" in data:
         fields.append("enabled = ?")
         params.append(1 if data["enabled"] else 0)
+    if "position" in data:
+        try:
+            position = int(data["position"])
+        except (TypeError, ValueError):
+            return api_error("INVALID_REQUEST", "position must be numeric", status=400)
+        fields.append("position = ?")
+        params.append(position)
 
     if not fields:
         return api_error("INVALID_REQUEST", "No valid updates provided", status=400)
@@ -242,6 +263,45 @@ def toggle_rule(rule_id: int):
     rules = _load_rules(g.user.id)
     rule = next((r for r in rules if r["id"] == rule_id), None)
     return api_response(rule)
+
+
+@feed_bp.route("/feed-rules/reorder", methods=["POST"])
+@feed_bp.route("/feed/rules/reorder", methods=["POST"])
+@require_auth
+def reorder_rules():
+    data = request.get_json(silent=True) or {}
+    order = data.get("order")
+    if not isinstance(order, list) or not order:
+        return api_error(
+            "INVALID_REQUEST", "order must be a non-empty list", status=400
+        )
+
+    try:
+        order_ids = [int(rule_id) for rule_id in order]
+    except (TypeError, ValueError):
+        return api_error("INVALID_REQUEST", "order must be a list of ids", status=400)
+
+    _ensure_tables()
+    conn = _get_conn()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM feed_rules WHERE user_id = ?", (g.user.id,))
+        existing = {row["id"] for row in cursor.fetchall()}
+        if set(order_ids) != existing:
+            return api_error(
+                "INVALID_REQUEST", "order must include all rule ids", status=400
+            )
+
+        for position, rule_id in enumerate(order_ids):
+            cursor.execute(
+                "UPDATE feed_rules SET position = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?",
+                (position, rule_id, g.user.id),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+    return api_response(_load_rules(g.user.id))
 
 
 @feed_bp.route("/feed/preview", methods=["POST"])
