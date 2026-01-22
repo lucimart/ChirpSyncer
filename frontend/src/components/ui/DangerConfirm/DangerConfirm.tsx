@@ -82,7 +82,7 @@ const AuditNote = styled.p`
   margin-top: ${({ theme }) => theme.spacing[4]};
 `;
 
-interface DangerConfirmProps {
+export interface DangerConfirmProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (reason: string) => void;
