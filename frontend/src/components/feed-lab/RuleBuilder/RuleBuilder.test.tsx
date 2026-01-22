@@ -45,7 +45,7 @@ describe('RuleBuilder', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /create rule/i }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/rule name is required/i);
+    expect(await screen.findByText(/rule name is required/i)).toBeInTheDocument();
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 

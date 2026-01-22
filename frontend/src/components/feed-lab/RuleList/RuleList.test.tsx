@@ -68,7 +68,8 @@ describe('RuleList', () => {
   it('displays condition count', () => {
     renderWithTheme(<RuleList {...defaultProps} />);
 
-    expect(screen.getByText('1 condition')).toBeInTheDocument();
+    // Two rules have 1 condition each
+    expect(screen.getAllByText('1 condition')).toHaveLength(2);
     expect(screen.getByText('2 conditions')).toBeInTheDocument();
   });
 
@@ -103,8 +104,8 @@ describe('RuleList', () => {
     const onToggle = jest.fn();
     renderWithTheme(<RuleList {...defaultProps} onToggle={onToggle} />);
 
-    const switches = screen.getAllByRole('switch');
-    fireEvent.click(switches[0]);
+    const checkboxes = screen.getAllByRole('checkbox');
+    fireEvent.click(checkboxes[0]);
 
     expect(onToggle).toHaveBeenCalledWith('rule-1', false);
   });

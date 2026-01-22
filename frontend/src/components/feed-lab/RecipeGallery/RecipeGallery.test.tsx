@@ -124,8 +124,11 @@ describe('RecipeGallery', () => {
     // Open category dropdown
     fireEvent.click(screen.getByTestId('category-filter'));
 
-    // Select filtering category
-    fireEvent.click(screen.getByText('Filtering'));
+    // Select filtering category (use role to avoid matching badge text)
+    const filteringOption = screen.getAllByRole('option').find(
+      (opt) => opt.textContent === 'Filtering'
+    );
+    fireEvent.click(filteringOption!);
 
     expect(screen.getByText('Filter Spam')).toBeInTheDocument();
     expect(screen.queryByText('Boost High Engagement')).not.toBeInTheDocument();
