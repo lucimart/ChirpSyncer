@@ -5,7 +5,6 @@ Provides endpoints for scheduled posts management with ML-powered optimal timing
 """
 
 import sqlite3
-import time
 from collections import defaultdict
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple

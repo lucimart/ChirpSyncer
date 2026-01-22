@@ -1,5 +1,4 @@
 import sqlite3
-import sqlite3
 import time
 import uuid
 from datetime import datetime

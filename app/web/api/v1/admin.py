@@ -19,12 +19,14 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
 def require_admin(f):
     """Decorator to require admin privileges."""
+
     @wraps(f)
     @require_auth
     def decorated(*args, **kwargs):
         if not g.user.is_admin:
             return api_error("FORBIDDEN", "Admin privileges required", status=403)
         return f(*args, **kwargs)
+
     return decorated
 
 
@@ -42,7 +44,9 @@ def _format_user(user):
         "is_active": user.is_active,
         "is_admin": user.is_admin,
         "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(user.created_at)),
-        "last_login": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(user.last_login)) if user.last_login else None,
+        "last_login": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(user.last_login))
+        if user.last_login
+        else None,
     }
 
 
@@ -61,7 +65,8 @@ def list_users():
     if search:
         search_lower = search.lower()
         all_users = [
-            u for u in all_users
+            u
+            for u in all_users
             if search_lower in u.username.lower() or search_lower in u.email.lower()
         ]
 
@@ -71,7 +76,14 @@ def list_users():
     end = start + limit
     users = all_users[start:end]
 
-    return api_response([_format_user(u) for u in users])
+    return api_response(
+        {
+            "users": [_format_user(u) for u in users],
+            "total": total,
+            "page": page,
+            "limit": limit,
+        }
+    )
 
 
 @admin_bp.route("/users/<int:user_id>", methods=["GET"])
@@ -126,7 +138,9 @@ def delete_user(user_id):
     """Delete a user."""
     # Prevent deleting self
     if user_id == g.user.id:
-        return api_error("INVALID_REQUEST", "Cannot delete your own account", status=400)
+        return api_error(
+            "INVALID_REQUEST", "Cannot delete your own account", status=400
+        )
 
     user_manager = _get_user_manager()
     user = user_manager.get_user_by_id(user_id)
@@ -168,7 +182,9 @@ def toggle_admin(user_id):
     """Toggle a user's admin status."""
     # Prevent toggling own admin status
     if user_id == g.user.id:
-        return api_error("INVALID_REQUEST", "Cannot change your own admin status", status=400)
+        return api_error(
+            "INVALID_REQUEST", "Cannot change your own admin status", status=400
+        )
 
     user_manager = _get_user_manager()
     user = user_manager.get_user_by_id(user_id)

@@ -9,7 +9,7 @@ import functools
 import hashlib
 import json
 import logging
-from typing import Any, Callable, Dict, Optional, TypeVar
+from typing import Any, Callable, Dict, TypeVar
 
 import redis
 

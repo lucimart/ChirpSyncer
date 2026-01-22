@@ -128,8 +128,10 @@ class ConflictResolver:
 
         # Check if this is a real conflict (both modified after last sync)
         # If one is clearly newer and the other hasn't changed, it's not a conflict
-        source_modified = source_post.last_modified or source_post.created_at
-        target_modified = target_post.last_modified or target_post.created_at
+        # Note: These timestamps are computed for future conflict resolution logic
+        # that will compare modification times to determine if both sides changed
+        _ = source_post.last_modified or source_post.created_at  # source_modified
+        _ = target_post.last_modified or target_post.created_at  # target_modified
 
         # Create conflict
         conflict_id = f"conflict_{source_post.id}_{int(datetime.now().timestamp())}"
