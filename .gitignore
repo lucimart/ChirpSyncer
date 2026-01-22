@@ -87,3 +87,11 @@ coverage.xml
 
 # Oh My OpenCode
 oh-my-opencode/
+
+# Local artifacts
+.playwright-mcp/
+.sisyphus/
+storybook-static/
+frontend/storybook-static/
+nul
+frontend/nul
