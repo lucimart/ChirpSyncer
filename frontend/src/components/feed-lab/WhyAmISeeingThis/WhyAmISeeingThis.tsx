@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styled, { css } from 'styled-components';
-import { RuleContributionChart } from '@/components/feed-lab/RuleContributionChart';
+import { RuleContributionChart } from '../RuleContributionChart';
 import { useFeedExplanation } from '@/hooks/useFeedExplanation';
 import { Spinner } from '@/components/ui';
 

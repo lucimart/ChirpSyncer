@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ConditionEditor } from './ConditionEditor';
+import { ConditionEditor } from '../ConditionEditor';
 
 interface Condition {
   field: string;
