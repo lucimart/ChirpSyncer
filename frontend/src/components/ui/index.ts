@@ -1,4 +1,4 @@
-// Migrated to standard folder structure (with stories + tests)
+// Core UI primitives (with stories + tests)
 export { Button } from './Button';
 export { Input } from './Input';
 export { Card } from './Card';
@@ -15,12 +15,15 @@ export { EmptyState } from './EmptyState';
 export type { EmptyStateProps } from './EmptyState';
 export { Spinner } from './Spinner';
 export type { SpinnerProps } from './Spinner';
-
-// Not yet migrated (still single files)
 export { DataTable } from './DataTable';
 export type { Column } from './DataTable';
 export { DangerConfirm } from './DangerConfirm';
+export type { DangerConfirmProps } from './DangerConfirm';
 export { ConnectionStatus } from './ConnectionStatus';
+export type { ConnectionStatusProps } from './ConnectionStatus';
 export { CollapsibleMenu } from './CollapsibleMenu';
+export type { CollapsibleMenuProps } from './CollapsibleMenu';
+
+// Complex components (not yet fully migrated)
 export { CommandPalette } from './CommandPalette';
 export { ErrorResolution } from './ErrorResolution';

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { ReactNode, useState, useCallback } from 'react';
 import { ChevronDown, ChevronRight, LucideIcon } from 'lucide-react';
 
-interface CollapsibleMenuProps {
+export interface CollapsibleMenuProps {
   label: string;
   icon?: LucideIcon;
   children: ReactNode;
