@@ -27,7 +27,7 @@ import { Switch } from '../../ui/Switch';
 interface Condition {
   field: string;
   operator: string;
-  value: string | number;
+  value: string | number | boolean;
 }
 
 export interface Rule {

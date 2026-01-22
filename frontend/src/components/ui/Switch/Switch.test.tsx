@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+// describe, it, expect are global in Jest
 import { Switch } from './Switch';
 
 describe('Switch', () => {
@@ -11,23 +11,23 @@ describe('Switch', () => {
   });
 
   it('handles toggle interaction', () => {
-    const handleChange = vi.fn();
+    const handleChange = jest.fn();
     render(<Switch onChange={handleChange} aria-label="Test Switch" />);
-    
+
     const switchInput = screen.getByLabelText('Test Switch');
     fireEvent.click(switchInput);
-    
+
     expect(handleChange).toHaveBeenCalledTimes(1);
     expect(switchInput).toBeChecked();
   });
 
   it('respects disabled state', () => {
-    const handleChange = vi.fn();
+    const handleChange = jest.fn();
     render(<Switch disabled onChange={handleChange} aria-label="Test Switch" />);
-    
+
     const switchInput = screen.getByLabelText('Test Switch');
     fireEvent.click(switchInput);
-    
+
     expect(handleChange).not.toHaveBeenCalled();
     expect(switchInput).toBeDisabled();
   });

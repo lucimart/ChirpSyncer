@@ -5,9 +5,9 @@ import styled from 'styled-components';
 import { Zap, TrendingDown, Filter, Star } from 'lucide-react';
 
 export interface RecipeCondition {
-  field: 'author' | 'content' | 'engagement' | 'age' | 'platform';
-  operator: 'contains' | 'equals' | 'gt' | 'lt' | 'regex';
-  value: string | number;
+  field: 'author' | 'content' | 'engagement' | 'age' | 'platform' | string;
+  operator: 'contains' | 'equals' | 'gt' | 'lt' | 'regex' | string;
+  value: string | number | boolean;
 }
 
 export interface Recipe {

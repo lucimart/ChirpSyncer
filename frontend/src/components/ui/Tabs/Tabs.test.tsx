@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+// describe, it, expect are global in Jest
 import { Tabs } from './Tabs';
 
 describe('Tabs', () => {
@@ -9,24 +9,24 @@ describe('Tabs', () => {
   ];
 
   it('renders all tabs', () => {
-    render(<Tabs items={mockItems} value="tab1" onChange={() => {}} />);
+    render(<Tabs items={mockItems} value="tab1" onChange={() => { }} />);
     expect(screen.getByText('Tab 1')).toBeInTheDocument();
     expect(screen.getByText('Tab 2')).toBeInTheDocument();
   });
 
   it('highlights active tab', () => {
-    render(<Tabs items={mockItems} value="tab1" onChange={() => {}} />);
+    render(<Tabs items={mockItems} value="tab1" onChange={() => { }} />);
     const tab1 = screen.getByRole('tab', { name: 'Tab 1' });
     const tab2 = screen.getByRole('tab', { name: 'Tab 2' });
-    
+
     expect(tab1).toHaveAttribute('aria-selected', 'true');
     expect(tab2).toHaveAttribute('aria-selected', 'false');
   });
 
   it('calls onChange when clicked', () => {
-    const handleChange = vi.fn();
+    const handleChange = jest.fn();
     render(<Tabs items={mockItems} value="tab1" onChange={handleChange} />);
-    
+
     fireEvent.click(screen.getByText('Tab 2'));
     expect(handleChange).toHaveBeenCalledWith('tab2');
   });
@@ -35,16 +35,16 @@ describe('Tabs', () => {
     const itemsWithBadge = [
       { id: 'tab1', label: 'Tab 1', badge: 5 },
     ];
-    render(<Tabs items={itemsWithBadge} value="tab1" onChange={() => {}} />);
+    render(<Tabs items={itemsWithBadge} value="tab1" onChange={() => { }} />);
     expect(screen.getByText('5')).toBeInTheDocument();
   });
 
   it('renders different variants', () => {
     // Just ensure it renders without error
-    render(<Tabs items={mockItems} value="tab1" onChange={() => {}} variant="accent" />);
+    render(<Tabs items={mockItems} value="tab1" onChange={() => { }} variant="accent" />);
     expect(screen.getByText('Tab 1')).toBeInTheDocument();
-    
-    render(<Tabs items={mockItems} value="tab1" onChange={() => {}} variant="soft" />);
+
+    render(<Tabs items={mockItems} value="tab1" onChange={() => { }} variant="soft" />);
     expect(screen.getByText('Tab 1')).toBeInTheDocument();
   });
 });

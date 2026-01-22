@@ -292,7 +292,7 @@ class ApiClient {
   async createFeedRule(payload: {
     name: string;
     type: string;
-    conditions: Array<{ field: string; operator: string; value: string | number }>;
+    conditions: Array<{ field: string; operator: string; value: string | number | boolean }>;
     weight?: number;
     enabled?: boolean;
   }): Promise<ApiResponse<unknown>> {

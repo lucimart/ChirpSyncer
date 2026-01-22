@@ -21,7 +21,7 @@ type BadgeVariant =
   | 'status-primary';
 type BadgeSize = 'xs' | 'sm' | 'md' | 'lg';
 
-interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
+export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   children: ReactNode;
   variant?: BadgeVariant;
   size?: BadgeSize;

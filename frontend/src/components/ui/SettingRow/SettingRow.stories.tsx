@@ -34,7 +34,7 @@ export const WithSwitch: Story = {
           label="Email Notifications"
           hint="Receive updates about your account"
         >
-          <Switch checked={enabled} onChange={setEnabled} />
+          <Switch checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
         </SettingRow>
       </Container>
     );
@@ -83,19 +83,19 @@ export const MultipleSettings: Story = {
           label="Sync Completed"
           hint="Get notified when a sync completes"
         >
-          <Switch checked={syncComplete} onChange={setSyncComplete} />
+          <Switch checked={syncComplete} onChange={(e) => setSyncComplete(e.target.checked)} />
         </SettingRow>
         <SettingRow
           label="Sync Failed"
           hint="Get notified when a sync fails"
         >
-          <Switch checked={syncFailed} onChange={setSyncFailed} />
+          <Switch checked={syncFailed} onChange={(e) => setSyncFailed(e.target.checked)} />
         </SettingRow>
         <SettingRow
           label="Weekly Report"
           hint="Receive a weekly summary of your activity"
         >
-          <Switch checked={weeklyReport} onChange={setWeeklyReport} />
+          <Switch checked={weeklyReport} onChange={(e) => setWeeklyReport(e.target.checked)} />
         </SettingRow>
       </Container>
     );
@@ -108,7 +108,7 @@ export const WithoutHint: Story = {
     return (
       <Container>
         <SettingRow label="Dark Mode">
-          <Switch checked={enabled} onChange={setEnabled} />
+          <Switch checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
         </SettingRow>
       </Container>
     );
@@ -121,7 +121,7 @@ export const NoBorder: Story = {
     return (
       <Container>
         <SettingRow label="Single Setting" hint="This has no border" noBorder>
-          <Switch checked={enabled} onChange={setEnabled} />
+          <Switch checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
         </SettingRow>
       </Container>
     );

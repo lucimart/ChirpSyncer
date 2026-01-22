@@ -348,7 +348,45 @@ def save_sync_config():
             "SELECT * FROM sync_config WHERE user_id = ? AND platform = ?",
             (g.user.id, platform),
         )
-        row = cursor.fetchone()
         return api_response(dict(row) if row else {})
     finally:
         conn.close()
+
+
+@sync_bp.route("/preview", methods=["GET"])
+@require_auth
+def preview_sync():
+    """Preview items to be synced."""
+    # Placeholder implementation
+    return api_response({
+        "items": [],
+        "totalCount": 0,
+        "estimatedTime": 0
+    })
+
+
+@sync_bp.route("/execute", methods=["POST"])
+@require_auth
+def execute_sync():
+    """Execute sync for specific items."""
+    data = request.get_json(silent=True) or {}
+    item_ids = data.get("item_ids", [])
+    
+    # Placeholder: Start a sync job similar to start_sync
+    # In a real implementation, this would pass item_ids to the task
+    job_id = f"job-{uuid.uuid4()}"
+    direction = _DEFAULT_DIRECTION
+    
+    db_path = current_app.config["DB_PATH"]
+    create_sync_job(db_path, job_id, g.user.id, direction)
+    
+    # Send generic sync task for now as we don't have a granular task yet
+    try:
+        celery_app.send_task(
+            _SYNC_TASK_NAME,
+            args=[job_id, g.user.id, direction, db_path],
+        )
+    except Exception as exc:
+        current_app.logger.warning(f"Failed to enqueue sync job: {exc}")
+        
+    return api_response({"job_id": job_id})

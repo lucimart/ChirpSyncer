@@ -7,7 +7,7 @@ import { Card } from '../Card';
 export interface StatCardProps {
   value: string | number;
   label: string;
-  icon?: ComponentType<{ size?: number }>;
+  icon?: ComponentType<{ size?: number | string }>;
   color?: string;
   trend?: {
     value: number;
@@ -17,7 +17,7 @@ export interface StatCardProps {
   className?: string;
 }
 
-const StyledCard = styled(Card)<{ $variant: 'default' | 'centered' }>`
+const StyledCard = styled(Card) <{ $variant: 'default' | 'centered' }>`
   display: flex;
   align-items: ${({ $variant }) => ($variant === 'centered' ? 'center' : 'flex-start')};
   justify-content: ${({ $variant }) => ($variant === 'centered' ? 'center' : 'flex-start')};

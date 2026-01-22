@@ -18,7 +18,7 @@ type Story = StoryObj<typeof ConditionEditor>;
 const InteractiveConditionEditor = ({
   initialCondition,
 }: {
-  initialCondition: { field: string; operator: string; value: string | number };
+  initialCondition: { field: string; operator: string; value: string | number | boolean };
 }) => {
   const [condition, setCondition] = useState(initialCondition);
 
@@ -44,8 +44,8 @@ export const Default: Story = {
       operator: 'contains',
       value: '',
     },
-    onChange: () => {},
-    onRemove: () => {},
+    onChange: () => { },
+    onRemove: () => { },
   },
 };
 
@@ -56,8 +56,8 @@ export const TextCondition: Story = {
       operator: 'contains',
       value: 'breaking news',
     },
-    onChange: () => {},
-    onRemove: () => {},
+    onChange: () => { },
+    onRemove: () => { },
   },
 };
 
@@ -68,8 +68,8 @@ export const AuthorCondition: Story = {
       operator: 'equals',
       value: '@elonmusk',
     },
-    onChange: () => {},
-    onRemove: () => {},
+    onChange: () => { },
+    onRemove: () => { },
   },
 };
 
@@ -80,8 +80,8 @@ export const NumericCondition: Story = {
       operator: 'greater_than',
       value: 50,
     },
-    onChange: () => {},
-    onRemove: () => {},
+    onChange: () => { },
+    onRemove: () => { },
   },
 };
 
@@ -92,8 +92,8 @@ export const TimestampCondition: Story = {
       operator: 'equals',
       value: '2024-01-15',
     },
-    onChange: () => {},
-    onRemove: () => {},
+    onChange: () => { },
+    onRemove: () => { },
   },
 };
 

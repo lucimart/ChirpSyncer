@@ -63,7 +63,7 @@ const severityColors = {
 };
 
 // Type to icon mapping
-const typeIcons: Record<Notification['type'], React.ComponentType<{ size?: number; className?: string }>> = {
+const typeIcons: Record<Notification['type'], React.ComponentType<{ size?: number | string; className?: string }>> = {
   sync_complete: CheckCircle,
   sync_failed: XCircle,
   rate_limit: AlertTriangle,

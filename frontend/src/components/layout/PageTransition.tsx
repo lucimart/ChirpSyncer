@@ -24,10 +24,10 @@ const pageVariants = {
 };
 
 const pageTransition = {
-  type: 'tween' as const,
+  type: 'tween',
   ease: 'easeInOut',
   duration: 0.2,
-};
+} as const;
 
 export function PageTransition({ children }: PageTransitionProps) {
   const pathname = usePathname();

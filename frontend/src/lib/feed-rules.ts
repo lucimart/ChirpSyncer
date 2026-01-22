@@ -8,7 +8,7 @@ import { api } from '@/lib/api';
 export interface FeedCondition {
   field: 'author' | 'content' | 'engagement' | 'age' | 'platform' | string;
   operator: 'contains' | 'equals' | 'gt' | 'lt' | 'regex' | string;
-  value: string | number;
+  value: string | number | boolean;
 }
 
 export interface FeedRule {
@@ -242,7 +242,7 @@ export function useToggleFeedRule() {
 export function useReorderFeedRules() {
   const queryClient = useQueryClient();
 
-  return useMutation<FeedRule[], Error, FeedRule[]>({
+  return useMutation<FeedRule[], Error, FeedRule[], { previousRules: FeedRule[] | undefined }>({
     mutationFn: async (reorderedRules) => {
       const response = await api.reorderFeedRules(
         reorderedRules.map((rule) => Number(rule.id))

@@ -11,6 +11,7 @@ export interface WidgetConfig {
   position: { x: number; y: number };
   size: { width: number; height: number };
   settings?: Record<string, unknown>;
+  data?: Record<string, unknown>;
 }
 
 export interface WidgetProps {
