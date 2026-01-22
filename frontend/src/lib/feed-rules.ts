@@ -18,6 +18,7 @@ export interface FeedRule {
   conditions: FeedCondition[];
   weight: number; // -100 to +100
   enabled: boolean;
+  position?: number | null;
 }
 
 export interface ValidationResult {
@@ -37,6 +38,7 @@ function normalizeFeedRule(raw: any): FeedRule {
     conditions: Array.isArray(raw.conditions) ? raw.conditions : [],
     weight: typeof raw.weight === 'number' ? raw.weight : 0,
     enabled: Boolean(raw.enabled),
+    position: typeof raw.position === 'number' ? raw.position : null,
   };
 }
 
@@ -242,15 +244,13 @@ export function useReorderFeedRules() {
 
   return useMutation<FeedRule[], Error, FeedRule[]>({
     mutationFn: async (reorderedRules) => {
-      // Optimistic update - backend endpoint can be added later
-      // For now, we update each rule's position via existing update endpoint
-      // This could be optimized with a dedicated reorder endpoint
-      const updatePromises = reorderedRules.map((rule, index) =>
-        api.updateFeedRule(Number(rule.id), { position: index })
+      const response = await api.reorderFeedRules(
+        reorderedRules.map((rule) => Number(rule.id))
       );
-
-      await Promise.all(updatePromises);
-      return reorderedRules;
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to reorder feed rules');
+      }
+      return (response.data as any[]).map(normalizeFeedRule);
     },
     onMutate: async (reorderedRules) => {
       // Cancel outgoing refetches

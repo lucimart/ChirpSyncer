@@ -320,6 +320,13 @@ class ApiClient {
     return this.request(`/feed-rules/${ruleId}/toggle`, { method: 'PATCH' });
   }
 
+  async reorderFeedRules(order: number[]): Promise<ApiResponse<unknown[]>> {
+    return this.request('/feed-rules/reorder', {
+      method: 'POST',
+      body: JSON.stringify({ order }),
+    });
+  }
+
   async previewFeed(rules: Array<Record<string, unknown>>): Promise<ApiResponse<unknown>> {
     return this.request('/feed/preview', {
       method: 'POST',
@@ -329,6 +336,23 @@ class ApiClient {
 
   async explainFeed(postId: string): Promise<ApiResponse<unknown>> {
     return this.request(`/feed/explain/${postId}`);
+  }
+
+  // Notifications
+  async getNotifications(): Promise<ApiResponse<unknown[]>> {
+    return this.request('/notifications');
+  }
+
+  async markNotificationRead(notificationId: string): Promise<ApiResponse<unknown>> {
+    return this.request(`/notifications/${notificationId}/read`, { method: 'PATCH' });
+  }
+
+  async markAllNotificationsRead(): Promise<ApiResponse<{ success: boolean }>> {
+    return this.request('/notifications/read-all', { method: 'PATCH' });
+  }
+
+  async deleteNotification(notificationId: string): Promise<ApiResponse<{ deleted: boolean }>> {
+    return this.request(`/notifications/${notificationId}`, { method: 'DELETE' });
   }
 
   // Scheduling
