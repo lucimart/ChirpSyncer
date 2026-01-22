@@ -4,6 +4,7 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styled from 'styled-components';
+import { Repeat } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { Button, Input, Card } from '@/components/ui';
 
@@ -13,17 +14,37 @@ const PageContainer = styled.div`
   justify-content: center;
   min-height: 100vh;
   padding: ${({ theme }) => theme.spacing[4]};
-  background-color: ${({ theme }) => theme.colors.background.secondary};
+  background: ${({ theme }) => 
+    theme.mode === 'dark' 
+      ? `linear-gradient(135deg, ${theme.colors.neutral[900]} 0%, ${theme.colors.neutral[800]} 100%)`
+      : `linear-gradient(135deg, ${theme.colors.neutral[100]} 0%, ${theme.colors.neutral[50]} 100%)`
+  };
 `;
 
 const RegisterCard = styled(Card)`
   width: 100%;
   max-width: 400px;
+  box-shadow: ${({ theme }) => theme.shadows.xl};
 `;
 
 const Logo = styled.div`
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: ${({ theme }) => theme.spacing[6]};
+`;
+
+const LogoIcon = styled.div`
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary[500]} 0%, ${({ theme }) => theme.colors.primary[600]} 100%);
+  color: white;
+  border-radius: ${({ theme }) => theme.borderRadius.xl};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: ${({ theme }) => theme.spacing[3]};
+  box-shadow: 0 4px 14px ${({ theme }) => theme.colors.primary[500]}40;
 `;
 
 const LogoText = styled.h1`
@@ -105,6 +126,9 @@ export default function RegisterPage() {
     <PageContainer>
       <RegisterCard padding="lg">
         <Logo>
+          <LogoIcon>
+            <Repeat size={28} />
+          </LogoIcon>
           <LogoText>ChirpSyncer</LogoText>
           <Subtitle>Create your account</Subtitle>
         </Logo>

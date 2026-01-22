@@ -14,12 +14,17 @@ const PageContainer = styled.div`
   justify-content: center;
   min-height: 100vh;
   padding: ${({ theme }) => theme.spacing[4]};
-  background-color: ${({ theme }) => theme.colors.background.secondary};
+  background: ${({ theme }) => 
+    theme.mode === 'dark' 
+      ? `linear-gradient(135deg, ${theme.colors.neutral[900]} 0%, ${theme.colors.neutral[800]} 100%)`
+      : `linear-gradient(135deg, ${theme.colors.neutral[100]} 0%, ${theme.colors.neutral[50]} 100%)`
+  };
 `;
 
 const LoginCard = styled(Card)`
   width: 100%;
   max-width: 400px;
+  box-shadow: ${({ theme }) => theme.shadows.xl};
 `;
 
 const Logo = styled.div`
@@ -30,15 +35,16 @@ const Logo = styled.div`
 `;
 
 const LogoIcon = styled.div`
-  width: 48px;
-  height: 48px;
-  background-color: ${({ theme }) => theme.colors.primary[50]};
-  color: ${({ theme }) => theme.colors.primary[600]};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary[500]} 0%, ${({ theme }) => theme.colors.primary[600]} 100%);
+  color: white;
+  border-radius: ${({ theme }) => theme.borderRadius.xl};
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: ${({ theme }) => theme.spacing[3]};
+  box-shadow: 0 4px 14px ${({ theme }) => theme.colors.primary[500]}40;
 `;
 
 const LogoText = styled.h1`
@@ -66,6 +72,18 @@ const ErrorMessage = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.md};
   color: ${({ theme }) => theme.colors.danger[700]};
   font-size: ${({ theme }) => theme.fontSizes.sm};
+`;
+
+const ForgotPasswordLink = styled(Link)`
+  display: block;
+  text-align: right;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.primary[600]};
+  margin-top: -${({ theme }) => theme.spacing[2]};
+  
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const Footer = styled.div`
@@ -138,6 +156,10 @@ export default function LoginPage() {
             fullWidth
             autoComplete="current-password"
           />
+
+          <ForgotPasswordLink href="/forgot-password">
+            Forgot your password?
+          </ForgotPasswordLink>
 
           <Button type="submit" fullWidth isLoading={isLoading}>
             Sign In

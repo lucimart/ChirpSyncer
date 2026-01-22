@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
+import { List, Plus, Eye } from 'lucide-react';
 import { FeedPreview } from '@/components/feed-lab/FeedPreview';
 import { RuleBuilder } from '@/components/feed-lab/RuleBuilder';
 import { RuleList } from '@/components/feed-lab/RuleList';
@@ -16,11 +17,13 @@ import {
 } from '@/lib/feed-rules';
 import { api } from '@/lib/api';
 
+type TabId = 'rules' | 'create' | 'preview';
+
 const PageHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
 `;
 
 const HeaderLeft = styled.div``;
@@ -36,20 +39,65 @@ const PageDescription = styled.p`
   margin-top: ${({ theme }) => theme.spacing[1]};
 `;
 
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-  gap: ${({ theme }) => theme.spacing[6]};
+const TabsContainer = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing[1]};
+  margin-bottom: ${({ theme }) => theme.spacing[6]};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
+  padding-bottom: ${({ theme }) => theme.spacing[1]};
+`;
 
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
+const Tab = styled.button<{ $active: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme, $active }) =>
+    $active ? theme.colors.primary[500] : theme.colors.text.secondary};
+  background: ${({ theme, $active }) =>
+    $active ? theme.colors.primary[500] + '15' : 'transparent'};
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: ${({ theme, $active }) =>
+      $active ? theme.colors.primary[500] + '20' : theme.colors.background.tertiary};
+    color: ${({ theme, $active }) =>
+      $active ? theme.colors.primary[500] : theme.colors.text.primary};
   }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const TabBadge = styled.span`
+  background: ${({ theme }) => theme.colors.primary[500]};
+  color: white;
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  padding: 2px 6px;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  min-width: 20px;
+  text-align: center;
+`;
+
+const TabContent = styled.div`
+  min-height: 400px;
 `;
 
 const Section = styled.section`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing[4]};
+`;
+
+const SectionHeader = styled.div`
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
 `;
 
 const SectionTitle = styled.h2`
@@ -61,6 +109,47 @@ const SectionTitle = styled.h2`
 const HelperText = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.text.secondary};
+  margin-top: ${({ theme }) => theme.spacing[1]};
+`;
+
+const CreateRulePrompt = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: ${({ theme }) => theme.spacing[8]};
+  background: ${({ theme }) => theme.colors.background.secondary};
+  border: 1px dashed ${({ theme }) => theme.colors.border.light};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  text-align: center;
+`;
+
+const PromptText = styled.p`
+  color: ${({ theme }) => theme.colors.text.secondary};
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
+`;
+
+const CreateButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
+  background: ${({ theme }) => theme.colors.primary[500]};
+  color: white;
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primary[600]};
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
 `;
 
 interface PreviewPost {
@@ -73,6 +162,7 @@ interface PreviewPost {
 }
 
 export default function FeedLabPage() {
+  const [activeTab, setActiveTab] = useState<TabId>('rules');
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
 
   const { data: rules = [], isLoading } = useFeedRules();
@@ -160,42 +250,88 @@ export default function FeedLabPage() {
         </HeaderLeft>
       </PageHeader>
 
-      <Grid>
-        <Section>
-          <div>
-            <SectionTitle>Your Rules</SectionTitle>
-            <HelperText>Create, tune, and toggle your feed rules.</HelperText>
-          </div>
+      <TabsContainer>
+        <Tab $active={activeTab === 'rules'} onClick={() => setActiveTab('rules')}>
+          <List />
+          My Rules
+          {rules.length > 0 && <TabBadge>{rules.length}</TabBadge>}
+        </Tab>
+        <Tab $active={activeTab === 'create'} onClick={() => setActiveTab('create')}>
+          <Plus />
+          {editingRuleId ? 'Edit Rule' : 'Create Rule'}
+        </Tab>
+        <Tab $active={activeTab === 'preview'} onClick={() => setActiveTab('preview')}>
+          <Eye />
+          Preview
+        </Tab>
+      </TabsContainer>
 
-          <RuleList
-            rules={rules}
-            onToggle={(id, enabled) => toggleRule.mutate({ id, enabled })}
-            onEdit={(id) => setEditingRuleId(id)}
-            onDelete={(id) => deleteRule.mutate(id)}
-          />
+      <TabContent>
+        {activeTab === 'rules' && (
+          <Section>
+            <SectionHeader>
+              <SectionTitle>Your Rules</SectionTitle>
+              <HelperText>Create, tune, and toggle your feed rules.</HelperText>
+            </SectionHeader>
 
-          <div>
-            <SectionTitle>{editingRule ? 'Edit Rule' : 'Create Rule'}</SectionTitle>
+            {rules.length === 0 ? (
+              <CreateRulePrompt>
+                <PromptText>No rules yet. Create your first rule to customize your feed.</PromptText>
+                <CreateButton onClick={() => setActiveTab('create')}>
+                  <Plus />
+                  Create Rule
+                </CreateButton>
+              </CreateRulePrompt>
+            ) : (
+              <RuleList
+                rules={rules}
+                onToggle={(id, enabled) => toggleRule.mutate({ id, enabled })}
+                onEdit={(id) => {
+                  setEditingRuleId(id);
+                  setActiveTab('create');
+                }}
+                onDelete={(id) => deleteRule.mutate(id)}
+              />
+            )}
+          </Section>
+        )}
+
+        {activeTab === 'create' && (
+          <Section>
+            <SectionHeader>
+              <SectionTitle>{editingRuleId ? 'Edit Rule' : 'Create New Rule'}</SectionTitle>
+              <HelperText>
+                {editingRuleId
+                  ? 'Modify your rule settings below.'
+                  : 'Define conditions and weights to shape your feed.'}
+              </HelperText>
+            </SectionHeader>
+
             <RuleBuilder
-              onSubmit={editingRule ? handleUpdate : handleCreate}
-              onCancel={() => setEditingRuleId(null)}
+              onSubmit={editingRuleId ? handleUpdate : handleCreate}
+              onCancel={() => {
+                setEditingRuleId(null);
+                setActiveTab('rules');
+              }}
               initialRule={editingRule ?? undefined}
             />
-          </div>
-        </Section>
+          </Section>
+        )}
 
-        <Section>
-          <div>
-            <SectionTitle>Preview</SectionTitle>
-            <HelperText>See how your rules affect scoring in real time.</HelperText>
-          </div>
+        {activeTab === 'preview' && (
+          <Section>
+            <SectionHeader>
+              <SectionTitle>Feed Preview</SectionTitle>
+              <HelperText>See how your rules affect post scoring in real time.</HelperText>
+            </SectionHeader>
 
-          <FeedPreview
-            posts={previewPosts}
-            onPostClick={() => {}}
-          />
-        </Section>
-      </Grid>
+            <FeedPreview
+              posts={previewPosts}
+              onPostClick={() => {}}
+            />
+          </Section>
+        )}
+      </TabContent>
     </div>
   );
 }

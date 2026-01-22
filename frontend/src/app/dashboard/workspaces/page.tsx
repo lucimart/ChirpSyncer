@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
-import { Plus } from 'lucide-react';
+import { Plus, Settings, Users, Key, Activity } from 'lucide-react';
 import {
   ActivityFeed,
   MemberManagement,
@@ -38,17 +38,50 @@ const PageDescription = styled.p`
   margin-top: ${({ theme }) => theme.spacing[1]};
 `;
 
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: ${({ theme }) => theme.spacing[6]};
-
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
+const TabsContainer = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing[1]};
+  margin-bottom: ${({ theme }) => theme.spacing[6]};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
+  padding-bottom: ${({ theme }) => theme.spacing[1]};
+  overflow-x: auto;
+  
+  &::-webkit-scrollbar {
+    display: none;
   }
 `;
 
-const Section = styled.section`
+const Tab = styled.button<{ $active: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
+  border: none;
+  background: ${({ $active, theme }) => 
+    $active ? theme.colors.primary[50] : 'transparent'};
+  color: ${({ $active, theme }) => 
+    $active ? theme.colors.primary[700] : theme.colors.text.secondary};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.fast};
+  white-space: nowrap;
+  
+  &:hover {
+    background: ${({ $active, theme }) => 
+      $active ? theme.colors.primary[100] : theme.colors.background.secondary};
+    color: ${({ $active, theme }) => 
+      $active ? theme.colors.primary[700] : theme.colors.text.primary};
+  }
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const TabContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing[4]};
@@ -63,6 +96,7 @@ const SectionTitle = styled.h2`
 const SectionDescription = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.text.secondary};
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
 `;
 
 const HeaderActions = styled.div`
@@ -71,11 +105,21 @@ const HeaderActions = styled.div`
   align-items: center;
 `;
 
+type TabType = 'settings' | 'members' | 'credentials' | 'activity';
+
+const tabs: { id: TabType; label: string; icon: typeof Settings }[] = [
+  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'members', label: 'Members', icon: Users },
+  { id: 'credentials', label: 'Shared Credentials', icon: Key },
+  { id: 'activity', label: 'Activity', icon: Activity },
+];
+
 export default function WorkspacesPage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { currentWorkspace, workspaces, switchWorkspace, createWorkspace } = useWorkspace();
 
+  const [activeTab, setActiveTab] = useState<TabType>('settings');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState('');
   const [newWorkspaceType, setNewWorkspaceType] = useState<'personal' | 'team'>('team');
@@ -182,68 +226,102 @@ export default function WorkspacesPage() {
         </HeaderActions>
       </PageHeader>
 
-      <Grid>
-        <Section>
-          <SectionTitle>Workspace Settings</SectionTitle>
-          {currentWorkspace ? (
+      <TabsContainer>
+        {tabs.map((tab) => (
+          <Tab
+            key={tab.id}
+            $active={activeTab === tab.id}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            <tab.icon />
+            {tab.label}
+          </Tab>
+        ))}
+      </TabsContainer>
+
+      <TabContent>
+        {activeTab === 'settings' && (
+          <>
+            <SectionTitle>Workspace Settings</SectionTitle>
+            {currentWorkspace ? (
+              <Card padding="lg">
+                <WorkspaceSettings
+                  workspace={currentWorkspace}
+                  currentUserRole={settingsRole}
+                  isOwner={String(currentWorkspace.ownerId) === String(user?.id)}
+                  onUpdate={() => {}}
+                  onDelete={() => {}}
+                  onLeave={() => {}}
+                />
+              </Card>
+            ) : (
+              <Card padding="lg">Loading workspace settings...</Card>
+            )}
+            
+            <SectionTitle>Role Permissions</SectionTitle>
+            <SectionDescription>
+              View the permissions available for each role in this workspace.
+            </SectionDescription>
             <Card padding="lg">
-              <WorkspaceSettings
-                workspace={currentWorkspace}
+              <RolePermissions />
+            </Card>
+          </>
+        )}
+
+        {activeTab === 'members' && (
+          <>
+            <SectionTitle>Members</SectionTitle>
+            <SectionDescription>
+              Manage workspace members and their roles.
+            </SectionDescription>
+            <Card padding="lg">
+              <MemberManagement
+                members={membersHook.members}
+                currentUserId={String(user?.id ?? '')}
                 currentUserRole={settingsRole}
-                isOwner={String(currentWorkspace.ownerId) === String(user?.id)}
-                onUpdate={() => {}}
-                onDelete={() => {}}
-                onLeave={() => {}}
+                onInvite={handleInvite}
+                onRemove={membersHook.removeMember}
+                onUpdateRole={membersHook.updateMemberRole}
               />
             </Card>
-          ) : (
-            <Card padding="lg">Loading workspace settings...</Card>
-          )}
+          </>
+        )}
 
-          <SectionTitle>Members</SectionTitle>
-          <Card padding="lg">
-            <MemberManagement
-              members={membersHook.members}
-              currentUserId={String(user?.id ?? '')}
-              currentUserRole={settingsRole}
-              onInvite={handleInvite}
-              onRemove={membersHook.removeMember}
-              onUpdateRole={membersHook.updateMemberRole}
-            />
-          </Card>
+        {activeTab === 'credentials' && (
+          <>
+            <SectionTitle>Shared Credentials</SectionTitle>
+            <SectionDescription>
+              Share access to credentials with workspace members.
+            </SectionDescription>
+            <Card padding="none">
+              <SharedCredentials
+                credentials={sharedCredentials}
+                currentUserRole={settingsRole}
+                onShare={handleShareCredential}
+                onRevoke={handleRevokeCredential}
+                onUpdateAccess={handleUpdateAccess}
+              />
+            </Card>
+          </>
+        )}
 
-          <SectionTitle>Role Permissions</SectionTitle>
-          <Card padding="lg">
-            <RolePermissions />
-          </Card>
-        </Section>
-
-        <Section>
-          <SectionTitle>Shared Credentials</SectionTitle>
-          <SectionDescription>
-            Share access to credentials with workspace members.
-          </SectionDescription>
-          <Card padding="none">
-            <SharedCredentials
-              credentials={sharedCredentials}
-              currentUserRole={settingsRole}
-              onShare={handleShareCredential}
-              onRevoke={handleRevokeCredential}
-              onUpdateAccess={handleUpdateAccess}
-            />
-          </Card>
-
-          <SectionTitle>Activity Feed</SectionTitle>
-          <Card padding="none">
-            <ActivityFeed
-              activities={activityHook.activities}
-              isLoading={activityHook.loading}
-              hasMore={activityHook.hasMore}
-              onLoadMore={activityHook.loadMore}
-            />
-          </Card>
-        </Section>
-      </Grid>
+        {activeTab === 'activity' && (
+          <>
+            <SectionTitle>Activity Feed</SectionTitle>
+            <SectionDescription>
+              Recent activity in this workspace.
+            </SectionDescription>
+            <Card padding="none">
+              <ActivityFeed
+                activities={activityHook.activities}
+                isLoading={activityHook.loading}
+                hasMore={activityHook.hasMore}
+                onLoadMore={activityHook.loadMore}
+              />
+            </Card>
+          </>
+        )}
+      </TabContent>
 
       <Modal
         isOpen={isCreateOpen}

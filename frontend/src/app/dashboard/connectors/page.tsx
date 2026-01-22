@@ -8,6 +8,7 @@ import {
   Check,
   X,
   ChevronRight,
+  ChevronDown,
   Settings,
   AlertCircle,
   Clock,
@@ -159,6 +160,39 @@ const CapabilityBadge = styled.span<{ $enabled: boolean }>`
 const ConnectorActions = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing[2]};
+`;
+
+const ExpandButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[1]};
+  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
+  background: transparent;
+  border: 1px solid ${({ theme }) => theme.colors.border.light};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-bottom: ${({ theme }) => theme.spacing[3]};
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.background.tertiary};
+    color: ${({ theme }) => theme.colors.text.primary};
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s ease;
+  }
+`;
+
+const CapabilitiesWrapper = styled.div<{ $expanded: boolean }>`
+  overflow: hidden;
+  max-height: ${({ $expanded }) => ($expanded ? '500px' : '0')};
+  opacity: ${({ $expanded }) => ($expanded ? 1 : 0)};
+  transition: max-height 0.3s ease, opacity 0.2s ease;
 `;
 
 const ComingSoonBadge = styled.span`
@@ -328,6 +362,16 @@ export default function ConnectorsPage() {
 
   const [connectModal, setConnectModal] = useState<PlatformConnector | null>(null);
   const [credentials, setCredentials] = useState<Record<string, string>>({});
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (id: string) => {
+    setExpandedCards(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const connectorsList = connectors ?? AVAILABLE_CONNECTORS;
 
@@ -609,8 +653,6 @@ export default function ConnectorsPage() {
 
               <ConnectorDescription>{connector.description}</ConnectorDescription>
 
-              {renderCapabilities(connector)}
-
               {isConnected && connection && (
                 <ConnectionDetails>
                   <ConnectionRow>
@@ -630,6 +672,24 @@ export default function ConnectorsPage() {
                   </ConnectionRow>
                 </ConnectionDetails>
               )}
+
+              <ExpandButton onClick={() => toggleExpand(connector.id)}>
+                {expandedCards.has(connector.id) ? (
+                  <>
+                    Hide Details
+                    <ChevronDown style={{ transform: 'rotate(180deg)' }} />
+                  </>
+                ) : (
+                  <>
+                    Show Details
+                    <ChevronDown />
+                  </>
+                )}
+              </ExpandButton>
+
+              <CapabilitiesWrapper $expanded={expandedCards.has(connector.id)}>
+                {renderCapabilities(connector)}
+              </CapabilitiesWrapper>
 
               <ConnectorActions>
                 {isConnected ? (

@@ -97,6 +97,27 @@ class ApiClient {
     });
   }
 
+  async forgotPassword(email: string): Promise<ApiResponse<{ success: boolean; message: string; dev_token?: string; dev_reset_url?: string }>> {
+    return this.request('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async validateResetToken(token: string): Promise<ApiResponse<{ valid: boolean; email: string }>> {
+    return this.request('/auth/validate-reset-token', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<ApiResponse<{ success: boolean; message: string }>> {
+    return this.request('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, new_password: newPassword }),
+    });
+  }
+
   // Dashboard
   async getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
     return this.request<DashboardStats>('/dashboard/stats');

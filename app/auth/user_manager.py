@@ -59,8 +59,7 @@ class UserManager:
         cursor = conn.cursor()
 
         # Create users table
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
@@ -72,12 +71,10 @@ class UserManager:
                 is_admin INTEGER DEFAULT 0,
                 settings_json TEXT
             )
-        """
-        )
+        """)
 
         # Create user_sessions table
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS user_sessions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
@@ -88,8 +85,7 @@ class UserManager:
                 user_agent TEXT,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )
-        """
-        )
+        """)
 
         # Create indexes
         cursor.execute(
@@ -100,6 +96,26 @@ class UserManager:
         )
         cursor.execute(
             "CREATE INDEX IF NOT EXISTS idx_sessions_expires ON user_sessions(expires_at)"
+        )
+
+        # Create password_reset_tokens table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS password_reset_tokens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                token TEXT UNIQUE NOT NULL,
+                created_at INTEGER NOT NULL,
+                expires_at INTEGER NOT NULL,
+                used INTEGER DEFAULT 0,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        """)
+
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_reset_tokens_token ON password_reset_tokens(token)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_reset_tokens_user ON password_reset_tokens(user_id)"
         )
 
         conn.commit()
@@ -353,7 +369,8 @@ class UserManager:
 
             # Execute update
             values.append(user_id)
-            query = f"UPDATE users SET {', '.join(updates)} WHERE id = ?"  # nosec B608 - updates contains validated column names
+            # nosec B608 - updates contains validated column names
+            query = f"UPDATE users SET {', '.join(updates)} WHERE id = ?"
             cursor.execute(query, values)
             conn.commit()
 
@@ -580,7 +597,7 @@ class UserManager:
 
             return True
 
-        except Exception as e:
+        except Exception:
             conn.rollback()
             return False
         finally:
@@ -599,3 +616,206 @@ class UserManager:
             is_admin=bool(row["is_admin"]),
             settings_json=row["settings_json"],
         )
+
+    def get_user_by_email(self, email: str) -> Optional[User]:
+        """
+        Get user by email.
+
+        Args:
+            email: Email address
+
+        Returns:
+            User object or None if not found
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+            row = cursor.fetchone()
+
+            if row:
+                return self._row_to_user(row)
+            return None
+
+        finally:
+            conn.close()
+
+    def create_password_reset_token(self, user_id: int, expires_in: int = 3600) -> str:
+        """
+        Create a password reset token for a user.
+
+        Args:
+            user_id: User ID
+            expires_in: Token validity in seconds (default: 1 hour)
+
+        Returns:
+            Reset token
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        try:
+            # Invalidate any existing unused tokens for this user
+            cursor.execute(
+                "UPDATE password_reset_tokens SET used = 1 WHERE user_id = ? AND used = 0",
+                (user_id,),
+            )
+
+            # Generate secure random token
+            token = secrets.token_urlsafe(32)
+
+            created_at = int(time.time())
+            expires_at = created_at + expires_in
+
+            cursor.execute(
+                """
+                INSERT INTO password_reset_tokens (user_id, token, created_at, expires_at, used)
+                VALUES (?, ?, ?, ?, 0)
+            """,
+                (user_id, token, created_at, expires_at),
+            )
+
+            conn.commit()
+
+            log_audit(
+                user_id,
+                "password_reset_requested",
+                success=True,
+            )
+
+            return token
+
+        except Exception as e:
+            conn.rollback()
+            log_audit(
+                user_id,
+                "password_reset_requested",
+                success=False,
+                details={"error": str(e)},
+            )
+            raise Exception(f"Failed to create reset token: {e}")
+        finally:
+            conn.close()
+
+    def validate_password_reset_token(self, token: str) -> Optional[User]:
+        """
+        Validate a password reset token and return the associated user.
+
+        Args:
+            token: Reset token
+
+        Returns:
+            User object if token is valid, None otherwise
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute(
+                """
+                SELECT user_id, expires_at, used FROM password_reset_tokens
+                WHERE token = ?
+            """,
+                (token,),
+            )
+
+            row = cursor.fetchone()
+            if not row:
+                return None
+
+            user_id = row["user_id"]
+            expires_at = row["expires_at"]
+            used = row["used"]
+
+            # Check if token is already used
+            if used:
+                return None
+
+            # Check expiration
+            if int(time.time()) > expires_at:
+                return None
+
+            return self.get_user_by_id(user_id)
+
+        finally:
+            conn.close()
+
+    def reset_password_with_token(self, token: str, new_password: str) -> bool:
+        """
+        Reset password using a valid reset token.
+
+        Args:
+            token: Reset token
+            new_password: New password
+
+        Returns:
+            True if password was reset successfully, False otherwise
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        try:
+            # Validate token
+            cursor.execute(
+                """
+                SELECT user_id, expires_at, used FROM password_reset_tokens
+                WHERE token = ?
+            """,
+                (token,),
+            )
+
+            row = cursor.fetchone()
+            if not row:
+                return False
+
+            user_id = row["user_id"]
+            expires_at = row["expires_at"]
+            used = row["used"]
+
+            # Check if token is already used or expired
+            if used or int(time.time()) > expires_at:
+                return False
+
+            # Validate new password
+            if not validate_password(new_password):
+                return False
+
+            # Hash new password
+            password_hash = bcrypt.hashpw(
+                new_password.encode("utf-8"), bcrypt.gensalt(rounds=12)
+            )
+
+            # Update password
+            cursor.execute(
+                "UPDATE users SET password_hash = ? WHERE id = ?",
+                (password_hash.decode("utf-8"), user_id),
+            )
+
+            # Mark token as used
+            cursor.execute(
+                "UPDATE password_reset_tokens SET used = 1 WHERE token = ?",
+                (token,),
+            )
+
+            conn.commit()
+
+            log_audit(
+                user_id,
+                "password_reset_completed",
+                success=True,
+            )
+
+            return True
+
+        except Exception as e:
+            conn.rollback()
+            log_audit(
+                user_id if "user_id" in dir() else None,
+                "password_reset_completed",
+                success=False,
+                details={"error": str(e)},
+            )
+            return False
+        finally:
+            conn.close()

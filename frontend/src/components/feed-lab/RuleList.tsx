@@ -1,4 +1,8 @@
+'use client';
+
 import React from 'react';
+import styled from 'styled-components';
+import { Pencil, Trash2, Zap, TrendingDown, Filter } from 'lucide-react';
 
 interface Condition {
   field: string;
@@ -20,6 +24,203 @@ interface RuleListProps {
   onDelete: (id: string) => void;
 }
 
+const RulesContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[3]};
+`;
+
+const RuleCard = styled.div<{ $enabled: boolean }>`
+  background: ${({ theme }) => theme.colors.background.primary};
+  border: 1px solid ${({ theme }) => theme.colors.border.light};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  padding: ${({ theme }) => theme.spacing[4]};
+  transition: all ${({ theme }) => theme.transitions.fast};
+  opacity: ${({ $enabled }) => ($enabled ? 1 : 0.6)};
+  
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.border.default};
+    box-shadow: ${({ theme }) => theme.shadows.sm};
+  }
+`;
+
+const RuleHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.spacing[4]};
+`;
+
+const RuleInfo = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+const RuleTitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[3]};
+  flex-wrap: wrap;
+`;
+
+const RuleName = styled.h3`
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  color: ${({ theme }) => theme.colors.text.primary};
+  margin: 0;
+`;
+
+const RuleTypeBadge = styled.span<{ $type: 'boost' | 'demote' | 'filter' }>`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[1]};
+  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  
+  ${({ $type, theme }) => {
+    switch ($type) {
+      case 'boost':
+        return `
+          background: ${theme.colors.success[50]};
+          color: ${theme.colors.success[700]};
+        `;
+      case 'demote':
+        return `
+          background: ${theme.colors.warning[50]};
+          color: ${theme.colors.warning[700]};
+        `;
+      case 'filter':
+        return `
+          background: ${theme.colors.danger[50]};
+          color: ${theme.colors.danger[700]};
+        `;
+    }
+  }}
+  
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+`;
+
+const RuleMeta = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[4]};
+  margin-top: ${({ theme }) => theme.spacing[2]};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
+const WeightBadge = styled.span`
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const RuleActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[3]};
+`;
+
+const Toggle = styled.label`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+`;
+
+const ToggleInput = styled.input`
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+`;
+
+const ToggleSlider = styled.span<{ $checked: boolean }>`
+  width: 44px;
+  height: 24px;
+  background: ${({ $checked, theme }) =>
+    $checked ? theme.colors.primary[600] : theme.colors.neutral[300]};
+  border-radius: 12px;
+  position: relative;
+  transition: background ${({ theme }) => theme.transitions.fast};
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: ${({ $checked }) => ($checked ? '22px' : '2px')};
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: left ${({ theme }) => theme.transitions.fast};
+  }
+`;
+
+const ActionButton = styled.button<{ $variant?: 'default' | 'danger' }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.spacing[1]};
+  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[3]}`};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.fast};
+  
+  ${({ $variant, theme }) =>
+    $variant === 'danger'
+      ? `
+          background: ${theme.colors.danger[50]};
+          color: ${theme.colors.danger[700]};
+          
+          &:hover {
+            background: ${theme.colors.danger[100]};
+          }
+        `
+      : `
+          background: ${theme.colors.background.secondary};
+          color: ${theme.colors.text.secondary};
+          
+          &:hover {
+            background: ${theme.colors.background.tertiary};
+            color: ${theme.colors.text.primary};
+          }
+        `}
+  
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: ${({ theme }) => theme.spacing[12]};
+  text-align: center;
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
+const EmptyTitle = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const EmptyText = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  margin-top: ${({ theme }) => theme.spacing[2]};
+`;
+
 export const RuleList: React.FC<RuleListProps> = ({
   rules,
   onToggle,
@@ -28,14 +229,10 @@ export const RuleList: React.FC<RuleListProps> = ({
 }) => {
   if (rules.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="text-gray-500 dark:text-gray-400">
-          <p className="text-lg font-medium">No rules created yet</p>
-          <p className="text-sm mt-2">
-            Create your first rule to customize your feed
-          </p>
-        </div>
-      </div>
+      <EmptyState>
+        <EmptyTitle>No rules created yet</EmptyTitle>
+        <EmptyText>Create your first rule to customize your feed</EmptyText>
+      </EmptyState>
     );
   }
 
@@ -43,71 +240,75 @@ export const RuleList: React.FC<RuleListProps> = ({
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
+  const getRuleTypeIcon = (type: 'boost' | 'demote' | 'filter') => {
+    switch (type) {
+      case 'boost':
+        return <Zap />;
+      case 'demote':
+        return <TrendingDown />;
+      case 'filter':
+        return <Filter />;
+    }
+  };
+
   const getConditionCountText = (count: number) => {
     return count === 1 ? '1 condition' : `${count} conditions`;
   };
 
   return (
-    <div className="space-y-3">
+    <RulesContainer>
       {rules.map((rule) => (
-        <div
+        <RuleCard
           key={rule.id}
+          $enabled={rule.enabled}
           data-testid={`rule-item-${rule.id}`}
-          className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
         >
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-3">
-                <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">
-                  {rule.name}
-                </h3>
-                <span
-                  data-testid={`rule-type-badge-${rule.id}`}
-                  className="inline-flex items-center rounded-md bg-blue-50 dark:bg-blue-900/30 px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-300"
-                >
+          <RuleHeader>
+            <RuleInfo>
+              <RuleTitleRow>
+                <RuleName>{rule.name}</RuleName>
+                <RuleTypeBadge $type={rule.type} data-testid={`rule-type-badge-${rule.id}`}>
+                  {getRuleTypeIcon(rule.type)}
                   {getRuleTypeLabel(rule.type)}
-                </span>
-              </div>
+                </RuleTypeBadge>
+              </RuleTitleRow>
 
-              <div className="mt-2 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+              <RuleMeta>
                 <span>{getConditionCountText(rule.conditions.length)}</span>
                 {rule.type !== 'filter' && (
-                  <span className="font-medium">Weight: {rule.weight}</span>
+                  <WeightBadge>Weight: {rule.weight}</WeightBadge>
                 )}
-              </div>
-            </div>
+              </RuleMeta>
+            </RuleInfo>
 
-            <div className="flex items-center gap-3">
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
+            <RuleActions>
+              <Toggle>
+                <ToggleInput
                   type="checkbox"
                   role="switch"
                   checked={rule.enabled}
                   onChange={(e) => onToggle(rule.id, e.target.checked)}
-                  className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-              </label>
+                <ToggleSlider $checked={rule.enabled} />
+              </Toggle>
 
-              <button
-                onClick={() => onEdit(rule.id)}
-                className="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
-                aria-label="Edit"
-              >
+              <ActionButton onClick={() => onEdit(rule.id)} aria-label="Edit">
+                <Pencil />
                 Edit
-              </button>
+              </ActionButton>
 
-              <button
+              <ActionButton
+                $variant="danger"
                 onClick={() => onDelete(rule.id)}
-                className="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-md transition-colors"
                 aria-label="Delete"
               >
+                <Trash2 />
                 Delete
-              </button>
-            </div>
-          </div>
-        </div>
+              </ActionButton>
+            </RuleActions>
+          </RuleHeader>
+        </RuleCard>
       ))}
-    </div>
+    </RulesContainer>
   );
 };
