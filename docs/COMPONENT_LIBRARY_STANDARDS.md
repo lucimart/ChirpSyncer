@@ -60,3 +60,20 @@ Before adding new UI, confirm:
 - Interaction tests: `npm run test-storybook`
 
 The CI workflow runs Storybook build + interaction tests for regression checks.
+
+## A11y Automation
+
+- `test-storybook` runs automated a11y checks via Playwright + axe.
+- If a story must skip a11y for a justified reason, set:
+  `parameters: { a11y: { disable: true } }` on that story and document why.
+
+## Visual Regression (Chromatic)
+
+- Set `CHROMATIC_PROJECT_TOKEN` as a GitHub Actions secret.
+- Run locally: `npm run chromatic` (uses the env token).
+- CI workflow: `.github/workflows/chromatic.yml`.
+
+## Docker (Storybook)
+
+- `docker compose -f docker-compose.dev.yml --profile storybook up`
+- Storybook available at `http://localhost:6006`.
