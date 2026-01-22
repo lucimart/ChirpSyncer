@@ -121,3 +121,90 @@ export function useDeleteScheduledPost() {
     },
   });
 }
+
+// Types for TimingHeatmap
+export interface HeatmapCell {
+  day: number;
+  hour: number;
+  score: number;
+  postCount?: number;
+  avgEngagement?: number;
+}
+
+export interface TimingHeatmapData {
+  cells: HeatmapCell[];
+  bestSlots: Array<{
+    day: number;
+    hour: number;
+    score: number;
+    label: string;
+  }>;
+  dataQuality: 'low' | 'medium' | 'high';
+  basedOnPosts: number;
+}
+
+/**
+ * Hook that transforms OptimalTimeResult into TimingHeatmapData format.
+ * Generates heatmap cells from best_times and fills remaining slots with estimated scores.
+ */
+export function useHeatmapData() {
+  const { data: optimalTimes, isLoading, error } = useOptimalTimes();
+
+  const heatmapData: TimingHeatmapData | null = optimalTimes
+    ? (() => {
+        const cells: HeatmapCell[] = [];
+        const bestSlots = optimalTimes.best_times.map((slot) => ({
+          day: slot.day,
+          hour: slot.hour,
+          score: slot.score,
+          label: slot.label,
+        }));
+
+        // Create a map of best slots for quick lookup
+        const bestSlotsMap = new Map<string, number>();
+        optimalTimes.best_times.forEach((slot) => {
+          bestSlotsMap.set(`${slot.day}-${slot.hour}`, slot.score);
+        });
+
+        // Generate cells for all day/hour combinations
+        for (let day = 0; day < 7; day++) {
+          for (let hour = 0; hour < 24; hour++) {
+            const key = `${day}-${hour}`;
+            const bestScore = bestSlotsMap.get(key);
+
+            if (bestScore !== undefined) {
+              cells.push({ day, hour, score: bestScore });
+            } else {
+              // Estimate score based on typical engagement patterns
+              const isWeekday = day >= 1 && day <= 5;
+              const isPeakHour = (hour >= 9 && hour <= 12) || (hour >= 18 && hour <= 21);
+              const isOffHour = hour < 6 || hour > 23;
+
+              let estimatedScore = 30;
+              if (isWeekday && isPeakHour) estimatedScore = 55;
+              else if (isPeakHour) estimatedScore = 45;
+              else if (isOffHour) estimatedScore = 10;
+
+              cells.push({ day, hour, score: estimatedScore });
+            }
+          }
+        }
+
+        const dataQuality: 'low' | 'medium' | 'high' =
+          optimalTimes.based_on_posts >= 50
+            ? 'high'
+            : optimalTimes.based_on_posts >= 10
+              ? 'medium'
+              : 'low';
+
+        return {
+          cells,
+          bestSlots,
+          dataQuality,
+          basedOnPosts: optimalTimes.based_on_posts,
+        };
+      })()
+    : null;
+
+  return { data: heatmapData, isLoading, error };
+}

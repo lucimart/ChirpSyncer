@@ -2,6 +2,24 @@ import type { ApiResponse, User, Session, DashboardStats, Credential, AdminUser 
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
+// Sync Preview types
+export interface SyncPreviewItemData {
+  id: string;
+  content: string;
+  sourcePlatform: 'twitter' | 'bluesky';
+  targetPlatform: 'twitter' | 'bluesky';
+  timestamp: string;
+  hasMedia: boolean;
+  mediaCount?: number;
+  selected: boolean;
+}
+
+export interface SyncPreviewData {
+  items: SyncPreviewItemData[];
+  totalCount: number;
+  estimatedTime: number;
+}
+
 class ApiClient {
   private token: string | null = null;
 
@@ -160,6 +178,17 @@ class ApiClient {
 
   async startSync(): Promise<ApiResponse<{ job_id: string }>> {
     return this.request('/sync/start', { method: 'POST' });
+  }
+
+  async getSyncPreview(): Promise<ApiResponse<SyncPreviewData>> {
+    return this.request('/sync/preview');
+  }
+
+  async executeSyncWithItems(itemIds: string[]): Promise<ApiResponse<{ job_id: string }>> {
+    return this.request('/sync/execute', {
+      method: 'POST',
+      body: JSON.stringify({ item_ids: itemIds }),
+    });
   }
 
   // Cleanup
@@ -643,6 +672,24 @@ export interface WebhookTestResult {
   error: string | null;
   skipped: boolean;
   reason: string | null;
+}
+
+// Sync Preview types
+export interface SyncPreviewItemData {
+  id: string;
+  content: string;
+  sourcePlatform: 'twitter' | 'bluesky';
+  targetPlatform: 'twitter' | 'bluesky';
+  timestamp: string;
+  hasMedia: boolean;
+  mediaCount?: number;
+  selected: boolean;
+}
+
+export interface SyncPreviewData {
+  items: SyncPreviewItemData[];
+  totalCount: number;
+  estimatedTime: number;
 }
 
 export const api = new ApiClient();

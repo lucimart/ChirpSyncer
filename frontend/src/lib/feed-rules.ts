@@ -236,3 +236,42 @@ export function useToggleFeedRule() {
     },
   });
 }
+
+export function useReorderFeedRules() {
+  const queryClient = useQueryClient();
+
+  return useMutation<FeedRule[], Error, FeedRule[]>({
+    mutationFn: async (reorderedRules) => {
+      // Optimistic update - backend endpoint can be added later
+      // For now, we update each rule's position via existing update endpoint
+      // This could be optimized with a dedicated reorder endpoint
+      const updatePromises = reorderedRules.map((rule, index) =>
+        api.updateFeedRule(Number(rule.id), { position: index })
+      );
+
+      await Promise.all(updatePromises);
+      return reorderedRules;
+    },
+    onMutate: async (reorderedRules) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['feed-rules'] });
+
+      // Snapshot previous value
+      const previousRules = queryClient.getQueryData<FeedRule[]>(['feed-rules']);
+
+      // Optimistically update cache
+      queryClient.setQueryData(['feed-rules'], reorderedRules);
+
+      return { previousRules };
+    },
+    onError: (_err, _variables, context) => {
+      // Rollback on error
+      if (context?.previousRules) {
+        queryClient.setQueryData(['feed-rules'], context.previousRules);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['feed-rules'] });
+    },
+  });
+}
