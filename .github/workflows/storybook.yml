@@ -1,4 +1,4 @@
-name: Storybook Regression
+name: Storybook QA
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  storybook:
+  storybook-qa:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -30,8 +30,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
       - name: Build Storybook
         run: npm run build-storybook
 
       - name: Run Storybook interaction tests
         run: npx concurrently -k -s first "npm run storybook -- --ci --quiet" "npx wait-on http://localhost:6006 && npm run test-storybook"
+
+      - name: Run Chromatic
+        if: secrets.CHROMATIC_PROJECT_TOKEN != ''
+        uses: chromaui/action@v1
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          workingDir: frontend
+          storybookBuildDir: frontend/storybook-static

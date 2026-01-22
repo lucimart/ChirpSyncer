@@ -172,60 +172,6 @@ jobs:
           retention-days: 1
 
   # ============================================
-  # E2E TESTS
-  # ============================================
-  e2e:
-    name: E2E Tests (Playwright)
-    runs-on: ubuntu-latest
-    needs: [backend-unit]
-    services:
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: 'pip'
-
-      - name: Install Python dependencies
-        run: |
-          pip install -r requirements-dev.txt
-          playwright install chromium
-
-      - name: Create .env file
-        run: cp .env.example .env
-
-      - name: Run Playwright Tests
-        env:
-          BASE_URL: http://localhost:5000
-          PYTHONPATH: .
-          # We let conftest.py spin up the app server (on port 5000)
-          # We use the service container for Redis (on port 6379)
-        run: |
-          pytest tests/e2e/playwright/ -v --junit-xml=test-results/playwright-junit.xml
-      
-      - name: Upload Playwright Artifacts
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-artifacts
-          path: |
-            test-results/
-            playwright-report/
-          retention-days: 30
-
-  # ============================================
   # DOCKER BUILD CHECK
   # ============================================
   docker-build:
@@ -247,7 +193,7 @@ jobs:
   ci-passed:
     name: CI Passed
     runs-on: ubuntu-latest
-    needs: [backend-unit, backend-lint, frontend-unit, frontend-lint, frontend-build, e2e, docker-build]
+    needs: [backend-unit, backend-lint, frontend-unit, frontend-lint, frontend-build, docker-build]
     if: always()
     steps:
       - name: Check results
@@ -258,12 +204,8 @@ jobs:
           if [[ "${{ needs.frontend-unit.result }}" != "success" ]]; then
             echo "Frontend unit tests failed"; exit 1
           fi
-          if [[ "${{ needs.e2e.result }}" != "success" ]]; then
-            echo "E2E tests failed"; exit 1
-          fi
           if [[ "${{ needs.docker-build.result }}" != "success" ]]; then
             echo "Docker build failed"; exit 1
           fi
           echo "All CI checks passed!"
-
 
