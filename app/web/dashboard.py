@@ -28,6 +28,7 @@ from flask_cors import CORS
 from app.web.websocket import socketio
 from app.auth.user_manager import UserManager
 from app.auth.credential_manager import CredentialManager
+from app.auth.jwt_handler import init_refresh_tokens_table
 from app.auth.auth_decorators import require_auth, require_admin, require_self_or_admin
 from app.auth.security_utils import validate_password
 from app.features.analytics_tracker import AnalyticsTracker
@@ -107,6 +108,9 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
 
     credential_manager = CredentialManager(master_key, db_path)
     credential_manager.init_db()
+
+    # Initialize refresh tokens table for JWT refresh token rotation
+    init_refresh_tokens_table(db_path)
 
     analytics_tracker = AnalyticsTracker(db_path)
     analytics_tracker.init_db()
