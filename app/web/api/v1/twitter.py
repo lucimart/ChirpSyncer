@@ -570,8 +570,8 @@ def create_tweet():
                 error_data = e.response.json()
                 error_msg = error_data.get("detail") or error_data.get("title", "Failed to post")
                 return api_error(error_msg, status=e.response.status_code)
-            except Exception:
-                pass
+            except Exception as parse_err:
+                logger.debug(f"Could not parse Twitter error response: {parse_err}")
         return api_error("Twitter API error", status=502)
     except Exception as e:
         logger.error(f"Error creating tweet: {e}")

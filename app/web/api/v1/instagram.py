@@ -524,8 +524,8 @@ def create_media_container():
                             status=403
                         )
                     return api_error(error_msg, status=400)
-                except Exception:
-                    pass
+                except Exception as parse_err:
+                    logger.debug(f"Could not parse Instagram error response: {parse_err}")
             if e.response.status_code == 403:
                 return api_error(
                     "Content Publishing API not enabled. Requires Meta App Review approval.",
@@ -621,8 +621,8 @@ def publish_media():
                     {"fields": "permalink"},
                 )
                 permalink = media_info.get("permalink")
-            except Exception:
-                pass  # Non-critical, proceed without permalink
+            except Exception as e:
+                logger.debug(f"Could not fetch permalink for media {media_id}: {e}")
 
         return api_response({
             "media_id": media_id,
@@ -640,8 +640,8 @@ def publish_media():
                     error_data = e.response.json()
                     error_msg = error_data.get("error", {}).get("message", "Publish failed")
                     return api_error(error_msg, status=400)
-                except Exception:
-                    pass
+                except Exception as parse_err:
+                    logger.debug(f"Could not parse Instagram error response: {parse_err}")
             if e.response.status_code == 403:
                 return api_error(
                     "Content Publishing API not authorized",

@@ -25,8 +25,9 @@ class OAuthProviderConfig:
 
 
 # Provider configurations
+# Note: token_url values are public OAuth endpoint URLs, not secrets
 OAUTH_PROVIDERS: dict[str, OAuthProviderConfig] = {
-    "google": OAuthProviderConfig(
+    "google": OAuthProviderConfig(  # nosec B106 - token_url is a public OAuth endpoint URL
         client_id=os.getenv("GOOGLE_CLIENT_ID"),
         client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
         authorize_url="https://accounts.google.com/o/oauth2/v2/auth",
@@ -34,7 +35,7 @@ OAUTH_PROVIDERS: dict[str, OAuthProviderConfig] = {
         userinfo_url="https://openidconnect.googleapis.com/v1/userinfo",
         scope="openid email profile",
     ),
-    "github": OAuthProviderConfig(
+    "github": OAuthProviderConfig(  # nosec B106 - token_url is a public OAuth endpoint URL
         client_id=os.getenv("GITHUB_CLIENT_ID"),
         client_secret=os.getenv("GITHUB_CLIENT_SECRET"),
         authorize_url="https://github.com/login/oauth/authorize",
@@ -43,7 +44,7 @@ OAUTH_PROVIDERS: dict[str, OAuthProviderConfig] = {
         scope="read:user user:email",
         emails_url="https://api.github.com/user/emails",
     ),
-    "twitter": OAuthProviderConfig(
+    "twitter": OAuthProviderConfig(  # nosec B106 - token_url is a public OAuth endpoint URL
         client_id=os.getenv("TWITTER_CLIENT_ID"),
         client_secret=os.getenv("TWITTER_CLIENT_SECRET"),
         authorize_url="https://twitter.com/i/oauth2/authorize",
