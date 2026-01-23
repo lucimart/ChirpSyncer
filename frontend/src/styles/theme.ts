@@ -18,6 +18,7 @@ import { transition } from './tokens/transitions';
 // Legacy theme structure for backward compatibility
 // This maps the old theme structure to new tokens
 export const theme = {
+  mode: 'light' as const,
   colors: {
     // Primary - Social Hub Blue (mapped from new tokens)
     primary: colors.blue,
@@ -27,25 +28,34 @@ export const theme = {
     success: {
       50: colors.green[50],
       100: colors.green[100],
+      200: colors.green[200],
       500: colors.green[500],
       600: colors.green[600],
       700: colors.green[700],
+      800: colors.green[800],
+      900: colors.green[900],
     },
     // Warning - Amber
     warning: {
       50: colors.yellow[50],
       100: colors.yellow[100],
+      200: colors.yellow[200],
       500: colors.yellow[500],
       600: colors.yellow[600],
       700: colors.yellow[700],
+      800: colors.yellow[800],
+      900: colors.yellow[900],
     },
     // Danger - Red
     danger: {
       50: colors.red[50],
       100: colors.red[100],
+      200: colors.red[200],
       500: colors.red[500],
       600: colors.red[600],
       700: colors.red[700],
+      800: colors.red[800],
+      900: colors.red[900],
     },
     // Background (light theme defaults for legacy)
     background: {
@@ -65,6 +75,19 @@ export const theme = {
       light: lightTheme.border.light,
       default: lightTheme.border.medium,
       dark: lightTheme.border.heavy,
+    },
+    // Semantic surface colors for badges, alerts, etc. (light mode defaults)
+    surface: {
+      primary: { bg: colors.blue[50], text: colors.blue[800], border: colors.blue[200] },
+      success: { bg: colors.green[50], text: colors.green[800], border: colors.green[200] },
+      warning: { bg: colors.yellow[50], text: colors.yellow[800], border: colors.yellow[200] },
+      danger: { bg: colors.red[50], text: colors.red[800], border: colors.red[200] },
+      info: { bg: colors.blue[50], text: colors.blue[800], border: colors.blue[200] },
+      neutral: { bg: colors.slate[100], text: colors.slate[800], border: colors.slate[200] },
+      primarySubtle: { bg: colors.blue[100], text: colors.blue[800], border: colors.blue[200] },
+      successSubtle: { bg: colors.green[100], text: colors.green[800], border: colors.green[200] },
+      warningSubtle: { bg: colors.yellow[100], text: colors.yellow[800], border: colors.yellow[200] },
+      dangerSubtle: { bg: colors.red[100], text: colors.red[800], border: colors.red[200] },
     },
   },
   spacing: {

@@ -56,13 +56,20 @@ export const useAuth = create<AuthState>()(
       },
 
       checkAuth: async () => {
-        const { token } = get();
+        const { token, user, isAuthenticated } = get();
+
+        // Already authenticated with user data - no need to check again
+        if (token && user && isAuthenticated) {
+          set({ isLoading: false });
+          return;
+        }
 
         if (!token) {
           set({ isLoading: false, isAuthenticated: false });
           return;
         }
 
+        // Have token but no user - need to verify
         api.setToken(token);
         const response = await api.getCurrentUser();
 
