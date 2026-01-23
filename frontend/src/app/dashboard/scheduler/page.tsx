@@ -25,7 +25,8 @@ import {
   TimeSlot,
 } from '@/lib/scheduling';
 import { TimingHeatmap } from '@/components/scheduler/TimingHeatmap';
-import { PostDensityMap, type PostDataPoint } from '@/components/canvas';
+import { PostDensityMap } from '@/components/canvas';
+import type { PostDataPoint } from '@/components/canvas';
 
 const StyledSectionTitle = styled(SectionTitle)`
   display: flex;

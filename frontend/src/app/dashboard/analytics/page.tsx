@@ -16,7 +16,8 @@ import {
 import { Button, Card, PageHeader, SectionTitle, StatsGrid, Stack, MetaItem, SmallText } from '@/components/ui';
 import { AnimatedNumber, AnimatedCompactNumber, AnimatedPercentage } from '@/components/ui/Motion';
 import { NivoChartWidget } from '@/components/widgets';
-import { EngagementNetwork, type NetworkNode, type NetworkLink } from '@/components/canvas';
+import { EngagementNetwork } from '@/components/canvas';
+import type { NetworkNode, NetworkLink } from '@/components/canvas';
 import { api } from '@/lib/api';
 
 const PeriodSelector = styled.div`
