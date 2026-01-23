@@ -645,13 +645,13 @@ class WebhookService:
                 last_error = f"HTTP {response.status_code}"
 
             except requests.exceptions.Timeout:
-                logger.warning("Webhook %s delivery timeout on attempt %d", _sanitize_log_value(webhook_id), attempt)
+                logger.warning("Webhook delivery timeout on attempt %d", attempt)
                 last_error = "Request timeout"
             except requests.exceptions.ConnectionError:
-                logger.warning("Webhook %s connection failed on attempt %d", _sanitize_log_value(webhook_id), attempt)
+                logger.warning("Webhook delivery connection failed on attempt %d", attempt)
                 last_error = "Connection error"
             except Exception:
-                logger.exception("Webhook %s unexpected error on attempt %d", _sanitize_log_value(webhook_id), attempt)
+                logger.error("Webhook delivery unexpected error on attempt %d", attempt)
                 last_error = "Unexpected error"
 
             # Backoff before retry (except on last attempt)
