@@ -4,28 +4,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import styled from 'styled-components';
 import { useRouter } from 'next/navigation';
+import { PageHeader } from '@/components/ui';
 import { AlgorithmDashboard } from '@/components/algorithm-dashboard/AlgorithmDashboard';
 import { useAlgorithmStats } from '@/hooks/useAlgorithmStats';
-
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const HeaderLeft = styled.div``;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
 
 export default function AlgorithmPage() {
   const router = useRouter();
@@ -79,14 +60,10 @@ export default function AlgorithmPage() {
 
   return (
     <div>
-      <PageHeader>
-        <HeaderLeft>
-          <PageTitle>Algorithm Dashboard</PageTitle>
-          <PageDescription>
-            Review your transparency score and see how rules shape the feed.
-          </PageDescription>
-        </HeaderLeft>
-      </PageHeader>
+      <PageHeader
+        title="Algorithm Dashboard"
+        description="Review your transparency score and see how rules shape the feed."
+      />
 
       <AlgorithmDashboard
         stats={data ?? undefined}

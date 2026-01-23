@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
 import { List, Plus, Eye, BookOpen } from 'lucide-react';
-import { Button, Tabs, Badge } from '@/components/ui';
+import { Button, Tabs, Badge, PageHeader, SectionTitle } from '@/components/ui';
 import { FeedPreview } from '@/components/feed-lab/FeedPreview';
 import { RuleBuilder } from '@/components/feed-lab/RuleBuilder';
 import { RuleList } from '@/components/feed-lab/RuleList';
@@ -95,26 +95,6 @@ const RECIPE_TEMPLATES: Recipe[] = [
   },
 ];
 
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const HeaderLeft = styled.div``;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
-
 const StyledTabs = styled(Tabs)`
   margin-bottom: ${({ theme }) => theme.spacing[6]};
 `;
@@ -131,12 +111,6 @@ const Section = styled.section`
 
 const SectionHeader = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const SectionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
 const HelperText = styled.p`
@@ -295,14 +269,10 @@ export default function FeedLabPage() {
 
   return (
     <div>
-      <PageHeader>
-        <HeaderLeft>
-          <PageTitle>Feed Lab</PageTitle>
-          <PageDescription>
-            Customize your algorithm and preview how rules shape your feed.
-          </PageDescription>
-        </HeaderLeft>
-      </PageHeader>
+      <PageHeader
+        title="Feed Lab"
+        description="Customize your algorithm and preview how rules shape your feed."
+      />
 
       <StyledTabs
         items={tabItems}

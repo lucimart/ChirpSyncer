@@ -13,24 +13,9 @@ import {
   Hash,
   User,
 } from 'lucide-react';
-import { Button, Card, Input } from '@/components/ui';
+import { Button, Card, Input, PageHeader, EmptyState } from '@/components/ui';
 import { api, SearchResultItem } from '@/lib/api';
 import type { SearchFilters } from '@/types';
-
-const PageHeader = styled.div`
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
 
 const SearchContainer = styled.div`
   display: flex;
@@ -168,12 +153,6 @@ const MetaItem = styled.span`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing[1]};
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: ${({ theme }) => theme.spacing[10]};
-  color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
 const Pagination = styled.div`
@@ -329,12 +308,10 @@ export default function SearchPage() {
 
   return (
     <div>
-      <PageHeader>
-        <PageTitle>Search</PageTitle>
-        <PageDescription>
-          Search through your synced posts across all platforms
-        </PageDescription>
-      </PageHeader>
+      <PageHeader
+        title="Search"
+        description="Search through your synced posts across all platforms"
+      />
 
       <SearchContainer>
         <SearchInputWrapper>
@@ -472,13 +449,15 @@ export default function SearchPage() {
 
       {!query ? (
         <Card padding="lg">
-          <EmptyState>
-            Enter a search term to find posts across your synced accounts
-          </EmptyState>
+          <EmptyState
+            icon={SearchIcon}
+            title="Search your synced posts"
+            description="Enter a search term to find posts across your synced accounts"
+          />
         </Card>
       ) : isLoading ? (
         <Card padding="lg">
-          <EmptyState>Searching...</EmptyState>
+          <EmptyState title="Searching..." />
         </Card>
       ) : paginatedResults && paginatedResults.length > 0 ? (
         <>
@@ -561,7 +540,7 @@ export default function SearchPage() {
         </>
       ) : (
         <Card padding="lg">
-          <EmptyState>No results found for &quot;{query}&quot;</EmptyState>
+          <EmptyState title={`No results found for "${query}"`} />
         </Card>
       )}
     </div>

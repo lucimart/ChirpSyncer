@@ -49,13 +49,6 @@ const DEFAULT_WIDGETS: WidgetConfig[] = [
   },
 ];
 
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: ${({ theme }) => theme.spacing[4]};
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
 const DashboardLayout = styled.div`
   display: grid;
   grid-template-columns: 1fr;

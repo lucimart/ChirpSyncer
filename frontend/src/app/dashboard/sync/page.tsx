@@ -20,6 +20,7 @@ import {
   EmptyState,
   PageHeader,
   StatCard,
+  StatsGrid,
   PlatformIcon,
   SectionTitle,
 } from '@/components/ui';
@@ -29,12 +30,6 @@ import {
 } from '@/providers/RealtimeProvider';
 import { api } from '@/lib/api';
 
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: ${({ theme }) => theme.spacing[4]};
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
 
 const SyncDirections = styled.div`
   display: grid;
@@ -281,7 +276,7 @@ export default function SyncPage() {
         </Card>
       )}
 
-      <StatsGrid>
+      <StatsGrid minColumnWidth="200px">
         <StatCard
           value={stats?.total_synced ?? 0}
           label="Total Synced"

@@ -5,22 +5,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
 import { Plus, Trash2, CheckCircle, XCircle, RefreshCw, Key } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Button, Card, Modal, Input, EmptyState } from '@/components/ui';
+import { Button, Card, Modal, Input, EmptyState, PageHeader, Select } from '@/components/ui';
 import { ApiErrorDisplay } from '@/components/error-resolution';
 import type { Credential } from '@/types';
-
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
 
 const CredentialsList = styled.div`
   display: flex;
@@ -87,38 +74,6 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const Select = styled.select`
-  width: 100%;
-  height: 40px;
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
-  font-size: ${({ theme }) => theme.fontSizes.base};
-  color: ${({ theme }) => theme.colors.text.primary};
-  background-color: ${({ theme }) => theme.colors.background.primary};
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  cursor: pointer;
-
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.primary[500]};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[100]};
-  }
-`;
-
-const Label = styled.label`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-  display: block;
-  margin-bottom: ${({ theme }) => theme.spacing[1]};
-`;
-
-const FieldGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[1]};
 `;
 
 export default function CredentialsPage() {
@@ -216,13 +171,15 @@ export default function CredentialsPage() {
 
   return (
     <div>
-      <PageHeader>
-        <PageTitle>Credentials</PageTitle>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus size={18} />
-          Add Credential
-        </Button>
-      </PageHeader>
+      <PageHeader
+        title="Credentials"
+        actions={
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus size={18} />
+            Add Credential
+          </Button>
+        }
+      />
 
       {/* Contextual Error Display */}
       <ApiErrorDisplay
@@ -328,27 +285,27 @@ export default function CredentialsPage() {
             error={addError}
             onDismiss={() => setAddError(null)}
           />
-          <FieldGroup>
-            <Label>Platform</Label>
-            <Select
-              value={platform}
-              onChange={(e) => setPlatform(e.target.value)}
-            >
-              <option value="twitter">Twitter</option>
-              <option value="bluesky">Bluesky</option>
-            </Select>
-          </FieldGroup>
+          <Select
+            label="Platform"
+            value={platform}
+            onChange={(e) => setPlatform(e.target.value)}
+            options={[
+              { value: 'twitter', label: 'Twitter' },
+              { value: 'bluesky', label: 'Bluesky' },
+            ]}
+            fullWidth
+          />
 
-          <FieldGroup>
-            <Label>Credential Type</Label>
-            <Select
-              value={credentialType}
-              onChange={(e) => setCredentialType(e.target.value)}
-            >
-              <option value="scraping">Scraping (username/password)</option>
-              <option value="api">API Keys</option>
-            </Select>
-          </FieldGroup>
+          <Select
+            label="Credential Type"
+            value={credentialType}
+            onChange={(e) => setCredentialType(e.target.value)}
+            options={[
+              { value: 'scraping', label: 'Scraping (username/password)' },
+              { value: 'api', label: 'API Keys' },
+            ]}
+            fullWidth
+          />
 
           <Input
             label="Username"

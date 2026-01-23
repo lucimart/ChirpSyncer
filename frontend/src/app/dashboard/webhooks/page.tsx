@@ -16,15 +16,9 @@ import {
   AlertCircle,
   Webhook,
 } from 'lucide-react';
-import { Button, Card, Modal, Input, Badge, EmptyState, PageHeader, StatCard } from '@/components/ui';
+import { Button, Card, Modal, Input, Badge, EmptyState, PageHeader, StatCard, StatsGrid } from '@/components/ui';
 import { api, Webhook as WebhookType, WebhookDelivery } from '@/lib/api';
 
-const StatsRow = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: ${({ theme }) => theme.spacing[4]};
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
 
 const WebhooksList = styled.div`
   display: flex;
@@ -398,7 +392,7 @@ export default function WebhooksPage() {
         }
       />
 
-      <StatsRow>
+      <StatsGrid>
         <StatCard
           value={webhooks.length}
           label="Total Webhooks"
@@ -414,7 +408,7 @@ export default function WebhooksPage() {
           label="Event Types"
           variant="centered"
         />
-      </StatsRow>
+      </StatsGrid>
 
       {isLoading ? (
         <Card padding="lg">

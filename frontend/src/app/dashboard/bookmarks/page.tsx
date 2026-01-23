@@ -12,28 +12,8 @@ import {
   Trash2,
   ExternalLink,
 } from 'lucide-react';
-import { Button, Card, Modal, Input } from '@/components/ui';
+import { Button, Card, Modal, Input, PageHeader, EmptyState as UiEmptyState } from '@/components/ui';
 import { api } from '@/lib/api';
-
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const TitleSection = styled.div``;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
 
 const HeaderActions = styled.div`
   display: flex;
@@ -360,20 +340,18 @@ export default function BookmarksPage() {
 
   return (
     <div>
-      <PageHeader>
-        <TitleSection>
-          <PageTitle>Bookmarks</PageTitle>
-          <PageDescription>
-            Save and organize your favorite posts across platforms
-          </PageDescription>
-        </TitleSection>
-        <HeaderActions>
-          <Button variant="secondary" onClick={() => setIsModalOpen(true)}>
-            <FolderPlus size={18} />
-            New Collection
-          </Button>
-        </HeaderActions>
-      </PageHeader>
+      <PageHeader
+        title="Bookmarks"
+        description="Save and organize your favorite posts across platforms"
+        actions={
+          <HeaderActions>
+            <Button variant="secondary" onClick={() => setIsModalOpen(true)}>
+              <FolderPlus size={18} />
+              New Collection
+            </Button>
+          </HeaderActions>
+        }
+      />
 
       <ContentGrid>
         <CollectionsSidebar>

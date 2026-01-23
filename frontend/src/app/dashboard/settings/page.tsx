@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Save, Bell, Shield, Palette, Lock, Sun, Moon, Monitor } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
-import { Button, Card, Input, Switch, PageHeader, SettingRow } from '@/components/ui';
+import { Alert, Button, Card, Input, Switch, PageHeader, SettingRow, SectionTitle as BaseSectionTitle, Text, FormActions, ToggleGroup } from '@/components/ui';
 import { useTheme, type ThemeMode } from '@/styles/ThemeContext';
 
 const SettingsSections = styled.div`
@@ -38,15 +38,7 @@ const SectionIcon = styled.div`
 
 const SectionInfo = styled.div``;
 
-const SectionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const SectionDescription = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
+const SectionDescription = styled(Text)`
   margin-top: ${({ theme }) => theme.spacing[1]};
 `;
 
@@ -56,49 +48,23 @@ const SettingsGrid = styled.div`
   gap: ${({ theme }) => theme.spacing[4]};
 `;
 
-const ThemeSwitcher = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[2]};
-  background-color: ${({ theme }) => theme.colors.background.secondary};
-  padding: ${({ theme }) => theme.spacing[1]};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-`;
-
-const ThemeOption = styled.button<{ $active: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-  padding: ${({ theme }) => theme.spacing[2]} ${({ theme }) => theme.spacing[3]};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  border: none;
-  background-color: ${({ $active, theme }) =>
-    $active ? theme.colors.background.primary : 'transparent'};
-  color: ${({ $active, theme }) =>
-    $active ? theme.colors.text.primary : theme.colors.text.secondary};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.fast};
-  box-shadow: ${({ $active, theme }) =>
-    $active ? theme.shadows?.sm || '0 1px 2px rgba(0,0,0,0.1)' : 'none'};
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.text.primary};
-  }
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-`;
-
-const FormActions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: ${({ theme }) => theme.spacing[3]};
+const PasswordSection = styled.div`
   margin-top: ${({ theme }) => theme.spacing[6]};
-  padding-top: ${({ theme }) => theme.spacing[4]};
+  padding-top: ${({ theme }) => theme.spacing[6]};
   border-top: 1px solid ${({ theme }) => theme.colors.border.light};
+`;
+
+const PasswordTitle = styled.h3`
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+`;
+
+const PasswordActions = styled.div`
+  margin-top: ${({ theme }) => theme.spacing[4]};
+`;
+
+const AlertWrapper = styled.div`
+  margin-top: ${({ theme }) => theme.spacing[4]};
 `;
 
 export default function SettingsPage() {
@@ -191,7 +157,7 @@ export default function SettingsPage() {
               <Shield size={20} />
             </SectionIcon>
             <SectionInfo>
-              <SectionTitle>Account</SectionTitle>
+              <BaseSectionTitle>Account</BaseSectionTitle>
               <SectionDescription>
                 Manage your account information
               </SectionDescription>
@@ -216,10 +182,10 @@ export default function SettingsPage() {
           </SettingsGrid>
 
           {saveError && (
-            <div style={{ color: 'red', marginTop: '1rem' }}>{saveError}</div>
+            <AlertWrapper><Alert variant="error">{saveError}</Alert></AlertWrapper>
           )}
           {saveSuccess && (
-            <div style={{ color: 'green', marginTop: '1rem' }}>Changes saved successfully!</div>
+            <AlertWrapper><Alert variant="success">Changes saved successfully!</Alert></AlertWrapper>
           )}
 
           <FormActions>
@@ -234,8 +200,8 @@ export default function SettingsPage() {
           </FormActions>
 
           {showPasswordForm && (
-            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e0e0e0' }}>
-              <h3 style={{ marginBottom: '1rem', fontWeight: 600 }}>Change Password</h3>
+            <PasswordSection>
+              <PasswordTitle>Change Password</PasswordTitle>
               <SettingsGrid>
                 <Input
                   label="Current Password"
@@ -260,14 +226,14 @@ export default function SettingsPage() {
                 />
               </SettingsGrid>
               {passwordError && (
-                <div style={{ color: 'red', marginTop: '1rem' }}>{passwordError}</div>
+                <Alert variant="error">{passwordError}</Alert>
               )}
-              <div style={{ marginTop: '1rem' }}>
+              <PasswordActions>
                 <Button onClick={handleChangePassword} isLoading={isChangingPassword}>
                   Update Password
                 </Button>
-              </div>
-            </div>
+              </PasswordActions>
+            </PasswordSection>
           )}
         </SectionCard>
 
@@ -277,7 +243,7 @@ export default function SettingsPage() {
               <Bell size={20} />
             </SectionIcon>
             <SectionInfo>
-              <SectionTitle>Notifications</SectionTitle>
+              <BaseSectionTitle>Notifications</BaseSectionTitle>
               <SectionDescription>
                 Configure how you want to be notified
               </SectionDescription>
@@ -336,7 +302,7 @@ export default function SettingsPage() {
               <Palette size={20} />
             </SectionIcon>
             <SectionInfo>
-              <SectionTitle>Appearance</SectionTitle>
+              <BaseSectionTitle>Appearance</BaseSectionTitle>
               <SectionDescription>
                 Customize how ChirpSyncer looks
               </SectionDescription>
@@ -347,32 +313,16 @@ export default function SettingsPage() {
             label="Theme"
             hint="Choose your preferred color scheme"
           >
-            <ThemeSwitcher>
-              <ThemeOption
-                $active={mode === 'light'}
-                onClick={() => setMode('light')}
-                aria-label="Light theme"
-              >
-                <Sun />
-                Light
-              </ThemeOption>
-              <ThemeOption
-                $active={mode === 'dark'}
-                onClick={() => setMode('dark')}
-                aria-label="Dark theme"
-              >
-                <Moon />
-                Dark
-              </ThemeOption>
-              <ThemeOption
-                $active={mode === 'system'}
-                onClick={() => setMode('system')}
-                aria-label="System theme"
-              >
-                <Monitor />
-                System
-              </ThemeOption>
-            </ThemeSwitcher>
+            <ToggleGroup
+              options={[
+                { value: 'light', label: 'Light', icon: <Sun /> },
+                { value: 'dark', label: 'Dark', icon: <Moon /> },
+                { value: 'system', label: 'System', icon: <Monitor /> },
+              ]}
+              value={mode}
+              onChange={(value) => setMode(value as ThemeMode)}
+              variant="pill"
+            />
           </SettingRow>
         </SectionCard>
       </SettingsSections>

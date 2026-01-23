@@ -13,23 +13,8 @@ import {
   Download,
   BarChart2,
 } from 'lucide-react';
-import { Button, Card } from '@/components/ui';
+import { Button, Card, PageHeader, SectionTitle, StatsGrid } from '@/components/ui';
 import { api } from '@/lib/api';
-
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const HeaderLeft = styled.div``;
-
-const HeaderRight = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[3]};
-  align-items: center;
-`;
 
 const PeriodSelector = styled.div`
   display: flex;
@@ -59,25 +44,13 @@ const PeriodButton = styled.button<{ $active: boolean }>`
   }
 `;
 
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
+const HeaderActions = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing[3]};
+  align-items: center;
 `;
 
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
-
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: ${({ theme }) => theme.spacing[4]};
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const StatCard = styled(Card)`
+const AnalyticsStatCard = styled(Card)`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -116,13 +89,6 @@ const StatIcon = styled.div<{ $color: string }>`
   display: flex;
   align-items: center;
   justify-content: center;
-`;
-
-const SectionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes.xl};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
 `;
 
 const ChartsGrid = styled.div`
@@ -338,35 +304,33 @@ export default function AnalyticsPage() {
 
   return (
     <div>
-      <PageHeader>
-        <HeaderLeft>
-          <PageTitle>Analytics</PageTitle>
-          <PageDescription>
-            Track your social media performance across platforms
-          </PageDescription>
-        </HeaderLeft>
-        <HeaderRight>
-          <PeriodSelector>
-            {PERIODS.map((p) => (
-              <PeriodButton
-                key={p.value}
-                $active={period === p.value}
-                onClick={() => setPeriod(p.value)}
-              >
-                {p.label}
-              </PeriodButton>
-            ))}
-          </PeriodSelector>
-          <Button variant="secondary" onClick={handleExportData}>
-            <Download size={18} />
-            Export
-          </Button>
-        </HeaderRight>
-      </PageHeader>
+      <PageHeader
+        title="Analytics"
+        description="Track your social media performance across platforms"
+        actions={
+          <HeaderActions>
+            <PeriodSelector>
+              {PERIODS.map((p) => (
+                <PeriodButton
+                  key={p.value}
+                  $active={period === p.value}
+                  onClick={() => setPeriod(p.value)}
+                >
+                  {p.label}
+                </PeriodButton>
+              ))}
+            </PeriodSelector>
+            <Button variant="secondary" onClick={handleExportData}>
+              <Download size={18} />
+              Export
+            </Button>
+          </HeaderActions>
+        }
+      />
 
-      <StatsGrid>
+      <StatsGrid minColumnWidth="240px">
         {stats.map((stat) => (
-          <StatCard key={stat.label} padding="md">
+          <AnalyticsStatCard key={stat.label} padding="md">
             <StatInfo>
               <StatLabel>{stat.label}</StatLabel>
               <StatValue>{formatNumber(stat.value as number)}</StatValue>
@@ -382,7 +346,7 @@ export default function AnalyticsPage() {
             <StatIcon $color={stat.color}>
               <stat.icon size={24} />
             </StatIcon>
-          </StatCard>
+          </AnalyticsStatCard>
         ))}
       </StatsGrid>
 
