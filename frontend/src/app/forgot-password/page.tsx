@@ -3,72 +3,15 @@
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import styled from 'styled-components';
-import { Repeat, ArrowLeft, Mail, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Button, Input, Card, Alert } from '@/components/ui';
-
-const PageContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: ${({ theme }) => theme.spacing[4]};
-  background: ${({ theme }) => 
-    theme.mode === 'dark' 
-      ? `linear-gradient(135deg, ${theme.colors.neutral[900]} 0%, ${theme.colors.neutral[800]} 100%)`
-      : `linear-gradient(135deg, ${theme.colors.neutral[100]} 0%, ${theme.colors.neutral[50]} 100%)`
-  };
-`;
-
-const ForgotCard = styled(Card)`
-  width: 100%;
-  max-width: 400px;
-  box-shadow: ${({ theme }) => theme.shadows.xl};
-`;
-
-const ForgotCardContent = styled(Card.Content)`
-  padding: 2rem;
-`;
-
-const Logo = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const LogoIcon = styled.div`
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary[500]} 0%, ${({ theme }) => theme.colors.primary[600]} 100%);
-  color: white;
-  border-radius: ${({ theme }) => theme.borderRadius.xl};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: ${({ theme }) => theme.spacing[3]};
-  box-shadow: 0 4px 14px ${({ theme }) => theme.colors.primary[500]}40;
-`;
-
-const LogoText = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  color: ${({ theme }) => theme.colors.primary[600]};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-`;
-
-const Subtitle = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-  text-align: center;
-`;
+import { Button, Input, Alert, AuthLayout } from '@/components/ui';
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing[4]};
 `;
-
 
 const SuccessMessage = styled.div`
   display: flex;
@@ -147,75 +90,65 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <PageContainer>
-      <ForgotCard padding="none">
-        <ForgotCardContent>
-          <Logo>
-            <LogoIcon>
-              <Repeat size={28} />
-            </LogoIcon>
-            <LogoText>ChirpSyncer</LogoText>
-            {!isSuccess && (
-              <Subtitle>
-                Enter your email address and we&apos;ll send you a link to reset your password.
-              </Subtitle>
-            )}
-          </Logo>
+    <AuthLayout
+      subtitle={
+        isSuccess
+          ? undefined
+          : "Enter your email address and we'll send you a link to reset your password."
+      }
+    >
+      {isSuccess ? (
+        <SuccessMessage>
+          <SuccessIcon>
+            <CheckCircle size={32} />
+          </SuccessIcon>
+          <SuccessTitle>Check your email</SuccessTitle>
+          <SuccessText>
+            If an account with that email exists, we&apos;ve sent you a password reset link.
+            Please check your inbox and spam folder.
+          </SuccessText>
 
-          {isSuccess ? (
-            <SuccessMessage>
-              <SuccessIcon>
-                <CheckCircle size={32} />
-              </SuccessIcon>
-              <SuccessTitle>Check your email</SuccessTitle>
-              <SuccessText>
-                If an account with that email exists, we&apos;ve sent you a password reset link.
-                Please check your inbox and spam folder.
-              </SuccessText>
-              
-              {devResetUrl && (
-                <Alert variant="warning" title="Development Mode">
-                  Email sending is disabled. Use this link to reset your password:
-                  <br />
-                  <DevNoteLink href={devResetUrl}>{devResetUrl}</DevNoteLink>
-                </Alert>
-              )}
-              
-              <BackLink href="/login">
-                <ArrowLeft size={16} />
-                Back to sign in
-              </BackLink>
-            </SuccessMessage>
-          ) : (
-            <>
-              <Form onSubmit={handleSubmit}>
-              {error && <Alert variant="error">{error}</Alert>}
-
-                <Input
-                  label="Email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
-                  required
-                  fullWidth
-                  autoComplete="email"
-                />
-
-                <Button type="submit" fullWidth isLoading={isLoading}>
-                  <Mail size={18} />
-                  Send Reset Link
-                </Button>
-              </Form>
-
-              <BackLink href="/login">
-                <ArrowLeft size={16} />
-                Back to sign in
-              </BackLink>
-            </>
+          {devResetUrl && (
+            <Alert variant="warning" title="Development Mode">
+              Email sending is disabled. Use this link to reset your password:
+              <br />
+              <DevNoteLink href={devResetUrl}>{devResetUrl}</DevNoteLink>
+            </Alert>
           )}
-        </ForgotCardContent>
-      </ForgotCard>
-    </PageContainer>
+
+          <BackLink href="/login">
+            <ArrowLeft size={16} />
+            Back to sign in
+          </BackLink>
+        </SuccessMessage>
+      ) : (
+        <>
+          <Form onSubmit={handleSubmit}>
+            {error && <Alert variant="error">{error}</Alert>}
+
+            <Input
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email address"
+              required
+              fullWidth
+              autoComplete="email"
+            />
+
+            <Button type="submit" fullWidth isLoading={isLoading}>
+              <Mail size={18} />
+              Send Reset Link
+            </Button>
+          </Form>
+
+          <BackLink href="/login">
+            <ArrowLeft size={16} />
+            Back to sign in
+          </BackLink>
+        </>
+      )}
+    </AuthLayout>
   );
 }
