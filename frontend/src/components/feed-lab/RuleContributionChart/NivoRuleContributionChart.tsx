@@ -5,6 +5,7 @@
  *
  * Horizontal bar chart using Nivo for rule contributions.
  * Shows positive (boost) and negative (demote) contributions.
+ * Supports both direct contributions and explanation props.
  */
 
 import { memo, useMemo, type FC } from 'react';
@@ -12,15 +13,34 @@ import styled, { useTheme } from 'styled-components';
 import { ResponsiveBar } from '@nivo/bar';
 import { nivoLightTheme, chartAnimation } from '@/styles/nivoTheme';
 import { formatContribution } from '../shared';
-import type { RuleContribution } from '../shared';
+import type { RuleContribution, FeedExplanation } from '../shared';
 
-export interface NivoRuleContributionChartProps {
+/** Props for direct contributions mode */
+export interface NivoRuleContributionChartDirectProps {
   contributions: RuleContribution[];
   baseScore?: number;
   totalScore?: number;
   onRuleHover?: (ruleId: string | null) => void;
   onRuleClick?: (ruleId: string) => void;
   height?: number;
+}
+
+/** Props for explanation mode (used by WhyAmISeeingThis) */
+export interface NivoRuleContributionChartExplanationProps {
+  explanation: FeedExplanation;
+  onRuleHover?: (ruleId: string | null) => void;
+  onRuleClick?: (ruleId: string) => void;
+  height?: number;
+}
+
+export type NivoRuleContributionChartProps =
+  | NivoRuleContributionChartDirectProps
+  | NivoRuleContributionChartExplanationProps;
+
+function isExplanationProps(
+  props: NivoRuleContributionChartProps
+): props is NivoRuleContributionChartExplanationProps {
+  return 'explanation' in props;
 }
 
 // Colors for rule types
@@ -83,15 +103,31 @@ interface BarData {
   [key: string]: string | number;
 }
 
-export const NivoRuleContributionChart: FC<NivoRuleContributionChartProps> = memo(({
-  contributions,
-  baseScore = 50,
-  totalScore,
-  onRuleHover,
-  onRuleClick,
-  height = 200,
-}) => {
+export const NivoRuleContributionChart: FC<NivoRuleContributionChartProps> = memo((props) => {
   const theme = useTheme();
+  const { onRuleHover, onRuleClick, height = 200 } = props;
+
+  // Normalize props to handle both formats
+  const { baseScore, totalScore, contributions } = useMemo(() => {
+    if (isExplanationProps(props)) {
+      const { explanation } = props;
+      return {
+        baseScore: explanation.baseScore,
+        totalScore: explanation.totalScore,
+        contributions: explanation.appliedRules.map((rule) => ({
+          ruleId: rule.ruleId,
+          ruleName: rule.ruleName,
+          ruleType: rule.type,
+          contribution: rule.contribution,
+        })),
+      };
+    }
+    return {
+      baseScore: props.baseScore ?? 50,
+      totalScore: props.totalScore,
+      contributions: props.contributions,
+    };
+  }, [props]);
 
   // Calculate total if not provided
   const calculatedTotal = useMemo(() => {
