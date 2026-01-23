@@ -83,7 +83,25 @@ export interface PlatformMapping {
 }
 
 // Supported platforms
-export type PlatformType = 'twitter' | 'bluesky' | 'mastodon' | 'instagram' | 'threads' | 'linkedin' | 'facebook';
+export type PlatformType =
+  | 'twitter'
+  | 'bluesky'
+  | 'mastodon'
+  | 'instagram'
+  | 'threads'
+  | 'linkedin'
+  | 'facebook'
+  | 'nostr'
+  | 'matrix'
+  // Coming soon platforms
+  | 'tiktok'
+  | 'youtube'
+  | 'pinterest'
+  | 'tumblr'
+  | 'reddit'
+  | 'discord'
+  | 'dsnp'
+  | 'ssb';
 
 // Platform connector configuration
 export interface PlatformConnector {
@@ -94,7 +112,7 @@ export interface PlatformConnector {
   icon: string;
   color: string;
   capabilities: PlatformCapabilities;
-  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto';
+  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix';
   status: 'available' | 'coming_soon' | 'beta';
 }
 
@@ -302,6 +320,159 @@ export const PLATFORM_DEFAULTS: Record<PlatformType, PlatformCapabilities> = {
     characterLimit: 63206,
     altTextLimit: 100,
   },
+  nostr: {
+    publish: true,
+    delete: true, // Via deletion events
+    edit: false,
+    read: true,
+    metrics: false, // Decentralized, no central metrics
+    schedule: false,
+    threads: true, // Reply threads
+    media: {
+      images: true, // Via URLs
+      videos: true,
+      gifs: true,
+      maxImages: 10,
+    },
+    interactions: {
+      like: true, // Reactions (kind 7)
+      repost: true, // Reposts (kind 6)
+      reply: true,
+      quote: false,
+      bookmark: false,
+    },
+    characterLimit: 10000, // No hard limit, recommended
+    altTextLimit: 1000,
+  },
+  matrix: {
+    publish: true, // Send messages
+    delete: false, // Redaction requires special permissions
+    edit: true, // Message editing supported
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: true, // Reply threads
+    media: {
+      images: true,
+      videos: true,
+      gifs: true,
+      maxImages: 1, // Per message
+    },
+    interactions: {
+      like: true, // Reactions
+      repost: false,
+      reply: true,
+      quote: false,
+      bookmark: false,
+    },
+    characterLimit: 65535,
+    altTextLimit: 500,
+  },
+  // Coming soon platforms - placeholder capabilities
+  tiktok: {
+    publish: true,
+    delete: true,
+    edit: false,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: false,
+    media: { images: false, videos: true, gifs: false, maxImages: 0 },
+    interactions: { like: false, repost: false, reply: true, quote: false, bookmark: false },
+    characterLimit: 2200,
+    altTextLimit: 150,
+  },
+  youtube: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: false,
+    media: { images: false, videos: true, gifs: false, maxImages: 0 },
+    interactions: { like: false, repost: false, reply: true, quote: false, bookmark: false },
+    characterLimit: 5000,
+    altTextLimit: 0,
+  },
+  pinterest: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: true, gifs: false, maxImages: 1 },
+    interactions: { like: false, repost: true, reply: false, quote: false, bookmark: true },
+    characterLimit: 500,
+    altTextLimit: 500,
+  },
+  tumblr: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: false,
+    media: { images: true, videos: true, gifs: true, maxImages: 10 },
+    interactions: { like: true, repost: true, reply: true, quote: false, bookmark: false },
+    characterLimit: 4096,
+    altTextLimit: 1000,
+  },
+  reddit: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: true,
+    media: { images: true, videos: true, gifs: true, maxImages: 20 },
+    interactions: { like: true, repost: false, reply: true, quote: false, bookmark: true },
+    characterLimit: 40000,
+    altTextLimit: 0,
+  },
+  discord: {
+    publish: true, // Webhooks
+    delete: false,
+    edit: false,
+    read: false, // Webhooks are write-only
+    metrics: false,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: true, gifs: true, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 2000,
+    altTextLimit: 0,
+  },
+  dsnp: {
+    publish: true,
+    delete: true,
+    edit: false,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: true,
+    media: { images: true, videos: true, gifs: true, maxImages: 4 },
+    interactions: { like: true, repost: true, reply: true, quote: false, bookmark: false },
+    characterLimit: 5000,
+    altTextLimit: 1000,
+  },
+  ssb: {
+    publish: true,
+    delete: false, // Append-only
+    edit: false,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: true,
+    media: { images: true, videos: false, gifs: false, maxImages: 4 },
+    interactions: { like: true, repost: false, reply: true, quote: false, bookmark: false },
+    characterLimit: 8192,
+    altTextLimit: 500,
+  },
 };
 
 // Available connectors
@@ -382,6 +553,119 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     capabilities: PLATFORM_DEFAULTS.facebook,
     auth_type: 'oauth2',
     status: 'beta',
+  },
+  // Decentralized protocols
+  {
+    id: 'nostr',
+    platform: 'nostr',
+    name: 'Nostr',
+    description: 'Decentralized social protocol with cryptographic identity',
+    icon: '⚡',
+    color: '#8B5CF6',
+    capabilities: PLATFORM_DEFAULTS.nostr,
+    auth_type: 'nostr',
+    status: 'beta',
+  },
+  {
+    id: 'matrix',
+    platform: 'matrix',
+    name: 'Matrix',
+    description: 'Federated messaging with bridges to other platforms',
+    icon: '[m]',
+    color: '#0DBD8B',
+    capabilities: PLATFORM_DEFAULTS.matrix,
+    auth_type: 'matrix',
+    status: 'beta',
+  },
+  // Coming soon platforms
+  {
+    id: 'tiktok',
+    platform: 'tiktok',
+    name: 'TikTok',
+    description: 'Short-form video platform (requires Business account)',
+    icon: '♪',
+    color: '#000000',
+    capabilities: PLATFORM_DEFAULTS.tiktok,
+    auth_type: 'oauth2',
+    status: 'coming_soon',
+  },
+  {
+    id: 'youtube',
+    platform: 'youtube',
+    name: 'YouTube',
+    description: 'Video platform with Shorts support',
+    icon: '▶',
+    color: '#FF0000',
+    capabilities: PLATFORM_DEFAULTS.youtube,
+    auth_type: 'oauth2',
+    status: 'coming_soon',
+  },
+  {
+    id: 'pinterest',
+    platform: 'pinterest',
+    name: 'Pinterest',
+    description: 'Visual discovery and bookmarking platform',
+    icon: 'P',
+    color: '#E60023',
+    capabilities: PLATFORM_DEFAULTS.pinterest,
+    auth_type: 'oauth2',
+    status: 'coming_soon',
+  },
+  {
+    id: 'tumblr',
+    platform: 'tumblr',
+    name: 'Tumblr',
+    description: 'Microblogging with multimedia posts',
+    icon: 't',
+    color: '#36465D',
+    capabilities: PLATFORM_DEFAULTS.tumblr,
+    auth_type: 'oauth2',
+    status: 'coming_soon',
+  },
+  {
+    id: 'reddit',
+    platform: 'reddit',
+    name: 'Reddit',
+    description: 'Community-driven discussions and content',
+    icon: '®',
+    color: '#FF4500',
+    capabilities: PLATFORM_DEFAULTS.reddit,
+    auth_type: 'oauth2',
+    status: 'coming_soon',
+  },
+  {
+    id: 'discord',
+    platform: 'discord',
+    name: 'Discord',
+    description: 'Webhook notifications to Discord channels',
+    icon: 'D',
+    color: '#5865F2',
+    capabilities: PLATFORM_DEFAULTS.discord,
+    auth_type: 'api_key', // Webhooks
+    status: 'coming_soon',
+  },
+  // Experimental decentralized protocols
+  {
+    id: 'dsnp',
+    platform: 'dsnp',
+    name: 'DSNP',
+    description: 'Decentralized Social Networking Protocol (Frequency)',
+    icon: '◈',
+    color: '#6366F1',
+    capabilities: PLATFORM_DEFAULTS.dsnp,
+    auth_type: 'api_key',
+    status: 'coming_soon',
+  },
+  {
+    id: 'ssb',
+    platform: 'ssb',
+    name: 'Scuttlebutt',
+    description: 'P2P offline-first social protocol',
+    icon: '🦀',
+    color: '#FF6B6B',
+    capabilities: PLATFORM_DEFAULTS.ssb,
+    auth_type: 'api_key',
+    status: 'coming_soon',
   },
 ];
 
@@ -495,7 +779,7 @@ export function useConnectPlatform() {
         // Remove internal _mode field before sending
         const { _mode, ...cleanCredentials } = credentials;
         credentials = cleanCredentials;
-      } else if (platform === 'bluesky' || platform === 'instagram' || platform === 'threads' || platform === 'linkedin' || platform === 'facebook') {
+      } else if (platform === 'bluesky' || platform === 'instagram' || platform === 'threads' || platform === 'linkedin' || platform === 'facebook' || platform === 'nostr' || platform === 'matrix') {
         credentialType = 'api';
       } else {
         credentialType = 'scraping';

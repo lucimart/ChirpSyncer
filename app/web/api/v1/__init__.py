@@ -72,6 +72,9 @@ from app.web.api.v1.twitter import twitter_bp  # noqa: E402
 from app.web.api.v1.threads import threads_bp  # noqa: E402
 from app.web.api.v1.linkedin import linkedin_bp  # noqa: E402
 from app.web.api.v1.facebook import facebook_bp  # noqa: E402
+from app.web.api.v1.notification_settings import notification_settings_bp, unsubscribe_bp  # noqa: E402
+from app.web.api.v1.nostr import nostr_bp  # noqa: E402
+from app.web.api.v1.matrix import matrix_bp  # noqa: E402
 
 api_v1.register_blueprint(auth_bp)
 api_v1.register_blueprint(dashboard_bp)
@@ -97,3 +100,7 @@ api_v1.register_blueprint(twitter_bp)
 api_v1.register_blueprint(threads_bp)
 api_v1.register_blueprint(linkedin_bp)
 api_v1.register_blueprint(facebook_bp)
+api_v1.register_blueprint(notification_settings_bp)
+api_v1.register_blueprint(unsubscribe_bp)
+api_v1.register_blueprint(nostr_bp)
+api_v1.register_blueprint(matrix_bp)

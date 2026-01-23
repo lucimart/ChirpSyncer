@@ -630,6 +630,67 @@ export default function ConnectorsPage() {
             )}
           </Stack>
         );
+      case 'nostr':
+        return (
+          <Stack gap={4}>
+            <SmallText>
+              Nostr uses cryptographic key pairs for identity.
+              You can provide your private key (nsec) for full access, or just public key (npub) for read-only.
+            </SmallText>
+            <Input
+              label="Private Key (nsec or hex)"
+              type="password"
+              value={credentials.private_key || ''}
+              onChange={(e) => setCredentials({ ...credentials, private_key: e.target.value })}
+              hint="Your Nostr private key for signing events"
+              fullWidth
+            />
+            <Input
+              label="Public Key (optional if private key provided)"
+              type="text"
+              value={credentials.public_key || ''}
+              onChange={(e) => setCredentials({ ...credentials, public_key: e.target.value })}
+              placeholder="npub1... or hex"
+              hint="Your Nostr public key (npub or hex format)"
+              fullWidth
+            />
+            <Input
+              label="Custom Relays (optional)"
+              type="text"
+              value={credentials.relays || ''}
+              onChange={(e) => setCredentials({ ...credentials, relays: e.target.value })}
+              placeholder="wss://relay.damus.io,wss://nos.lol"
+              hint="Comma-separated list of relay URLs"
+              fullWidth
+            />
+          </Stack>
+        );
+      case 'matrix':
+        return (
+          <Stack gap={4}>
+            <SmallText>
+              Matrix uses homeserver-based authentication.
+              You&apos;ll need an access token from your Matrix homeserver.
+            </SmallText>
+            <Input
+              label="Homeserver URL"
+              type="text"
+              value={credentials.homeserver || ''}
+              onChange={(e) => setCredentials({ ...credentials, homeserver: e.target.value })}
+              placeholder="https://matrix.org"
+              hint="Your Matrix homeserver URL"
+              fullWidth
+            />
+            <Input
+              label="Access Token"
+              type="password"
+              value={credentials.access_token || ''}
+              onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
+              hint="Get this from Element: Settings > Help & About > Access Token"
+              fullWidth
+            />
+          </Stack>
+        );
       default:
         return null;
     }
