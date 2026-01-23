@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback, useMemo, type FC, type CSSProperties } from 'react';
+import { memo, useCallback, useMemo, useState, useEffect, type FC, type CSSProperties } from 'react';
 import {
   ReactFlow,
   Background,
@@ -10,6 +10,8 @@ import {
   Position,
   useNodesState,
   useEdgesState,
+  useReactFlow,
+  ReactFlowProvider,
   type Node,
   type Edge,
   type NodeProps,
@@ -21,6 +23,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import styled, { useTheme } from 'styled-components';
 import { Button, EmptyState } from '../../ui';
+import { FlowParticleOverlay, type FlowEdge } from '../../canvas/visualizations/FlowParticleOverlay';
 import type { Platform, SyncConnection, FlowDiagramData } from '../types';
 import { LEGEND_ITEMS, STATUS_COLORS, PLATFORM_COLORS, DEFAULT_COLOR } from '../constants';
 
@@ -32,6 +35,8 @@ interface FlowDiagramProps {
   onNodeClick: (platform: Platform) => void;
   onEdgeClick: (connection: SyncConnection) => void;
   compact?: boolean;
+  /** Show animated particles flowing along edges */
+  showParticles?: boolean;
 }
 
 // Styled containers
@@ -52,6 +57,7 @@ const Title = styled.h3`
 `;
 
 const FlowWrapper = styled.div<{ $compact: boolean }>`
+  position: relative;
   height: ${({ $compact }) => ($compact ? '280px' : '400px')};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   overflow: hidden;
@@ -403,8 +409,10 @@ export const FlowDiagram: FC<FlowDiagramProps> = memo(function FlowDiagram({
   onNodeClick,
   onEdgeClick,
   compact = false,
+  showParticles = false,
 }) {
   const theme = useTheme();
+  const [flowDimensions, setFlowDimensions] = useState({ width: 600, height: compact ? 280 : 400 });
 
   // Separate hub from other platforms
   const { hub, platforms } = useMemo(() => {
@@ -479,6 +487,41 @@ export const FlowDiagram: FC<FlowDiagramProps> = memo(function FlowDiagram({
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  // Calculate particle edges from node positions
+  const particleEdges = useMemo((): FlowEdge[] => {
+    if (!showParticles) return [];
+
+    // Build a map of node positions (center of each node)
+    const nodePositions = new Map<string, { x: number; y: number }>();
+    nodes.forEach((node) => {
+      // Approximate node center (adjust based on node dimensions)
+      const nodeWidth = node.type === 'hub' ? 140 : 120;
+      const nodeHeight = node.type === 'hub' ? 140 : 100;
+      nodePositions.set(node.id, {
+        x: node.position.x + nodeWidth / 2,
+        y: node.position.y + nodeHeight / 2,
+      });
+    });
+
+    // Create FlowEdge array for particle overlay
+    return data.connections.map((conn) => {
+      const sourcePos = nodePositions.get(conn.sourceId);
+      const targetPos = nodePositions.get(conn.targetId);
+      const status = conn.status;
+      const color = STATUS_COLORS[status as keyof typeof STATUS_COLORS] || DEFAULT_COLOR;
+
+      return {
+        id: conn.id,
+        sourceX: sourcePos?.x ?? 0,
+        sourceY: sourcePos?.y ?? 0,
+        targetX: targetPos?.x ?? 0,
+        targetY: targetPos?.y ?? 0,
+        color,
+        active: status === 'active',
+      };
+    });
+  }, [showParticles, nodes, data.connections]);
 
   // Handle node click
   const handleNodeClick = useCallback(
@@ -569,6 +612,17 @@ export const FlowDiagram: FC<FlowDiagramProps> = memo(function FlowDiagram({
             />
           )}
         </ReactFlow>
+        {showParticles && particleEdges.length > 0 && (
+          <FlowParticleOverlay
+            edges={particleEdges}
+            width={flowDimensions.width}
+            height={flowDimensions.height}
+            active={true}
+            particlesPerEdge={2}
+            speed={0.4}
+            particleSize={5}
+          />
+        )}
       </FlowWrapper>
       <FlowLegend />
     </DiagramContainer>
