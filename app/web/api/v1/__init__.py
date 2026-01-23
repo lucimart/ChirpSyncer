@@ -93,6 +93,17 @@ from app.web.api.v1.pixelfed import pixelfed_bp  # noqa: E402
 from app.web.api.v1.lemmy import lemmy_bp  # noqa: E402
 from app.web.api.v1.rss import rss_bp  # noqa: E402
 from app.web.api.v1.outgoing_webhooks import outgoing_webhooks_bp  # noqa: E402
+from app.web.api.v1.wordpress import wordpress_bp  # noqa: E402
+from app.web.api.v1.ghost import ghost_bp  # noqa: E402
+from app.web.api.v1.writeas import writeas_bp  # noqa: E402
+from app.web.api.v1.microblog import microblog_bp  # noqa: E402
+from app.web.api.v1.buttondown import buttondown_bp  # noqa: E402
+from app.web.api.v1.convertkit import convertkit_bp  # noqa: E402
+from app.web.api.v1.beehiiv import beehiiv_bp  # noqa: E402
+from app.web.api.v1.misskey import misskey_bp  # noqa: E402
+from app.web.api.v1.peertube import peertube_bp  # noqa: E402
+from app.web.api.v1.bookwyrm import bookwyrm_bp  # noqa: E402
+from app.web.api.v1.lens import lens_bp  # noqa: E402
 
 api_v1.register_blueprint(auth_bp)
 api_v1.register_blueprint(dashboard_bp)
@@ -140,3 +151,14 @@ api_v1.register_blueprint(pixelfed_bp)
 api_v1.register_blueprint(lemmy_bp)
 api_v1.register_blueprint(rss_bp)
 api_v1.register_blueprint(outgoing_webhooks_bp)
+api_v1.register_blueprint(wordpress_bp)
+api_v1.register_blueprint(ghost_bp)
+api_v1.register_blueprint(writeas_bp)
+api_v1.register_blueprint(microblog_bp)
+api_v1.register_blueprint(buttondown_bp)
+api_v1.register_blueprint(convertkit_bp)
+api_v1.register_blueprint(beehiiv_bp)
+api_v1.register_blueprint(misskey_bp)
+api_v1.register_blueprint(peertube_bp)
+api_v1.register_blueprint(bookwyrm_bp)
+api_v1.register_blueprint(lens_bp)
