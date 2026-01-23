@@ -218,7 +218,8 @@ describe('RuleContributionChart', () => {
     );
 
     expect(screen.getByLabelText(/feed score breakdown chart/i)).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: /bar chart/i })).toBeInTheDocument();
+    // SVG uses aria-label instead of role="img" to allow interactive children
+    expect(screen.getByLabelText(/bar chart showing rule contributions/i)).toBeInTheDocument();
   });
 
   it('supports keyboard navigation on bars', () => {
