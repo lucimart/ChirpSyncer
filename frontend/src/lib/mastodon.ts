@@ -6,7 +6,7 @@ import { CanonicalPost, PlatformMapping } from './connectors';
 export interface MastodonInstance {
   uri: string;
   title: string;
-  short_description: string;
+  shortDescription: string;
   description: string;
   email: string;
   version: string;
@@ -51,17 +51,17 @@ export interface MastodonAccount {
   id: string;
   username: string;
   acct: string;
-  display_name: string;
+  displayName: string;
   locked: boolean;
   bot: boolean;
-  created_at: string;
+  createdAt: string;
   note: string;
   url: string;
   avatar: string;
   header: string;
-  followers_count: number;
-  following_count: number;
-  statuses_count: number;
+  followersCount: number;
+  followingCount: number;
+  statusesCount: number;
   emojis: MastodonEmoji[];
   fields: MastodonField[];
 }
@@ -81,22 +81,22 @@ export interface MastodonField {
 
 export interface MastodonStatus {
   id: string;
-  created_at: string;
-  in_reply_to_id?: string;
+  createdAt: string;
+  inReplyToId?: string;
   sensitive: boolean;
-  spoiler_text: string;
+  spoilerText: string;
   visibility: 'public' | 'unlisted' | 'private' | 'direct';
   language?: string;
   uri: string;
   url?: string;
-  replies_count: number;
-  reblogs_count: number;
-  favourites_count: number;
-  edited_at?: string;
+  repliesCount: number;
+  reblogsCount: number;
+  favouritesCount: number;
+  editedAt?: string;
   content: string;
   reblog?: MastodonStatus;
   account: MastodonAccount;
-  media_attachments: MastodonMediaAttachment[];
+  mediaAttachments: MastodonMediaAttachment[];
   mentions: MastodonMention[];
   tags: MastodonTag[];
   emojis: MastodonEmoji[];
@@ -111,7 +111,7 @@ export interface MastodonMediaAttachment {
   id: string;
   type: 'unknown' | 'image' | 'gifv' | 'video' | 'audio';
   url: string;
-  preview_url?: string;
+  previewUrl?: string;
   description?: string;
   meta?: { original?: { width: number; height: number; duration?: number } };
 }
@@ -145,9 +145,17 @@ export interface MastodonPoll {
   options: { title: string; votes_count?: number }[];
 }
 
+export interface MastodonTimeline {
+  statuses: MastodonStatus[];
+}
+
 // Utility Functions
 
 export function stripHtml(html: string): string {
+  if (typeof window === 'undefined') {
+    // Server-side: simple regex strip
+    return html.replace(/<[^>]*>/g, '');
+  }
   const doc = new DOMParser().parseFromString(html, 'text/html');
   return doc.body.textContent || '';
 }
@@ -156,14 +164,14 @@ export function mastodonToCanonical(status: MastodonStatus): CanonicalPost {
   return {
     id: status.id,
     content: stripHtml(status.content),
-    created_at: status.created_at,
+    created_at: status.createdAt,
     author: {
       id: status.account.id,
       handle: status.account.acct,
-      displayName: status.account.display_name || status.account.username,
+      displayName: status.account.displayName || status.account.username,
       avatar: status.account.avatar,
     },
-    media: status.media_attachments.map((m) => ({
+    media: status.mediaAttachments.map((m) => ({
       type: m.type === 'gifv' ? 'gif' as const : m.type === 'video' ? 'video' as const : 'image' as const,
       url: m.url,
       alt_text: m.description,
@@ -171,71 +179,139 @@ export function mastodonToCanonical(status: MastodonStatus): CanonicalPost {
       height: m.meta?.original?.height,
     })),
     metrics: {
-      likes: status.favourites_count,
-      reposts: status.reblogs_count,
-      replies: status.replies_count,
+      likes: status.favouritesCount,
+      reposts: status.reblogsCount,
+      replies: status.repliesCount,
       quotes: 0,
     },
-    reply_to: status.in_reply_to_id || undefined,
+    reply_to: status.inReplyToId || undefined,
     language: status.language || undefined,
   };
 }
 
+// API Client wrapper for Mastodon endpoints
+class MastodonApiClient {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const response = await fetch(`/api/v1/mastodon${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      credentials: 'include',
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP ${response.status}`);
+    }
+
+    return data.data;
+  }
+
+  async getInstance(): Promise<MastodonInstance> {
+    return this.request('/instance');
+  }
+
+  async getHomeTimeline(maxId?: string, limit = 40): Promise<MastodonTimeline> {
+    const params = new URLSearchParams();
+    if (maxId) params.set('max_id', maxId);
+    params.set('limit', String(limit));
+    return this.request(`/timeline/home?${params.toString()}`);
+  }
+
+  async getPublicTimeline(maxId?: string, limit = 40, local = false): Promise<MastodonTimeline> {
+    const params = new URLSearchParams();
+    if (maxId) params.set('max_id', maxId);
+    params.set('limit', String(limit));
+    params.set('local', String(local));
+    return this.request(`/timeline/public?${params.toString()}`);
+  }
+
+  async getStatus(statusId: string): Promise<MastodonStatus> {
+    return this.request(`/status/${statusId}`);
+  }
+
+  async createStatus(params: {
+    status: string;
+    visibility?: string;
+    in_reply_to_id?: string;
+    sensitive?: boolean;
+    spoiler_text?: string;
+  }): Promise<MastodonStatus> {
+    return this.request('/status', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    });
+  }
+
+  async deleteStatus(statusId: string): Promise<{ deleted: boolean }> {
+    return this.request(`/status/${statusId}`, { method: 'DELETE' });
+  }
+
+  async favouriteStatus(statusId: string): Promise<MastodonStatus> {
+    return this.request(`/status/${statusId}/favourite`, { method: 'POST' });
+  }
+
+  async unfavouriteStatus(statusId: string): Promise<MastodonStatus> {
+    return this.request(`/status/${statusId}/unfavourite`, { method: 'POST' });
+  }
+
+  async reblogStatus(statusId: string): Promise<MastodonStatus> {
+    return this.request(`/status/${statusId}/reblog`, { method: 'POST' });
+  }
+
+  async unreblogStatus(statusId: string): Promise<MastodonStatus> {
+    return this.request(`/status/${statusId}/unreblog`, { method: 'POST' });
+  }
+
+  async getAccount(accountId: string): Promise<MastodonAccount> {
+    return this.request(`/account/${accountId}`);
+  }
+
+  async getAccountStatuses(accountId: string, maxId?: string, limit = 40): Promise<MastodonTimeline> {
+    const params = new URLSearchParams();
+    if (maxId) params.set('max_id', maxId);
+    params.set('limit', String(limit));
+    return this.request(`/account/${accountId}/statuses?${params.toString()}`);
+  }
+
+  async verifyCredentials(): Promise<MastodonAccount> {
+    return this.request('/verify_credentials');
+  }
+}
+
+export const mastodonApi = new MastodonApiClient();
+
 // Hooks
 
-export function useMastodonInstance(instanceUrl?: string) {
+export function useMastodonInstance() {
   return useQuery<MastodonInstance>({
-    queryKey: ['mastodon-instance', instanceUrl],
-    queryFn: async () => ({
-      uri: instanceUrl || 'mastodon.social',
-      title: 'Mastodon',
-      short_description: 'A decentralized social network',
-      description: 'The original Mastodon server',
-      email: 'admin@mastodon.social',
-      version: '4.2.0',
-      urls: { streaming_api: 'wss://mastodon.social' },
-      stats: { user_count: 1500000, status_count: 50000000, domain_count: 25000 },
-      languages: ['en'],
-      registrations: true,
-      approval_required: false,
-      invites_enabled: true,
-      configuration: {
-        statuses: { max_characters: 500, max_media_attachments: 4, characters_reserved_per_url: 23 },
-        media_attachments: { supported_mime_types: ['image/jpeg', 'image/png', 'video/mp4'], image_size_limit: 10485760, video_size_limit: 41943040 },
-        polls: { max_options: 4, max_characters_per_option: 50, min_expiration: 300, max_expiration: 2629746 },
-      },
-      rules: [{ id: '1', text: 'Be respectful' }],
-    }),
-    enabled: !!instanceUrl,
+    queryKey: ['mastodon-instance'],
+    queryFn: () => mastodonApi.getInstance(),
   });
 }
 
-export function useMastodonTimeline() {
-  return useQuery<{ statuses: MastodonStatus[] }>({
-    queryKey: ['mastodon-timeline'],
-    queryFn: async () => ({
-      statuses: Array.from({ length: 20 }, (_, i) => ({
-        id: `status-${i}`,
-        created_at: new Date(Date.now() - i * 3600000).toISOString(),
-        sensitive: false,
-        spoiler_text: '',
-        visibility: 'public' as const,
-        language: 'en',
-        uri: `https://mastodon.social/users/user/statuses/${i}`,
-        url: `https://mastodon.social/@user/${i}`,
-        replies_count: Math.floor(Math.random() * 10),
-        reblogs_count: Math.floor(Math.random() * 20),
-        favourites_count: Math.floor(Math.random() * 50),
-        content: `<p>Mastodon post ${i + 1}</p>`,
-        account: {
-          id: 'user-1', username: 'user', acct: 'user@mastodon.social', display_name: 'User',
-          locked: false, bot: false, created_at: '2023-01-01T00:00:00.000Z', note: '',
-          url: 'https://mastodon.social/@user', avatar: '', header: '',
-          followers_count: 100, following_count: 50, statuses_count: 500, emojis: [], fields: [],
-        },
-        media_attachments: [], mentions: [], tags: [], emojis: [],
-      })),
-    }),
+export function useMastodonTimeline(maxId?: string) {
+  return useQuery<MastodonTimeline>({
+    queryKey: ['mastodon-timeline', maxId],
+    queryFn: () => mastodonApi.getHomeTimeline(maxId),
+  });
+}
+
+export function useMastodonPublicTimeline(maxId?: string, local = false) {
+  return useQuery<MastodonTimeline>({
+    queryKey: ['mastodon-public-timeline', maxId, local],
+    queryFn: () => mastodonApi.getPublicTimeline(maxId, 40, local),
+  });
+}
+
+export function useMastodonStatus(statusId?: string) {
+  return useQuery<MastodonStatus>({
+    queryKey: ['mastodon-status', statusId],
+    queryFn: () => mastodonApi.getStatus(statusId!),
+    enabled: !!statusId,
   });
 }
 
@@ -243,9 +319,14 @@ export function useCreateMastodonStatus() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (params: { status: string; visibility?: string }): Promise<PlatformMapping> => {
-      await new Promise((r) => setTimeout(r, 500));
-      const id = Date.now().toString();
-      return { platform: 'mastodon', native_id: id, url: `https://mastodon.social/@user/${id}`, status: 'synced', synced_at: new Date().toISOString() };
+      const status = await mastodonApi.createStatus(params);
+      return {
+        platform: 'mastodon',
+        native_id: status.id,
+        url: status.url || status.uri,
+        status: 'synced',
+        synced_at: new Date().toISOString(),
+      };
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['mastodon-timeline'] }),
   });
@@ -254,7 +335,7 @@ export function useCreateMastodonStatus() {
 export function useDeleteMastodonStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (statusId: string) => { await new Promise((r) => setTimeout(r, 300)); return { success: true }; },
+    mutationFn: (statusId: string) => mastodonApi.deleteStatus(statusId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['mastodon-timeline'] }),
   });
 }
@@ -262,7 +343,15 @@ export function useDeleteMastodonStatus() {
 export function useFavouriteMastodonStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (statusId: string) => { await new Promise((r) => setTimeout(r, 200)); return { success: true }; },
+    mutationFn: (statusId: string) => mastodonApi.favouriteStatus(statusId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['mastodon-timeline'] }),
+  });
+}
+
+export function useUnfavouriteMastodonStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (statusId: string) => mastodonApi.unfavouriteStatus(statusId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['mastodon-timeline'] }),
   });
 }
@@ -270,7 +359,38 @@ export function useFavouriteMastodonStatus() {
 export function useBoostMastodonStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (statusId: string) => { await new Promise((r) => setTimeout(r, 200)); return { success: true }; },
+    mutationFn: (statusId: string) => mastodonApi.reblogStatus(statusId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['mastodon-timeline'] }),
+  });
+}
+
+export function useUnboostMastodonStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (statusId: string) => mastodonApi.unreblogStatus(statusId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['mastodon-timeline'] }),
+  });
+}
+
+export function useMastodonAccount(accountId?: string) {
+  return useQuery<MastodonAccount>({
+    queryKey: ['mastodon-account', accountId],
+    queryFn: () => mastodonApi.getAccount(accountId!),
+    enabled: !!accountId,
+  });
+}
+
+export function useMastodonAccountStatuses(accountId?: string, maxId?: string) {
+  return useQuery<MastodonTimeline>({
+    queryKey: ['mastodon-account-statuses', accountId, maxId],
+    queryFn: () => mastodonApi.getAccountStatuses(accountId!, maxId),
+    enabled: !!accountId,
+  });
+}
+
+export function useMastodonCurrentUser() {
+  return useQuery<MastodonAccount>({
+    queryKey: ['mastodon-current-user'],
+    queryFn: () => mastodonApi.verifyCredentials(),
   });
 }

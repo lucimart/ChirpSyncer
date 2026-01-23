@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from './api';
 import { CanonicalPost, PlatformMapping } from './connectors';
 
 // AT Protocol Types
@@ -201,7 +202,9 @@ export function buildATUri(repo: string, collection: string, rkey: string): stri
   return `at://${repo}/${collection}/${rkey}`;
 }
 
-export function getPostUrl(handle: string, rkey: string): string {
+export function getPostUrl(handle: string, uri: string): string {
+  const parsed = parseATUri(uri);
+  const rkey = parsed?.rkey || uri.split('/').pop() || '';
   return `https://bsky.app/profile/${handle}/post/${rkey}`;
 }
 
@@ -320,26 +323,108 @@ export function canonicalToATProto(post: Partial<CanonicalPost>): Partial<ATProt
   };
 }
 
+// API Client wrapper for Bluesky endpoints
+class BlueskyApiClient {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const response = await fetch(`/api/v1/bluesky${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      credentials: 'include',
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP ${response.status}`);
+    }
+
+    return data.data;
+  }
+
+  async getProfile(handle: string): Promise<ATProtoProfile> {
+    return this.request(`/profile/${encodeURIComponent(handle)}`);
+  }
+
+  async getTimeline(cursor?: string, limit = 50): Promise<BlueskyTimeline> {
+    const params = new URLSearchParams();
+    if (cursor) params.set('cursor', cursor);
+    params.set('limit', String(limit));
+    return this.request(`/timeline?${params.toString()}`);
+  }
+
+  async getPost(uri: string): Promise<ATProtoPost> {
+    return this.request(`/post/${encodeURIComponent(uri)}`);
+  }
+
+  async createPost(text: string, replyTo?: { uri: string; cid: string }): Promise<{ uri: string; cid: string }> {
+    return this.request('/post', {
+      method: 'POST',
+      body: JSON.stringify({ text, reply_to: replyTo }),
+    });
+  }
+
+  async deletePost(uri: string): Promise<{ deleted: boolean }> {
+    return this.request(`/post/${encodeURIComponent(uri)}`, { method: 'DELETE' });
+  }
+
+  async like(uri: string, cid: string): Promise<{ uri: string }> {
+    return this.request('/like', {
+      method: 'POST',
+      body: JSON.stringify({ uri, cid }),
+    });
+  }
+
+  async unlike(likeUri: string): Promise<{ deleted: boolean }> {
+    return this.request('/unlike', {
+      method: 'POST',
+      body: JSON.stringify({ like_uri: likeUri }),
+    });
+  }
+
+  async repost(uri: string, cid: string): Promise<{ uri: string }> {
+    return this.request('/repost', {
+      method: 'POST',
+      body: JSON.stringify({ uri, cid }),
+    });
+  }
+
+  async unrepost(repostUri: string): Promise<{ deleted: boolean }> {
+    return this.request('/unrepost', {
+      method: 'POST',
+      body: JSON.stringify({ repost_uri: repostUri }),
+    });
+  }
+
+  async resolveHandle(identifier: string): Promise<ATProtoDID> {
+    return this.request(`/resolve/${encodeURIComponent(identifier)}`);
+  }
+
+  async getPopularFeeds(limit = 25, cursor?: string): Promise<{ cursor?: string; feeds: BlueskyFeed[] }> {
+    const params = new URLSearchParams();
+    params.set('limit', String(limit));
+    if (cursor) params.set('cursor', cursor);
+    return this.request(`/feeds/popular?${params.toString()}`);
+  }
+
+  async getAuthorFeed(handle: string, cursor?: string, limit = 50): Promise<BlueskyTimeline> {
+    const params = new URLSearchParams();
+    if (cursor) params.set('cursor', cursor);
+    params.set('limit', String(limit));
+    return this.request(`/author/${encodeURIComponent(handle)}/feed?${params.toString()}`);
+  }
+}
+
+export const blueskyApi = new BlueskyApiClient();
+
 // Hooks
 
 export function useBlueskyProfile(handle?: string) {
   return useQuery<ATProtoProfile>({
     queryKey: ['bluesky-profile', handle],
-    queryFn: async () => {
-      // Mock profile
-      return {
-        did: 'did:plc:example123',
-        handle: handle || 'user.bsky.social',
-        displayName: 'Example User',
-        description: 'A Bluesky user',
-        avatar: undefined,
-        banner: undefined,
-        followersCount: 150,
-        followsCount: 75,
-        postsCount: 320,
-        indexedAt: new Date().toISOString(),
-      };
-    },
+    queryFn: () => blueskyApi.getProfile(handle!),
     enabled: !!handle,
   });
 }
@@ -347,87 +432,21 @@ export function useBlueskyProfile(handle?: string) {
 export function useBlueskyTimeline(cursor?: string) {
   return useQuery<BlueskyTimeline>({
     queryKey: ['bluesky-timeline', cursor],
-    queryFn: async () => {
-      // Mock timeline
-      return {
-        cursor: 'next-cursor',
-        feed: Array.from({ length: 20 }, (_, i) => ({
-          post: {
-            uri: `at://did:plc:example/app.bsky.feed.post/${i}`,
-            cid: `cid-${i}`,
-            author: {
-              did: 'did:plc:example',
-              handle: 'user.bsky.social',
-              displayName: 'Example User',
-              followersCount: 100,
-              followsCount: 50,
-              postsCount: 200,
-              indexedAt: new Date().toISOString(),
-            },
-            record: {
-              $type: 'app.bsky.feed.post' as const,
-              text: `This is post number ${i + 1} from the timeline`,
-              createdAt: new Date(Date.now() - i * 3600000).toISOString(),
-            },
-            replyCount: Math.floor(Math.random() * 10),
-            repostCount: Math.floor(Math.random() * 20),
-            likeCount: Math.floor(Math.random() * 50),
-            quoteCount: Math.floor(Math.random() * 5),
-            indexedAt: new Date(Date.now() - i * 3600000).toISOString(),
-          },
-        })),
-      };
-    },
+    queryFn: () => blueskyApi.getTimeline(cursor),
   });
 }
 
 export function useBlueskyPost(uri?: string) {
   return useQuery<ATProtoPost>({
     queryKey: ['bluesky-post', uri],
-    queryFn: async () => {
-      const parsed = parseATUri(uri!);
-      return {
-        uri: uri!,
-        cid: 'example-cid',
-        author: {
-          did: parsed?.repo || 'did:plc:example',
-          handle: 'user.bsky.social',
-          displayName: 'Example User',
-          followersCount: 100,
-          followsCount: 50,
-          postsCount: 200,
-          indexedAt: new Date().toISOString(),
-        },
-        record: {
-          $type: 'app.bsky.feed.post',
-          text: 'This is an example Bluesky post',
-          createdAt: new Date().toISOString(),
-        },
-        replyCount: 5,
-        repostCount: 10,
-        likeCount: 25,
-        quoteCount: 2,
-        indexedAt: new Date().toISOString(),
-      };
-    },
+    queryFn: () => blueskyApi.getPost(uri!),
     enabled: !!uri,
   });
 }
 
 export function useResolveDID() {
   return useMutation({
-    mutationFn: async (identifier: string): Promise<ATProtoDID> => {
-      // Mock DID resolution
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      const isHandle = !identifier.startsWith('did:');
-      return {
-        did: isHandle ? `did:plc:${identifier.replace(/\./g, '')}` : identifier,
-        handle: isHandle ? identifier : `${identifier.slice(-8)}.bsky.social`,
-        pds: 'https://bsky.social',
-        resolved_at: new Date().toISOString(),
-      };
-    },
+    mutationFn: (identifier: string) => blueskyApi.resolveHandle(identifier),
   });
 }
 
@@ -436,14 +455,11 @@ export function useCreateBlueskyPost() {
 
   return useMutation({
     mutationFn: async (post: Partial<CanonicalPost>): Promise<PlatformMapping> => {
-      // Mock post creation
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const rkey = Date.now().toString(36);
+      const response = await blueskyApi.createPost(post.content || '');
       return {
         platform: 'bluesky',
-        native_id: `at://did:plc:user/app.bsky.feed.post/${rkey}`,
-        url: `https://bsky.app/profile/user.bsky.social/post/${rkey}`,
+        native_id: response.uri,
+        url: getPostUrl('user.bsky.social', response.uri), // TODO: get actual handle
         status: 'synced',
         synced_at: new Date().toISOString(),
       };
@@ -458,10 +474,7 @@ export function useDeleteBlueskyPost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (uri: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return { success: true };
-    },
+    mutationFn: (uri: string) => blueskyApi.deletePost(uri),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bluesky-timeline'] });
     },
@@ -472,10 +485,18 @@ export function useLikeBlueskyPost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ uri, cid }: { uri: string; cid: string }) => {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      return { success: true };
+    mutationFn: ({ uri, cid }: { uri: string; cid: string }) => blueskyApi.like(uri, cid),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bluesky-timeline'] });
     },
+  });
+}
+
+export function useUnlikeBlueskyPost() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (likeUri: string) => blueskyApi.unlike(likeUri),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bluesky-timeline'] });
     },
@@ -486,10 +507,18 @@ export function useRepostBluesky() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ uri, cid }: { uri: string; cid: string }) => {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      return { success: true };
+    mutationFn: ({ uri, cid }: { uri: string; cid: string }) => blueskyApi.repost(uri, cid),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bluesky-timeline'] });
     },
+  });
+}
+
+export function useUnrepostBluesky() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (repostUri: string) => blueskyApi.unrepost(repostUri),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bluesky-timeline'] });
     },
@@ -502,45 +531,16 @@ export function useBlueskyFeeds() {
   return useQuery<BlueskyFeed[]>({
     queryKey: ['bluesky-feeds'],
     queryFn: async () => {
-      // Mock popular feeds
-      return [
-        {
-          uri: 'at://did:plc:feed1/app.bsky.feed.generator/whats-hot',
-          cid: 'feed-cid-1',
-          did: 'did:plc:feed1',
-          creator: {
-            did: 'did:plc:bsky',
-            handle: 'bsky.app',
-            displayName: 'Bluesky',
-            followersCount: 1000000,
-            followsCount: 0,
-            postsCount: 500,
-            indexedAt: new Date().toISOString(),
-          },
-          displayName: "What's Hot",
-          description: 'Top trending posts on Bluesky',
-          likeCount: 50000,
-          indexedAt: new Date().toISOString(),
-        },
-        {
-          uri: 'at://did:plc:feed2/app.bsky.feed.generator/discover',
-          cid: 'feed-cid-2',
-          did: 'did:plc:feed2',
-          creator: {
-            did: 'did:plc:bsky',
-            handle: 'bsky.app',
-            displayName: 'Bluesky',
-            followersCount: 1000000,
-            followsCount: 0,
-            postsCount: 500,
-            indexedAt: new Date().toISOString(),
-          },
-          displayName: 'Discover',
-          description: 'Discover new accounts and posts',
-          likeCount: 35000,
-          indexedAt: new Date().toISOString(),
-        },
-      ];
+      const response = await blueskyApi.getPopularFeeds();
+      return response.feeds;
     },
+  });
+}
+
+export function useBlueskyAuthorFeed(handle?: string, cursor?: string) {
+  return useQuery<BlueskyTimeline>({
+    queryKey: ['bluesky-author-feed', handle, cursor],
+    queryFn: () => blueskyApi.getAuthorFeed(handle!, cursor),
+    enabled: !!handle,
   });
 }

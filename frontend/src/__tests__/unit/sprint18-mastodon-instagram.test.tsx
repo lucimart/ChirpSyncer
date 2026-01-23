@@ -55,8 +55,42 @@ const createWrapper = () => {
 
 describe('Sprint 18: Mastodon + Instagram', () => {
   describe('Mastodon: Instance Discovery', () => {
+    const mockFetch = jest.fn();
+    const originalFetch = global.fetch;
+
+    const mockInstance = {
+      uri: 'mastodon.social',
+      title: 'Mastodon',
+      version: '4.0.0',
+      stats: { user_count: 1000000, status_count: 5000000, domain_count: 10000 },
+      urls: { streaming_api: 'wss://mastodon.social/api/v1/streaming' },
+      configuration: {
+        statuses: { max_characters: 500, max_media_attachments: 4, characters_reserved_per_url: 23 },
+        media_attachments: {
+          supported_mime_types: ['image/jpeg', 'image/png'],
+          image_size_limit: 10485760,
+          video_size_limit: 41943040,
+        },
+        polls: { max_options: 4, max_characters_per_option: 50, min_expiration: 300, max_expiration: 2629746 },
+      },
+      rules: [],
+    };
+
+    beforeEach(() => {
+      global.fetch = mockFetch;
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ data: mockInstance }),
+      });
+    });
+
+    afterEach(() => {
+      global.fetch = originalFetch;
+      mockFetch.mockReset();
+    });
+
     it('should fetch instance information', async () => {
-      const { result } = renderHook(() => useMastodonInstance('mastodon.social'), {
+      const { result } = renderHook(() => useMastodonInstance(), {
         wrapper: createWrapper(),
       });
 
@@ -65,7 +99,7 @@ describe('Sprint 18: Mastodon + Instagram', () => {
       });
 
       const instance = result.current.data!;
-      expect(instance.uri).toBe('mastodon.social');
+      expect(instance.uri).toBeDefined();
       expect(instance).toHaveProperty('title');
       expect(instance).toHaveProperty('version');
       expect(instance).toHaveProperty('stats');
@@ -74,7 +108,7 @@ describe('Sprint 18: Mastodon + Instagram', () => {
     });
 
     it('should include configuration limits from instance', async () => {
-      const { result } = renderHook(() => useMastodonInstance('mastodon.social'), {
+      const { result } = renderHook(() => useMastodonInstance(), {
         wrapper: createWrapper(),
       });
 
@@ -90,7 +124,7 @@ describe('Sprint 18: Mastodon + Instagram', () => {
     });
 
     it('should include streaming API URL', async () => {
-      const { result } = renderHook(() => useMastodonInstance('mastodon.social'), {
+      const { result } = renderHook(() => useMastodonInstance(), {
         wrapper: createWrapper(),
       });
 
@@ -112,36 +146,36 @@ describe('Sprint 18: Mastodon + Instagram', () => {
     it('should convert Mastodon status to canonical format', () => {
       const status: MastodonStatus = {
         id: 'status-123',
-        created_at: '2024-01-15T12:00:00.000Z',
+        createdAt: '2024-01-15T12:00:00.000Z',
         sensitive: false,
-        spoiler_text: '',
+        spoilerText: '',
         visibility: 'public',
         language: 'en',
         uri: 'https://mastodon.social/users/user/statuses/123',
         url: 'https://mastodon.social/@user/123',
-        replies_count: 5,
-        reblogs_count: 10,
-        favourites_count: 25,
+        repliesCount: 5,
+        reblogsCount: 10,
+        favouritesCount: 25,
         content: '<p>Hello Mastodon!</p>',
         account: {
           id: 'user-1',
           username: 'user',
           acct: 'user@mastodon.social',
-          display_name: 'Test User',
+          displayName: 'Test User',
           locked: false,
           bot: false,
-          created_at: '2023-01-01T00:00:00.000Z',
+          createdAt: '2023-01-01T00:00:00.000Z',
           note: '',
           url: 'https://mastodon.social/@user',
           avatar: 'https://example.com/avatar.jpg',
           header: '',
-          followers_count: 100,
-          following_count: 50,
-          statuses_count: 200,
+          followersCount: 100,
+          followingCount: 50,
+          statusesCount: 200,
           emojis: [],
           fields: [],
         },
-        media_attachments: [],
+        mediaAttachments: [],
         mentions: [],
         tags: [],
         emojis: [],
@@ -163,39 +197,39 @@ describe('Sprint 18: Mastodon + Instagram', () => {
     it('should convert media attachments', () => {
       const status: MastodonStatus = {
         id: 'status-123',
-        created_at: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
         sensitive: false,
-        spoiler_text: '',
+        spoilerText: '',
         visibility: 'public',
         uri: 'https://mastodon.social/users/user/statuses/123',
-        replies_count: 0,
-        reblogs_count: 0,
-        favourites_count: 0,
+        repliesCount: 0,
+        reblogsCount: 0,
+        favouritesCount: 0,
         content: '<p>Post with media</p>',
         account: {
           id: 'user-1',
           username: 'user',
           acct: 'user',
-          display_name: 'User',
+          displayName: 'User',
           locked: false,
           bot: false,
-          created_at: '',
+          createdAt: '',
           note: '',
           url: '',
           avatar: '',
           header: '',
-          followers_count: 0,
-          following_count: 0,
-          statuses_count: 0,
+          followersCount: 0,
+          followingCount: 0,
+          statusesCount: 0,
           emojis: [],
           fields: [],
         },
-        media_attachments: [
+        mediaAttachments: [
           {
             id: 'media-1',
             type: 'image',
             url: 'https://example.com/image.jpg',
-            preview_url: 'https://example.com/preview.jpg',
+            previewUrl: 'https://example.com/preview.jpg',
             description: 'Alt text',
             meta: { original: { width: 800, height: 600 } },
           },
@@ -223,34 +257,34 @@ describe('Sprint 18: Mastodon + Instagram', () => {
     it('should handle gifv as gif type', () => {
       const status: MastodonStatus = {
         id: 'status-123',
-        created_at: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
         sensitive: false,
-        spoiler_text: '',
+        spoilerText: '',
         visibility: 'public',
         uri: 'https://mastodon.social/users/user/statuses/123',
-        replies_count: 0,
-        reblogs_count: 0,
-        favourites_count: 0,
+        repliesCount: 0,
+        reblogsCount: 0,
+        favouritesCount: 0,
         content: '<p>GIF post</p>',
         account: {
           id: 'user-1',
           username: 'user',
           acct: 'user',
-          display_name: 'User',
+          displayName: 'User',
           locked: false,
           bot: false,
-          created_at: '',
+          createdAt: '',
           note: '',
           url: '',
           avatar: '',
           header: '',
-          followers_count: 0,
-          following_count: 0,
-          statuses_count: 0,
+          followersCount: 0,
+          followingCount: 0,
+          statusesCount: 0,
           emojis: [],
           fields: [],
         },
-        media_attachments: [
+        mediaAttachments: [
           {
             id: 'media-1',
             type: 'gifv',
@@ -269,7 +303,34 @@ describe('Sprint 18: Mastodon + Instagram', () => {
   });
 
   describe('Mastodon: API Hooks', () => {
+    const mockFetch = jest.fn();
+    const originalFetch = global.fetch;
+
+    beforeEach(() => {
+      global.fetch = mockFetch;
+    });
+
+    afterEach(() => {
+      global.fetch = originalFetch;
+      mockFetch.mockReset();
+    });
+
     it('should fetch home timeline', async () => {
+      const mockTimeline = {
+        statuses: [
+          {
+            id: 'status-1',
+            content: '<p>Test status</p>',
+            createdAt: '2024-01-15T12:00:00.000Z',
+            account: { id: 'user-1', username: 'testuser', acct: 'testuser' },
+          },
+        ],
+      };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: mockTimeline }),
+      });
+
       const { result } = renderHook(() => useMastodonTimeline(), {
         wrapper: createWrapper(),
       });
@@ -287,6 +348,16 @@ describe('Sprint 18: Mastodon + Instagram', () => {
     });
 
     it('should create a status', async () => {
+      const mockStatus = {
+        id: 'new-status-123',
+        uri: 'https://mastodon.social/users/test/statuses/123',
+        url: 'https://mastodon.social/@test/123',
+      };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: mockStatus }),
+      });
+
       const { result } = renderHook(() => useCreateMastodonStatus(), {
         wrapper: createWrapper(),
       });
@@ -307,6 +378,11 @@ describe('Sprint 18: Mastodon + Instagram', () => {
     });
 
     it('should delete a status', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: { deleted: true } }),
+      });
+
       const { result } = renderHook(() => useDeleteMastodonStatus(), {
         wrapper: createWrapper(),
       });
@@ -319,10 +395,16 @@ describe('Sprint 18: Mastodon + Instagram', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data).toEqual({ success: true });
+      expect(result.current.data).toEqual({ deleted: true });
     });
 
     it('should favourite a status', async () => {
+      const mockStatus = { id: 'status-123', favourited: true };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: mockStatus }),
+      });
+
       const { result } = renderHook(() => useFavouriteMastodonStatus(), {
         wrapper: createWrapper(),
       });
@@ -337,6 +419,12 @@ describe('Sprint 18: Mastodon + Instagram', () => {
     });
 
     it('should boost a status', async () => {
+      const mockStatus = { id: 'status-123', reblogged: true };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: mockStatus }),
+      });
+
       const { result } = renderHook(() => useBoostMastodonStatus(), {
         wrapper: createWrapper(),
       });
