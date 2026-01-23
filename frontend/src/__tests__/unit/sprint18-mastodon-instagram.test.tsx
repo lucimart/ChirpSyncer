@@ -573,7 +573,34 @@ describe('Sprint 18: Mastodon + Instagram', () => {
   });
 
   describe('Instagram: API Hooks (Read-only)', () => {
+    const mockFetch = jest.fn();
+    const originalFetch = global.fetch;
+
+    beforeEach(() => {
+      global.fetch = mockFetch;
+    });
+
+    afterEach(() => {
+      global.fetch = originalFetch;
+      mockFetch.mockReset();
+    });
+
     it('should fetch profile by username', async () => {
+      const mockProfile = {
+        id: 'ig-user-123',
+        username: 'testuser',
+        name: 'Test User',
+        biography: 'Test bio',
+        followers_count: 5000,
+        follows_count: 500,
+        media_count: 150,
+        account_type: 'PERSONAL',
+      };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: mockProfile }),
+      });
+
       const { result } = renderHook(() => useInstagramProfile('testuser'), {
         wrapper: createWrapper(),
       });
@@ -591,6 +618,25 @@ describe('Sprint 18: Mastodon + Instagram', () => {
     });
 
     it('should fetch user media', async () => {
+      const mockMedia = {
+        data: [
+          {
+            id: 'media-1',
+            caption: 'Test post',
+            media_type: 'IMAGE',
+            media_url: 'https://example.com/image.jpg',
+            permalink: 'https://instagram.com/p/abc123',
+            timestamp: '2024-01-15T12:00:00+0000',
+            like_count: 100,
+            comments_count: 10,
+          },
+        ],
+      };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: mockMedia }),
+      });
+
       const { result } = renderHook(() => useInstagramMedia('user-123'), {
         wrapper: createWrapper(),
       });
@@ -600,14 +646,26 @@ describe('Sprint 18: Mastodon + Instagram', () => {
       });
 
       const media = result.current.data!;
-      expect(Array.isArray(media)).toBe(true);
-      expect(media.length).toBeGreaterThan(0);
-      expect(media[0]).toHaveProperty('id');
-      expect(media[0]).toHaveProperty('media_type');
-      expect(media[0]).toHaveProperty('permalink');
+      expect(Array.isArray(media.data)).toBe(true);
+      expect(media.data.length).toBeGreaterThan(0);
+      expect(media.data[0]).toHaveProperty('id');
+      expect(media.data[0]).toHaveProperty('media_type');
+      expect(media.data[0]).toHaveProperty('permalink');
     });
 
     it('should fetch insights for media', async () => {
+      const mockInsights = {
+        media_id: 'media-123',
+        impressions: 5000,
+        reach: 3000,
+        engagement: 500,
+        saved: 50,
+      };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: mockInsights }),
+      });
+
       const { result } = renderHook(() => useInstagramInsights('media-123'), {
         wrapper: createWrapper(),
       });
@@ -625,6 +683,21 @@ describe('Sprint 18: Mastodon + Instagram', () => {
     });
 
     it('should fetch user stories', async () => {
+      const mockStories = {
+        data: [
+          {
+            id: 'story-1',
+            media_type: 'IMAGE',
+            media_url: 'https://example.com/story.jpg',
+            timestamp: '2024-01-15T12:00:00+0000',
+          },
+        ],
+      };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: mockStories }),
+      });
+
       const { result } = renderHook(() => useInstagramStories('user-123'), {
         wrapper: createWrapper(),
       });
@@ -634,8 +707,8 @@ describe('Sprint 18: Mastodon + Instagram', () => {
       });
 
       const stories = result.current.data!;
-      expect(Array.isArray(stories)).toBe(true);
-      stories.forEach((story) => {
+      expect(Array.isArray(stories.data)).toBe(true);
+      stories.data.forEach((story: { id: string; media_type: string; media_url: string; timestamp: string }) => {
         expect(story).toHaveProperty('id');
         expect(story).toHaveProperty('media_type');
         expect(story).toHaveProperty('media_url');
