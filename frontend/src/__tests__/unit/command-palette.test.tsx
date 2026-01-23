@@ -5,6 +5,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { CommandPalette } from '@/components/ui/CommandPalette';
+import { ToastProvider } from '@/components/ui/Toast';
 
 // Mock ResizeObserver
 class ResizeObserverMock {
@@ -56,7 +57,9 @@ const mockTheme = {
 const renderWithTheme = (component: React.ReactElement) => {
   return render(
     <ThemeProvider theme={mockTheme}>
-      {component}
+      <ToastProvider>
+        {component}
+      </ToastProvider>
     </ThemeProvider>
   );
 };

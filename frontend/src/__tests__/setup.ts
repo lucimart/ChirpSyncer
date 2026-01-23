@@ -1,4 +1,42 @@
 import '@testing-library/jest-dom';
+import React from 'react';
+
+// Mock Nivo chart components globally
+jest.mock('@nivo/bar', () => ({
+  ResponsiveBar: function MockResponsiveBar({ data }: { data: unknown[] }) {
+    return React.createElement('div', {
+      'data-testid': 'nivo-bar-mock',
+      'data-count': data?.length || 0,
+    }, 'Bar Chart Mock');
+  },
+}));
+
+jest.mock('@nivo/line', () => ({
+  ResponsiveLine: function MockResponsiveLine({ data }: { data: unknown[] }) {
+    return React.createElement('div', {
+      'data-testid': 'nivo-line-mock',
+      'data-count': data?.length || 0,
+    }, 'Line Chart Mock');
+  },
+}));
+
+jest.mock('@nivo/pie', () => ({
+  ResponsivePie: function MockResponsivePie({ data }: { data: unknown[] }) {
+    return React.createElement('div', {
+      'data-testid': 'nivo-pie-mock',
+      'data-count': data?.length || 0,
+    }, 'Pie Chart Mock');
+  },
+}));
+
+jest.mock('@nivo/heatmap', () => ({
+  ResponsiveHeatMap: function MockResponsiveHeatMap({ data }: { data: unknown[] }) {
+    return React.createElement('div', {
+      'data-testid': 'nivo-heatmap-mock',
+      'data-count': data?.length || 0,
+    }, 'HeatMap Mock');
+  },
+}));
 
 // Polyfill TextEncoder and TextDecoder for Jest environment
 // Using require to ensure it's available before any module imports

@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { theme } from '@/styles/theme';
@@ -10,21 +11,23 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
-// Mock Nivo components
+// Mock Nivo components - use React.createElement to avoid JSX hoisting issues
 jest.mock('@nivo/bar', () => ({
-  ResponsiveBar: ({ data }: { data: unknown[] }) => (
-    <div data-testid="nivo-bar-mock" data-count={data.length}>
-      Bar Chart Mock
-    </div>
-  ),
+  ResponsiveBar: function MockResponsiveBar({ data }: { data: unknown[] }) {
+    return React.createElement('div', {
+      'data-testid': 'nivo-bar-mock',
+      'data-count': data.length,
+    }, 'Bar Chart Mock');
+  },
 }));
 
 jest.mock('@nivo/line', () => ({
-  ResponsiveLine: ({ data }: { data: unknown[] }) => (
-    <div data-testid="nivo-line-mock" data-count={data.length}>
-      Line Chart Mock
-    </div>
-  ),
+  ResponsiveLine: function MockResponsiveLine({ data }: { data: unknown[] }) {
+    return React.createElement('div', {
+      'data-testid': 'nivo-line-mock',
+      'data-count': data.length,
+    }, 'Line Chart Mock');
+  },
 }));
 
 const renderWithTheme = (ui: React.ReactElement) => {

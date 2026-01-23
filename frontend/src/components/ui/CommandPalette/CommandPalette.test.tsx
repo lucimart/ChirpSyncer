@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from 'styled-components';
 import { theme } from '@/styles/theme';
 import { CommandPalette } from './CommandPalette';
+import { ToastProvider } from '@/components/ui/Toast';
 
 // Mock next/navigation
 const mockPush = jest.fn();
@@ -13,7 +14,13 @@ jest.mock('next/navigation', () => ({
 }));
 
 const renderWithTheme = (ui: React.ReactElement) => {
-  return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+  return render(
+    <ThemeProvider theme={theme}>
+      <ToastProvider>
+        {ui}
+      </ToastProvider>
+    </ThemeProvider>
+  );
 };
 
 describe('CommandPalette', () => {

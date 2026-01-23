@@ -9,6 +9,12 @@ const config = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '\\.css$': '<rootDir>/src/__tests__/__mocks__/styleMock.js',
+    '^pixi\\.js$': '<rootDir>/src/__tests__/__mocks__/pixiMock.tsx',
+    '^@/components/canvas$': '<rootDir>/src/__tests__/__mocks__/canvasMock.tsx',
+    '^@/components/canvas/(.*)$': '<rootDir>/src/__tests__/__mocks__/canvasMock.tsx',
+    '^d3$': '<rootDir>/src/__tests__/__mocks__/d3Mock.ts',
+    '^d3-force$': '<rootDir>/src/__tests__/__mocks__/d3ForceMock.tsx',
+    '^lottie-react$': '<rootDir>/src/__tests__/__mocks__/lottieReactMock.tsx',
   },
   testMatch: [
     '<rootDir>/src/**/*.test.{ts,tsx}',
