@@ -96,6 +96,7 @@ export { AuthLayout } from './AuthLayout';
 export type { AuthLayoutProps } from './AuthLayout';
 export { AuthFooter } from './AuthFooter';
 export type { AuthFooterProps } from './AuthFooter';
+export { SocialLoginButtons } from './SocialLoginButtons';
 
 // Links
 export { TextLink } from './TextLink';

@@ -440,8 +440,8 @@ describe('Sprint 18: Mastodon + Instagram', () => {
   });
 
   describe('Instagram: Limitations', () => {
-    it('should define read-only limitations', () => {
-      expect(INSTAGRAM_LIMITATIONS.publishSupported).toBe(false);
+    it('should define publishing requirements', () => {
+      expect(INSTAGRAM_LIMITATIONS.publishRequiresApproval).toBe(true);
       expect(INSTAGRAM_LIMITATIONS.requiresBusinessAccount).toBe(true);
     });
 

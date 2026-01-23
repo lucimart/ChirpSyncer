@@ -207,7 +207,7 @@ export const PLATFORM_DEFAULTS: Record<PlatformType, PlatformCapabilities> = {
     altTextLimit: 1500,
   },
   instagram: {
-    publish: false, // Requires Business account
+    publish: true, // Requires Content Publishing API approval from Meta
     delete: false,
     edit: false,
     read: true,
@@ -223,7 +223,7 @@ export const PLATFORM_DEFAULTS: Record<PlatformType, PlatformCapabilities> = {
     interactions: {
       like: false,
       repost: false,
-      reply: false,
+      reply: true, // Comments supported with instagram_manage_comments
       quote: false,
       bookmark: false,
     },

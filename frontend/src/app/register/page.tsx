@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styled from 'styled-components';
 import { useAuth } from '@/lib/auth';
-import { Button, Input, Alert, AuthLayout, Form } from '@/components/ui';
+import { Button, Input, Alert, AuthLayout, Form, SocialLoginButtons } from '@/components/ui';
 
 const Footer = styled.div`
   margin-top: ${({ theme }) => theme.spacing[6]};
@@ -108,6 +108,8 @@ export default function RegisterPage() {
         <Button type="submit" fullWidth isLoading={isLoading}>
           Create Account
         </Button>
+
+        <SocialLoginButtons mode="register" disabled={isLoading} />
       </Form>
 
       <Footer>

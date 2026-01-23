@@ -408,3 +408,348 @@ def get_account_insights():
     except Exception as e:
         logger.error(f"Error fetching Instagram account insights: {e}")
         return api_error("Failed to fetch account insights", status=500)
+
+
+# ============================================================================
+# Content Publishing API (requires Meta App Review approval)
+# ============================================================================
+
+
+def _instagram_post(
+    access_token: str,
+    endpoint: str,
+    data: Optional[dict] = None,
+) -> dict:
+    """
+    Make authenticated POST request to Instagram Graph API.
+
+    Args:
+        access_token: Instagram access token
+        endpoint: API endpoint path
+        data: POST body data
+
+    Returns:
+        JSON response from API
+    """
+    url = f"{GRAPH_API_BASE}/{GRAPH_API_VERSION}{endpoint}"
+
+    request_data = data or {}
+    request_data["access_token"] = access_token
+
+    response = requests.post(url, data=request_data, timeout=60)
+    response.raise_for_status()
+
+    return response.json() if response.text else {}
+
+
+@instagram_bp.route("/media/container", methods=["POST"])
+@require_auth
+def create_media_container():
+    """
+    Create a media container for publishing.
+
+    This is step 1 of the Instagram Content Publishing flow.
+    Requires Content Publishing API approval from Meta.
+
+    Body:
+        image_url: URL of the image to publish (must be publicly accessible)
+        video_url: URL of the video to publish (for Reels)
+        caption: Post caption (optional)
+        media_type: IMAGE, VIDEO, CAROUSEL_ALBUM, or REELS
+        children: List of container IDs for carousel (if media_type is CAROUSEL_ALBUM)
+        location_id: Facebook Page location ID (optional)
+        user_tags: List of user tags with coordinates (optional)
+
+    Returns:
+        Container ID for use in publishing step
+    """
+    try:
+        access_token, user_id = _get_instagram_credentials(request.user_id)
+
+        body = request.get_json() or {}
+        media_type = body.get("media_type", "IMAGE").upper()
+
+        # Build container creation params
+        params = {}
+
+        if media_type == "IMAGE":
+            if not body.get("image_url"):
+                return api_error("image_url is required for IMAGE type", status=400)
+            params["image_url"] = body["image_url"]
+
+        elif media_type in ("VIDEO", "REELS"):
+            if not body.get("video_url"):
+                return api_error("video_url is required for VIDEO/REELS type", status=400)
+            params["video_url"] = body["video_url"]
+            params["media_type"] = "REELS" if media_type == "REELS" else "VIDEO"
+
+        elif media_type == "CAROUSEL_ALBUM":
+            if not body.get("children"):
+                return api_error("children container IDs required for CAROUSEL_ALBUM", status=400)
+            params["media_type"] = "CAROUSEL"
+            params["children"] = ",".join(body["children"])
+
+        else:
+            return api_error(f"Unsupported media_type: {media_type}", status=400)
+
+        # Optional params
+        if body.get("caption"):
+            params["caption"] = body["caption"]
+        if body.get("location_id"):
+            params["location_id"] = body["location_id"]
+        if body.get("user_tags"):
+            import json
+            params["user_tags"] = json.dumps(body["user_tags"])
+
+        result = _instagram_post(access_token, f"/{user_id}/media", params)
+
+        return api_response({
+            "container_id": result.get("id"),
+            "status": "PENDING",
+        })
+
+    except ValueError as e:
+        return api_error(str(e), status=400)
+    except requests.HTTPError as e:
+        logger.error(f"Instagram API error creating media container: {e}")
+        if e.response is not None:
+            if e.response.status_code == 400:
+                try:
+                    error_data = e.response.json()
+                    error_msg = error_data.get("error", {}).get("message", "Invalid request")
+                    # Check for common publishing errors
+                    if "not authorized" in error_msg.lower():
+                        return api_error(
+                            "Content Publishing not authorized. App requires Meta approval.",
+                            status=403
+                        )
+                    return api_error(error_msg, status=400)
+                except Exception:
+                    pass
+            if e.response.status_code == 403:
+                return api_error(
+                    "Content Publishing API not enabled. Requires Meta App Review approval.",
+                    status=403
+                )
+        return api_error("Instagram API error", status=502)
+    except Exception as e:
+        logger.error(f"Error creating Instagram media container: {e}")
+        return api_error("Failed to create media container", status=500)
+
+
+@instagram_bp.route("/media/container/<container_id>/status", methods=["GET"])
+@require_auth
+def get_container_status(container_id: str):
+    """
+    Check the status of a media container.
+
+    For videos/reels, Instagram processes them asynchronously.
+    Poll this endpoint until status is FINISHED before publishing.
+
+    Returns:
+        status: IN_PROGRESS, FINISHED, ERROR, or EXPIRED
+        status_code: Detailed status code if available
+    """
+    try:
+        access_token, _ = _get_instagram_credentials(request.user_id)
+
+        result = _instagram_request(
+            access_token,
+            f"/{container_id}",
+            {"fields": "status,status_code"},
+        )
+
+        return api_response({
+            "container_id": container_id,
+            "status": result.get("status", "UNKNOWN"),
+            "status_code": result.get("status_code"),
+        })
+
+    except ValueError as e:
+        return api_error(str(e), status=400)
+    except requests.HTTPError as e:
+        logger.error(f"Instagram API error checking container status: {e}")
+        if e.response is not None and e.response.status_code == 404:
+            return api_error("Container not found or expired", status=404)
+        return api_error("Instagram API error", status=502)
+    except Exception as e:
+        logger.error(f"Error checking Instagram container status: {e}")
+        return api_error("Failed to check container status", status=500)
+
+
+@instagram_bp.route("/media/publish", methods=["POST"])
+@require_auth
+def publish_media():
+    """
+    Publish a media container to Instagram.
+
+    This is step 2 of the Instagram Content Publishing flow.
+    The container must be in FINISHED status before publishing.
+
+    Body:
+        container_id: The media container ID from create_media_container
+
+    Returns:
+        media_id: The published media ID
+        permalink: URL to the published post
+    """
+    try:
+        access_token, user_id = _get_instagram_credentials(request.user_id)
+
+        body = request.get_json() or {}
+        container_id = body.get("container_id")
+
+        if not container_id:
+            return api_error("container_id is required", status=400)
+
+        # Publish the container
+        result = _instagram_post(
+            access_token,
+            f"/{user_id}/media_publish",
+            {"creation_id": container_id},
+        )
+
+        media_id = result.get("id")
+
+        # Fetch the permalink for the published post
+        permalink = None
+        if media_id:
+            try:
+                media_info = _instagram_request(
+                    access_token,
+                    f"/{media_id}",
+                    {"fields": "permalink"},
+                )
+                permalink = media_info.get("permalink")
+            except Exception:
+                pass  # Non-critical, proceed without permalink
+
+        return api_response({
+            "media_id": media_id,
+            "permalink": permalink,
+            "status": "PUBLISHED",
+        })
+
+    except ValueError as e:
+        return api_error(str(e), status=400)
+    except requests.HTTPError as e:
+        logger.error(f"Instagram API error publishing media: {e}")
+        if e.response is not None:
+            if e.response.status_code == 400:
+                try:
+                    error_data = e.response.json()
+                    error_msg = error_data.get("error", {}).get("message", "Publish failed")
+                    return api_error(error_msg, status=400)
+                except Exception:
+                    pass
+            if e.response.status_code == 403:
+                return api_error(
+                    "Content Publishing API not authorized",
+                    status=403
+                )
+        return api_error("Instagram API error", status=502)
+    except Exception as e:
+        logger.error(f"Error publishing Instagram media: {e}")
+        return api_error("Failed to publish media", status=500)
+
+
+@instagram_bp.route("/media/<media_id>/comments", methods=["GET"])
+@require_auth
+def get_media_comments(media_id: str):
+    """
+    Get comments on a media item.
+
+    Query params:
+        limit: Number of comments to return (default 25)
+        after: Pagination cursor
+    """
+    try:
+        access_token, _ = _get_instagram_credentials(request.user_id)
+
+        limit = min(int(request.args.get("limit", 25)), 100)
+        after = request.args.get("after")
+
+        params = {"fields": "id,text,timestamp,username,like_count", "limit": limit}
+        if after:
+            params["after"] = after
+
+        result = _instagram_request(access_token, f"/{media_id}/comments", params)
+
+        comments = [
+            {
+                "id": c.get("id"),
+                "text": c.get("text"),
+                "timestamp": c.get("timestamp"),
+                "username": c.get("username"),
+                "like_count": c.get("like_count", 0),
+            }
+            for c in result.get("data", [])
+        ]
+
+        response_data = {"data": comments}
+        if result.get("paging", {}).get("cursors", {}).get("after"):
+            response_data["next_cursor"] = result["paging"]["cursors"]["after"]
+
+        return api_response(response_data)
+
+    except ValueError as e:
+        return api_error(str(e), status=400)
+    except requests.HTTPError as e:
+        logger.error(f"Instagram API error fetching comments: {e}")
+        if e.response is not None and e.response.status_code == 404:
+            return api_error("Media not found", status=404)
+        return api_error("Instagram API error", status=502)
+    except Exception as e:
+        logger.error(f"Error fetching Instagram comments: {e}")
+        return api_error("Failed to fetch comments", status=500)
+
+
+@instagram_bp.route("/media/<media_id>/comments", methods=["POST"])
+@require_auth
+def reply_to_comment(media_id: str):
+    """
+    Reply to a comment or add a comment to a media item.
+
+    Body:
+        message: The comment text
+        comment_id: (optional) The comment ID to reply to
+
+    Note: Requires instagram_manage_comments permission.
+    """
+    try:
+        access_token, _ = _get_instagram_credentials(request.user_id)
+
+        body = request.get_json() or {}
+        message = body.get("message")
+        comment_id = body.get("comment_id")
+
+        if not message:
+            return api_error("message is required", status=400)
+
+        # Reply to specific comment or add new comment to media
+        if comment_id:
+            endpoint = f"/{comment_id}/replies"
+        else:
+            endpoint = f"/{media_id}/comments"
+
+        result = _instagram_post(access_token, endpoint, {"message": message})
+
+        return api_response({
+            "comment_id": result.get("id"),
+            "status": "CREATED",
+        })
+
+    except ValueError as e:
+        return api_error(str(e), status=400)
+    except requests.HTTPError as e:
+        logger.error(f"Instagram API error posting comment: {e}")
+        if e.response is not None:
+            if e.response.status_code == 403:
+                return api_error(
+                    "Comment permissions not granted. Requires instagram_manage_comments.",
+                    status=403
+                )
+        return api_error("Instagram API error", status=502)
+    except Exception as e:
+        logger.error(f"Error posting Instagram comment: {e}")
+        return api_error("Failed to post comment", status=500)

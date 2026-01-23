@@ -4,7 +4,7 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
-import { Button, Input, Alert, AuthLayout, AuthFooter, Form, TextLink } from '@/components/ui';
+import { Button, Input, Alert, AuthLayout, AuthFooter, Form, TextLink, SocialLoginButtons } from '@/components/ui';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -65,6 +65,8 @@ export default function LoginPage() {
         <Button type="submit" fullWidth isLoading={isLoading}>
           Sign In
         </Button>
+
+        <SocialLoginButtons mode="login" disabled={isLoading} />
       </Form>
 
       <AuthFooter>

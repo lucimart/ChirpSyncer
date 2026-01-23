@@ -59,6 +59,10 @@ def _extract_frontend_api_calls() -> list[str]:
         for match in re.findall(r"/api/v1/[^\s\"'`\\)]+", text):
             endpoint = _strip_query(match)
             endpoint = re.sub(r"\$\{[^}]+\}", "<var>", endpoint)
+            # Skip base URL patterns used in API client classes (e.g., /api/v1/instagram${endpoint})
+            # These are dynamically constructed with method-specific paths
+            if endpoint.endswith("<var>"):
+                continue
             endpoints.add(_normalize_path(endpoint))
     api_path = FRONTEND_ROOT / "lib" / "api.ts"
     if api_path.exists():

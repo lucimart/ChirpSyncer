@@ -53,6 +53,39 @@ export interface InstagramComment {
   like_count: number;
 }
 
+export interface InstagramCommentsResponse {
+  data: InstagramComment[];
+  next_cursor?: string;
+}
+
+// Content Publishing API Types
+export interface CreateContainerRequest {
+  media_type: 'IMAGE' | 'VIDEO' | 'REELS' | 'CAROUSEL_ALBUM';
+  image_url?: string;
+  video_url?: string;
+  caption?: string;
+  location_id?: string;
+  user_tags?: Array<{ username: string; x: number; y: number }>;
+  children?: string[]; // For carousel
+}
+
+export interface ContainerResponse {
+  container_id: string;
+  status: 'PENDING' | 'IN_PROGRESS' | 'FINISHED' | 'ERROR' | 'EXPIRED';
+  status_code?: string;
+}
+
+export interface PublishResponse {
+  media_id: string;
+  permalink?: string;
+  status: 'PUBLISHED';
+}
+
+export interface CommentResponse {
+  comment_id: string;
+  status: 'CREATED';
+}
+
 export interface InstagramStory {
   id: string;
   media_type: 'IMAGE' | 'VIDEO';
@@ -160,6 +193,43 @@ class InstagramApiClient {
   async getAccountInsights(period = 'day'): Promise<{ period: string; insights: Record<string, number> }> {
     return this.request(`/account/insights?period=${period}`);
   }
+
+  // Content Publishing API (requires Meta approval)
+
+  async createMediaContainer(data: CreateContainerRequest): Promise<ContainerResponse> {
+    return this.request('/media/container', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getContainerStatus(containerId: string): Promise<ContainerResponse> {
+    return this.request(`/media/container/${encodeURIComponent(containerId)}/status`);
+  }
+
+  async publishMedia(containerId: string): Promise<PublishResponse> {
+    return this.request('/media/publish', {
+      method: 'POST',
+      body: JSON.stringify({ container_id: containerId }),
+    });
+  }
+
+  async getComments(mediaId: string, limit = 25, cursor?: string): Promise<InstagramCommentsResponse> {
+    const params = new URLSearchParams();
+    params.set('limit', String(limit));
+    if (cursor) params.set('after', cursor);
+    return this.request(`/media/${encodeURIComponent(mediaId)}/comments?${params.toString()}`);
+  }
+
+  async postComment(mediaId: string, message: string, replyToCommentId?: string): Promise<CommentResponse> {
+    return this.request(`/media/${encodeURIComponent(mediaId)}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({
+        message,
+        comment_id: replyToCommentId,
+      }),
+    });
+  }
 }
 
 export const instagramApi = new InstagramApiClient();
@@ -220,15 +290,43 @@ export function useInstagramAccountInsights(period = 'day') {
   });
 }
 
-// Instagram limitations
+export function useInstagramComments(mediaId?: string, cursor?: string) {
+  return useQuery<InstagramCommentsResponse>({
+    queryKey: ['instagram-comments', mediaId, cursor],
+    queryFn: () => instagramApi.getComments(mediaId!, 25, cursor),
+    enabled: !!mediaId,
+  });
+}
+
+// Publishing hooks (requires Content Publishing API approval)
+
+export function useInstagramContainerStatus(containerId?: string, pollInterval?: number) {
+  return useQuery<ContainerResponse>({
+    queryKey: ['instagram-container-status', containerId],
+    queryFn: () => instagramApi.getContainerStatus(containerId!),
+    enabled: !!containerId,
+    refetchInterval: pollInterval, // Poll while processing
+  });
+}
+
+// Instagram limitations and requirements
 export const INSTAGRAM_LIMITATIONS = {
   maxCaptionLength: 2200,
   maxHashtags: 30,
   maxCarouselItems: 10,
   supportedImageFormats: ['image/jpeg', 'image/png'],
   supportedVideoFormats: ['video/mp4'],
-  maxImageSize: 8 * 1024 * 1024,
-  maxVideoSize: 100 * 1024 * 1024,
+  maxImageSize: 8 * 1024 * 1024, // 8MB
+  maxVideoSize: 100 * 1024 * 1024, // 100MB for Reels
+  maxVideoDuration: 60, // 60 seconds for feed, 90 for Reels
   requiresBusinessAccount: true,
-  publishSupported: false, // Without Content Publishing API approval
+  publishRequiresApproval: true, // Requires Meta Content Publishing API approval
+  requiredPermissions: [
+    'instagram_basic',
+    'instagram_content_publish', // For publishing
+    'instagram_manage_comments', // For comments
+    'instagram_manage_insights', // For insights
+    'pages_show_list', // Required for Instagram API
+    'pages_read_engagement', // Required for some features
+  ],
 };

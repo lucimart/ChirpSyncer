@@ -15,6 +15,7 @@ interface AuthState {
   register: (username: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   checkAuth: () => Promise<void>;
   setUser: (user: User | null) => void;
+  setToken: (token: string) => void;
 }
 
 export const useAuth = create<AuthState>()(
@@ -83,6 +84,13 @@ export const useAuth = create<AuthState>()(
 
       setUser: (user: User | null) => {
         set({ user, isAuthenticated: !!user });
+      },
+
+      setToken: (token: string) => {
+        api.setToken(token);
+        set({ token, isAuthenticated: true, isLoading: false });
+        // Fetch user info after setting token
+        get().checkAuth();
       },
     }),
     {
