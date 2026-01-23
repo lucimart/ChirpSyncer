@@ -15,12 +15,6 @@ const preview: Preview = {
     a11y: {
       element: '#storybook-root',
     },
-    nextjs: {
-      appDirectory: true,
-      navigation: {
-        pathname: '/',
-      },
-    },
   },
   decorators: [
     (Story) => (

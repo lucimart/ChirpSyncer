@@ -1,4 +1,4 @@
-import type { StorybookConfig } from '@storybook/nextjs';
+import type { StorybookConfig } from '@storybook/react-webpack5';
 import path from 'path';
 
 const config: StorybookConfig = {
@@ -9,13 +9,21 @@ const config: StorybookConfig = {
     '@storybook/addon-a11y',
   ],
   framework: {
-    name: '@storybook/nextjs',
-    options: {
-      nextConfigPath: path.resolve(__dirname, '../next.config.js'),
-    },
+    name: '@storybook/react-webpack5',
+    options: {},
   },
   docs: {
     autodocs: 'tag',
+  },
+  webpackFinal: async (config) => {
+    config.resolve = config.resolve ?? {};
+    config.resolve.alias = {
+      ...(config.resolve.alias ?? {}),
+      '@': path.resolve(__dirname, '../src'),
+      // Mock next/navigation for Storybook
+      'next/navigation': path.resolve(__dirname, './mocks/next-navigation.ts'),
+    };
+    return config;
   },
 };
 
