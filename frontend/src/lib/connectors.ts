@@ -83,7 +83,7 @@ export interface PlatformMapping {
 }
 
 // Supported platforms
-export type PlatformType = 'twitter' | 'bluesky' | 'mastodon' | 'instagram' | 'threads' | 'linkedin';
+export type PlatformType = 'twitter' | 'bluesky' | 'mastodon' | 'instagram' | 'threads' | 'linkedin' | 'facebook';
 
 // Platform connector configuration
 export interface PlatformConnector {
@@ -278,6 +278,30 @@ export const PLATFORM_DEFAULTS: Record<PlatformType, PlatformCapabilities> = {
     characterLimit: 3000,
     altTextLimit: 300,
   },
+  facebook: {
+    publish: true,
+    delete: true,
+    edit: false,
+    read: true,
+    metrics: true,
+    schedule: true, // Native scheduling support
+    threads: false,
+    media: {
+      images: true,
+      videos: true,
+      gifs: true,
+      maxImages: 10,
+    },
+    interactions: {
+      like: true,
+      repost: false, // No native share via API
+      reply: true,
+      quote: false,
+      bookmark: false,
+    },
+    characterLimit: 63206,
+    altTextLimit: 100,
+  },
 };
 
 // Available connectors
@@ -345,6 +369,17 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     icon: 'in',
     color: '#0A66C2',
     capabilities: PLATFORM_DEFAULTS.linkedin,
+    auth_type: 'oauth2',
+    status: 'beta',
+  },
+  {
+    id: 'facebook',
+    platform: 'facebook',
+    name: 'Facebook',
+    description: 'Manage Facebook Pages with posts, comments and insights',
+    icon: 'f',
+    color: '#1877F2',
+    capabilities: PLATFORM_DEFAULTS.facebook,
     auth_type: 'oauth2',
     status: 'beta',
   },
@@ -460,7 +495,7 @@ export function useConnectPlatform() {
         // Remove internal _mode field before sending
         const { _mode, ...cleanCredentials } = credentials;
         credentials = cleanCredentials;
-      } else if (platform === 'bluesky' || platform === 'instagram' || platform === 'threads' || platform === 'linkedin') {
+      } else if (platform === 'bluesky' || platform === 'instagram' || platform === 'threads' || platform === 'linkedin' || platform === 'facebook') {
         credentialType = 'api';
       } else {
         credentialType = 'scraping';

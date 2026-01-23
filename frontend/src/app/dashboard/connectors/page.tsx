@@ -516,6 +516,25 @@ export default function ConnectorsPage() {
             </Stack>
           );
         }
+        // Facebook OAuth
+        if (connectModal.platform === 'facebook') {
+          return (
+            <Stack gap={4}>
+              <SmallText>
+                Facebook requires a Page access token with pages_manage_posts and pages_read_engagement permissions.
+                You can get this from the Meta Developer Console or Graph API Explorer.
+              </SmallText>
+              <Input
+                label="Access Token"
+                type="password"
+                value={credentials.access_token || ''}
+                onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
+                hint="Page access token from Meta Developer Console"
+                fullWidth
+              />
+            </Stack>
+          );
+        }
         // Mastodon OAuth
         return (
           <Input
