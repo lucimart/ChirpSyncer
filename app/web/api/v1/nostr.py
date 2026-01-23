@@ -859,7 +859,11 @@ def get_relay_info(user_id: int):
         relay_url = relays[0] if relays else DEFAULT_RELAYS[0]
 
     # Convert wss:// to https:// for NIP-11 info request
-    http_url = relay_url.replace("wss://", "https://").replace("ws://", "http://")
+    # Only support secure connections (wss -> https)
+    if relay_url.startswith("ws://"):
+        # Upgrade insecure ws:// to wss:// for security
+        relay_url = relay_url.replace("ws://", "wss://")
+    http_url = relay_url.replace("wss://", "https://")
 
     try:
         response = requests.get(

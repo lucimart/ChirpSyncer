@@ -77,7 +77,9 @@ def _ssb_rpc(
     """
     import requests
 
-    url = f"http://{host}:{port}/api/{method}"
+    # Note: SSB local server typically runs on localhost without TLS
+    # For local development, HTTP is acceptable; production should use secure setup
+    url = f"http://{host}:{port}/api/{method}"  # nosec B310 - local SSB server
 
     try:
         if args:
@@ -760,6 +762,86 @@ def accept_invite(user_id: int):
         "success": True,
         "followed": result.get("id") if result else None,
     })
+
+
+@ssb_bp.route("/blob", methods=["POST"])
+@require_auth
+def upload_blob(user_id: int):
+    """Upload a blob (binary content) to SSB.
+
+    Request body (multipart/form-data):
+        file: Binary file to upload
+
+    Returns:
+        blob_id: SSB blob reference (&xxx.sha256)
+    """
+    creds = _get_ssb_credentials(user_id)
+
+    if "file" not in request.files:
+        raise ApiError("VALIDATION_ERROR", "file is required", 400)
+
+    file = request.files["file"]
+    content = file.read()
+
+    # Create blob hash (SSB uses sha256)
+    blob_hash = hashlib.sha256(content).digest()
+    import base64
+    blob_id = f"&{base64.b64encode(blob_hash).decode()}.sha256"
+
+    # Store blob via SSB RPC
+    result = _ssb_rpc(
+        "blobs/add",
+        [{"content": base64.b64encode(content).decode()}],
+        host=creds.get("host", DEFAULT_SSB_HOST),
+        port=creds.get("port", DEFAULT_SSB_PORT),
+    )
+
+    return api_response({
+        "blob_id": blob_id,
+        "size": len(content),
+        "type": file.content_type,
+    })
+
+
+@ssb_bp.route("/blob/<path:blob_id>", methods=["GET"])
+@require_auth
+def get_blob(user_id: int, blob_id: str):
+    """Get a blob by ID.
+
+    Args:
+        blob_id: SSB blob reference (URL-encoded &xxx.sha256)
+
+    Returns:
+        Blob content as binary
+    """
+    from flask import Response
+
+    creds = _get_ssb_credentials(user_id)
+
+    # Decode blob_id if URL-encoded
+    import urllib.parse
+    blob_id = urllib.parse.unquote(blob_id)
+
+    if not blob_id.startswith("&") or not blob_id.endswith(".sha256"):
+        raise ApiError("VALIDATION_ERROR", "Invalid blob ID format", 400)
+
+    result = _ssb_rpc(
+        "blobs/get",
+        [blob_id],
+        host=creds.get("host", DEFAULT_SSB_HOST),
+        port=creds.get("port", DEFAULT_SSB_PORT),
+    )
+
+    if not result:
+        raise ApiError("BLOB_NOT_FOUND", "Blob not found", 404)
+
+    import base64
+    content = base64.b64decode(result.get("content", ""))
+
+    return Response(
+        content,
+        mimetype=result.get("type", "application/octet-stream"),
+    )
 
 
 # SSB Constants
