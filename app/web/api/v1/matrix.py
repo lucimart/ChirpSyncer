@@ -99,7 +99,7 @@ def _matrix_request(
                 error_data = response.json()
                 if "error" in error_data:
                     error_msg = error_data["error"]
-            except Exception:
+            except Exception:  # nosec B110 - intentionally ignore JSON parse errors for error message
                 pass
             raise ApiError("MATRIX_API_ERROR", error_msg, response.status_code)
 
@@ -288,7 +288,7 @@ def get_room(user_id: int, room_id: str):
             f"/_matrix/client/v3/rooms/{room_id}/state/m.room.name",
         )
         room_info["name"] = name_state.get("name")
-    except Exception:
+    except Exception:  # nosec B110 - room name is optional
         pass
 
     # Get room topic
@@ -300,7 +300,7 @@ def get_room(user_id: int, room_id: str):
             f"/_matrix/client/v3/rooms/{room_id}/state/m.room.topic",
         )
         room_info["topic"] = topic_state.get("topic")
-    except Exception:
+    except Exception:  # nosec B110 - room topic is optional
         pass
 
     # Get member count
@@ -312,7 +312,7 @@ def get_room(user_id: int, room_id: str):
             f"/_matrix/client/v3/rooms/{room_id}/joined_members",
         )
         room_info["member_count"] = len(members.get("joined", {}))
-    except Exception:
+    except Exception:  # nosec B110 - member count is optional
         pass
 
     return api_response(room_info)

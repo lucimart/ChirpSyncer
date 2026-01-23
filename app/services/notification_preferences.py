@@ -229,6 +229,7 @@ class NotificationPreferences:
                     params.append(now)
                     params.append(user_id)
 
+                    # nosec B608 - updates list contains only validated column names from the code above
                     query = f"UPDATE notification_preferences SET {', '.join(updates)} WHERE user_id = ?"
                     cursor.execute(query, params)
 

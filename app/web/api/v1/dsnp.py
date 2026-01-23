@@ -116,7 +116,7 @@ def _frequency_request(
                     error_msg = error_data["message"]
                 elif "error" in error_data:
                     error_msg = error_data["error"]
-            except Exception:
+            except Exception:  # nosec B110 - intentionally ignore JSON parse errors for error message
                 pass
             raise ApiError("DSNP_API_ERROR", error_msg, response.status_code)
 
