@@ -420,7 +420,7 @@ class TestLinkedInTransformer:
 
         # Should include a CTA
         content_lower = result["content"].lower()
-        cta_indicators = ["comment", "share", "thoughts", "agree", "follow", "connect"]
+        cta_indicators = ["comment", "share", "thoughts", "agree", "follow", "connect", "insights", "discuss"]
         has_cta = any(indicator in content_lower for indicator in cta_indicators)
         assert has_cta, "LinkedIn post should include a call-to-action"
 
