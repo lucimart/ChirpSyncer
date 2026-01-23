@@ -156,18 +156,6 @@ export {
 } from './Motion';
 export type { Variants, Transition } from './Motion';
 
-// Lottie Animations (complex visual feedback)
-export {
-  LottieAnimation,
-  SuccessAnimation,
-  SyncCompleteAnimation,
-  EmptyStateAnimation,
-} from './Lottie';
-export type {
-  LottieAnimationProps,
-  LottieAnimationType,
-} from './Lottie';
-
 // Shared Utilities
 export {
   // Animations
