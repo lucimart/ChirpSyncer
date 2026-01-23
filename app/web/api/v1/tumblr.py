@@ -15,7 +15,7 @@ import uuid
 from flask import Blueprint, request
 
 from app.auth.auth_decorators import require_auth
-from app.auth.credential_manager import credential_manager
+from app.auth.credential_manager import CredentialManager
 from app.core.logger import get_logger
 from app.web.api.v1.responses import api_response, api_error
 
@@ -28,7 +28,8 @@ TUMBLR_API_BASE = "https://api.tumblr.com/v2"
 
 def get_tumblr_credentials(user_id: int) -> dict | None:
     """Get Tumblr credentials for user."""
-    return credential_manager.get_credentials(user_id, "tumblr")
+    cm = CredentialManager()
+    return cm.get_credentials(user_id, "tumblr", "api")
 
 
 def oauth1_sign(method: str, url: str, params: dict, consumer_secret: str, token_secret: str = "") -> str:

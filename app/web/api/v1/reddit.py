@@ -8,7 +8,7 @@ Supports posting, reading, voting, and commenting.
 from flask import Blueprint, request
 
 from app.auth.auth_decorators import require_auth
-from app.auth.credential_manager import credential_manager
+from app.auth.credential_manager import CredentialManager
 from app.core.logger import get_logger
 from app.web.api.v1.responses import api_response, api_error
 
@@ -22,7 +22,8 @@ REDDIT_USER_AGENT = "ChirpSyncer/1.0"
 
 def get_reddit_credentials(user_id: int) -> dict | None:
     """Get Reddit credentials for user."""
-    return credential_manager.get_credentials(user_id, "reddit")
+    cm = CredentialManager()
+    return cm.get_credentials(user_id, "reddit", "api")
 
 
 def get_reddit_headers(access_token: str) -> dict:

@@ -9,7 +9,7 @@ from functools import wraps
 import requests
 from flask import Blueprint, g, request
 
-from app.auth.credential_manager import credential_manager
+from app.auth.credential_manager import CredentialManager
 from app.web.api.v1.errors import ApiError
 from app.web.api.v1.responses import api_response
 
@@ -26,7 +26,7 @@ def require_youtube_credentials(f):
     def decorated(*args, **kwargs):
         user_id = g.user_id
 
-        credentials = credential_manager.get_credentials(user_id, "youtube")
+        credentials = CredentialManager().get_credentials(user_id, "youtube", "api")
         if not credentials:
             raise ApiError("YOUTUBE_NOT_CONNECTED", "YouTube account not connected", 401)
 
@@ -72,7 +72,7 @@ def _refresh_token(user_id: str, credentials: dict) -> dict:
     credentials["access_token"] = data["access_token"]
     credentials["expires_at"] = time.time() + data.get("expires_in", 3600)
 
-    credential_manager.store_credentials(user_id, "youtube", credentials)
+    CredentialManager().save_credentials(user_id, "youtube", "api", credentials)
     return credentials
 
 

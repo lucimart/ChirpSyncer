@@ -9,7 +9,7 @@ from functools import wraps
 import requests
 from flask import Blueprint, g, request
 
-from app.auth.credential_manager import credential_manager
+from app.auth.credential_manager import CredentialManager
 from app.web.api.v1.errors import ApiError
 from app.web.api.v1.responses import api_response
 
@@ -26,7 +26,7 @@ def require_tiktok_credentials(f):
     def decorated(*args, **kwargs):
         user_id = g.user_id
 
-        credentials = credential_manager.get_credentials(user_id, "tiktok")
+        credentials = CredentialManager().get_credentials(user_id, "tiktok", "api")
         if not credentials:
             raise ApiError("TIKTOK_NOT_CONNECTED", "TikTok account not connected", 401)
 
@@ -77,7 +77,7 @@ def _refresh_token(user_id: str, credentials: dict) -> dict:
         credentials["refresh_token"] = data["refresh_token"]
     credentials["expires_at"] = time.time() + data.get("expires_in", 86400)
 
-    credential_manager.store_credentials(user_id, "tiktok", credentials)
+    CredentialManager().save_credentials(user_id, "tiktok", "api", credentials)
     return credentials
 
 

@@ -8,7 +8,7 @@ import re
 from flask import Blueprint, request
 
 from app.auth.auth_decorators import require_auth
-from app.auth.credential_manager import credential_manager
+from app.auth.credential_manager import CredentialManager
 from app.core.logger import get_logger
 from app.web.api.v1.responses import api_response, api_error
 
@@ -19,7 +19,8 @@ discord_bp = Blueprint("discord", __name__, url_prefix="/discord")
 
 def get_discord_credentials(user_id: int) -> dict | None:
     """Get Discord credentials for user."""
-    return credential_manager.get_credentials(user_id, "discord")
+    cm = CredentialManager()
+    return cm.get_credentials(user_id, "discord", "api")
 
 
 def get_bot_headers(bot_token: str) -> dict:
