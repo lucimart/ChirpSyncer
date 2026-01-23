@@ -2,12 +2,14 @@
 # These files make API calls to trusted third-party services using fixed base URLs
 # User-provided data (IDs, usernames) are only used in URL paths, not to construct the host
 
-# DevTo, Medium, Substack integrations
+# Blog/Writing platforms
 app/web/api/v1/devto.py
 app/web/api/v1/medium.py
 app/web/api/v1/substack.py
+app/web/api/v1/hashnode.py
+app/web/api/v1/cohost.py
 
-# Social media platform integrations
+# Social media platforms
 app/web/api/v1/discord.py
 app/web/api/v1/reddit.py
 app/web/api/v1/tumblr.py
@@ -18,10 +20,17 @@ app/web/api/v1/facebook.py
 app/web/api/v1/instagram.py
 app/web/api/v1/linkedin.py
 app/web/api/v1/threads.py
-app/web/api/v1/mastodon.py
+app/web/api/v1/telegram.py
 
-# Decentralized protocols
+# Federated/Decentralized platforms
+app/web/api/v1/mastodon.py
 app/web/api/v1/nostr.py
 app/web/api/v1/matrix.py
 app/web/api/v1/ssb.py
 app/web/api/v1/dsnp.py
+app/web/api/v1/lemmy.py
+app/web/api/v1/pixelfed.py
+
+# Core sync connectors
+app/web/api/v1/twitter.py
+app/web/api/v1/bluesky.py
