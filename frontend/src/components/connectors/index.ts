@@ -25,6 +25,23 @@ export { CohostConnect } from './CohostConnect';
 // Fediverse connectors
 export { LemmyConnect } from './LemmyConnect';
 export { PixelfedConnect } from './PixelfedConnect';
+export { MisskeyConnect } from './MisskeyConnect';
+export { PeerTubeConnect } from './PeerTubeConnect';
+export { BookWyrmConnect } from './BookWyrmConnect';
+
+// Blog/CMS connectors
+export { WordPressConnect } from './WordPressConnect';
+export { GhostConnect } from './GhostConnect';
+export { WriteAsConnect } from './WriteAsConnect';
+export { MicroblogConnect } from './MicroblogConnect';
+
+// Newsletter connectors
+export { ButtondownConnect } from './ButtondownConnect';
+export { ConvertKitConnect } from './ConvertKitConnect';
+export { BeehiivConnect } from './BeehiivConnect';
+
+// Web3 connectors
+export { LensConnect } from './LensConnect';
 
 // Utility connectors
 export { RSSConnect } from './RSSConnect';

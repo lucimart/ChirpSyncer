@@ -104,6 +104,10 @@ from app.web.api.v1.misskey import misskey_bp  # noqa: E402
 from app.web.api.v1.peertube import peertube_bp  # noqa: E402
 from app.web.api.v1.bookwyrm import bookwyrm_bp  # noqa: E402
 from app.web.api.v1.lens import lens_bp  # noqa: E402
+from app.web.api.v1.inbox import inbox_bp  # noqa: E402
+from app.web.api.v1.workflows import workflows_bp  # noqa: E402
+from app.web.api.v1.atomization import atomization_bp  # noqa: E402
+from app.web.api.v1.recycling import recycling_bp  # noqa: E402
 
 api_v1.register_blueprint(auth_bp)
 api_v1.register_blueprint(dashboard_bp)
@@ -162,3 +166,7 @@ api_v1.register_blueprint(misskey_bp)
 api_v1.register_blueprint(peertube_bp)
 api_v1.register_blueprint(bookwyrm_bp)
 api_v1.register_blueprint(lens_bp)
+api_v1.register_blueprint(inbox_bp)
+api_v1.register_blueprint(workflows_bp)
+api_v1.register_blueprint(atomization_bp)
+api_v1.register_blueprint(recycling_bp)

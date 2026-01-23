@@ -67,6 +67,17 @@ import {
   CohostConnect,
   LemmyConnect,
   PixelfedConnect,
+  MisskeyConnect,
+  PeerTubeConnect,
+  BookWyrmConnect,
+  WordPressConnect,
+  GhostConnect,
+  WriteAsConnect,
+  MicroblogConnect,
+  ButtondownConnect,
+  ConvertKitConnect,
+  BeehiivConnect,
+  LensConnect,
   RSSConnect,
   WebhookConnect,
   OAuthConnect,
@@ -87,7 +98,7 @@ import {
 } from '@/lib/connectors';
 
 // ============ Constants ============
-type Category = 'all' | 'social' | 'video' | 'blogging' | 'messaging' | 'decentralized' | 'utilities';
+type Category = 'all' | 'social' | 'video' | 'blogging' | 'newsletters' | 'messaging' | 'decentralized' | 'web3' | 'utilities';
 type ViewMode = 'grid' | 'list';
 type TabId = 'platforms' | 'flow';
 
@@ -97,19 +108,25 @@ const CATEGORIES: { id: Category; label: string; icon: React.ReactNode; platform
     id: 'social',
     label: 'Social',
     icon: <MessageSquare size={16} />,
-    platforms: ['twitter', 'bluesky', 'mastodon', 'threads', 'facebook', 'linkedin', 'instagram', 'tumblr', 'reddit', 'cohost', 'pixelfed']
+    platforms: ['twitter', 'bluesky', 'mastodon', 'threads', 'facebook', 'linkedin', 'instagram', 'tumblr', 'reddit', 'cohost', 'pixelfed', 'misskey', 'bookwyrm']
   },
   {
     id: 'video',
     label: 'Video',
     icon: <Video size={16} />,
-    platforms: ['youtube', 'tiktok', 'pinterest']
+    platforms: ['youtube', 'tiktok', 'pinterest', 'peertube']
   },
   {
     id: 'blogging',
     label: 'Blogging',
     icon: <FileText size={16} />,
-    platforms: ['medium', 'substack', 'devto', 'hashnode']
+    platforms: ['medium', 'substack', 'devto', 'hashnode', 'wordpress', 'ghost', 'writeas', 'microblog']
+  },
+  {
+    id: 'newsletters',
+    label: 'Newsletters',
+    icon: <FileText size={16} />,
+    platforms: ['buttondown', 'convertkit', 'beehiiv', 'substack']
   },
   {
     id: 'messaging',
@@ -121,7 +138,13 @@ const CATEGORIES: { id: Category; label: string; icon: React.ReactNode; platform
     id: 'decentralized',
     label: 'Decentralized',
     icon: <Globe size={16} />,
-    platforms: ['nostr', 'lemmy', 'dsnp', 'ssb']
+    platforms: ['nostr', 'lemmy', 'dsnp', 'ssb', 'misskey', 'peertube', 'pixelfed', 'bookwyrm']
+  },
+  {
+    id: 'web3',
+    label: 'Web3',
+    icon: <Globe size={16} />,
+    platforms: ['nostr', 'lens']
   },
   {
     id: 'utilities',
@@ -1041,6 +1064,105 @@ export default function ConnectorsPage() {
             isConnecting={connectMutation.isPending}
           />
         );
+      case 'misskey':
+        return (
+          <MisskeyConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'peertube':
+        return (
+          <PeerTubeConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'bookwyrm':
+        return (
+          <BookWyrmConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'wordpress':
+        return (
+          <WordPressConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'ghost':
+        return (
+          <GhostConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'writeas':
+        return (
+          <WriteAsConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'microblog':
+        return (
+          <MicroblogConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'buttondown':
+        return (
+          <ButtondownConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'convertkit':
+        return (
+          <ConvertKitConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'beehiiv':
+        return (
+          <BeehiivConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'lens':
+        return (
+          <LensConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
       default:
         return null;
     }
@@ -1290,7 +1412,7 @@ export default function ConnectorsPage() {
         }}
         title={`Connect to ${connectModal?.name}`}
         footer={
-          ['nostr', 'bluesky', 'mastodon', 'twitter', 'matrix', 'discord', 'telegram', 'linkedin', 'facebook', 'threads', 'reddit', 'youtube', 'tumblr', 'pinterest', 'tiktok', 'medium', 'substack', 'devto', 'hashnode', 'cohost', 'lemmy', 'pixelfed', 'rss', 'webhooks'].includes(connectModal?.platform || '') ? null : (
+          ['nostr', 'bluesky', 'mastodon', 'twitter', 'matrix', 'discord', 'telegram', 'linkedin', 'facebook', 'threads', 'reddit', 'youtube', 'tumblr', 'pinterest', 'tiktok', 'medium', 'substack', 'devto', 'hashnode', 'cohost', 'lemmy', 'pixelfed', 'rss', 'webhooks', 'misskey', 'peertube', 'bookwyrm', 'wordpress', 'ghost', 'writeas', 'microblog', 'buttondown', 'convertkit', 'beehiiv', 'lens'].includes(connectModal?.platform || '') ? null : (
             <Stack direction="row" justify="end" gap={2}>
               <Button
                 variant="secondary"
