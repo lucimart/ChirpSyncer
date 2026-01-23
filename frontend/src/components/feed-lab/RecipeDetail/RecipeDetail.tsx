@@ -158,12 +158,12 @@ const Button = styled.button<{ $variant?: 'primary' | 'secondary' }>`
   ${({ theme, $variant }) =>
     $variant === 'primary'
       ? `
-    background: ${theme.colors.primary[500]};
+    background: ${theme.colors.primary[600]};
     color: white;
     border: none;
 
     &:hover {
-      background: ${theme.colors.primary[600]};
+      background: ${theme.colors.primary[700]};
     }
   `
       : `

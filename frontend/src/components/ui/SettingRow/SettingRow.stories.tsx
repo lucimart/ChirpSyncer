@@ -118,6 +118,7 @@ export const WithInput: Story = {
           value="sk-xxxx-xxxx-xxxx"
           readOnly
           style={{ width: '200px' }}
+          aria-label="API Key"
         />
       </SettingRow>
     </Container>
@@ -143,7 +144,7 @@ export const WithStatus: Story = {
         label="Account Status"
         hint="Your current plan and subscription"
       >
-        <span style={{ color: '#22c55e', fontWeight: 500 }}>Active</span>
+        <span style={{ color: '#15803D', fontWeight: 500 }}>Active</span>
       </SettingRow>
     </Container>
   ),

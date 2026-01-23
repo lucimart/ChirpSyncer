@@ -48,7 +48,7 @@ const variantStyles = {
   `,
   warning: css`
     background-color: ${({ theme }) => theme.colors.warning[50]};
-    color: ${({ theme }) => theme.colors.warning[700]};
+    color: ${({ theme }) => theme.colors.warning[800]};
     border-color: ${({ theme }) => theme.colors.warning[100]};
   `,
   danger: css`
@@ -78,7 +78,7 @@ const variantStyles = {
   `,
   'warning-soft': css`
     background-color: ${({ theme }) => theme.colors.warning[100]};
-    color: ${({ theme }) => theme.colors.warning[700]};
+    color: ${({ theme }) => theme.colors.warning[800]};
     border-color: ${({ theme }) => theme.colors.warning[100]};
   `,
   text: css`
@@ -92,8 +92,8 @@ const variantStyles = {
     border-color: transparent;
   `,
   'status-warning': css`
-    background-color: ${({ theme }) => theme.colors.warning[500]};
-    color: ${({ theme }) => theme.colors.text.inverse};
+    background-color: ${({ theme }) => theme.colors.warning[100]};
+    color: ${({ theme }) => theme.colors.warning[800]};
     border-color: transparent;
   `,
   'status-danger': css`
@@ -102,7 +102,7 @@ const variantStyles = {
     border-color: transparent;
   `,
   'status-primary': css`
-    background-color: ${({ theme }) => theme.colors.primary[500]};
+    background-color: ${({ theme }) => theme.colors.primary[600]};
     color: white;
     border-color: transparent;
   `,
