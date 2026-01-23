@@ -33,7 +33,7 @@ def get_tumblr_credentials(user_id: int) -> dict | None:
     return cm.get_credentials(user_id, "tumblr", "api")
 
 
-def oauth1_sign(method: str, url: str, params: dict, consumer_secret: str, token_secret: str = "") -> str:
+def oauth1_sign(method: str, url: str, params: dict, consumer_secret: str, token_secret: str = "") -> str:  # nosec B107
     """Create OAuth 1.0a signature."""
     # Sort and encode parameters
     sorted_params = sorted(params.items())

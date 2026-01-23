@@ -16,7 +16,7 @@ from app.web.api.v1.responses import api_response
 youtube_bp = Blueprint("youtube", __name__, url_prefix="/youtube")
 
 YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3"
-GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
+GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"  # nosec B105
 
 
 def require_youtube_credentials(f):
@@ -243,7 +243,7 @@ def get_my_videos():
 
     uploads_playlist = items[0].get("contentDetails", {}).get("relatedPlaylists", {}).get("uploads")
     if not uploads_playlist:
-        return api_response({"videos": [], "next_page_token": None})
+        return api_response({"videos": [], "next_page_token": None})  # nosec B105
 
     # Get videos from uploads playlist
     max_results = request.args.get("max_results", 25, type=int)

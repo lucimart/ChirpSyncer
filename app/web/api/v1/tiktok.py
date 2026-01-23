@@ -16,7 +16,7 @@ from app.web.api.v1.responses import api_response
 tiktok_bp = Blueprint("tiktok", __name__, url_prefix="/tiktok")
 
 TIKTOK_API_BASE = "https://open.tiktokapis.com/v2"
-TIKTOK_TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/"
+TIKTOK_TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/"  # nosec B105
 
 
 def require_tiktok_credentials(f):
