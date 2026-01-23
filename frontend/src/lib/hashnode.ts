@@ -160,8 +160,8 @@ export function useHashnodeMe() {
   return useQuery({
     queryKey: hashnodeKeys.me(),
     queryFn: async () => {
-      const response = await api.get<{ data: HashnodeUser }>('/hashnode/me');
-      return response.data.data;
+      const response = await api.get<HashnodeUser>('/hashnode/me');
+      return response.data;
     },
   });
 }
@@ -173,7 +173,7 @@ export function useHashnodePublications() {
       const response = await api.get<{ data: { publications: HashnodePublication[] } }>(
         '/hashnode/publications'
       );
-      return response.data.data.publications;
+      return response.data?.publications;
     },
   });
 }
@@ -189,7 +189,7 @@ export function useHashnodePosts(
         `/hashnode/publications/${publicationId}/posts`,
         { params }
       );
-      return response.data.data;
+      return response.data;
     },
     enabled: !!publicationId,
   });
@@ -199,8 +199,8 @@ export function useHashnodePost(postId: string) {
   return useQuery({
     queryKey: hashnodeKeys.post(postId),
     queryFn: async () => {
-      const response = await api.get<{ data: HashnodePost }>(`/hashnode/posts/${postId}`);
-      return response.data.data;
+      const response = await api.get<HashnodePost>(`/hashnode/posts/${postId}`);
+      return response.data;
     },
     enabled: !!postId,
   });
@@ -211,11 +211,11 @@ export function useCreateHashnodePost(publicationId: string) {
 
   return useMutation({
     mutationFn: async (input: CreatePostInput) => {
-      const response = await api.post<{ data: HashnodePost }>(
+      const response = await api.post<HashnodePost>(
         `/hashnode/publications/${publicationId}/posts`,
         input
       );
-      return response.data.data;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: hashnodeKeys.all });
@@ -228,8 +228,8 @@ export function useUpdateHashnodePost(postId: string) {
 
   return useMutation({
     mutationFn: async (input: UpdatePostInput) => {
-      const response = await api.put<{ data: HashnodePost }>(`/hashnode/posts/${postId}`, input);
-      return response.data.data;
+      const response = await api.put<HashnodePost>(`/hashnode/posts/${postId}`, input);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: hashnodeKeys.all });
@@ -261,7 +261,7 @@ export function useHashnodeDrafts(
         `/hashnode/publications/${publicationId}/drafts`,
         { params }
       );
-      return response.data.data;
+      return response.data;
     },
     enabled: !!publicationId,
   });
@@ -278,7 +278,7 @@ export function useHashnodeSeries(
         `/hashnode/publications/${publicationId}/series`,
         { params }
       );
-      return response.data.data;
+      return response.data;
     },
     enabled: !!publicationId,
   });
@@ -291,7 +291,7 @@ export function useHashnodeTags(params?: { q?: string; first?: number }) {
       const response = await api.get<{ data: { tags: HashnodeTag[] } }>('/hashnode/tags', {
         params,
       });
-      return response.data.data.tags;
+      return response.data?.tags;
     },
   });
 }

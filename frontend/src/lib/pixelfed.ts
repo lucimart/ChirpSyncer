@@ -88,8 +88,8 @@ export function usePixelfedMe() {
   return useQuery({
     queryKey: pixelfedKeys.me(),
     queryFn: async () => {
-      const response = await api.get<{ data: PixelfedAccount }>('/pixelfed/verify_credentials');
-      return response.data.data;
+      const response = await api.get<PixelfedAccount>('/pixelfed/verify_credentials');
+      return response.data;
     },
   });
 }
@@ -98,8 +98,8 @@ export function usePixelfedAccount(accountId: string) {
   return useQuery({
     queryKey: pixelfedKeys.account(accountId),
     queryFn: async () => {
-      const response = await api.get<{ data: PixelfedAccount }>(`/pixelfed/accounts/${accountId}`);
-      return response.data.data;
+      const response = await api.get<PixelfedAccount>(`/pixelfed/accounts/${accountId}`);
+      return response.data;
     },
     enabled: !!accountId,
   });
@@ -116,7 +116,7 @@ export function usePixelfedAccountStatuses(
         `/pixelfed/accounts/${accountId}/statuses`,
         { params }
       );
-      return response.data.data.statuses;
+      return response.data?.statuses;
     },
     enabled: !!accountId,
   });
@@ -130,7 +130,7 @@ export function usePixelfedHomeTimeline(params?: { limit?: number; max_id?: stri
         '/pixelfed/timelines/home',
         { params }
       );
-      return response.data.data.statuses;
+      return response.data?.statuses;
     },
   });
 }
@@ -143,7 +143,7 @@ export function usePixelfedPublicTimeline(params?: { limit?: number; local?: boo
         '/pixelfed/timelines/public',
         { params }
       );
-      return response.data.data.statuses;
+      return response.data?.statuses;
     },
   });
 }
@@ -152,8 +152,8 @@ export function usePixelfedStatus(statusId: string) {
   return useQuery({
     queryKey: pixelfedKeys.status(statusId),
     queryFn: async () => {
-      const response = await api.get<{ data: PixelfedStatus }>(`/pixelfed/statuses/${statusId}`);
-      return response.data.data;
+      const response = await api.get<PixelfedStatus>(`/pixelfed/statuses/${statusId}`);
+      return response.data;
     },
     enabled: !!statusId,
   });
@@ -164,8 +164,8 @@ export function useCreatePixelfedStatus() {
 
   return useMutation({
     mutationFn: async (input: CreateStatusInput) => {
-      const response = await api.post<{ data: PixelfedStatus }>('/pixelfed/statuses', input);
-      return response.data.data;
+      const response = await api.post<PixelfedStatus>('/pixelfed/statuses', input);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: pixelfedKeys.all });
@@ -191,10 +191,10 @@ export function useFavouritePixelfedStatus(statusId: string) {
 
   return useMutation({
     mutationFn: async () => {
-      const response = await api.post<{ data: PixelfedStatus }>(
+      const response = await api.post<PixelfedStatus>(
         `/pixelfed/statuses/${statusId}/favourite`
       );
-      return response.data.data;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: pixelfedKeys.status(statusId) });
@@ -207,10 +207,10 @@ export function useUnfavouritePixelfedStatus(statusId: string) {
 
   return useMutation({
     mutationFn: async () => {
-      const response = await api.post<{ data: PixelfedStatus }>(
+      const response = await api.post<PixelfedStatus>(
         `/pixelfed/statuses/${statusId}/unfavourite`
       );
-      return response.data.data;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: pixelfedKeys.status(statusId) });
@@ -223,10 +223,10 @@ export function useReblogPixelfedStatus(statusId: string) {
 
   return useMutation({
     mutationFn: async () => {
-      const response = await api.post<{ data: PixelfedStatus }>(
+      const response = await api.post<PixelfedStatus>(
         `/pixelfed/statuses/${statusId}/reblog`
       );
-      return response.data.data;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: pixelfedKeys.all });
@@ -243,12 +243,12 @@ export function useUploadPixelfedMedia() {
         formData.append('description', description);
       }
 
-      const response = await api.post<{ data: PixelfedMediaAttachment }>(
+      const response = await api.post<PixelfedMediaAttachment>(
         '/pixelfed/media',
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
-      return response.data.data;
+      return response.data;
     },
   });
 }
@@ -258,8 +258,8 @@ export function useFollowPixelfedAccount(accountId: string) {
 
   return useMutation({
     mutationFn: async () => {
-      const response = await api.post<{ data: unknown }>(`/pixelfed/accounts/${accountId}/follow`);
-      return response.data.data;
+      const response = await api.post<unknown>(`/pixelfed/accounts/${accountId}/follow`);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: pixelfedKeys.account(accountId) });
@@ -272,10 +272,10 @@ export function useUnfollowPixelfedAccount(accountId: string) {
 
   return useMutation({
     mutationFn: async () => {
-      const response = await api.post<{ data: unknown }>(
+      const response = await api.post<unknown>(
         `/pixelfed/accounts/${accountId}/unfollow`
       );
-      return response.data.data;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: pixelfedKeys.account(accountId) });
@@ -288,7 +288,7 @@ export function usePixelfedDiscover() {
     queryKey: pixelfedKeys.discover(),
     queryFn: async () => {
       const response = await api.get<{ data: { posts: PixelfedStatus[] } }>('/pixelfed/discover/posts');
-      return response.data.data.posts;
+      return response.data?.posts;
     },
   });
 }

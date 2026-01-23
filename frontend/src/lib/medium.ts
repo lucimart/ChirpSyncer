@@ -58,8 +58,8 @@ export function useMediumMe() {
   return useQuery({
     queryKey: mediumKeys.me(),
     queryFn: async () => {
-      const response = await api.get<{ data: MediumUser }>('/medium/me');
-      return response.data.data;
+      const response = await api.get<MediumUser>('/medium/me');
+      return response.data;
     },
   });
 }
@@ -71,7 +71,7 @@ export function useMediumPublications(userId: string) {
       const response = await api.get<{ data: { publications: MediumPublication[] } }>(
         `/medium/users/${userId}/publications`
       );
-      return response.data.data.publications;
+      return response.data?.publications;
     },
     enabled: !!userId,
   });
@@ -82,11 +82,11 @@ export function useCreateMediumPost(userId: string) {
 
   return useMutation({
     mutationFn: async (input: CreatePostInput) => {
-      const response = await api.post<{ data: MediumPost }>(
+      const response = await api.post<MediumPost>(
         `/medium/users/${userId}/posts`,
         input
       );
-      return response.data.data;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: mediumKeys.all });
@@ -99,11 +99,11 @@ export function useCreatePublicationPost(publicationId: string) {
 
   return useMutation({
     mutationFn: async (input: CreatePostInput) => {
-      const response = await api.post<{ data: MediumPost }>(
+      const response = await api.post<MediumPost>(
         `/medium/publications/${publicationId}/posts`,
         input
       );
-      return response.data.data;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: mediumKeys.all });
@@ -124,7 +124,7 @@ export function useUploadMediumImage() {
           headers: { 'Content-Type': 'multipart/form-data' },
         }
       );
-      return response.data.data;
+      return response.data;
     },
   });
 }
@@ -133,10 +133,10 @@ export function useMediumPublicationContributors(publicationId: string) {
   return useQuery({
     queryKey: mediumKeys.contributors(publicationId),
     queryFn: async () => {
-      const response = await api.get<{ data: { contributors: Array<{ publicationId: string; userId: string; role: string }> } }>(
+      const response = await api.get<{ contributors: Array<{ publicationId: string; userId: string; role: string }> }>(
         `/medium/publications/${publicationId}/contributors`
       );
-      return response.data.data.contributors;
+      return response.data?.contributors;
     },
     enabled: !!publicationId,
   });

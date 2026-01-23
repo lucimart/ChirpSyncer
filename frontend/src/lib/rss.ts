@@ -86,8 +86,8 @@ export function useParseFeed(feedUrl: string, enabled = true) {
   return useQuery({
     queryKey: rssKeys.feed(feedUrl),
     queryFn: async () => {
-      const response = await api.post<{ data: RSSFeed }>('/rss/parse', { url: feedUrl });
-      return response.data.data;
+      const response = await api.post<RSSFeed>('/rss/parse', { url: feedUrl });
+      return response.data;
     },
     enabled: enabled && !!feedUrl,
   });
@@ -101,7 +101,7 @@ export function useDiscoverFeeds(pageUrl: string, enabled = true) {
         '/rss/discover',
         { url: pageUrl }
       );
-      return response.data.data;
+      return response.data;
     },
     enabled: enabled && !!pageUrl,
   });
@@ -111,8 +111,8 @@ export function useValidateFeed(feedUrl: string, enabled = true) {
   return useQuery({
     queryKey: rssKeys.validate(feedUrl),
     queryFn: async () => {
-      const response = await api.post<{ data: FeedValidation }>('/rss/validate', { url: feedUrl });
-      return response.data.data;
+      const response = await api.post<FeedValidation>('/rss/validate', { url: feedUrl });
+      return response.data;
     },
     enabled: enabled && !!feedUrl,
   });
@@ -122,8 +122,8 @@ export function useFeedHash(feedUrl: string, enabled = true) {
   return useQuery({
     queryKey: rssKeys.hash(feedUrl),
     queryFn: async () => {
-      const response = await api.post<{ data: FeedHash }>('/rss/hash', { url: feedUrl });
-      return response.data.data;
+      const response = await api.post<FeedHash>('/rss/hash', { url: feedUrl });
+      return response.data;
     },
     enabled: enabled && !!feedUrl,
   });
@@ -132,8 +132,8 @@ export function useFeedHash(feedUrl: string, enabled = true) {
 export function useParseFeedMutation() {
   return useMutation({
     mutationFn: async (feedUrl: string) => {
-      const response = await api.post<{ data: RSSFeed }>('/rss/parse', { url: feedUrl });
-      return response.data.data;
+      const response = await api.post<RSSFeed>('/rss/parse', { url: feedUrl });
+      return response.data;
     },
   });
 }
@@ -145,7 +145,7 @@ export function useDiscoverFeedsMutation() {
         '/rss/discover',
         { url: pageUrl }
       );
-      return response.data.data;
+      return response.data;
     },
   });
 }
@@ -156,7 +156,7 @@ export function useParseOPML() {
       const response = await api.post<{
         data: { feeds: OPMLFeed[]; total: number; metadata: OPMLMetadata };
       }>('/rss/opml/parse', { content });
-      return response.data.data;
+      return response.data;
     },
   });
 }
@@ -172,7 +172,7 @@ export function useParseOPMLFile() {
       }>('/rss/opml/parse', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      return response.data.data;
+      return response.data;
     },
   });
 }
@@ -196,7 +196,7 @@ export function useExportOPML() {
           owner_name: ownerName,
         }
       );
-      return response.data.data;
+      return response.data;
     },
   });
 }
@@ -204,8 +204,8 @@ export function useExportOPML() {
 export function useValidateFeedMutation() {
   return useMutation({
     mutationFn: async (feedUrl: string) => {
-      const response = await api.post<{ data: FeedValidation }>('/rss/validate', { url: feedUrl });
-      return response.data.data;
+      const response = await api.post<FeedValidation>('/rss/validate', { url: feedUrl });
+      return response.data;
     },
   });
 }
@@ -213,8 +213,8 @@ export function useValidateFeedMutation() {
 export function useFeedHashMutation() {
   return useMutation({
     mutationFn: async (feedUrl: string) => {
-      const response = await api.post<{ data: FeedHash }>('/rss/hash', { url: feedUrl });
-      return response.data.data;
+      const response = await api.post<FeedHash>('/rss/hash', { url: feedUrl });
+      return response.data;
     },
   });
 }

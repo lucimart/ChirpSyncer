@@ -645,7 +645,7 @@ export default function ConnectorsPage() {
     return syncConfigs.find((c) => c.platform === platform);
   };
 
-  const handleConnect = async () => {
+  const handleConnect = useCallback(async () => {
     if (!connectModal) return;
     try {
       await connectMutation.mutateAsync({
@@ -666,7 +666,7 @@ export default function ConnectorsPage() {
         message: 'Failed to connect to platform',
       });
     }
-  };
+  }, [connectModal, credentials, connectMutation, addToast]);
 
   const handleDisconnect = async (platform: PlatformType) => {
     try {

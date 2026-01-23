@@ -181,8 +181,8 @@ export function useLemmySite() {
   return useQuery({
     queryKey: lemmyKeys.site(),
     queryFn: async () => {
-      const response = await api.get<{ data: unknown }>('/lemmy/site');
-      return response.data.data;
+      const response = await api.get<unknown>('/lemmy/site');
+      return response.data;
     },
   });
 }
@@ -191,10 +191,10 @@ export function useLemmyUser(username?: string, personId?: number) {
   return useQuery({
     queryKey: lemmyKeys.user(username),
     queryFn: async () => {
-      const response = await api.get<{ data: unknown }>('/lemmy/user', {
+      const response = await api.get<unknown>('/lemmy/user', {
         params: { username, person_id: personId },
       });
-      return response.data.data;
+      return response.data;
     },
     enabled: !!(username || personId),
   });
@@ -213,7 +213,7 @@ export function useLemmyCommunities(params?: {
         '/lemmy/community/list',
         { params }
       );
-      return response.data.data.communities;
+      return response.data?.communities;
     },
   });
 }
@@ -226,7 +226,7 @@ export function useLemmyCommunity(id?: number, name?: string) {
         '/lemmy/community',
         { params: { id, name } }
       );
-      return response.data.data.community_view;
+      return response.data?.community_view;
     },
     enabled: !!(id || name),
   });
@@ -241,7 +241,7 @@ export function useFollowLemmyCommunity() {
         '/lemmy/community/follow',
         { community_id: communityId, follow }
       );
-      return response.data.data.community_view;
+      return response.data?.community_view;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: lemmyKeys.communities() });
@@ -263,7 +263,7 @@ export function useLemmyPosts(params?: {
       const response = await api.get<{ data: { posts: LemmyPostView[] } }>('/lemmy/post/list', {
         params,
       });
-      return response.data.data.posts;
+      return response.data?.posts;
     },
   });
 }
@@ -275,7 +275,7 @@ export function useLemmyPost(postId: number) {
       const response = await api.get<{ data: { post_view: LemmyPostView } }>('/lemmy/post', {
         params: { id: postId },
       });
-      return response.data.data.post_view;
+      return response.data?.post_view;
     },
     enabled: !!postId,
   });
@@ -287,7 +287,7 @@ export function useCreateLemmyPost() {
   return useMutation({
     mutationFn: async (input: CreatePostInput) => {
       const response = await api.post<{ data: { post_view: LemmyPostView } }>('/lemmy/post', input);
-      return response.data.data.post_view;
+      return response.data?.post_view;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: lemmyKeys.posts() });
@@ -301,7 +301,7 @@ export function useEditLemmyPost() {
   return useMutation({
     mutationFn: async (input: { post_id: number; name?: string; url?: string; body?: string; nsfw?: boolean }) => {
       const response = await api.put<{ data: { post_view: LemmyPostView } }>('/lemmy/post', input);
-      return response.data.data.post_view;
+      return response.data?.post_view;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: lemmyKeys.post(variables.post_id) });
@@ -319,7 +319,7 @@ export function useDeleteLemmyPost() {
         post_id: postId,
         deleted,
       });
-      return response.data.data.post_view;
+      return response.data?.post_view;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: lemmyKeys.posts() });
@@ -336,7 +336,7 @@ export function useVoteLemmyPost() {
         post_id: postId,
         score,
       });
-      return response.data.data.post_view;
+      return response.data?.post_view;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: lemmyKeys.post(variables.postId) });
@@ -352,7 +352,7 @@ export function useLemmyComments(params?: { post_id?: number; sort?: string; lim
         '/lemmy/comment/list',
         { params }
       );
-      return response.data.data.comments;
+      return response.data?.comments;
     },
   });
 }
@@ -366,7 +366,7 @@ export function useCreateLemmyComment() {
         '/lemmy/comment',
         input
       );
-      return response.data.data.comment_view;
+      return response.data?.comment_view;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: lemmyKeys.comments({ post_id: variables.post_id }) });
@@ -383,7 +383,7 @@ export function useVoteLemmyComment() {
         '/lemmy/comment/like',
         { comment_id: commentId, score }
       );
-      return response.data.data.comment_view;
+      return response.data?.comment_view;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: lemmyKeys.comments() });
@@ -401,8 +401,8 @@ export function useLemmySearch(params: {
   return useQuery({
     queryKey: lemmyKeys.search(params),
     queryFn: async () => {
-      const response = await api.get<{ data: unknown }>('/lemmy/search', { params });
-      return response.data.data;
+      const response = await api.get<unknown>('/lemmy/search', { params });
+      return response.data;
     },
     enabled: !!params.q,
   });

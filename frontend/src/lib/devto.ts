@@ -122,8 +122,8 @@ export function useDevtoMe() {
   return useQuery({
     queryKey: devtoKeys.me(),
     queryFn: async () => {
-      const response = await api.get<{ data: DevtoUser }>('/devto/me');
-      return response.data.data;
+      const response = await api.get<DevtoUser>('/devto/me');
+      return response.data;
     },
   });
 }
@@ -132,10 +132,10 @@ export function useDevtoArticles(params?: { page?: number; per_page?: number; st
   return useQuery({
     queryKey: devtoKeys.articles(params),
     queryFn: async () => {
-      const response = await api.get<{ data: { articles: DevtoArticle[] } }>('/devto/articles', {
+      const response = await api.get<{ articles: DevtoArticle[] }>('/devto/articles', {
         params,
       });
-      return response.data.data.articles;
+      return response.data?.articles;
     },
   });
 }
@@ -144,11 +144,11 @@ export function useDevtoPublishedArticles(params?: { page?: number; per_page?: n
   return useQuery({
     queryKey: devtoKeys.publishedArticles(params),
     queryFn: async () => {
-      const response = await api.get<{ data: { articles: DevtoArticle[] } }>(
+      const response = await api.get<{ articles: DevtoArticle[] }>(
         '/devto/articles/published',
         { params }
       );
-      return response.data.data.articles;
+      return response.data?.articles;
     },
   });
 }
@@ -157,11 +157,11 @@ export function useDevtoUnpublishedArticles(params?: { page?: number; per_page?:
   return useQuery({
     queryKey: devtoKeys.unpublishedArticles(params),
     queryFn: async () => {
-      const response = await api.get<{ data: { articles: DevtoArticle[] } }>(
+      const response = await api.get<{ articles: DevtoArticle[] }>(
         '/devto/articles/unpublished',
         { params }
       );
-      return response.data.data.articles;
+      return response.data?.articles;
     },
   });
 }
@@ -170,8 +170,8 @@ export function useDevtoArticle(articleId: number) {
   return useQuery({
     queryKey: devtoKeys.article(articleId),
     queryFn: async () => {
-      const response = await api.get<{ data: DevtoArticle }>(`/devto/articles/${articleId}`);
-      return response.data.data;
+      const response = await api.get<DevtoArticle>(`/devto/articles/${articleId}`);
+      return response.data;
     },
     enabled: !!articleId,
   });
@@ -182,8 +182,8 @@ export function useCreateDevtoArticle() {
 
   return useMutation({
     mutationFn: async (input: CreateArticleInput) => {
-      const response = await api.post<{ data: DevtoArticle }>('/devto/articles', input);
-      return response.data.data;
+      const response = await api.post<DevtoArticle>('/devto/articles', input);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: devtoKeys.all });
@@ -196,8 +196,8 @@ export function useUpdateDevtoArticle(articleId: number) {
 
   return useMutation({
     mutationFn: async (input: Partial<CreateArticleInput>) => {
-      const response = await api.put<{ data: DevtoArticle }>(`/devto/articles/${articleId}`, input);
-      return response.data.data;
+      const response = await api.put<DevtoArticle>(`/devto/articles/${articleId}`, input);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: devtoKeys.all });
@@ -210,10 +210,10 @@ export function useUnpublishDevtoArticle(articleId: number) {
 
   return useMutation({
     mutationFn: async () => {
-      const response = await api.put<{ data: DevtoArticle }>(
+      const response = await api.put<DevtoArticle>(
         `/devto/articles/${articleId}/unpublish`
       );
-      return response.data.data;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: devtoKeys.all });
@@ -225,10 +225,10 @@ export function useDevtoComments(articleId: number) {
   return useQuery({
     queryKey: devtoKeys.comments(articleId),
     queryFn: async () => {
-      const response = await api.get<{ data: { comments: DevtoComment[] } }>('/devto/comments', {
+      const response = await api.get<{ comments: DevtoComment[] }>('/devto/comments', {
         params: { a_id: articleId },
       });
-      return response.data.data.comments;
+      return response.data?.comments;
     },
     enabled: !!articleId,
   });
@@ -238,8 +238,8 @@ export function useDevtoTags(params?: { page?: number; per_page?: number }) {
   return useQuery({
     queryKey: devtoKeys.tags(params),
     queryFn: async () => {
-      const response = await api.get<{ data: { tags: DevtoTag[] } }>('/devto/tags', { params });
-      return response.data.data.tags;
+      const response = await api.get<{ tags: DevtoTag[] }>('/devto/tags', { params });
+      return response.data?.tags;
     },
   });
 }
@@ -248,10 +248,10 @@ export function useDevtoOrganization(organizationId: string) {
   return useQuery({
     queryKey: devtoKeys.organization(organizationId),
     queryFn: async () => {
-      const response = await api.get<{ data: DevtoOrganization }>(
+      const response = await api.get<DevtoOrganization>(
         `/devto/organizations/${organizationId}`
       );
-      return response.data.data;
+      return response.data;
     },
     enabled: !!organizationId,
   });
@@ -261,10 +261,10 @@ export function useDevtoFollowers(params?: { page?: number; per_page?: number; s
   return useQuery({
     queryKey: devtoKeys.followers(params),
     queryFn: async () => {
-      const response = await api.get<{ data: { followers: DevtoFollower[] } }>('/devto/followers', {
+      const response = await api.get<{ followers: DevtoFollower[] }>('/devto/followers', {
         params,
       });
-      return response.data.data.followers;
+      return response.data?.followers;
     },
   });
 }
@@ -273,11 +273,11 @@ export function useDevtoReadingList(params?: { page?: number; per_page?: number 
   return useQuery({
     queryKey: devtoKeys.readingList(params),
     queryFn: async () => {
-      const response = await api.get<{ data: { reading_list: DevtoArticle[] } }>(
+      const response = await api.get<{ reading_list: DevtoArticle[] }>(
         '/devto/readinglist',
         { params }
       );
-      return response.data.data.reading_list;
+      return response.data?.reading_list;
     },
   });
 }

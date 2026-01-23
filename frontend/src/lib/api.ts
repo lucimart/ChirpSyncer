@@ -151,8 +151,24 @@ class ApiClient {
   }
 
   // Generic HTTP methods for external integrations
-  async get<T>(endpoint: string): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint);
+  async get<T>(
+    endpoint: string,
+    options?: { params?: Record<string, unknown> }
+  ): Promise<ApiResponse<T>> {
+    let url = endpoint;
+    if (options?.params) {
+      const searchParams = new URLSearchParams();
+      for (const [key, value] of Object.entries(options.params)) {
+        if (value !== undefined && value !== null) {
+          searchParams.set(key, String(value));
+        }
+      }
+      const queryString = searchParams.toString();
+      if (queryString) {
+        url += (url.includes('?') ? '&' : '?') + queryString;
+      }
+    }
+    return this.request<T>(url);
   }
 
   async post<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {

@@ -104,7 +104,7 @@ export function useWebhookConfigs() {
       const response = await api.get<{ data: { configs: WebhookConfig[] } }>(
         '/outgoing-webhooks/configs'
       );
-      return response.data.data.configs;
+      return response.data?.configs;
     },
   });
 }
@@ -112,8 +112,8 @@ export function useWebhookConfigs() {
 export function useSendWebhook() {
   return useMutation({
     mutationFn: async (input: SendWebhookInput) => {
-      const response = await api.post<{ data: WebhookResult }>('/outgoing-webhooks/send', input);
-      return response.data.data;
+      const response = await api.post<WebhookResult>('/outgoing-webhooks/send', input);
+      return response.data;
     },
   });
 }
@@ -121,10 +121,10 @@ export function useSendWebhook() {
 export function useTestWebhook() {
   return useMutation({
     mutationFn: async (url: string) => {
-      const response = await api.post<{ data: WebhookTestResult }>('/outgoing-webhooks/test', {
+      const response = await api.post<WebhookTestResult>('/outgoing-webhooks/test', {
         url,
       });
-      return response.data.data;
+      return response.data;
     },
   });
 }
@@ -140,12 +140,12 @@ export function useSendBatchWebhooks() {
       payload?: Record<string, unknown>;
       failFast?: boolean;
     }) => {
-      const response = await api.post<{ data: BatchWebhookResponse }>('/outgoing-webhooks/batch', {
+      const response = await api.post<BatchWebhookResponse>('/outgoing-webhooks/batch', {
         webhooks,
         payload,
         fail_fast: failFast,
       });
-      return response.data.data;
+      return response.data;
     },
   });
 }
@@ -166,7 +166,7 @@ export function useApplyPayloadTemplate() {
           result: Record<string, unknown>;
         };
       }>('/outgoing-webhooks/templates', { template, variables });
-      return response.data.data;
+      return response.data;
     },
   });
 }
@@ -176,8 +176,8 @@ export function useSaveWebhookConfig() {
 
   return useMutation({
     mutationFn: async (input: WebhookConfigInput) => {
-      const response = await api.post<{ data: WebhookConfig }>('/outgoing-webhooks/configs', input);
-      return response.data.data;
+      const response = await api.post<WebhookConfig>('/outgoing-webhooks/configs', input);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: webhookKeys.configs() });
@@ -211,7 +211,7 @@ export function useVerifyWebhookSignature() {
       signature: string;
       algorithm?: 'sha256' | 'sha1';
     }) => {
-      const response = await api.post<{ data: SignatureVerification }>(
+      const response = await api.post<SignatureVerification>(
         '/outgoing-webhooks/verify-signature',
         {
           payload,
@@ -220,7 +220,7 @@ export function useVerifyWebhookSignature() {
           algorithm,
         }
       );
-      return response.data.data;
+      return response.data;
     },
   });
 }

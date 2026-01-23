@@ -109,8 +109,8 @@ export function useCohostMe() {
   return useQuery({
     queryKey: cohostKeys.me(),
     queryFn: async () => {
-      const response = await api.get<{ data: CohostUser }>('/cohost/me');
-      return response.data.data;
+      const response = await api.get<CohostUser>('/cohost/me');
+      return response.data;
     },
   });
 }
@@ -119,8 +119,8 @@ export function useCohostProjects() {
   return useQuery({
     queryKey: cohostKeys.projects(),
     queryFn: async () => {
-      const response = await api.get<{ data: { projects: CohostProject[] } }>('/cohost/projects');
-      return response.data.data.projects;
+      const response = await api.get<{ projects: CohostProject[] }>('/cohost/projects');
+      return response.data?.projects;
     },
   });
 }
@@ -129,8 +129,8 @@ export function useCohostProject(handle: string) {
   return useQuery({
     queryKey: cohostKeys.project(handle),
     queryFn: async () => {
-      const response = await api.get<{ data: CohostProject }>(`/cohost/projects/${handle}`);
-      return response.data.data;
+      const response = await api.get<CohostProject>(`/cohost/projects/${handle}`);
+      return response.data;
     },
     enabled: !!handle,
   });
@@ -140,10 +140,11 @@ export function useCohostProjectPosts(handle: string, page = 0) {
   return useQuery({
     queryKey: cohostKeys.projectPosts(handle, page),
     queryFn: async () => {
-      const response = await api.get<{
-        data: { posts: CohostPost[]; pagination: CohostPagination };
-      }>(`/cohost/projects/${handle}/posts`, { params: { page } });
-      return response.data.data;
+      const response = await api.get<{ posts: CohostPost[]; pagination: CohostPagination }>(
+        `/cohost/projects/${handle}/posts`,
+        { params: { page } }
+      );
+      return response.data;
     },
     enabled: !!handle,
   });
@@ -154,11 +155,11 @@ export function useCreateCohostPost(projectId: string | number) {
 
   return useMutation({
     mutationFn: async (input: CreatePostInput) => {
-      const response = await api.post<{ data: CohostPost }>(
+      const response = await api.post<CohostPost>(
         `/cohost/projects/${projectId}/posts`,
         input
       );
-      return response.data.data;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cohostKeys.all });
@@ -171,11 +172,11 @@ export function useUpdateCohostPost(projectId: string | number, postId: number) 
 
   return useMutation({
     mutationFn: async (input: Partial<CreatePostInput>) => {
-      const response = await api.put<{ data: CohostPost }>(
+      const response = await api.put<CohostPost>(
         `/cohost/projects/${projectId}/posts/${postId}`,
         input
       );
-      return response.data.data;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cohostKeys.all });
@@ -201,8 +202,8 @@ export function useLikeCohostPost(postId: number) {
 
   return useMutation({
     mutationFn: async () => {
-      const response = await api.post<{ data: { liked: boolean } }>(`/cohost/posts/${postId}/like`);
-      return response.data.data;
+      const response = await api.post<{ liked: boolean }>(`/cohost/posts/${postId}/like`);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cohostKeys.all });
@@ -215,10 +216,10 @@ export function useUnlikeCohostPost(postId: number) {
 
   return useMutation({
     mutationFn: async () => {
-      const response = await api.post<{ data: { unliked: boolean } }>(
+      const response = await api.post<{ unliked: boolean }>(
         `/cohost/posts/${postId}/unlike`
       );
-      return response.data.data;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cohostKeys.all });
@@ -230,10 +231,11 @@ export function useCohostDashboard(page = 0) {
   return useQuery({
     queryKey: cohostKeys.dashboard(page),
     queryFn: async () => {
-      const response = await api.get<{
-        data: { posts: CohostPost[]; pagination: CohostPagination };
-      }>('/cohost/dashboard', { params: { page } });
-      return response.data.data;
+      const response = await api.get<{ posts: CohostPost[]; pagination: CohostPagination }>(
+        '/cohost/dashboard',
+        { params: { page } }
+      );
+      return response.data;
     },
   });
 }
@@ -243,10 +245,10 @@ export function useFollowCohostProject(handle: string) {
 
   return useMutation({
     mutationFn: async () => {
-      const response = await api.post<{ data: { following: boolean } }>(
+      const response = await api.post<{ following: boolean }>(
         `/cohost/projects/${handle}/follow`
       );
-      return response.data.data;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cohostKeys.project(handle) });
@@ -259,10 +261,10 @@ export function useUnfollowCohostProject(handle: string) {
 
   return useMutation({
     mutationFn: async () => {
-      const response = await api.post<{ data: { unfollowed: boolean } }>(
+      const response = await api.post<{ unfollowed: boolean }>(
         `/cohost/projects/${handle}/unfollow`
       );
-      return response.data.data;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cohostKeys.project(handle) });
@@ -274,10 +276,10 @@ export function useCohostNotifications(page = 0) {
   return useQuery({
     queryKey: cohostKeys.notifications(page),
     queryFn: async () => {
-      const response = await api.get<{ data: unknown }>('/cohost/notifications', {
+      const response = await api.get<unknown>('/cohost/notifications', {
         params: { page },
       });
-      return response.data.data;
+      return response.data;
     },
   });
 }
@@ -286,10 +288,11 @@ export function useCohostTagPosts(tag: string, page = 0) {
   return useQuery({
     queryKey: cohostKeys.tagPosts(tag, page),
     queryFn: async () => {
-      const response = await api.get<{
-        data: { posts: CohostPost[]; pagination: CohostPagination };
-      }>(`/cohost/tags/${tag}`, { params: { page } });
-      return response.data.data;
+      const response = await api.get<{ posts: CohostPost[]; pagination: CohostPagination }>(
+        `/cohost/tags/${tag}`,
+        { params: { page } }
+      );
+      return response.data;
     },
     enabled: !!tag,
   });

@@ -79,8 +79,8 @@ export function useSubstackPublication() {
   return useQuery({
     queryKey: substackKeys.publication(),
     queryFn: async () => {
-      const response = await api.get<{ data: SubstackPublication }>('/substack/publication');
-      return response.data.data;
+      const response = await api.get<SubstackPublication>('/substack/publication');
+      return response.data;
     },
   });
 }
@@ -89,10 +89,10 @@ export function useSubstackPosts(params?: { limit?: number; offset?: number; typ
   return useQuery({
     queryKey: substackKeys.posts(params),
     queryFn: async () => {
-      const response = await api.get<{ data: SubstackPost[] }>('/substack/posts', {
+      const response = await api.get<SubstackPost[]>('/substack/posts', {
         params,
       });
-      return response.data.data;
+      return response.data;
     },
   });
 }
@@ -101,8 +101,8 @@ export function useSubstackDrafts() {
   return useQuery({
     queryKey: substackKeys.drafts(),
     queryFn: async () => {
-      const response = await api.get<{ data: SubstackDraft[] }>('/substack/drafts');
-      return response.data.data;
+      const response = await api.get<SubstackDraft[]>('/substack/drafts');
+      return response.data;
     },
   });
 }
@@ -112,8 +112,8 @@ export function useCreateSubstackDraft() {
 
   return useMutation({
     mutationFn: async (input: CreateDraftInput) => {
-      const response = await api.post<{ data: SubstackDraft }>('/substack/posts', input);
-      return response.data.data;
+      const response = await api.post<SubstackDraft>('/substack/posts', input);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: substackKeys.drafts() });
@@ -126,8 +126,8 @@ export function useUpdateSubstackPost(postId: string | number) {
 
   return useMutation({
     mutationFn: async (input: Partial<CreateDraftInput>) => {
-      const response = await api.put<{ data: SubstackPost }>(`/substack/posts/${postId}`, input);
-      return response.data.data;
+      const response = await api.put<SubstackPost>(`/substack/posts/${postId}`, input);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: substackKeys.all });
@@ -153,11 +153,11 @@ export function usePublishSubstackPost(postId: string | number) {
 
   return useMutation({
     mutationFn: async (input: PublishPostInput = {}) => {
-      const response = await api.post<{ data: SubstackPost }>(
+      const response = await api.post<SubstackPost>(
         `/substack/posts/${postId}/publish`,
         input
       );
-      return response.data.data;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: substackKeys.all });
@@ -169,8 +169,8 @@ export function useSubstackSubscriberStats() {
   return useQuery({
     queryKey: substackKeys.subscriberStats(),
     queryFn: async () => {
-      const response = await api.get<{ data: SubscriberStats }>('/substack/subscribers/stats');
-      return response.data.data;
+      const response = await api.get<SubscriberStats>('/substack/subscribers/stats');
+      return response.data;
     },
   });
 }
@@ -179,8 +179,8 @@ export function useSubstackSettings() {
   return useQuery({
     queryKey: substackKeys.settings(),
     queryFn: async () => {
-      const response = await api.get<{ data: Record<string, unknown> }>('/substack/settings');
-      return response.data.data;
+      const response = await api.get<Record<string, unknown>>('/substack/settings');
+      return response.data;
     },
   });
 }
