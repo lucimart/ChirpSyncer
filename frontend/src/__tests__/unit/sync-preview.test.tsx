@@ -208,7 +208,8 @@ describe('SyncPreviewModal Component', () => {
       renderWithProviders(<SyncPreviewModal {...defaultProps} />);
 
       expect(screen.getByTestId('sync-preview-loading')).toBeInTheDocument();
-      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+      // Multiple elements may contain "loading" text, verify at least one exists
+      expect(screen.getAllByText(/loading/i).length).toBeGreaterThan(0);
 
       await waitFor(() => {
         expect(screen.queryByTestId('sync-preview-loading')).not.toBeInTheDocument();
