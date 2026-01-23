@@ -12,86 +12,36 @@ import {
   Trash2,
   ExternalLink,
 } from 'lucide-react';
-import { Button, Card, Modal, Input, PageHeader, EmptyState as UiEmptyState } from '@/components/ui';
+import {
+  Button,
+  Card,
+  Modal,
+  Input,
+  PageHeader,
+  EmptyState,
+  Avatar,
+  Spinner,
+  Form,
+  SidebarLayout,
+  Stack,
+  Badge,
+  IconButton,
+  NavItem,
+  MetaItem,
+  Label,
+  Typography,
+  Caption,
+} from '@/components/ui';
 import { api } from '@/lib/api';
 
-const HeaderActions = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[2]};
-`;
-
-const ContentGrid = styled.div`
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: ${({ theme }) => theme.spacing[6]};
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const CollectionsSidebar = styled.div``;
-
-const SidebarTitle = styled.h3`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.secondary};
+const SidebarTitle = styled(Typography).attrs({
+  variant: 'label',
+  color: 'secondary',
+  as: 'h3',
+})`
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: ${({ theme }) => theme.spacing[3]};
-`;
-
-const CollectionsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[1]};
-`;
-
-const CollectionItem = styled.button<{ $active: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[3]};
-  padding: ${({ theme }) => `${theme.spacing[3]} ${theme.spacing[4]}`};
-  background-color: ${({ $active, theme }) =>
-    $active ? theme.colors.primary[50] : 'transparent'};
-  border: none;
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  cursor: pointer;
-  text-align: left;
-  width: 100%;
-  transition: background-color ${({ theme }) => theme.transitions.fast};
-
-  &:hover {
-    background-color: ${({ $active, theme }) =>
-      $active ? theme.colors.primary[50] : theme.colors.background.secondary};
-  }
-`;
-
-const CollectionIcon = styled.div<{ $color?: string }>`
-  color: ${({ $color, theme }) => $color ?? theme.colors.text.secondary};
-`;
-
-const CollectionName = styled.span<{ $active: boolean }>`
-  flex: 1;
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ $active, theme }) =>
-    $active ? theme.fontWeights.medium : theme.fontWeights.normal};
-  color: ${({ $active, theme }) =>
-    $active ? theme.colors.primary[700] : theme.colors.text.primary};
-`;
-
-const CollectionCount = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  background-color: ${({ theme }) => theme.colors.background.tertiary};
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-`;
-
-const BookmarksList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
 `;
 
 const BookmarkCard = styled(Card)`
@@ -112,58 +62,11 @@ const AuthorInfo = styled.div`
   gap: ${({ theme }) => theme.spacing[2]};
 `;
 
-const AuthorAvatar = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: ${({ theme }) => theme.colors.primary[100]};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.primary[700]};
-`;
-
-const AuthorDetails = styled.div``;
-
-const AuthorName = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const AuthorHandle = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const BookmarkActions = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[1]};
-`;
-
-const ActionButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: none;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  cursor: pointer;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.background.secondary};
-    color: ${({ theme }) => theme.colors.text.primary};
-  }
-`;
-
 const BookmarkContent = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.base};
   color: ${({ theme }) => theme.colors.text.primary};
   line-height: 1.6;
+  margin: 0;
 `;
 
 const BookmarkMeta = styled.div`
@@ -172,45 +75,6 @@ const BookmarkMeta = styled.div`
   align-items: center;
   padding-top: ${({ theme }) => theme.spacing[3]};
   border-top: 1px solid ${({ theme }) => theme.colors.border.light};
-`;
-
-const MetaStats = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const MetaStat = styled.span`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[1]};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-const MetaDate = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const PlatformBadge = styled.span<{ $platform: string }>`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  border-radius: ${({ theme }) => theme.borderRadius.sm};
-  background-color: ${({ $platform, theme }) =>
-    $platform === 'twitter' ? '#1DA1F2' : '#0085FF'};
-  color: white;
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: ${({ theme }) => theme.spacing[10]};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
 `;
 
 const ColorPicker = styled.div`
@@ -234,7 +98,7 @@ const ColorOption = styled.button<{ $color: string; $selected: boolean }>`
   }
 `;
 
-interface CollectionItem {
+interface CollectionData {
   id: number | 'all';
   name: string;
   color: string;
@@ -270,7 +134,7 @@ export default function BookmarksPage() {
   const [collectionName, setCollectionName] = useState('');
   const [collectionColor, setCollectionColor] = useState(COLORS[0]);
 
-  const { data: collections } = useQuery<CollectionItem[]>({
+  const { data: collections } = useQuery<CollectionData[]>({
     queryKey: ['collections'],
     queryFn: async () => {
       const response = await api.getCollections();
@@ -329,14 +193,27 @@ export default function BookmarksPage() {
     });
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
+  const sidebar = (
+    <>
+      <SidebarTitle>Collections</SidebarTitle>
+      <Stack gap={1}>
+        {collections?.map((collection) => (
+          <NavItem
+            key={collection.id}
+            active={activeCollection === collection.id || (collection.id === 'all' && activeCollection === null)}
+            icon={collection.id === 'all' ? <Bookmark size={18} /> : <Folder size={18} />}
+            iconColor={collection.id === 'all' ? undefined : collection.color}
+            badge={<Badge variant="count" size="xs">{collection.count}</Badge>}
+            onClick={() =>
+              setActiveCollection(collection.id === 'all' ? null : collection.id as number)
+            }
+          >
+            {collection.name}
+          </NavItem>
+        ))}
+      </Stack>
+    </>
+  );
 
   return (
     <div>
@@ -344,112 +221,84 @@ export default function BookmarksPage() {
         title="Bookmarks"
         description="Save and organize your favorite posts across platforms"
         actions={
-          <HeaderActions>
-            <Button variant="secondary" onClick={() => setIsModalOpen(true)}>
-              <FolderPlus size={18} />
-              New Collection
-            </Button>
-          </HeaderActions>
+          <Button variant="secondary" onClick={() => setIsModalOpen(true)}>
+            <FolderPlus size={18} />
+            New Collection
+          </Button>
         }
       />
 
-      <ContentGrid>
-        <CollectionsSidebar>
-          <SidebarTitle>Collections</SidebarTitle>
-          <CollectionsList>
-            {collections?.map((collection) => (
-              <CollectionItem
-                key={collection.id}
-                $active={activeCollection === collection.id}
-                onClick={() =>
-                  setActiveCollection(
-                    collection.id === 'all' ? null : collection.id
-                  )
-                }
-              >
-                <CollectionIcon
-                  $color={collection.id === 'all' ? undefined : collection.color}
-                >
-                  {collection.id === 'all' ? (
-                    <Bookmark size={18} />
-                  ) : (
-                    <Folder size={18} />
-                  )}
-                </CollectionIcon>
-                <CollectionName $active={activeCollection === collection.id}>
-                  {collection.name}
-                </CollectionName>
-                <CollectionCount>{collection.count}</CollectionCount>
-              </CollectionItem>
-            ))}
-          </CollectionsList>
-        </CollectionsSidebar>
-
-        <div>
-          {isLoading ? (
-            <Card padding="lg">
-              <EmptyState>Loading bookmarks...</EmptyState>
-            </Card>
-          ) : bookmarks && bookmarks.length > 0 ? (
-            <BookmarksList>
-              {bookmarks.map((bookmark) => (
-                <BookmarkCard key={bookmark.id} padding="md">
-                  <BookmarkHeader>
-                    <AuthorInfo>
-                      <AuthorAvatar>
-                        {getInitials(bookmark.author_name)}
-                      </AuthorAvatar>
-                      <AuthorDetails>
-                        <AuthorName>{bookmark.author_name}</AuthorName>
-                        <AuthorHandle>{bookmark.author_handle}</AuthorHandle>
-                      </AuthorDetails>
-                    </AuthorInfo>
-                    <BookmarkActions>
-                      <PlatformBadge $platform={bookmark.platform}>
+      <SidebarLayout
+        sidebar={sidebar}
+        sidebarPosition="left"
+        sidebarWidth={280}
+        gap={6}
+        stackBelow={768}
+      >
+        {isLoading ? (
+          <Card padding="lg" style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
+            <Spinner size="md" />
+          </Card>
+        ) : bookmarks && bookmarks.length > 0 ? (
+          <Stack gap={4}>
+            {bookmarks.map((bookmark) => (
+              <BookmarkCard key={bookmark.id} padding="md">
+                <BookmarkHeader>
+                  <AuthorInfo>
+                    <Avatar name={bookmark.author_name} size="md" />
+                    <div>
+                      <Typography variant="label">{bookmark.author_name}</Typography>
+                      <Caption>{bookmark.author_handle}</Caption>
+                    </div>
+                  </AuthorInfo>
+                  <Stack direction="row" gap={1} align="center">
+                    {bookmark.platform !== 'unknown' && (
+                      <Badge variant={bookmark.platform} size="xs">
                         {bookmark.platform === 'twitter' ? 'Twitter' : 'Bluesky'}
-                      </PlatformBadge>
-                      <ActionButton>
-                        <ExternalLink size={16} />
-                      </ActionButton>
-                      <ActionButton
-                        onClick={() => {
-                          api.deleteBookmark(bookmark.id).then(() => {
-                            queryClient.invalidateQueries({ queryKey: ['bookmarks'] });
-                          });
-                        }}
-                      >
-                        <Trash2 size={16} />
-                      </ActionButton>
-                    </BookmarkActions>
-                  </BookmarkHeader>
+                      </Badge>
+                    )}
+                    <IconButton aria-label="Open original">
+                      <ExternalLink size={16} />
+                    </IconButton>
+                    <IconButton
+                      aria-label="Delete bookmark"
+                      onClick={() => {
+                        api.deleteBookmark(bookmark.id).then(() => {
+                          queryClient.invalidateQueries({ queryKey: ['bookmarks'] });
+                        });
+                      }}
+                    >
+                      <Trash2 size={16} />
+                    </IconButton>
+                  </Stack>
+                </BookmarkHeader>
 
-                  <BookmarkContent>{bookmark.content}</BookmarkContent>
+                <BookmarkContent>{bookmark.content}</BookmarkContent>
 
-                  <BookmarkMeta>
-                    <MetaStats>
-                      <MetaStat>
-                        <Heart size={14} />
-                        {bookmark.likes.toLocaleString()}
-                      </MetaStat>
-                      <MetaStat>
-                        <MessageCircle size={14} />
-                        {bookmark.comments}
-                      </MetaStat>
-                    </MetaStats>
-                    <MetaDate>Saved {bookmark.original_date}</MetaDate>
-                  </BookmarkMeta>
-                </BookmarkCard>
-              ))}
-            </BookmarksList>
-          ) : (
-            <Card padding="lg">
-              <EmptyState>
-                No bookmarks yet. Save your favorite posts to see them here.
-              </EmptyState>
-            </Card>
-          )}
-        </div>
-      </ContentGrid>
+                <BookmarkMeta>
+                  <Stack direction="row" gap={4}>
+                    <MetaItem size="sm" color="secondary">
+                      <Heart size={14} />
+                      {bookmark.likes.toLocaleString()}
+                    </MetaItem>
+                    <MetaItem size="sm" color="secondary">
+                      <MessageCircle size={14} />
+                      {bookmark.comments}
+                    </MetaItem>
+                  </Stack>
+                  <Caption>Saved {bookmark.original_date}</Caption>
+                </BookmarkMeta>
+              </BookmarkCard>
+            ))}
+          </Stack>
+        ) : (
+          <EmptyState
+            icon={Bookmark}
+            title="No bookmarks yet"
+            description="Save your favorite posts to see them here."
+          />
+        )}
+      </SidebarLayout>
 
       <Modal
         isOpen={isModalOpen}
@@ -475,26 +324,15 @@ export default function BookmarksPage() {
             fullWidth
           />
           <div>
-            <label
-              style={{
-                display: 'block',
-                marginBottom: '8px',
-                fontSize: '14px',
-                fontWeight: 500,
-              }}
-            >
-              Color
-            </label>
+            <Label>Color</Label>
             <ColorPicker>
               {COLORS.map((color) => (
                 <ColorOption
                   key={color}
+                  type="button"
                   $color={color}
                   $selected={collectionColor === color}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setCollectionColor(color);
-                  }}
+                  onClick={() => setCollectionColor(color)}
                 />
               ))}
             </ColorPicker>

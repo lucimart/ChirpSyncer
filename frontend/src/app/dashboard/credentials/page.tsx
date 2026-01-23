@@ -2,79 +2,24 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import styled from 'styled-components';
 import { Plus, Trash2, CheckCircle, XCircle, RefreshCw, Key } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Button, Card, Modal, Input, EmptyState, PageHeader, Select } from '@/components/ui';
+import {
+  Button,
+  Card,
+  Modal,
+  Input,
+  EmptyState,
+  PageHeader,
+  Select,
+  Badge,
+  Form,
+  Stack,
+  SmallText,
+  Caption,
+} from '@/components/ui';
 import { ApiErrorDisplay } from '@/components/error-resolution';
 import type { Credential } from '@/types';
-
-const CredentialsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const CredentialCard = styled(Card)`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const CredentialInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const PlatformBadge = styled.span<{ $platform: string }>`
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[3]}`};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  text-transform: capitalize;
-  background-color: ${({ $platform, theme }) =>
-    $platform === 'twitter' ? '#1DA1F2' : '#0085FF'};
-  color: white;
-`;
-
-const CredentialDetails = styled.div``;
-
-const CredentialType = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  text-transform: capitalize;
-`;
-
-const CredentialMeta = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
-
-const StatusBadge = styled.span<{ $active: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[1]};
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  background-color: ${({ $active, theme }) =>
-    $active ? theme.colors.success[50] : theme.colors.danger[50]};
-  color: ${({ $active, theme }) =>
-    $active ? theme.colors.success[700] : theme.colors.danger[700]};
-`;
-
-const Actions = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[2]};
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
 
 export default function CredentialsPage() {
   const queryClient = useQueryClient();
@@ -181,7 +126,6 @@ export default function CredentialsPage() {
         }
       />
 
-      {/* Contextual Error Display */}
       <ApiErrorDisplay
         error={testError}
         onRetry={testingId ? () => handleTest(testingId) : undefined}
@@ -193,58 +137,55 @@ export default function CredentialsPage() {
           <EmptyState title="Loading credentials..." />
         </Card>
       ) : credentials && credentials.length > 0 ? (
-        <CredentialsList>
+        <Stack gap={4}>
           {credentials.map((cred: Credential) => (
-              <CredentialCard key={cred.id} padding="md">
-                <CredentialInfo>
-                  <PlatformBadge $platform={cred.platform}>
+            <Card key={cred.id} padding="md">
+              <Stack direction="row" justify="between" align="center">
+                <Stack direction="row" gap={4} align="center">
+                  <Badge variant={cred.platform === 'twitter' ? 'twitter' : 'bluesky'} size="sm">
                     {cred.platform}
-                  </PlatformBadge>
-                  <CredentialDetails>
-                    <CredentialType>
+                  </Badge>
+                  <div>
+                    <SmallText>
                       {cred.credential_type === 'api' ? 'API' : cred.credential_type}
-                    </CredentialType>
-                    <CredentialMeta>
-                      Added: {formatDate(cred.created_at)} · Last used:{' '}
-                      {formatDate(cred.last_used)}
-                    </CredentialMeta>
-                  </CredentialDetails>
-                </CredentialInfo>
-                <Actions>
-                <StatusBadge $active={cred.is_active}>
-                  {cred.is_active ? (
-                    <>
-                      <CheckCircle size={12} /> Active
-                    </>
-                  ) : (
-                    <>
-                      <XCircle size={12} /> Inactive
-                    </>
-                  )}
-                </StatusBadge>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleTest(cred.id)}
-                  disabled={testingId === cred.id}
-                >
-                  <RefreshCw
-                    size={16}
-                    className={testingId === cred.id ? 'animate-spin' : ''}
-                  />
-                  Test
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => deleteMutation.mutate(cred.id)}
-                >
-                  <Trash2 size={16} />
-                </Button>
-              </Actions>
-            </CredentialCard>
+                    </SmallText>
+                    <div style={{ marginTop: '4px' }}>
+                      <Caption>
+                        Added: {formatDate(cred.created_at)} · Last used:{' '}
+                        {formatDate(cred.last_used)}
+                      </Caption>
+                    </div>
+                  </div>
+                </Stack>
+                <Stack direction="row" gap={2} align="center">
+                  <Badge variant={cred.is_active ? 'success' : 'danger'} size="sm">
+                    {cred.is_active ? <CheckCircle size={12} /> : <XCircle size={12} />}
+                    {cred.is_active ? 'Active' : 'Inactive'}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleTest(cred.id)}
+                    disabled={testingId === cred.id}
+                  >
+                    <RefreshCw
+                      size={16}
+                      className={testingId === cred.id ? 'animate-spin' : ''}
+                    />
+                    Test
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteMutation.mutate(cred.id)}
+                  >
+                    <Trash2 size={16} />
+                  </Button>
+                </Stack>
+              </Stack>
+            </Card>
           ))}
-        </CredentialsList>
+        </Stack>
       ) : (
         <Card padding="none">
           <EmptyState
@@ -280,7 +221,6 @@ export default function CredentialsPage() {
         }
       >
         <Form onSubmit={handleSubmit}>
-          {/* Error display in modal */}
           <ApiErrorDisplay
             error={addError}
             onDismiss={() => setAddError(null)}

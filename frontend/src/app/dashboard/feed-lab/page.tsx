@@ -1,10 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
 import { List, Plus, Eye, BookOpen } from 'lucide-react';
-import { Button, Tabs, Badge, PageHeader, SectionTitle } from '@/components/ui';
+import { Button, Tabs, PageHeader, SectionTitle } from '@/components/ui';
 import { FeedPreview } from '@/components/feed-lab/FeedPreview';
 import { RuleBuilder } from '@/components/feed-lab/RuleBuilder';
 import { RuleList } from '@/components/feed-lab/RuleList';
@@ -136,13 +136,56 @@ const PromptText = styled.p`
   margin-bottom: ${({ theme }) => theme.spacing[4]};
 `;
 
+interface AppliedRule {
+  ruleId: string;
+  ruleName: string;
+  contribution: number;
+}
+
 interface PreviewPost {
   id: string;
   content: string;
   author: string;
   timestamp: string;
   score: number;
-  appliedRules: Array<{ ruleId: string; ruleName: string; contribution: number }>;
+  appliedRules: AppliedRule[];
+}
+
+interface RawAppliedRule {
+  rule_id?: string;
+  ruleId?: string;
+  rule_name?: string;
+  ruleName?: string;
+  contribution?: number;
+}
+
+interface RawPost {
+  id?: string | number;
+  content?: string;
+  author?: string;
+  timestamp?: string;
+  created_at?: string;
+  score?: number;
+  applied_rules?: RawAppliedRule[];
+}
+
+const ICON_SIZE = 16;
+
+function mapRawPostToPreviewPost(post: RawPost): PreviewPost {
+  return {
+    id: String(post.id ?? ''),
+    content: post.content ?? '',
+    author: post.author ?? 'Unknown',
+    timestamp: post.timestamp ?? post.created_at ?? '',
+    score: post.score ?? 0,
+    appliedRules: Array.isArray(post.applied_rules)
+      ? post.applied_rules.map((rule) => ({
+          ruleId: String(rule.rule_id ?? rule.ruleId ?? ''),
+          ruleName: rule.rule_name ?? rule.ruleName ?? 'Rule',
+          contribution: rule.contribution ?? 0,
+        }))
+      : [],
+  };
 }
 
 export default function FeedLabPage() {
@@ -156,7 +199,10 @@ export default function FeedLabPage() {
   const toggleRule = useToggleFeedRule();
   const reorderRules = useReorderFeedRules();
 
-  const editingRule = rules.find((rule) => rule.id === editingRuleId) || null;
+  const editingRule = useMemo(
+    () => rules.find((rule) => rule.id === editingRuleId) ?? null,
+    [rules, editingRuleId]
+  );
 
   const previewRules = useMemo(
     () =>
@@ -180,92 +226,125 @@ export default function FeedLabPage() {
       if (!response.success || !response.data) {
         throw new Error(response.error || 'Failed to load feed preview');
       }
-      const rawPosts = (response.data as { posts?: Array<any> }).posts ?? [];
-      return rawPosts.map((post) => ({
-        id: String(post.id ?? ''),
-        content: post.content ?? '',
-        author: post.author ?? 'Unknown',
-        timestamp: post.timestamp ?? post.created_at ?? '',
-        score: post.score ?? 0,
-        appliedRules: Array.isArray(post.applied_rules)
-          ? post.applied_rules.map((rule: any) => ({
-              ruleId: String(rule.rule_id ?? rule.ruleId),
-              ruleName: rule.rule_name ?? rule.ruleName ?? 'Rule',
-              contribution: rule.contribution ?? 0,
-            }))
-          : [],
-      }));
+      const rawPosts = (response.data as { posts?: RawPost[] }).posts ?? [];
+      return rawPosts.map(mapRawPostToPreviewPost);
     },
     enabled: !isLoading,
   });
 
-  const handleCreate = (rule: {
-    name: string;
-    type: 'boost' | 'demote' | 'filter';
-    weight: number;
-    conditions: FeedRule['conditions'];
-  }) => {
-    createRule.mutate({ ...rule, enabled: true }, {
-      onSuccess: () => setEditingRuleId(null),
-    });
-  };
-
-  const handleUpdate = (rule: {
-    name: string;
-    type: 'boost' | 'demote' | 'filter';
-    weight: number;
-    conditions: FeedRule['conditions'];
-  }) => {
-    if (!editingRuleId) {
-      return;
-    }
-    updateRule.mutate({ id: editingRuleId, enabled: editingRule?.enabled ?? true, ...rule }, {
-      onSuccess: () => setEditingRuleId(null),
-    });
-  };
-
-  const handleApplyRecipe = (recipe: Recipe) => {
-    // Convert recipe to a new rule
-    createRule.mutate({
-      name: recipe.name,
-      type: recipe.type,
-      weight: recipe.weight,
-      conditions: recipe.conditions,
-      enabled: true,
-    }, {
-      onSuccess: () => setActiveTab('rules'),
-    });
-  };
-
-  const handleSelectRecipe = (recipe: Recipe) => {
-    // Could show a detail modal, for now just apply it
-    handleApplyRecipe(recipe);
-  };
-
-  const tabItems = [
-    {
-      id: 'rules',
-      label: 'My Rules',
-      icon: List,
-      badge: rules.length > 0 ? rules.length : undefined
+  const handleCreate = useCallback(
+    (rule: {
+      name: string;
+      type: 'boost' | 'demote' | 'filter';
+      weight: number;
+      conditions: FeedRule['conditions'];
+    }) => {
+      createRule.mutate(
+        { ...rule, enabled: true },
+        { onSuccess: () => setEditingRuleId(null) }
+      );
     },
-    {
-      id: 'create',
-      label: editingRuleId ? 'Edit Rule' : 'Create Rule',
-      icon: Plus
+    [createRule]
+  );
+
+  const handleUpdate = useCallback(
+    (rule: {
+      name: string;
+      type: 'boost' | 'demote' | 'filter';
+      weight: number;
+      conditions: FeedRule['conditions'];
+    }) => {
+      if (!editingRuleId) return;
+      updateRule.mutate(
+        { id: editingRuleId, enabled: editingRule?.enabled ?? true, ...rule },
+        { onSuccess: () => setEditingRuleId(null) }
+      );
     },
-    {
-      id: 'preview',
-      label: 'Preview',
-      icon: Eye
+    [editingRuleId, editingRule?.enabled, updateRule]
+  );
+
+  const handleApplyRecipe = useCallback(
+    (recipe: Recipe) => {
+      createRule.mutate(
+        {
+          name: recipe.name,
+          type: recipe.type,
+          weight: recipe.weight,
+          conditions: recipe.conditions,
+          enabled: true,
+        },
+        { onSuccess: () => setActiveTab('rules') }
+      );
     },
-    {
-      id: 'recipes',
-      label: 'Recipes',
-      icon: BookOpen,
-      badge: RECIPE_TEMPLATES.length,
-    }
-  ];
+    [createRule]
+  );
+
+  const handleToggleRule = useCallback(
+    (id: string, enabled: boolean) => toggleRule.mutate({ id, enabled }),
+    [toggleRule]
+  );
+
+  const handleEditRule = useCallback(
+    (id: string) => {
+      setEditingRuleId(id);
+      setActiveTab('create');
+    },
+    []
+  );
+
+  const handleDeleteRule = useCallback(
+    (id: string) => deleteRule.mutate(id),
+    [deleteRule]
+  );
+
+  const handleReorderRules = useCallback(
+    (reordered: FeedRule[]) => reorderRules.mutate(reordered),
+    [reorderRules]
+  );
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingRuleId(null);
+    setActiveTab('rules');
+  }, []);
+
+  const handleTabChange = useCallback(
+    (id: string) => setActiveTab(id as TabId),
+    []
+  );
+
+  const goToCreateTab = useCallback(() => setActiveTab('create'), []);
+
+  const handlePostClick = useCallback(() => {
+    // Placeholder for future post detail view
+  }, []);
+
+  const tabItems = useMemo(
+    () => [
+      {
+        id: 'rules',
+        label: 'My Rules',
+        icon: List,
+        badge: rules.length > 0 ? rules.length : undefined,
+      },
+      {
+        id: 'create',
+        label: editingRuleId ? 'Edit Rule' : 'Create Rule',
+        icon: Plus,
+      },
+      {
+        id: 'preview',
+        label: 'Preview',
+        icon: Eye,
+      },
+      {
+        id: 'recipes',
+        label: 'Recipes',
+        icon: BookOpen,
+        badge: RECIPE_TEMPLATES.length,
+      },
+    ],
+    [editingRuleId, rules.length]
+  );
 
   return (
     <div>
@@ -277,7 +356,7 @@ export default function FeedLabPage() {
       <StyledTabs
         items={tabItems}
         value={activeTab}
-        onChange={(id) => setActiveTab(id as TabId)}
+        onChange={handleTabChange}
         variant="accent"
       />
 
@@ -292,21 +371,18 @@ export default function FeedLabPage() {
             {rules.length === 0 ? (
               <CreateRulePrompt>
                 <PromptText>No rules yet. Create your first rule to customize your feed.</PromptText>
-                <Button variant="primary" size="md" onClick={() => setActiveTab('create')}>
-                  <Plus size={16} />
+                <Button variant="primary" size="md" onClick={goToCreateTab}>
+                  <Plus size={ICON_SIZE} />
                   Create Rule
                 </Button>
               </CreateRulePrompt>
             ) : (
               <RuleList
                 rules={rules}
-                onToggle={(id, enabled) => toggleRule.mutate({ id, enabled })}
-                onEdit={(id) => {
-                  setEditingRuleId(id);
-                  setActiveTab('create');
-                }}
-                onDelete={(id) => deleteRule.mutate(id)}
-                onReorder={(reordered) => reorderRules.mutate(reordered)}
+                onToggle={handleToggleRule}
+                onEdit={handleEditRule}
+                onDelete={handleDeleteRule}
+                onReorder={handleReorderRules}
               />
             )}
           </Section>
@@ -325,10 +401,7 @@ export default function FeedLabPage() {
 
             <RuleBuilder
               onSubmit={editingRuleId ? handleUpdate : handleCreate}
-              onCancel={() => {
-                setEditingRuleId(null);
-                setActiveTab('rules');
-              }}
+              onCancel={handleCancelEdit}
               initialRule={editingRule ?? undefined}
             />
           </Section>
@@ -343,7 +416,7 @@ export default function FeedLabPage() {
 
             <FeedPreview
               posts={previewPosts}
-              onPostClick={() => {}}
+              onPostClick={handlePostClick}
             />
           </Section>
         )}
@@ -357,7 +430,7 @@ export default function FeedLabPage() {
 
             <RecipeGallery
               recipes={RECIPE_TEMPLATES}
-              onSelectRecipe={handleSelectRecipe}
+              onSelectRecipe={handleApplyRecipe}
               onApplyRecipe={handleApplyRecipe}
               viewMode="grid"
             />

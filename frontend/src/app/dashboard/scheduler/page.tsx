@@ -13,7 +13,7 @@ import {
   Sparkles,
   Target,
 } from 'lucide-react';
-import { Button, Card, Input, Modal, useToast, PageHeader, SectionTitle } from '@/components/ui';
+import { Button, Card, Input, Modal, useToast, PageHeader, SectionTitle, Form, EmptyState, Spinner, Label, MetaItem, SidebarLayout, Stack, TextArea } from '@/components/ui';
 import {
   useOptimalTimes,
   useScheduledPosts,
@@ -25,33 +25,9 @@ import {
 } from '@/lib/scheduling';
 import { TimingHeatmap } from '@/components/scheduler/TimingHeatmap';
 
-const GridLayout = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: ${({ theme }) => theme.spacing[6]};
-
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const MainContent = styled.div``;
-
-const Sidebar = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
-
 const StyledSectionTitle = styled(SectionTitle)`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-`;
-
-const OptimalTimesList = styled.div`
-  display: flex;
-  flex-direction: column;
   gap: ${({ theme }) => theme.spacing[2]};
 `;
 
@@ -99,12 +75,6 @@ const ScoreBadge = styled.span<{ $score: number }>`
         : theme.colors.neutral[700]};
 `;
 
-const ScheduledList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[3]};
-`;
-
 const ScheduledCard = styled(Card)`
   display: flex;
   flex-direction: column;
@@ -129,12 +99,6 @@ const ScheduledMeta = styled.div`
   gap: ${({ theme }) => theme.spacing[4]};
   font-size: ${({ theme }) => theme.fontSizes.xs};
   color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const MetaItem = styled.span`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[1]};
 `;
 
 const PlatformBadge = styled.span<{ $platform: string }>`
@@ -177,45 +141,6 @@ const StatusBadge = styled.span<{ $status: string }>`
         ? theme.colors.danger[700]
         : theme.colors.warning[700]};
 `;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: ${({ theme }) => theme.spacing[8]};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const TextArea = styled.textarea`
-  width: 100%;
-  min-height: 120px;
-  padding: ${({ theme }) => theme.spacing[3]};
-  font-size: ${({ theme }) => theme.fontSizes.base};
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  resize: vertical;
-  font-family: inherit;
-
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.primary[500]};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[100]};
-  }
-`;
-
-const Label = styled.label`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-  display: block;
-  margin-bottom: ${({ theme }) => theme.spacing[1]};
-`;
-
-const FieldGroup = styled.div``;
 
 const PlatformSelect = styled.div`
   display: flex;
@@ -430,20 +355,61 @@ export default function SchedulerPage() {
         }
       />
 
-      <GridLayout>
-        <MainContent>
-          <StyledSectionTitle>
-            <Clock size={20} />
-            Upcoming Posts ({pendingPosts.length})
-          </StyledSectionTitle>
+      <SidebarLayout
+        sidebar={
+          <Card padding="md">
+            <StyledSectionTitle>
+              <Sparkles size={20} />
+              Optimal Times
+            </StyledSectionTitle>
+            {optimalTimes ? (
+              <>
+                <Stack gap={2}>
+                  {optimalTimes.best_times.map((slot, i) => (
+                    <OptimalTimeItem
+                      key={i}
+                      onClick={() => handleOptimalTimeSelect(slot)}
+                    >
+                      <TimeLabel>
+                        {slot.label}
+                        {slot.estimated && ' *'}
+                      </TimeLabel>
+                      <ScoreBadge $score={slot.score}>{slot.score}%</ScoreBadge>
+                    </OptimalTimeItem>
+                  ))}
+                </Stack>
+                <MetaItem style={{ marginTop: '12px', fontSize: '11px' }}>
+                  Based on {optimalTimes.based_on_posts} posts
+                  {optimalTimes.data_quality && (
+                    <span style={{ marginLeft: '8px', opacity: 0.7 }}>
+                      ({optimalTimes.data_quality} confidence)
+                    </span>
+                  )}
+                </MetaItem>
+                {optimalTimes.based_on_posts < 10 && (
+                  <MetaItem style={{ marginTop: '4px', fontSize: '10px', opacity: 0.6 }}>
+                    * Estimated based on industry best practices
+                  </MetaItem>
+                )}
+              </>
+            ) : (
+              <Spinner size="sm" />
+            )}
+          </Card>
+        }
+      >
+        <StyledSectionTitle>
+          <Clock size={20} />
+          Upcoming Posts ({pendingPosts.length})
+        </StyledSectionTitle>
 
-          {isLoading ? (
-            <Card padding="lg">
-              <EmptyState>Loading scheduled posts...</EmptyState>
-            </Card>
-          ) : pendingPosts.length > 0 ? (
-            <ScheduledList>
-              {pendingPosts.map((post) => (
+        {isLoading ? (
+          <Card padding="lg">
+            <Spinner size="md" />
+          </Card>
+        ) : pendingPosts.length > 0 ? (
+          <Stack gap={3}>
+            {pendingPosts.map((post) => (
                 <ScheduledCard key={post.id} padding="md">
                   <ScheduledHeader>
                     <PlatformBadge $platform={post.platform}>
@@ -474,12 +440,14 @@ export default function SchedulerPage() {
                   </ScheduledMeta>
                 </ScheduledCard>
               ))}
-            </ScheduledList>
+            </Stack>
           ) : (
             <Card padding="lg">
-              <EmptyState>
-                No scheduled posts. Click &quot;Schedule Post&quot; to create one.
-              </EmptyState>
+              <EmptyState
+                icon={Calendar}
+                title="No scheduled posts"
+                description="Click 'Schedule Post' to create one."
+              />
             </Card>
           )}
 
@@ -489,7 +457,7 @@ export default function SchedulerPage() {
                 <CheckCircle size={20} />
                 Recently Published ({publishedPosts.length})
               </SectionTitle>
-              <ScheduledList>
+              <Stack gap={3}>
                 {publishedPosts.map((post) => (
                   <ScheduledCard key={post.id} padding="md">
                     <ScheduledHeader>
@@ -510,53 +478,10 @@ export default function SchedulerPage() {
                     </ScheduledMeta>
                   </ScheduledCard>
                 ))}
-              </ScheduledList>
+              </Stack>
             </>
           )}
-        </MainContent>
-
-        <Sidebar>
-          <Card padding="md">
-            <StyledSectionTitle>
-              <Sparkles size={20} />
-              Optimal Times
-            </StyledSectionTitle>
-            {optimalTimes ? (
-              <>
-                <OptimalTimesList>
-                  {optimalTimes.best_times.map((slot, i) => (
-                    <OptimalTimeItem
-                      key={i}
-                      onClick={() => handleOptimalTimeSelect(slot)}
-                    >
-                      <TimeLabel>
-                        {slot.label}
-                        {slot.estimated && ' *'}
-                      </TimeLabel>
-                      <ScoreBadge $score={slot.score}>{slot.score}%</ScoreBadge>
-                    </OptimalTimeItem>
-                  ))}
-                </OptimalTimesList>
-                <MetaItem style={{ marginTop: '12px', fontSize: '11px' }}>
-                  Based on {optimalTimes.based_on_posts} posts
-                  {optimalTimes.data_quality && (
-                    <span style={{ marginLeft: '8px', opacity: 0.7 }}>
-                      ({optimalTimes.data_quality} confidence)
-                    </span>
-                  )}
-                </MetaItem>
-                {optimalTimes.based_on_posts < 10 && (
-                  <MetaItem style={{ marginTop: '4px', fontSize: '10px', opacity: 0.6 }}>
-                    * Estimated based on industry best practices
-                  </MetaItem>
-                )}
-              </>
-            ) : (
-              <EmptyState>Loading optimal times...</EmptyState>
-            )}
-          </Card>
-        </Sidebar>
-      </GridLayout>
+      </SidebarLayout>
 
       <Card padding="md" style={{ marginTop: '24px' }}>
         <StyledSectionTitle>
@@ -590,17 +515,16 @@ export default function SchedulerPage() {
         }
       >
         <Form onSubmit={handleSubmit}>
-          <FieldGroup>
-            <Label>Content</Label>
-            <TextArea
-              value={content}
-              onChange={(e) => handleContentChange(e.target.value)}
-              placeholder="What do you want to share?"
-              maxLength={280}
-            />
-          </FieldGroup>
+          <TextArea
+            label="Content"
+            value={content}
+            onChange={(e) => handleContentChange(e.target.value)}
+            placeholder="What do you want to share?"
+            maxLength={280}
+            fullWidth
+          />
 
-          <FieldGroup>
+          <div>
             <Label>Schedule For</Label>
             <Input
               type="datetime-local"
@@ -609,9 +533,9 @@ export default function SchedulerPage() {
               min={new Date().toISOString().slice(0, 16)}
               fullWidth
             />
-          </FieldGroup>
+          </div>
 
-          <FieldGroup>
+          <div>
             <Label>Platform</Label>
             <PlatformSelect>
               <PlatformOption
@@ -636,7 +560,7 @@ export default function SchedulerPage() {
                 Both
               </PlatformOption>
             </PlatformSelect>
-          </FieldGroup>
+          </div>
 
           {engagementPrediction.data && (
             <PredictionCard>

@@ -2,20 +2,13 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'styled-components';
 import { useAuth } from '@/lib/auth';
-import styled from 'styled-components';
-import { Spinner } from '@/components/ui';
-
-const LoadingContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background-color: ${({ theme }) => theme.colors.background.secondary};
-`;
+import { Spinner, Stack } from '@/components/ui';
 
 export default function Home() {
   const router = useRouter();
+  const theme = useTheme();
   const { isAuthenticated, isLoading, checkAuth } = useAuth();
 
   useEffect(() => {
@@ -24,17 +17,20 @@ export default function Home() {
 
   useEffect(() => {
     if (!isLoading) {
-      if (isAuthenticated) {
-        router.replace('/dashboard');
-      } else {
-        router.replace('/login');
-      }
+      router.replace(isAuthenticated ? '/dashboard' : '/login');
     }
   }, [isAuthenticated, isLoading, router]);
 
   return (
-    <LoadingContainer>
+    <Stack
+      align="center"
+      justify="center"
+      style={{
+        minHeight: '100vh',
+        backgroundColor: theme.colors.background.secondary,
+      }}
+    >
       <Spinner size="lg" />
-    </LoadingContainer>
+    </Stack>
   );
 }

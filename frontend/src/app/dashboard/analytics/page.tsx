@@ -11,9 +11,10 @@ import {
   MessageCircle,
   Eye,
   Download,
-  BarChart2,
 } from 'lucide-react';
-import { Button, Card, PageHeader, SectionTitle, StatsGrid } from '@/components/ui';
+import { Button, Card, PageHeader, SectionTitle, StatsGrid, Stack, MetaItem } from '@/components/ui';
+import { AnimatedNumber, AnimatedCompactNumber, AnimatedPercentage } from '@/components/ui/Motion';
+import { NivoChartWidget } from '@/components/widgets';
 import { api } from '@/lib/api';
 
 const PeriodSelector = styled.div`
@@ -44,19 +45,11 @@ const PeriodButton = styled.button<{ $active: boolean }>`
   }
 `;
 
-const HeaderActions = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[3]};
-  align-items: center;
-`;
-
 const AnalyticsStatCard = styled(Card)`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
 `;
-
-const StatInfo = styled.div``;
 
 const StatLabel = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.sm};
@@ -98,41 +91,6 @@ const ChartsGrid = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing[6]};
 `;
 
-const ChartCard = styled(Card)`
-  min-height: 300px;
-`;
-
-const ChartTitle = styled.h3`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const ChartPlaceholder = styled.div`
-  height: 220px;
-  background: linear-gradient(
-    to bottom,
-    ${({ theme }) => theme.colors.primary[50]},
-    ${({ theme }) => theme.colors.background.secondary}
-  );
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[2]};
-  align-items: center;
-  justify-content: center;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  border: 1px dashed ${({ theme }) => theme.colors.border.default};
-`;
-
-const TopPostsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[3]};
-`;
-
 const TopPostItem = styled.div`
   display: flex;
   justify-content: space-between;
@@ -159,11 +117,6 @@ const PostContent = styled.div`
   color: ${({ theme }) => theme.colors.text.primary};
   line-height: 1.4;
   margin-bottom: ${({ theme }) => theme.spacing[1]};
-`;
-
-const PostMeta = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
 const PostStats = styled.div`
@@ -249,13 +202,15 @@ export default function AnalyticsPage() {
       change: analytics?.followers.change ?? 0,
       icon: Users,
       color: '#3b82f6',
+      type: 'compact' as const,
     },
     {
       label: 'Engagement Rate',
-      value: `${(analytics?.engagement.value ?? 0).toFixed(2)}%`,
+      value: analytics?.engagement.value ?? 0,
       change: analytics?.engagement.change ?? 0,
       icon: Heart,
       color: '#ef4444',
+      type: 'percentage' as const,
     },
     {
       label: 'Impressions',
@@ -263,6 +218,7 @@ export default function AnalyticsPage() {
       change: analytics?.impressions.change ?? 0,
       icon: Eye,
       color: '#8b5cf6',
+      type: 'compact' as const,
     },
     {
       label: 'Interactions',
@@ -270,15 +226,39 @@ export default function AnalyticsPage() {
       change: analytics?.interactions.change ?? 0,
       icon: MessageCircle,
       color: '#22c55e',
+      type: 'compact' as const,
     },
   ];
 
-  const formatNumber = (num: number) => {
-    if (typeof num === 'string') return num;
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-    return num.toLocaleString();
+  const renderAnimatedValue = (
+    value: number,
+    type: 'compact' | 'percentage' | 'number'
+  ) => {
+    switch (type) {
+      case 'percentage':
+        return <AnimatedPercentage value={value} decimals={2} />;
+      case 'compact':
+        return <AnimatedCompactNumber value={value} />;
+      default:
+        return <AnimatedNumber value={value} />;
+    }
   };
+
+  // Sample chart data (would come from API in production)
+  const engagementChartData = [
+    { label: 'Mon', value: 120 },
+    { label: 'Tue', value: 180 },
+    { label: 'Wed', value: 145 },
+    { label: 'Thu', value: 210 },
+    { label: 'Fri', value: 195 },
+    { label: 'Sat', value: 165 },
+    { label: 'Sun', value: 140 },
+  ];
+
+  const platformChartData = [
+    { label: 'Twitter', value: 450 },
+    { label: 'Bluesky', value: 280 },
+  ];
 
   const handleExportData = () => {
     const exportData = {
@@ -308,7 +288,7 @@ export default function AnalyticsPage() {
         title="Analytics"
         description="Track your social media performance across platforms"
         actions={
-          <HeaderActions>
+          <Stack direction="row" gap={3} align="center">
             <PeriodSelector>
               {PERIODS.map((p) => (
                 <PeriodButton
@@ -324,25 +304,27 @@ export default function AnalyticsPage() {
               <Download size={18} />
               Export
             </Button>
-          </HeaderActions>
+          </Stack>
         }
       />
 
       <StatsGrid minColumnWidth="240px">
         {stats.map((stat) => (
           <AnalyticsStatCard key={stat.label} padding="md">
-            <StatInfo>
+            <div>
               <StatLabel>{stat.label}</StatLabel>
-              <StatValue>{formatNumber(stat.value as number)}</StatValue>
+              <StatValue>
+                {renderAnimatedValue(stat.value as number, stat.type)}
+              </StatValue>
               <StatChange $positive={stat.change >= 0}>
                 {stat.change >= 0 ? (
                   <TrendingUp size={14} />
                 ) : (
                   <TrendingDown size={14} />
                 )}
-                {Math.abs(stat.change)}% vs last month
+                <AnimatedPercentage value={Math.abs(stat.change)} /> vs last month
               </StatChange>
-            </StatInfo>
+            </div>
             <StatIcon $color={stat.color}>
               <stat.icon size={24} />
             </StatIcon>
@@ -351,31 +333,28 @@ export default function AnalyticsPage() {
       </StatsGrid>
 
       <ChartsGrid>
-        <ChartCard padding="lg">
-          <ChartTitle>Engagement Over Time</ChartTitle>
-          <ChartPlaceholder>
-            <BarChart2 size={32} opacity={0.2} />
-            Chart visualization coming soon
-          </ChartPlaceholder>
-        </ChartCard>
-
-        <ChartCard padding="lg">
-          <ChartTitle>Platform Breakdown</ChartTitle>
-          <ChartPlaceholder>
-            <BarChart2 size={32} opacity={0.2} />
-            Chart visualization coming soon
-          </ChartPlaceholder>
-        </ChartCard>
+        <NivoChartWidget
+          data={engagementChartData}
+          title="Engagement Over Time"
+          chartType="area"
+          height={250}
+        />
+        <NivoChartWidget
+          data={platformChartData}
+          title="Platform Breakdown"
+          chartType="bar"
+          height={250}
+        />
       </ChartsGrid>
 
       <SectionTitle>Top Performing Posts</SectionTitle>
       <Card padding="none">
-        <TopPostsList>
+        <Stack gap={3}>
           {analytics?.topPosts.map((post) => (
             <TopPostItem key={post.id}>
               <PostInfo>
                 <PostContent>{post.content}</PostContent>
-                <PostMeta>{post.date}</PostMeta>
+                <MetaItem size="xs" color="tertiary">{post.date}</MetaItem>
               </PostInfo>
               <PostStats>
                 <PostStat>
@@ -389,7 +368,7 @@ export default function AnalyticsPage() {
               </PostStats>
             </TopPostItem>
           ))}
-        </TopPostsList>
+        </Stack>
       </Card>
     </div>
   );

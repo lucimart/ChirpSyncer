@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import { Search, Trash2, Shield, ShieldOff, UserCheck, UserX } from 'lucide-react';
-import { Button, Card, Modal, Input, Badge, PageHeader, EmptyState, DataTable, Column } from '@/components/ui';
+import { Button, Card, Modal, Input, Badge, PageHeader, EmptyState, DataTable, Column, Stack } from '@/components/ui';
 import {
   useAdminUsers,
   useDeleteAdminUser,
@@ -12,39 +12,8 @@ import {
 } from '@/hooks/useAdminUsers';
 import type { AdminUser } from '@/types';
 
-const SearchBox = styled.div`
-  position: relative;
+const SearchWrapper = styled.div`
   width: 300px;
-`;
-
-const SearchIcon = styled.div`
-  position: absolute;
-  left: ${({ theme }) => theme.spacing[3]};
-  top: 50%;
-  transform: translateY(-50%);
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const SearchInput = styled.input`
-  width: 100%;
-  height: 40px;
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]} ${theme.spacing[2]} ${theme.spacing[10]}`};
-  font-size: ${({ theme }) => theme.fontSizes.base};
-  color: ${({ theme }) => theme.colors.text.primary};
-  background-color: ${({ theme }) => theme.colors.background.primary};
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.primary[500]};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[100]};
-  }
-`;
-
-const Actions = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[1]};
 `;
 
 const ModalContent = styled.div`
@@ -122,7 +91,7 @@ export default function AdminUsersPage() {
       key: 'actions',
       header: 'Actions',
       render: (user) => (
-        <Actions>
+        <Stack direction="row" gap={1}>
           <Button
             variant="ghost"
             size="sm"
@@ -149,7 +118,7 @@ export default function AdminUsersPage() {
           >
             <Trash2 size={16} />
           </Button>
-        </Actions>
+        </Stack>
       ),
     },
   ];
@@ -167,17 +136,16 @@ export default function AdminUsersPage() {
       <PageHeader
         title="User Management"
         actions={
-          <SearchBox>
-            <SearchIcon>
-              <Search size={18} />
-            </SearchIcon>
-            <SearchInput
+          <SearchWrapper>
+            <Input
               type="text"
               placeholder="Search users..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              startIcon={<Search size={18} />}
+              fullWidth
             />
-          </SearchBox>
+          </SearchWrapper>
         }
       />
 

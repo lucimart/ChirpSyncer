@@ -3,39 +3,8 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import styled from 'styled-components';
 import { useAuth } from '@/lib/auth';
-import { Button, Input, Alert, AuthLayout } from '@/components/ui';
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const ForgotPasswordLink = styled(Link)`
-  display: block;
-  text-align: right;
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.primary[600]};
-  margin-top: -${({ theme }) => theme.spacing[2]};
-  
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
-const Footer = styled.div`
-  margin-top: ${({ theme }) => theme.spacing[6]};
-  text-align: center;
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-
-  a {
-    color: ${({ theme }) => theme.colors.primary[600]};
-    font-weight: ${({ theme }) => theme.fontWeights.medium};
-  }
-`;
+import { Button, Input, Alert, AuthLayout, AuthFooter, Form, TextLink } from '@/components/ui';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -87,19 +56,21 @@ export default function LoginPage() {
           autoComplete="current-password"
         />
 
-        <ForgotPasswordLink href="/forgot-password">
-          Forgot your password?
-        </ForgotPasswordLink>
+        <div style={{ marginTop: '-8px' }}>
+          <TextLink href="/forgot-password" align="right" block>
+            Forgot your password?
+          </TextLink>
+        </div>
 
         <Button type="submit" fullWidth isLoading={isLoading}>
           Sign In
         </Button>
       </Form>
 
-      <Footer>
+      <AuthFooter>
         Don&apos;t have an account?{' '}
         <Link href="/register">Create one</Link>
-      </Footer>
+      </AuthFooter>
     </AuthLayout>
   );
 }

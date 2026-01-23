@@ -26,6 +26,12 @@ import {
   PlatformIcon,
   DetailsList,
   SectionTitle,
+  Grid,
+  Stack,
+  Typography,
+  SmallText,
+  Caption,
+  Label,
 } from '@/components/ui';
 import { FlowDiagram, FlowDiagramData, Platform, SyncConnection } from '@/components/flow';
 import {
@@ -42,13 +48,6 @@ import {
   PlatformType,
 } from '@/lib/connectors';
 
-const ConnectorGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: ${({ theme }) => theme.spacing[4]};
-  margin-bottom: ${({ theme }) => theme.spacing[8]};
-`;
-
 const ConnectorCard = styled(Card)<{ $connected?: boolean; $comingSoon?: boolean }>`
   position: relative;
   opacity: ${({ $comingSoon }) => ($comingSoon ? 0.7 : 1)};
@@ -60,29 +59,6 @@ const ConnectorCard = styled(Card)<{ $connected?: boolean; $comingSoon?: boolean
   `}
 `;
 
-const ConnectorHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[3]};
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const ConnectorInfo = styled.div`
-  flex: 1;
-`;
-
-const ConnectorName = styled.h3`
-  font-size: ${({ theme }) => theme.fontSizes.md};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const ConnectionLabel = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
-
 const ConnectorStatus = styled.span<{ $status: 'connected' | 'disconnected' | 'coming_soon' }>`
   font-size: ${({ theme }) => theme.fontSizes.xs};
   color: ${({ $status, theme }) =>
@@ -91,41 +67,6 @@ const ConnectorStatus = styled.span<{ $status: 'connected' | 'disconnected' | 'c
       : $status === 'coming_soon'
         ? theme.colors.warning[600]
         : theme.colors.text.tertiary};
-`;
-
-const ConnectorDescription = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const StyledDetailsList = styled(DetailsList)`
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const CapabilitiesGrid = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${({ theme }) => theme.spacing[2]};
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const CapabilitySection = styled.div`
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const CapabilitySectionTitle = styled.h4`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: ${({ theme }) => theme.spacing[2]};
-`;
-
-
-const ConnectorActions = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[2]};
 `;
 
 const ExpandButton = styled.button`
@@ -161,51 +102,10 @@ const CapabilitiesWrapper = styled.div<{ $expanded: boolean }>`
   transition: max-height 0.3s ease, opacity 0.2s ease;
 `;
 
-
-const ModalContent = styled.div`
-  padding: ${({ theme }) => theme.spacing[4]};
-`;
-
-const SpacedInput = styled(Input)`
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const ModalActions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: ${({ theme }) => theme.spacing[2]};
-  margin-top: ${({ theme }) => theme.spacing[6]};
-`;
-
-const SyncConfigCard = styled(Card)`
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const SyncConfigHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const SyncConfigTitle = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[3]};
-`;
-
-const FormLabel = styled.label`
-  display: block;
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
+const CapabilitySectionTitle = styled(Caption)`
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   margin-bottom: ${({ theme }) => theme.spacing[2]};
-`;
-
-const DirectionSelector = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[2]};
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
 `;
 
 const DirectionButton = styled.button<{ $active: boolean; $disabled?: boolean }>`
@@ -260,7 +160,6 @@ export default function ConnectorsPage() {
 
   const connectorsList = connectors ?? AVAILABLE_CONNECTORS;
 
-  // Transform connections to FlowDiagram format
   const flowDiagramData: FlowDiagramData = {
     platforms: (connections ?? [])
       .filter((c) => c.connected)
@@ -306,7 +205,6 @@ export default function ConnectorsPage() {
       }),
   };
 
-  // Add hub node if there are connections
   if (flowDiagramData.platforms.length > 0) {
     flowDiagramData.platforms.unshift({
       id: 'hub-chirpsyncer',
@@ -319,12 +217,10 @@ export default function ConnectorsPage() {
   }
 
   const handleNodeClick = (platform: Platform) => {
-    // Could open settings modal for the platform
     console.log('Node clicked:', platform);
   };
 
   const handleEdgeClick = (connection: SyncConnection) => {
-    // Could show sync details
     console.log('Edge clicked:', connection);
   };
 
@@ -401,9 +297,9 @@ export default function ConnectorsPage() {
 
     return (
       <>
-        <CapabilitySection>
+        <div style={{ marginBottom: '16px' }}>
           <CapabilitySectionTitle>Core</CapabilitySectionTitle>
-          <CapabilitiesGrid>
+          <Stack direction="row" wrap gap={2}>
             <Badge variant={enabledVariant(caps.publish)} size="sm">
               {caps.publish ? <Check /> : <X />}
               Publish
@@ -432,12 +328,12 @@ export default function ConnectorsPage() {
               {caps.threads ? <Check /> : <X />}
               Threads
             </Badge>
-          </CapabilitiesGrid>
-        </CapabilitySection>
+          </Stack>
+        </div>
 
-        <CapabilitySection>
+        <div style={{ marginBottom: '16px' }}>
           <CapabilitySectionTitle>Media</CapabilitySectionTitle>
-          <CapabilitiesGrid>
+          <Stack direction="row" wrap gap={2}>
             <Badge variant={enabledVariant(caps.media.images)} size="sm">
               {caps.media.images ? <Check /> : <X />}
               Images ({caps.media.maxImages})
@@ -450,12 +346,12 @@ export default function ConnectorsPage() {
               {caps.media.gifs ? <Check /> : <X />}
               GIFs
             </Badge>
-          </CapabilitiesGrid>
-        </CapabilitySection>
+          </Stack>
+        </div>
 
-        <CapabilitySection>
+        <div style={{ marginBottom: '16px' }}>
           <CapabilitySectionTitle>Interactions</CapabilitySectionTitle>
-          <CapabilitiesGrid>
+          <Stack direction="row" wrap gap={2}>
             <Badge variant={enabledVariant(caps.interactions.like)} size="sm">
               {caps.interactions.like ? <Check /> : <X />}
               Like
@@ -476,12 +372,12 @@ export default function ConnectorsPage() {
               {caps.interactions.bookmark ? <Check /> : <X />}
               Bookmark
             </Badge>
-          </CapabilitiesGrid>
-        </CapabilitySection>
+          </Stack>
+        </div>
 
-        <CapabilitySection>
+        <div style={{ marginBottom: '16px' }}>
           <CapabilitySectionTitle>Limits</CapabilitySectionTitle>
-          <CapabilitiesGrid>
+          <Stack direction="row" wrap gap={2}>
             <Badge variant="success" size="sm">
               <Check />
               {caps.characterLimit} chars
@@ -490,8 +386,8 @@ export default function ConnectorsPage() {
               <Check />
               {caps.altTextLimit} alt text
             </Badge>
-          </CapabilitiesGrid>
-        </CapabilitySection>
+          </Stack>
+        </div>
       </>
     );
   };
@@ -502,8 +398,8 @@ export default function ConnectorsPage() {
     switch (connectModal.auth_type) {
       case 'session':
         return (
-          <>
-            <SpacedInput
+          <Stack gap={4}>
+            <Input
               label="Username"
               type="text"
               value={credentials.username || ''}
@@ -511,7 +407,7 @@ export default function ConnectorsPage() {
               placeholder="@username"
               fullWidth
             />
-            <SpacedInput
+            <Input
               label="Password"
               type="password"
               value={credentials.password || ''}
@@ -519,12 +415,12 @@ export default function ConnectorsPage() {
               hint="Your credentials are encrypted with AES-256-GCM"
               fullWidth
             />
-          </>
+          </Stack>
         );
       case 'atproto':
         return (
-          <>
-            <SpacedInput
+          <Stack gap={4}>
+            <Input
               label="Handle"
               type="text"
               value={credentials.handle || ''}
@@ -532,7 +428,7 @@ export default function ConnectorsPage() {
               placeholder="yourname.bsky.social"
               fullWidth
             />
-            <SpacedInput
+            <Input
               label="App Password"
               type="password"
               value={credentials.app_password || ''}
@@ -540,11 +436,11 @@ export default function ConnectorsPage() {
               hint="Create an app password at bsky.app/settings/app-passwords"
               fullWidth
             />
-          </>
+          </Stack>
         );
       case 'oauth2':
         return (
-          <SpacedInput
+          <Input
             label="Instance URL (for Mastodon)"
             type="text"
             value={credentials.instance || ''}
@@ -587,195 +483,199 @@ export default function ConnectorsPage() {
       ) : (
         <>
           <SectionTitle style={{ marginTop: '24px' }}>Available Platforms</SectionTitle>
-          <ConnectorGrid>
-        {connectorsList.map((connector) => {
-          const connection = getConnection(connector.platform);
-          const isConnected = connection?.connected;
-          const isComingSoon = connector.status === 'coming_soon';
+          <Grid minWidth="320px" gap={4} style={{ marginBottom: '32px' }}>
+            {connectorsList.map((connector) => {
+              const connection = getConnection(connector.platform);
+              const isConnected = connection?.connected;
+              const isComingSoon = connector.status === 'coming_soon';
 
-          return (
-            <ConnectorCard
-              key={connector.id}
-              padding="md"
-              $connected={isConnected}
-              $comingSoon={isComingSoon}
-            >
-              {isComingSoon && (
-                <div style={{ position: 'absolute', top: 16, right: 16 }}>
-                  <Badge variant="warning-soft" size="sm">
-                    Coming Soon
-                  </Badge>
-                </div>
-              )}
-              <ConnectorHeader>
-                <PlatformIcon icon={connector.icon} color={connector.color} size="lg" />
-                <ConnectorInfo>
-                  <ConnectorName>{connector.name}</ConnectorName>
-                  <ConnectorStatus
-                    $status={
-                      isConnected ? 'connected' : isComingSoon ? 'coming_soon' : 'disconnected'
-                    }
-                  >
-                    {isConnected
-                      ? `Connected as ${connection?.handle}`
-                      : isComingSoon
-                        ? 'Coming soon'
-                        : 'Not connected'}
-                  </ConnectorStatus>
-                </ConnectorInfo>
-              </ConnectorHeader>
+              return (
+                <ConnectorCard
+                  key={connector.id}
+                  padding="md"
+                  $connected={isConnected}
+                  $comingSoon={isComingSoon}
+                >
+                  {isComingSoon && (
+                    <div style={{ position: 'absolute', top: 16, right: 16 }}>
+                      <Badge variant="warning-soft" size="sm">
+                        Coming Soon
+                      </Badge>
+                    </div>
+                  )}
+                  <Stack direction="row" gap={3} align="center" style={{ marginBottom: '16px' }}>
+                    <PlatformIcon icon={connector.icon} color={connector.color} size="lg" />
+                    <div style={{ flex: 1 }}>
+                      <Typography variant="h4">{connector.name}</Typography>
+                      <ConnectorStatus
+                        $status={
+                          isConnected ? 'connected' : isComingSoon ? 'coming_soon' : 'disconnected'
+                        }
+                      >
+                        {isConnected
+                          ? `Connected as ${connection?.handle}`
+                          : isComingSoon
+                            ? 'Coming soon'
+                            : 'Not connected'}
+                      </ConnectorStatus>
+                    </div>
+                  </Stack>
 
-              <ConnectorDescription>{connector.description}</ConnectorDescription>
-
-              {isConnected && connection && (
-                <StyledDetailsList
-                  variant="compact"
-                  items={[
-                    {
-                      label: 'Last Sync',
-                      value: (
-                        <>
-                          <Clock size={14} />
-                          {connection.last_sync
-                            ? new Date(connection.last_sync).toLocaleString()
-                            : 'Never'}
-                        </>
-                      ),
-                    },
-                    {
-                      label: 'Sync Status',
-                      value: connection.sync_enabled ? 'Enabled' : 'Disabled',
-                    },
-                  ]}
-                />
-              )}
-
-              <ExpandButton onClick={() => toggleExpand(connector.id)}>
-                {expandedCards.has(connector.id) ? (
-                  <>
-                    Hide Details
-                    <ChevronDown style={{ transform: 'rotate(180deg)' }} />
-                  </>
-                ) : (
-                  <>
-                    Show Details
-                    <ChevronDown />
-                  </>
-                )}
-              </ExpandButton>
-
-              <CapabilitiesWrapper $expanded={expandedCards.has(connector.id)}>
-                {renderCapabilities(connector)}
-              </CapabilitiesWrapper>
-
-              <ConnectorActions>
-                {isConnected ? (
-                  <>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleDisconnect(connector.platform)}
-                      isLoading={disconnectMutation.isPending}
-                    >
-                      <Link2Off size={16} />
-                      Disconnect
-                    </Button>
-                    <Button variant="secondary" size="sm">
-                      <Settings size={16} />
-                      Settings
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    size="sm"
-                    onClick={() => setConnectModal(connector)}
-                    disabled={isComingSoon}
-                  >
-                    <Link2 size={16} />
-                    Connect
-                  </Button>
-                )}
-              </ConnectorActions>
-            </ConnectorCard>
-          );
-        })}
-      </ConnectorGrid>
-
-      <SectionTitle>Sync Configuration</SectionTitle>
-      {connections
-        ?.filter((c) => c.connected)
-        .map((connection) => {
-          const config = getSyncConfig(connection.platform);
-          const connector = connectorsList.find((c) => c.platform === connection.platform);
-
-          if (!config || !connector) return null;
-
-          return (
-            <SyncConfigCard key={connection.id} padding="md">
-              <SyncConfigHeader>
-                <SyncConfigTitle>
-                  <PlatformIcon icon={connector.icon} color={connector.color} size="lg" />
-                  <div>
-                    <ConnectorName>{connector.name}</ConnectorName>
-                    <ConnectionLabel>{connection.handle}</ConnectionLabel>
+                  <div style={{ marginBottom: '16px' }}>
+                    <SmallText>{connector.description}</SmallText>
                   </div>
-                </SyncConfigTitle>
-                <Switch
-                  checked={config.enabled}
-                  onChange={() => handleToggleSync(config)}
-                  title={config.enabled ? 'Disable sync' : 'Enable sync'}
-                />
-              </SyncConfigHeader>
 
-              <FormLabel>Sync Direction</FormLabel>
-              <DirectionSelector>
-                <DirectionButton
-                  $active={config.direction === 'inbound'}
-                  $disabled={!connector.capabilities.read}
-                  title={!connector.capabilities.read ? 'Inbound sync not supported' : undefined}
-                  onClick={() => handleChangeDirection(config, 'inbound')}
-                >
-                  {connector.name} {'\u2192'} Hub
-                </DirectionButton>
-                <DirectionButton
-                  $active={config.direction === 'bidirectional'}
-                  $disabled={!connector.capabilities.read || !connector.capabilities.publish}
-                  title={
-                    !connector.capabilities.read || !connector.capabilities.publish
-                      ? 'Bidirectional sync requires read + publish support'
-                      : undefined
-                  }
-                  onClick={() => handleChangeDirection(config, 'bidirectional')}
-                >
-                  Bidirectional
-                </DirectionButton>
-                <DirectionButton
-                  $active={config.direction === 'outbound'}
-                  $disabled={!connector.capabilities.publish}
-                  title={!connector.capabilities.publish ? 'Outbound sync not supported' : undefined}
-                  onClick={() => handleChangeDirection(config, 'outbound')}
-                >
-                  Hub {'\u2192'} {connector.name}
-                </DirectionButton>
-              </DirectionSelector>
+                  {isConnected && connection && (
+                    <div style={{ marginBottom: '16px' }}>
+                      <DetailsList
+                        variant="compact"
+                        items={[
+                          {
+                            label: 'Last Sync',
+                            value: (
+                              <>
+                                <Clock size={14} />
+                                {connection.last_sync
+                                  ? new Date(connection.last_sync).toLocaleString()
+                                  : 'Never'}
+                              </>
+                            ),
+                          },
+                          {
+                            label: 'Sync Status',
+                            value: connection.sync_enabled ? 'Enabled' : 'Disabled',
+                          },
+                        ]}
+                      />
+                    </div>
+                  )}
 
-              <Button variant="secondary" size="sm">
-                <Settings size={16} />
-                Advanced Settings
-                <ChevronRight size={16} />
-              </Button>
-            </SyncConfigCard>
-          );
-        })}
+                  <ExpandButton onClick={() => toggleExpand(connector.id)}>
+                    {expandedCards.has(connector.id) ? (
+                      <>
+                        Hide Details
+                        <ChevronDown style={{ transform: 'rotate(180deg)' }} />
+                      </>
+                    ) : (
+                      <>
+                        Show Details
+                        <ChevronDown />
+                      </>
+                    )}
+                  </ExpandButton>
 
-      {connections?.filter((c) => c.connected).length === 0 && (
-          <Card padding="lg">
-            <div style={{ textAlign: 'center', color: '#666' }}>
-              <AlertCircle size={48} style={{ marginBottom: 16, opacity: 0.5 }} />
-              <p>Connect a platform above to configure sync settings</p>
-            </div>
-          </Card>
-        )}
+                  <CapabilitiesWrapper $expanded={expandedCards.has(connector.id)}>
+                    {renderCapabilities(connector)}
+                  </CapabilitiesWrapper>
+
+                  <Stack direction="row" gap={2}>
+                    {isConnected ? (
+                      <>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleDisconnect(connector.platform)}
+                          isLoading={disconnectMutation.isPending}
+                        >
+                          <Link2Off size={16} />
+                          Disconnect
+                        </Button>
+                        <Button variant="secondary" size="sm">
+                          <Settings size={16} />
+                          Settings
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={() => setConnectModal(connector)}
+                        disabled={isComingSoon}
+                      >
+                        <Link2 size={16} />
+                        Connect
+                      </Button>
+                    )}
+                  </Stack>
+                </ConnectorCard>
+              );
+            })}
+          </Grid>
+
+          <SectionTitle>Sync Configuration</SectionTitle>
+          {connections
+            ?.filter((c) => c.connected)
+            .map((connection) => {
+              const config = getSyncConfig(connection.platform);
+              const connector = connectorsList.find((c) => c.platform === connection.platform);
+
+              if (!config || !connector) return null;
+
+              return (
+                <Card key={connection.id} padding="md" style={{ marginBottom: '16px' }}>
+                  <Stack direction="row" justify="between" align="center" style={{ marginBottom: '16px' }}>
+                    <Stack direction="row" gap={3} align="center">
+                      <PlatformIcon icon={connector.icon} color={connector.color} size="lg" />
+                      <div>
+                        <Typography variant="h4">{connector.name}</Typography>
+                        <SmallText>{connection.handle}</SmallText>
+                      </div>
+                    </Stack>
+                    <Switch
+                      checked={config.enabled}
+                      onChange={() => handleToggleSync(config)}
+                      title={config.enabled ? 'Disable sync' : 'Enable sync'}
+                    />
+                  </Stack>
+
+                  <Label spacing="md">Sync Direction</Label>
+                  <Stack direction="row" gap={2} style={{ marginBottom: '16px' }}>
+                    <DirectionButton
+                      $active={config.direction === 'inbound'}
+                      $disabled={!connector.capabilities.read}
+                      title={!connector.capabilities.read ? 'Inbound sync not supported' : undefined}
+                      onClick={() => handleChangeDirection(config, 'inbound')}
+                    >
+                      {connector.name} {'\u2192'} Hub
+                    </DirectionButton>
+                    <DirectionButton
+                      $active={config.direction === 'bidirectional'}
+                      $disabled={!connector.capabilities.read || !connector.capabilities.publish}
+                      title={
+                        !connector.capabilities.read || !connector.capabilities.publish
+                          ? 'Bidirectional sync requires read + publish support'
+                          : undefined
+                      }
+                      onClick={() => handleChangeDirection(config, 'bidirectional')}
+                    >
+                      Bidirectional
+                    </DirectionButton>
+                    <DirectionButton
+                      $active={config.direction === 'outbound'}
+                      $disabled={!connector.capabilities.publish}
+                      title={!connector.capabilities.publish ? 'Outbound sync not supported' : undefined}
+                      onClick={() => handleChangeDirection(config, 'outbound')}
+                    >
+                      Hub {'\u2192'} {connector.name}
+                    </DirectionButton>
+                  </Stack>
+
+                  <Button variant="secondary" size="sm">
+                    <Settings size={16} />
+                    Advanced Settings
+                    <ChevronRight size={16} />
+                  </Button>
+                </Card>
+              );
+            })}
+
+          {connections?.filter((c) => c.connected).length === 0 && (
+            <Card padding="lg">
+              <div style={{ textAlign: 'center', color: '#666' }}>
+                <AlertCircle size={48} style={{ marginBottom: 16, opacity: 0.5 }} />
+                <p>Connect a platform above to configure sync settings</p>
+              </div>
+            </Card>
+          )}
         </>
       )}
 
@@ -786,10 +686,8 @@ export default function ConnectorsPage() {
           setCredentials({});
         }}
         title={`Connect to ${connectModal?.name}`}
-      >
-        <ModalContent>
-          {renderConnectForm()}
-          <ModalActions>
+        footer={
+          <Stack direction="row" justify="end" gap={2}>
             <Button
               variant="secondary"
               onClick={() => {
@@ -806,8 +704,10 @@ export default function ConnectorsPage() {
               <Link2 size={16} />
               Connect
             </Button>
-          </ModalActions>
-        </ModalContent>
+          </Stack>
+        }
+      >
+        {renderConnectForm()}
       </Modal>
     </div>
   );

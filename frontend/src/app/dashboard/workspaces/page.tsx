@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import styled from 'styled-components';
 import { Plus, Settings, Users, Key, Activity } from 'lucide-react';
 import {
   ActivityFeed,
@@ -12,31 +11,22 @@ import {
   WorkspaceSettings,
   WorkspaceSwitcher,
 } from '@/components/workspace';
-import { Button, Card, Input, Modal, Tabs, PageHeader, SectionTitle, SmallText } from '@/components/ui';
+import {
+  Button,
+  Card,
+  Input,
+  Modal,
+  Tabs,
+  PageHeader,
+  SectionTitle,
+  SmallText,
+  Select,
+  Stack,
+} from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { useActivityFeed } from '@/hooks/useActivityFeed';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { useWorkspaceMembers } from '@/hooks/useWorkspaceMembers';
-
-const StyledTabs = styled(Tabs)`
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const TabContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const SectionDescription = styled(SmallText)`
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const HeaderActions = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[2]};
-  align-items: center;
-`;
 
 type TabType = 'settings' | 'members' | 'credentials' | 'activity';
 
@@ -157,14 +147,16 @@ export default function WorkspacesPage() {
         }
       />
 
-      <StyledTabs
-        items={tabs}
-        value={activeTab}
-        onChange={(id) => setActiveTab(id as TabType)}
-        variant="soft"
-      />
+      <div style={{ marginBottom: '24px' }}>
+        <Tabs
+          items={tabs}
+          value={activeTab}
+          onChange={(id) => setActiveTab(id as TabType)}
+          variant="soft"
+        />
+      </div>
 
-      <TabContent>
+      <Stack gap={4}>
         {activeTab === 'settings' && (
           <>
             <SectionTitle>Workspace Settings</SectionTitle>
@@ -182,11 +174,13 @@ export default function WorkspacesPage() {
             ) : (
               <Card padding="lg">Loading workspace settings...</Card>
             )}
-            
+
             <SectionTitle>Role Permissions</SectionTitle>
-            <SectionDescription>
-              View the permissions available for each role in this workspace.
-            </SectionDescription>
+            <div style={{ marginBottom: '16px' }}>
+              <SmallText>
+                View the permissions available for each role in this workspace.
+              </SmallText>
+            </div>
             <Card padding="lg">
               <RolePermissions />
             </Card>
@@ -196,9 +190,11 @@ export default function WorkspacesPage() {
         {activeTab === 'members' && (
           <>
             <SectionTitle>Members</SectionTitle>
-            <SectionDescription>
-              Manage workspace members and their roles.
-            </SectionDescription>
+            <div style={{ marginBottom: '16px' }}>
+              <SmallText>
+                Manage workspace members and their roles.
+              </SmallText>
+            </div>
             <Card padding="lg">
               <MemberManagement
                 members={membersHook.members}
@@ -215,9 +211,11 @@ export default function WorkspacesPage() {
         {activeTab === 'credentials' && (
           <>
             <SectionTitle>Shared Credentials</SectionTitle>
-            <SectionDescription>
-              Share access to credentials with workspace members.
-            </SectionDescription>
+            <div style={{ marginBottom: '16px' }}>
+              <SmallText>
+                Share access to credentials with workspace members.
+              </SmallText>
+            </div>
             <Card padding="none">
               <SharedCredentials
                 credentials={sharedCredentials}
@@ -233,9 +231,11 @@ export default function WorkspacesPage() {
         {activeTab === 'activity' && (
           <>
             <SectionTitle>Activity Feed</SectionTitle>
-            <SectionDescription>
-              Recent activity in this workspace.
-            </SectionDescription>
+            <div style={{ marginBottom: '16px' }}>
+              <SmallText>
+                Recent activity in this workspace.
+              </SmallText>
+            </div>
             <Card padding="none">
               <ActivityFeed
                 activities={activityHook.activities}
@@ -246,7 +246,7 @@ export default function WorkspacesPage() {
             </Card>
           </>
         )}
-      </TabContent>
+      </Stack>
 
       <Modal
         isOpen={isCreateOpen}
@@ -267,7 +267,7 @@ export default function WorkspacesPage() {
           </>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <Stack gap={4}>
           <Input
             label="Workspace Name"
             value={newWorkspaceName}
@@ -275,21 +275,18 @@ export default function WorkspacesPage() {
             placeholder="e.g., Marketing Team"
             fullWidth
           />
-          <div>
-            <label htmlFor="workspace-type" style={{ fontSize: '14px', fontWeight: 500 }}>
-              Workspace Type
-            </label>
-            <select
-              id="workspace-type"
-              value={newWorkspaceType}
-              onChange={(e) => setNewWorkspaceType(e.target.value as 'personal' | 'team')}
-              style={{ width: '100%', marginTop: '8px', height: '40px' }}
-            >
-              <option value="team">Team</option>
-              <option value="personal">Personal</option>
-            </select>
-          </div>
-        </div>
+          <Select
+            label="Workspace Type"
+            id="workspace-type"
+            value={newWorkspaceType}
+            onChange={(e) => setNewWorkspaceType(e.target.value as 'personal' | 'team')}
+            options={[
+              { value: 'team', label: 'Team' },
+              { value: 'personal', label: 'Personal' },
+            ]}
+            fullWidth
+          />
+        </Stack>
       </Modal>
     </div>
   );

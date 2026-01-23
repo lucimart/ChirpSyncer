@@ -5,16 +5,8 @@ import styled from 'styled-components';
 import { Save, Bell, Shield, Palette, Lock, Sun, Moon, Monitor } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
-import { Alert, Button, Card, Input, Switch, PageHeader, SettingRow, SectionTitle as BaseSectionTitle, Text, FormActions, ToggleGroup } from '@/components/ui';
+import { Alert, Button, Card, Input, Switch, PageHeader, SettingRow, SectionTitle as BaseSectionTitle, Text, FormActions, ToggleGroup, Stack } from '@/components/ui';
 import { useTheme, type ThemeMode } from '@/styles/ThemeContext';
-
-const SettingsSections = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[6]};
-`;
-
-const SectionCard = styled(Card)``;
 
 const SectionHeader = styled.div`
   display: flex;
@@ -35,8 +27,6 @@ const SectionIcon = styled.div`
   align-items: center;
   justify-content: center;
 `;
-
-const SectionInfo = styled.div``;
 
 const SectionDescription = styled(Text)`
   margin-top: ${({ theme }) => theme.spacing[1]};
@@ -150,18 +140,18 @@ export default function SettingsPage() {
         description="Manage your account and preferences"
       />
 
-      <SettingsSections>
-        <SectionCard padding="lg">
+      <Stack gap={6}>
+        <Card padding="lg">
           <SectionHeader>
             <SectionIcon>
               <Shield size={20} />
             </SectionIcon>
-            <SectionInfo>
+            <div>
               <BaseSectionTitle>Account</BaseSectionTitle>
               <SectionDescription>
                 Manage your account information
               </SectionDescription>
-            </SectionInfo>
+            </div>
           </SectionHeader>
 
           <SettingsGrid>
@@ -235,19 +225,19 @@ export default function SettingsPage() {
               </PasswordActions>
             </PasswordSection>
           )}
-        </SectionCard>
+        </Card>
 
-        <SectionCard padding="lg">
+        <Card padding="lg">
           <SectionHeader>
             <SectionIcon>
               <Bell size={20} />
             </SectionIcon>
-            <SectionInfo>
+            <div>
               <BaseSectionTitle>Notifications</BaseSectionTitle>
               <SectionDescription>
                 Configure how you want to be notified
               </SectionDescription>
-            </SectionInfo>
+            </div>
           </SectionHeader>
 
           <SettingRow
@@ -294,19 +284,19 @@ export default function SettingsPage() {
               }
             />
           </SettingRow>
-        </SectionCard>
+        </Card>
 
-        <SectionCard padding="lg">
+        <Card padding="lg">
           <SectionHeader>
             <SectionIcon>
               <Palette size={20} />
             </SectionIcon>
-            <SectionInfo>
+            <div>
               <BaseSectionTitle>Appearance</BaseSectionTitle>
               <SectionDescription>
                 Customize how ChirpSyncer looks
               </SectionDescription>
-            </SectionInfo>
+            </div>
           </SectionHeader>
 
           <SettingRow
@@ -324,8 +314,8 @@ export default function SettingsPage() {
               variant="pill"
             />
           </SettingRow>
-        </SectionCard>
-      </SettingsSections>
+        </Card>
+      </Stack>
     </div>
   );
 }

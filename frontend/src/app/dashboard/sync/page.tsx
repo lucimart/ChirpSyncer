@@ -23,6 +23,10 @@ import {
   StatsGrid,
   PlatformIcon,
   SectionTitle,
+  Stack,
+  Typography,
+  MetaItem,
+  Grid,
 } from '@/components/ui';
 import {
   useRealtimeMessage,
@@ -30,54 +34,12 @@ import {
 } from '@/providers/RealtimeProvider';
 import { api } from '@/lib/api';
 
-
-const SyncDirections = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: ${({ theme }) => theme.spacing[4]};
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const DirectionCard = styled(Card)`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const DirectionHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${({ theme }) => theme.spacing[3]};
-`;
-
 const DirectionStats = styled.div`
   display: flex;
   justify-content: space-around;
   padding: ${({ theme }) => theme.spacing[3]} 0;
   border-top: 1px solid ${({ theme }) => theme.colors.border.light};
   border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
-`;
-
-const DirectionStat = styled.div`
-  text-align: center;
-`;
-
-const DirectionStatValue = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.xl};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const DirectionStatLabel = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const HistoryList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[3]};
 `;
 
 const HistoryItem = styled.div`
@@ -89,32 +51,13 @@ const HistoryItem = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.md};
 `;
 
-const HistoryInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[3]};
-`;
-
-const HistoryIcon = styled.div<{ $status: string }>`
+const HistoryIcon = styled.span<{ $status: string }>`
   color: ${({ $status, theme }) =>
     $status === 'success'
       ? theme.colors.success[500]
       : $status === 'failed'
         ? theme.colors.danger[500]
         : theme.colors.warning[500]};
-`;
-
-const HistoryDetails = styled.div``;
-
-const HistoryTitle = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const HistoryMeta = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
 interface SyncStats {
@@ -143,7 +86,6 @@ export default function SyncPage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncProgress, setSyncProgress] = useState<SyncProgress | null>(null);
 
-  // Handle real-time sync progress updates
   useRealtimeMessage(
     'sync.progress',
     useCallback((payload: SyncProgressPayload) => {
@@ -155,7 +97,6 @@ export default function SyncPage() {
     }, [])
   );
 
-  // Handle sync completion
   useRealtimeMessage(
     'sync.complete',
     useCallback(
@@ -295,86 +236,86 @@ export default function SyncPage() {
       </StatsGrid>
 
       <SectionTitle>Sync Directions</SectionTitle>
-      <SyncDirections>
-        <DirectionCard padding="md">
-          <DirectionHeader>
-            <PlatformIcon icon="T" color="#1DA1F2" />
-            <ArrowRight size={24} />
-            <PlatformIcon icon="B" color="#0085FF" />
-          </DirectionHeader>
-          <DirectionStats>
-            <DirectionStat>
-              <DirectionStatValue>
-                {twitterToBluesky}
-              </DirectionStatValue>
-              <DirectionStatLabel>Posts Synced</DirectionStatLabel>
-            </DirectionStat>
-            <DirectionStat>
-              <DirectionStatValue>98%</DirectionStatValue>
-              <DirectionStatLabel>Success Rate</DirectionStatLabel>
-            </DirectionStat>
-          </DirectionStats>
-          <Button
-            variant="secondary"
-            fullWidth
-            onClick={() => syncMutation.mutate('twitter_to_bluesky')}
-            disabled={isSyncing}
-          >
-            <Play size={16} />
-            Sync Twitter → Bluesky
-          </Button>
-        </DirectionCard>
+      <Grid minWidth="300px" gap={4} style={{ marginBottom: '24px' }}>
+        <Card padding="md">
+          <Stack gap={4}>
+            <Stack direction="row" align="center" justify="center" gap={3}>
+              <PlatformIcon icon="T" color="#1DA1F2" />
+              <ArrowRight size={24} />
+              <PlatformIcon icon="B" color="#0085FF" />
+            </Stack>
+            <DirectionStats>
+              <div style={{ textAlign: 'center' }}>
+                <Typography variant="h2">{twitterToBluesky}</Typography>
+                <MetaItem size="xs" color="tertiary">Posts Synced</MetaItem>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <Typography variant="h2">98%</Typography>
+                <MetaItem size="xs" color="tertiary">Success Rate</MetaItem>
+              </div>
+            </DirectionStats>
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => syncMutation.mutate('twitter_to_bluesky')}
+              disabled={isSyncing}
+            >
+              <Play size={16} />
+              Sync Twitter → Bluesky
+            </Button>
+          </Stack>
+        </Card>
 
-        <DirectionCard padding="md">
-          <DirectionHeader>
-            <PlatformIcon icon="B" color="#0085FF" />
-            <ArrowRight size={24} />
-            <PlatformIcon icon="T" color="#1DA1F2" />
-          </DirectionHeader>
-          <DirectionStats>
-            <DirectionStat>
-              <DirectionStatValue>
-                {blueskyToTwitter}
-              </DirectionStatValue>
-              <DirectionStatLabel>Posts Synced</DirectionStatLabel>
-            </DirectionStat>
-            <DirectionStat>
-              <DirectionStatValue>95%</DirectionStatValue>
-              <DirectionStatLabel>Success Rate</DirectionStatLabel>
-            </DirectionStat>
-          </DirectionStats>
-          <Button
-            variant="secondary"
-            fullWidth
-            onClick={() => syncMutation.mutate('bluesky_to_twitter')}
-            disabled={isSyncing}
-          >
-            <Play size={16} />
-            Sync Bluesky → Twitter
-          </Button>
-        </DirectionCard>
-      </SyncDirections>
+        <Card padding="md">
+          <Stack gap={4}>
+            <Stack direction="row" align="center" justify="center" gap={3}>
+              <PlatformIcon icon="B" color="#0085FF" />
+              <ArrowRight size={24} />
+              <PlatformIcon icon="T" color="#1DA1F2" />
+            </Stack>
+            <DirectionStats>
+              <div style={{ textAlign: 'center' }}>
+                <Typography variant="h2">{blueskyToTwitter}</Typography>
+                <MetaItem size="xs" color="tertiary">Posts Synced</MetaItem>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <Typography variant="h2">95%</Typography>
+                <MetaItem size="xs" color="tertiary">Success Rate</MetaItem>
+              </div>
+            </DirectionStats>
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => syncMutation.mutate('bluesky_to_twitter')}
+              disabled={isSyncing}
+            >
+              <Play size={16} />
+              Sync Bluesky → Twitter
+            </Button>
+          </Stack>
+        </Card>
+      </Grid>
 
       <SectionTitle>Recent Sync History</SectionTitle>
       <Card padding="none">
         {history && history.length > 0 ? (
-          <HistoryList>
+          <Stack gap={3}>
             {history.map((item) => (
               <HistoryItem key={item.id}>
-                <HistoryInfo>
+                <Stack direction="row" align="center" gap={3}>
                   <HistoryIcon $status={item.status}>
                     {getStatusIcon(item.status)}
                   </HistoryIcon>
-                  <HistoryDetails>
-                    <HistoryTitle>{item.direction}</HistoryTitle>
-                    <HistoryMeta>
+                  <div>
+                    <Typography variant="label">{item.direction}</Typography>
+                    <MetaItem size="xs" color="tertiary">
                       {item.posts_synced} posts · {formatDate(item.created_at)}
-                    </HistoryMeta>
-                  </HistoryDetails>
-                </HistoryInfo>
+                    </MetaItem>
+                  </div>
+                </Stack>
               </HistoryItem>
             ))}
-          </HistoryList>
+          </Stack>
         ) : (
           <EmptyState
             icon={Clock}

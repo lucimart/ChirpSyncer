@@ -59,10 +59,6 @@ const DashboardLayout = styled.div`
   }
 `;
 
-const MainContent = styled.div``;
-
-const Sidebar = styled.aside``;
-
 function DashboardContent() {
   const { addToast } = useToast();
   const { data: stats, isLoading } = useQuery({
@@ -119,7 +115,7 @@ function DashboardContent() {
 
   return (
     <DashboardLayout>
-      <MainContent>
+      <div>
         <PageHeader
           title="Dashboard"
           description="Overview of your ChirpSyncer activity"
@@ -148,12 +144,12 @@ function DashboardContent() {
             }
           />
         </Card>
-      </MainContent>
+      </div>
 
       {!isComplete && (
-        <Sidebar>
+        <aside>
           <OnboardingChecklist />
-        </Sidebar>
+        </aside>
       )}
     </DashboardLayout>
   );

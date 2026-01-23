@@ -5,13 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styled from 'styled-components';
 import { useAuth } from '@/lib/auth';
-import { Button, Input, Alert, AuthLayout } from '@/components/ui';
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
+import { Button, Input, Alert, AuthLayout, Form } from '@/components/ui';
 
 const Footer = styled.div`
   margin-top: ${({ theme }) => theme.spacing[6]};

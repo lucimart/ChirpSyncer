@@ -6,7 +6,7 @@ import Link from 'next/link';
 import styled from 'styled-components';
 import { Repeat, ArrowLeft, Lock, CheckCircle, AlertCircle } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Button, Input, Card, Alert } from '@/components/ui';
+import { Button, Input, Card, Alert, Form } from '@/components/ui';
 
 const PageContainer = styled.div`
   display: flex;
@@ -63,13 +63,6 @@ const Subtitle = styled.p`
   margin-top: ${({ theme }) => theme.spacing[1]};
   text-align: center;
 `;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
-
 
 const StatusMessage = styled.div`
   display: flex;

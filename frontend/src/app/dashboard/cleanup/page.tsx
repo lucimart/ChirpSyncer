@@ -25,31 +25,17 @@ import {
   StatCard,
   StatsGrid,
   EmptyState,
+  Form,
+  Stack,
+  Typography,
+  MetaItem,
 } from '@/components/ui';
 import { api } from '@/lib/api';
-
-const RulesList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
 
 const RuleCard = styled(Card)`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const RuleHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-`;
-
-const RuleInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[3]};
 `;
 
 const RuleIcon = styled.div<{ $type: string }>`
@@ -73,49 +59,11 @@ const RuleIcon = styled.div<{ $type: string }>`
         : theme.colors.primary[600]};
 `;
 
-const RuleDetails = styled.div``;
-
-const RuleName = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const RuleType = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  text-transform: capitalize;
-`;
-
-const RuleActions = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[2]};
-`;
-
 const RuleStats = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing[6]};
   padding: ${({ theme }) => theme.spacing[3]} 0;
   border-top: 1px solid ${({ theme }) => theme.colors.border.light};
-`;
-
-const RuleStat = styled.div``;
-
-const RuleStatValue = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const RuleStatLabel = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
 `;
 
 interface CleanupRule {
@@ -245,20 +193,22 @@ export default function CleanupPage() {
           <EmptyState title="Loading rules..." />
         </Card>
       ) : rules && rules.length > 0 ? (
-        <RulesList>
+        <Stack gap={4}>
           {rules.map((rule) => (
             <RuleCard key={rule.id} padding="md">
-              <RuleHeader>
-                <RuleInfo>
+              <Stack direction="row" justify="between" align="start">
+                <Stack direction="row" align="center" gap={3}>
                   <RuleIcon $type={rule.rule_type}>
                     {getRuleIcon(rule.rule_type)}
                   </RuleIcon>
-                  <RuleDetails>
-                    <RuleName>{rule.name}</RuleName>
-                    <RuleType>{rule.rule_type} based</RuleType>
-                  </RuleDetails>
-                </RuleInfo>
-                <RuleActions>
+                  <div>
+                    <Typography variant="h3">{rule.name}</Typography>
+                    <MetaItem size="sm" color="secondary" style={{ textTransform: 'capitalize' }}>
+                      {rule.rule_type} based
+                    </MetaItem>
+                  </div>
+                </Stack>
+                <Stack direction="row" gap={2}>
                   <Badge variant={rule.is_enabled ? 'success-soft' : 'neutral'} size="sm">
                     {rule.is_enabled ? 'Enabled' : 'Disabled'}
                   </Badge>
@@ -288,21 +238,21 @@ export default function CleanupPage() {
                   >
                     <Trash2 size={16} />
                   </Button>
-                </RuleActions>
-              </RuleHeader>
+                </Stack>
+              </Stack>
               <RuleStats>
-                <RuleStat>
-                  <RuleStatValue>{rule.total_deleted}</RuleStatValue>
-                  <RuleStatLabel>Deleted</RuleStatLabel>
-                </RuleStat>
-                <RuleStat>
-                  <RuleStatValue>{formatDate(rule.last_run)}</RuleStatValue>
-                  <RuleStatLabel>Last Run</RuleStatLabel>
-                </RuleStat>
+                <div>
+                  <Typography variant="h3">{rule.total_deleted}</Typography>
+                  <MetaItem size="xs" color="tertiary">Deleted</MetaItem>
+                </div>
+                <div>
+                  <Typography variant="h3">{formatDate(rule.last_run)}</Typography>
+                  <MetaItem size="xs" color="tertiary">Last Run</MetaItem>
+                </div>
               </RuleStats>
             </RuleCard>
           ))}
-        </RulesList>
+        </Stack>
       ) : (
         <Card padding="lg">
           <EmptyState

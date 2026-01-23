@@ -1,40 +1,58 @@
 'use client';
 
+/**
+ * Sidebar Component
+ *
+ * Navigation sidebar with collapsible menu groups, responsive behavior,
+ * and user section with logout functionality.
+ */
+
 import styled from 'styled-components';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useRef, useEffect } from 'react';
-import {
-  Home,
-  Key,
-  RefreshCw,
-  Trash2,
-  Search,
-  BarChart3,
-  Settings,
-  LogOut,
-  Bookmark,
-  Download,
-  Calendar,
-  Plug,
-  Sparkles,
-  Users,
-  SlidersHorizontal,
-  ShieldCheck,
-  Cable,
-  FileText,
-  Lightbulb,
-  FolderOpen,
-  X,
-} from 'lucide-react';
+import { useRef, useEffect, useCallback, memo, type FC } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Home, Settings, LogOut, ShieldCheck, X } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
-import { CollapsibleMenu } from '@/components/ui';
+import { CollapsibleMenu, Avatar, Stack } from '@/components/ui';
 import { layout, breakpoints } from '@/styles/tokens/spacing';
+import { type SidebarProps, NAV_GROUPS, ICON_SIZES } from '../types';
 
-interface SidebarProps {
-  isOpen?: boolean;
-  onClose?: () => void;
-}
+// Animation variants
+const overlayVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0 },
+};
+
+const navItemVariants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.2 } },
+};
+
+const navContainerVariants = {
+  hidden: { opacity: 1 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+// Styled Components
+const Overlay = styled(motion.div)`
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 49;
+  display: none;
+
+  @media (max-width: calc(${breakpoints.md} - 1px)) {
+    display: block;
+  }
+`;
 
 const SidebarContainer = styled.aside<{ $isOpen: boolean }>`
   width: ${layout.sidebarWidth};
@@ -54,7 +72,7 @@ const SidebarContainer = styled.aside<{ $isOpen: boolean }>`
   // Tablet: Collapsed state
   @media (min-width: ${breakpoints.md}) and (max-width: calc(${breakpoints.lg} - 1px)) {
     width: ${layout.sidebarCollapsedWidth};
-    
+
     &:hover {
       width: ${layout.sidebarWidth};
       box-shadow: ${({ theme }) => theme.shadows.xl};
@@ -68,13 +86,13 @@ const SidebarContainer = styled.aside<{ $isOpen: boolean }>`
         visibility: hidden;
         width: 0;
       }
-      
+
       // Target NavLink text and CollapsibleMenu labels
-      nav span, 
-      button span:not(:first-child) { 
+      nav span,
+      button span:not(:first-child) {
         display: none;
       }
-      
+
       // Center icons in NavLinks and Buttons
       nav a,
       nav button {
@@ -127,13 +145,13 @@ const CloseButton = styled.button`
   cursor: pointer;
   padding: ${({ theme }) => theme.spacing[1]};
   display: none;
-  
+
   @media (max-width: calc(${breakpoints.md} - 1px)) {
     display: flex;
   }
 `;
 
-const Nav = styled.nav`
+const Nav = styled(motion.nav)`
   flex: 1;
   padding: ${({ theme }) => theme.spacing[4]};
   overflow-y: auto;
@@ -151,7 +169,7 @@ const Nav = styled.nav`
   }
 `;
 
-const NavSection = styled.div`
+const NavSection = styled(motion.div)`
   margin-bottom: ${({ theme }) => theme.spacing[6]};
 `;
 
@@ -176,26 +194,26 @@ const NavLink = styled(Link)<{ $active: boolean }>`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   color: ${({ theme, $active }) =>
-    $active ? theme.colors.primary[700] : theme.colors.text.secondary};
+    $active ? theme.colors.surface.primary.text : theme.colors.text.secondary};
   background-color: ${({ theme, $active }) =>
-    $active ? theme.colors.primary[50] : 'transparent'};
+    $active ? theme.colors.surface.primary.bg : 'transparent'};
   text-decoration: none;
   transition: all ${({ theme }) => theme.transitions.fast};
 
   &:hover {
     background-color: ${({ theme, $active }) =>
-      $active ? theme.colors.primary[100] : theme.colors.background.secondary};
+      $active ? theme.colors.surface.primary.bg : theme.colors.background.secondary};
     color: ${({ theme, $active }) =>
-      $active ? theme.colors.primary[700] : theme.colors.text.primary};
+      $active ? theme.colors.surface.primary.text : theme.colors.text.primary};
     text-decoration: none;
   }
 
   svg {
-    width: 18px;
-    height: 18px;
-    min-width: 18px; // Prevent squishing
+    width: ${ICON_SIZES.nav}px;
+    height: ${ICON_SIZES.nav}px;
+    min-width: ${ICON_SIZES.nav}px;
   }
-  
+
   span {
     transition: opacity 0.2s ease;
   }
@@ -204,27 +222,6 @@ const NavLink = styled(Link)<{ $active: boolean }>`
 const UserSection = styled.div`
   padding: ${({ theme }) => theme.spacing[4]};
   border-top: 1px solid ${({ theme }) => theme.colors.border.light};
-`;
-
-const UserInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[3]};
-  margin-bottom: ${({ theme }) => theme.spacing[3]};
-`;
-
-const Avatar = styled.div`
-  width: 36px;
-  height: 36px;
-  min-width: 36px; // Prevent squishing
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  background-color: ${({ theme }) => theme.colors.primary[100]};
-  color: ${({ theme }) => theme.colors.primary[700]};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
 `;
 
 const UserName = styled.span`
@@ -249,62 +246,25 @@ const LogoutButton = styled.button`
   transition: all ${({ theme }) => theme.transitions.fast};
 
   &:hover {
-    background-color: ${({ theme }) => theme.colors.danger[50]};
-    color: ${({ theme }) => theme.colors.danger[600]};
+    background-color: ${({ theme }) => theme.colors.surface.danger.bg};
+    color: ${({ theme }) => theme.colors.surface.danger.text};
   }
 
   svg {
-    width: 18px;
-    height: 18px;
-    min-width: 18px;
+    width: ${ICON_SIZES.nav}px;
+    height: ${ICON_SIZES.nav}px;
+    min-width: ${ICON_SIZES.nav}px;
   }
-  
+
   span {
     transition: opacity 0.2s ease;
   }
 `;
 
-// Grouped navigation structure
-const navGroups = {
-  platforms: {
-    label: 'Platforms',
-    icon: Cable,
-    items: [
-      { href: '/dashboard/connectors', icon: Plug, label: 'Connectors' },
-      { href: '/dashboard/credentials', icon: Key, label: 'Credentials' },
-    ],
-  },
-  content: {
-    label: 'Content',
-    icon: FileText,
-    items: [
-      { href: '/dashboard/sync', icon: RefreshCw, label: 'Sync' },
-      { href: '/dashboard/scheduler', icon: Calendar, label: 'Scheduler' },
-      { href: '/dashboard/search', icon: Search, label: 'Search' },
-      { href: '/dashboard/cleanup', icon: Trash2, label: 'Cleanup' },
-    ],
-  },
-  insights: {
-    label: 'Insights',
-    icon: Lightbulb,
-    items: [
-      { href: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
-      { href: '/dashboard/feed-lab', icon: Sparkles, label: 'Feed Lab' },
-      { href: '/dashboard/algorithm', icon: SlidersHorizontal, label: 'Algorithm' },
-    ],
-  },
-  organize: {
-    label: 'Organize',
-    icon: FolderOpen,
-    items: [
-      { href: '/dashboard/workspaces', icon: Users, label: 'Workspaces' },
-      { href: '/dashboard/bookmarks', icon: Bookmark, label: 'Bookmarks' },
-      { href: '/dashboard/export', icon: Download, label: 'Export' },
-    ],
-  },
-};
-
-export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
+/**
+ * Sidebar Component
+ */
+export const Sidebar: FC<SidebarProps> = memo(({ isOpen = false, onClose }) => {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -319,36 +279,57 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     }
   }, [isOpen]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await logout();
     window.location.href = '/login';
-  };
+  }, [logout]);
 
-  const handleLinkClick = () => {
+  const handleLinkClick = useCallback(() => {
     // Only close on mobile
     if (window.innerWidth < parseInt(breakpoints.md) && onClose) {
       onClose();
     }
-  };
+  }, [onClose]);
 
   return (
-    <SidebarContainer $isOpen={isOpen} id="sidebar-nav">
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <Overlay
+            key="sidebar-overlay"
+            variants={overlayVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onClick={onClose}
+            aria-hidden="true"
+          />
+        )}
+      </AnimatePresence>
+      <SidebarContainer
+        $isOpen={isOpen}
+        id="sidebar-nav"
+      >
       <Logo>
         <LogoText>ChirpSyncer</LogoText>
         {onClose && (
-          <CloseButton 
+          <CloseButton
             ref={closeButtonRef}
-            onClick={onClose} 
+            onClick={onClose}
             aria-label="Close menu"
           >
-            <X size={20} />
+            <X size={ICON_SIZES.close} />
           </CloseButton>
         )}
       </Logo>
 
-      <Nav>
+      <Nav
+        variants={navContainerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {/* Dashboard - always visible at top */}
-        <NavSection>
+        <NavSection variants={navItemVariants}>
           <NavLink
             href="/dashboard"
             $active={pathname === '/dashboard'}
@@ -360,82 +341,31 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         </NavSection>
 
         {/* Collapsible Groups */}
-        <NavSection>
-          <CollapsibleMenu
-            label={navGroups.platforms.label}
-            icon={navGroups.platforms.icon}
-            defaultOpen={navGroups.platforms.items.some(item => pathname === item.href)}
-          >
-            {navGroups.platforms.items.map((item) => (
-              <NavLink
-                key={item.href}
-                href={item.href}
-                $active={pathname === item.href}
-                onClick={handleLinkClick}
-              >
-                <item.icon />
-                <span>{item.label}</span>
-              </NavLink>
-            ))}
-          </CollapsibleMenu>
-
-          <CollapsibleMenu
-            label={navGroups.content.label}
-            icon={navGroups.content.icon}
-            defaultOpen={navGroups.content.items.some(item => pathname === item.href)}
-          >
-            {navGroups.content.items.map((item) => (
-              <NavLink
-                key={item.href}
-                href={item.href}
-                $active={pathname === item.href}
-                onClick={handleLinkClick}
-              >
-                <item.icon />
-                <span>{item.label}</span>
-              </NavLink>
-            ))}
-          </CollapsibleMenu>
-
-          <CollapsibleMenu
-            label={navGroups.insights.label}
-            icon={navGroups.insights.icon}
-            defaultOpen={navGroups.insights.items.some(item => pathname === item.href)}
-          >
-            {navGroups.insights.items.map((item) => (
-              <NavLink
-                key={item.href}
-                href={item.href}
-                $active={pathname === item.href}
-                onClick={handleLinkClick}
-              >
-                <item.icon />
-                <span>{item.label}</span>
-              </NavLink>
-            ))}
-          </CollapsibleMenu>
-
-          <CollapsibleMenu
-            label={navGroups.organize.label}
-            icon={navGroups.organize.icon}
-            defaultOpen={navGroups.organize.items.some(item => pathname === item.href)}
-          >
-            {navGroups.organize.items.map((item) => (
-              <NavLink
-                key={item.href}
-                href={item.href}
-                $active={pathname === item.href}
-                onClick={handleLinkClick}
-              >
-                <item.icon />
-                <span>{item.label}</span>
-              </NavLink>
-            ))}
-          </CollapsibleMenu>
+        <NavSection variants={navItemVariants}>
+          {NAV_GROUPS.map((group) => (
+            <CollapsibleMenu
+              key={group.label}
+              label={group.label}
+              icon={group.icon}
+              defaultOpen={group.items.some((item) => pathname === item.href)}
+            >
+              {group.items.map((item) => (
+                <NavLink
+                  key={item.href}
+                  href={item.href}
+                  $active={pathname === item.href}
+                  onClick={handleLinkClick}
+                >
+                  <item.icon />
+                  <span>{item.label}</span>
+                </NavLink>
+              ))}
+            </CollapsibleMenu>
+          ))}
         </NavSection>
 
         {/* Settings */}
-        <NavSection>
+        <NavSection variants={navItemVariants}>
           <NavLink
             href="/dashboard/settings"
             $active={pathname === '/dashboard/settings'}
@@ -448,7 +378,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
         {/* Admin section */}
         {user?.is_admin && (
-          <NavSection>
+          <NavSection variants={navItemVariants}>
             <NavSectionTitle>Admin</NavSectionTitle>
             <NavLink
               href="/dashboard/admin/users"
@@ -463,15 +393,18 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       </Nav>
 
       <UserSection>
-        <UserInfo>
-          <Avatar>{user?.username?.[0]?.toUpperCase() || 'U'}</Avatar>
+        <Stack direction="row" align="center" gap={3} style={{ marginBottom: '12px' }}>
+          <Avatar name={user?.username || 'User'} size="sm" />
           <UserName>{user?.username || 'User'}</UserName>
-        </UserInfo>
+        </Stack>
         <LogoutButton onClick={handleLogout}>
           <LogOut />
           <span>Sign Out</span>
         </LogoutButton>
       </UserSection>
     </SidebarContainer>
+    </>
   );
-}
+});
+
+Sidebar.displayName = 'Sidebar';

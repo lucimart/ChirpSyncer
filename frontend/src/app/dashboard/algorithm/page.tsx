@@ -1,19 +1,20 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import styled from 'styled-components';
 import { useRouter } from 'next/navigation';
-import { PageHeader } from '@/components/ui';
+import { PageHeader, Stack } from '@/components/ui';
 import { AlgorithmDashboard } from '@/components/algorithm-dashboard/AlgorithmDashboard';
 import { useAlgorithmStats } from '@/hooks/useAlgorithmStats';
+
+const QUERY_KEY = ['algorithm-settings'] as const;
 
 export default function AlgorithmPage() {
   const router = useRouter();
   const { data, loading, error } = useAlgorithmStats();
 
   const { data: settings } = useQuery({
-    queryKey: ['algorithm-settings'],
+    queryKey: QUERY_KEY,
     queryFn: async () => {
       const response = await fetch('/api/v1/algorithm/settings');
       const payload = await response.json();
@@ -24,7 +25,7 @@ export default function AlgorithmPage() {
     },
   });
 
-  const [algorithmEnabled, setAlgorithmEnabled] = useState<boolean>(true);
+  const [algorithmEnabled, setAlgorithmEnabled] = useState(true);
 
   useEffect(() => {
     if (typeof settings?.algorithm_enabled === 'boolean') {
@@ -58,8 +59,17 @@ export default function AlgorithmPage() {
     [updateSettings]
   );
 
+  const handleViewRule = useCallback(() => {
+    router.push('/dashboard/feed-lab');
+  }, [router]);
+
+  const errorObj = useMemo(
+    () => (error ? new Error(error) : null),
+    [error]
+  );
+
   return (
-    <div>
+    <Stack>
       <PageHeader
         title="Algorithm Dashboard"
         description="Review your transparency score and see how rules shape the feed."
@@ -68,11 +78,11 @@ export default function AlgorithmPage() {
       <AlgorithmDashboard
         stats={data ?? undefined}
         isLoading={loading}
-        error={error ? new Error(error) : null}
+        error={errorObj}
         algorithmEnabled={algorithmEnabled}
         onToggleAlgorithm={handleToggle}
-        onViewRule={() => router.push('/dashboard/feed-lab')}
+        onViewRule={handleViewRule}
       />
-    </div>
+    </Stack>
   );
 }

@@ -16,32 +16,14 @@ import {
   AlertCircle,
   Webhook,
 } from 'lucide-react';
-import { Button, Card, Modal, Input, Badge, EmptyState, PageHeader, StatCard, StatsGrid } from '@/components/ui';
+import { Button, Card, Modal, Input, Badge, EmptyState, PageHeader, StatCard, StatsGrid, Form, Label, MetaItem, Stack, Typography } from '@/components/ui';
 import { api, Webhook as WebhookType, WebhookDelivery } from '@/lib/api';
 
-
-const WebhooksList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
 
 const WebhookCard = styled(Card)`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const WebhookHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-`;
-
-const WebhookInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[3]};
 `;
 
 const WebhookIcon = styled.div`
@@ -55,14 +37,6 @@ const WebhookIcon = styled.div`
   color: ${({ theme }) => theme.colors.primary[600]};
 `;
 
-const WebhookDetails = styled.div``;
-
-const WebhookName = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
 const WebhookUrl = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.text.secondary};
@@ -73,11 +47,6 @@ const WebhookUrl = styled.div`
   white-space: nowrap;
 `;
 
-const WebhookActions = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[2]};
-`;
-
 const WebhookMeta = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing[6]};
@@ -85,28 +54,6 @@ const WebhookMeta = styled.div`
   border-top: 1px solid ${({ theme }) => theme.colors.border.light};
   flex-wrap: wrap;
 `;
-
-const EventBadges = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[2]};
-  flex-wrap: wrap;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const Label = styled.label`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-  display: block;
-  margin-bottom: ${({ theme }) => theme.spacing[1]};
-`;
-
-const FieldGroup = styled.div``;
 
 const CheckboxGroup = styled.div`
   display: grid;
@@ -177,35 +124,12 @@ const DeliveryItem = styled.div<{ $success: boolean }>`
       $success ? theme.colors.success[500] : theme.colors.danger[500]};
 `;
 
-const DeliveryInfo = styled.div``;
-
-const DeliveryEvent = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const DeliveryTime = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const DeliveryStatus = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-`;
 
 const StatusCode = styled.span<{ $success: boolean }>`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   color: ${({ $success, theme }) =>
     $success ? theme.colors.success[700] : theme.colors.danger[700]};
-`;
-
-const MetaItem = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
 export default function WebhooksPage() {
@@ -415,22 +339,22 @@ export default function WebhooksPage() {
           <EmptyState title="Loading webhooks..." />
         </Card>
       ) : webhooks.length > 0 ? (
-        <WebhooksList>
+        <Stack gap={4}>
           {webhooks.map((webhook) => (
             <WebhookCard key={webhook.id} padding="md">
-              <WebhookHeader>
-                <WebhookInfo>
+              <Stack direction="row" justify="between" align="start">
+                <Stack direction="row" align="center" gap={3}>
                   <WebhookIcon>
                     <Webhook size={20} />
                   </WebhookIcon>
-                  <WebhookDetails>
-                    <WebhookName>{webhook.name || 'Unnamed Webhook'}</WebhookName>
+                  <div>
+                    <Typography variant="h3">{webhook.name || 'Unnamed Webhook'}</Typography>
                     <WebhookUrl title={webhook.url}>
                       {truncateUrl(webhook.url)}
                     </WebhookUrl>
-                  </WebhookDetails>
-                </WebhookInfo>
-                <WebhookActions>
+                  </div>
+                </Stack>
+                <Stack direction="row" gap={2}>
                   <Badge variant={webhook.enabled ? 'success-soft' : 'neutral'} size="sm">
                     {webhook.enabled ? 'Enabled' : 'Disabled'}
                   </Badge>
@@ -480,19 +404,19 @@ export default function WebhooksPage() {
                   >
                     <Trash2 size={16} />
                   </Button>
-                </WebhookActions>
-              </WebhookHeader>
+                </Stack>
+              </Stack>
               <WebhookMeta>
-                <EventBadges>
+                <Stack direction="row" gap={2} wrap>
                   {webhook.events.map((event) => (
                     <Badge variant="default" size="sm" key={event}>{event}</Badge>
                   ))}
-                </EventBadges>
-                <MetaItem>Created: {formatDate(webhook.created_at)}</MetaItem>
+                </Stack>
+                <MetaItem variant="text">Created: {formatDate(webhook.created_at)}</MetaItem>
               </WebhookMeta>
             </WebhookCard>
           ))}
-        </WebhooksList>
+        </Stack>
       ) : (
         <Card padding="lg">
           <EmptyState
@@ -559,7 +483,7 @@ export default function WebhooksPage() {
               fullWidth
             />
 
-            <FieldGroup>
+            <div>
               <Label>Events</Label>
               <CheckboxGroup>
                 {eventTypes.map((event) => (
@@ -573,7 +497,7 @@ export default function WebhooksPage() {
                   </CheckboxLabel>
                 ))}
               </CheckboxGroup>
-            </FieldGroup>
+            </div>
           </Form>
         )}
       </Modal>
@@ -602,11 +526,11 @@ export default function WebhooksPage() {
           <DeliveryList>
             {deliveriesData.deliveries.map((delivery) => (
               <DeliveryItem key={delivery.id} $success={delivery.success}>
-                <DeliveryInfo>
-                  <DeliveryEvent>{delivery.event_type}</DeliveryEvent>
-                  <DeliveryTime>{formatDateTime(delivery.created_at)}</DeliveryTime>
-                </DeliveryInfo>
-                <DeliveryStatus>
+                <div>
+                  <Typography variant="label">{delivery.event_type}</Typography>
+                  <MetaItem size="xs" color="tertiary">{formatDateTime(delivery.created_at)}</MetaItem>
+                </div>
+                <Stack direction="row" gap={2} align="center">
                   <StatusCode $success={delivery.success}>
                     {delivery.status_code || 'N/A'}
                   </StatusCode>
@@ -615,7 +539,7 @@ export default function WebhooksPage() {
                   ) : (
                     <X size={16} color="red" />
                   )}
-                </DeliveryStatus>
+                </Stack>
               </DeliveryItem>
             ))}
           </DeliveryList>

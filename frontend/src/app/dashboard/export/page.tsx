@@ -12,145 +12,37 @@ import {
   Loader,
   Archive,
 } from 'lucide-react';
-import { Button, Card, Progress, PageHeader, SectionTitle } from '@/components/ui';
+import {
+  Button,
+  Card,
+  Progress,
+  PageHeader,
+  SectionTitle,
+  Label,
+  Stack,
+  Grid,
+  SelectableCard,
+  IconBadge,
+  Typography,
+  SmallText,
+  Select,
+  Checkbox,
+} from '@/components/ui';
 import { api } from '@/lib/api';
 
-const ExportGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: ${({ theme }) => theme.spacing[4]};
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const ExportCard = styled(Card)<{ $selected: boolean }>`
-  cursor: pointer;
-  border: 2px solid
-    ${({ $selected, theme }) =>
-      $selected ? theme.colors.primary[500] : 'transparent'};
-  transition: all ${({ theme }) => theme.transitions.fast};
-
-  &:hover {
-    border-color: ${({ $selected, theme }) =>
-      $selected ? theme.colors.primary[500] : theme.colors.border.default};
-  }
-`;
-
-const ExportCardHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: ${({ theme }) => theme.spacing[3]};
-`;
-
-const ExportIcon = styled.div<{ $color: string }>`
-  width: 48px;
-  height: 48px;
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  background-color: ${({ $color }) => `${$color}15`};
-  color: ${({ $color }) => $color};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const CheckIcon = styled.div<{ $visible: boolean }>`
+const CheckIcon = styled.span<{ $visible: boolean }>`
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
   color: ${({ theme }) => theme.colors.success[600]};
+  transition: opacity ${({ theme }) => theme.transitions.fast};
 `;
 
-const ExportTitle = styled.h3`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: ${({ theme }) => theme.spacing[1]};
-`;
-
-const ExportDescription = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-const OptionsCard = styled(Card)`
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const OptionsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const OptionGroup = styled.div``;
-
-const Label = styled.label`
-  display: block;
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: ${({ theme }) => theme.spacing[2]};
-`;
-
-const Select = styled.select`
-  width: 100%;
-  height: 40px;
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
-  font-size: ${({ theme }) => theme.fontSizes.base};
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  background-color: ${({ theme }) => theme.colors.background.primary};
-`;
-
-const CheckboxGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[2]};
-`;
-
-const CheckboxLabel = styled.label`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.primary};
-  cursor: pointer;
-`;
-
-const Checkbox = styled.input`
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-`;
-
-const ExportButton = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: ${({ theme }) => theme.spacing[3]};
-`;
-
-const ExportStatus = styled(Card)`
-  margin-top: ${({ theme }) => theme.spacing[6]};
-`;
-
-const StatusHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[3]};
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const StatusIcon = styled.div<{ $status: 'pending' | 'running' | 'complete' }>`
+const StatusIcon = styled.span<{ $status: 'pending' | 'running' | 'complete' }>`
   color: ${({ $status, theme }) =>
     $status === 'complete'
       ? theme.colors.success[600]
       : $status === 'running'
         ? theme.colors.primary[600]
         : theme.colors.text.tertiary};
-`;
-
-const StatusTitle = styled.h3`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
 const DownloadLink = styled.a`
@@ -165,12 +57,6 @@ const DownloadLink = styled.a`
   &:hover {
     text-decoration: underline;
   }
-`;
-
-const EstimateInfo = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[2]};
 `;
 
 type ExportFormat = 'json' | 'csv' | 'txt';
@@ -239,7 +125,6 @@ export default function ExportPage() {
       const blob = await response.blob();
       const filename = `chirpsyncer-export-${new Date().toISOString().split('T')[0]}.${format}`;
 
-      // Create download link
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -271,95 +156,92 @@ export default function ExportPage() {
       />
 
       <SectionTitle>Export Format</SectionTitle>
-      <ExportGrid>
+      <Grid minWidth="300px" gap={4} style={{ marginBottom: '24px' }}>
         {EXPORT_FORMATS.map((fmt) => (
-          <ExportCard
+          <SelectableCard
             key={fmt.id}
-            $selected={format === fmt.id}
+            selected={format === fmt.id}
             onClick={() => setFormat(fmt.id)}
             padding="md"
           >
-            <ExportCardHeader>
-              <ExportIcon $color={fmt.color}>
+            <Stack direction="row" justify="between" align="start" style={{ marginBottom: '12px' }}>
+              <IconBadge size="lg" color={fmt.color}>
                 <fmt.icon size={24} />
-              </ExportIcon>
+              </IconBadge>
               <CheckIcon $visible={format === fmt.id}>
                 <CheckCircle size={20} />
               </CheckIcon>
-            </ExportCardHeader>
-            <ExportTitle>{fmt.name}</ExportTitle>
-            <ExportDescription>{fmt.description}</ExportDescription>
-          </ExportCard>
+            </Stack>
+            <div style={{ marginBottom: '4px' }}>
+              <Typography variant="h3">{fmt.name}</Typography>
+            </div>
+            <SmallText>{fmt.description}</SmallText>
+          </SelectableCard>
         ))}
-      </ExportGrid>
+      </Grid>
 
       <SectionTitle>Export Options</SectionTitle>
-      <OptionsCard padding="lg">
-        <OptionsGrid>
-          <OptionGroup>
-            <Label>Date Range</Label>
+      <Card padding="lg" style={{ marginBottom: '24px' }}>
+        <Grid minWidth="200px" gap={4}>
+          <div>
+            <Label spacing="md">Date Range</Label>
             <Select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
-            >
-              <option value="all">All Time</option>
-              <option value="year">Last Year</option>
-              <option value="6months">Last 6 Months</option>
-              <option value="3months">Last 3 Months</option>
-              <option value="month">Last Month</option>
-              <option value="week">Last Week</option>
-            </Select>
-          </OptionGroup>
+              options={[
+                { value: 'all', label: 'All Time' },
+                { value: 'year', label: 'Last Year' },
+                { value: '6months', label: 'Last 6 Months' },
+                { value: '3months', label: 'Last 3 Months' },
+                { value: 'month', label: 'Last Month' },
+                { value: 'week', label: 'Last Week' },
+              ]}
+              fullWidth
+            />
+          </div>
 
-          <OptionGroup>
-            <Label>Platform</Label>
+          <div>
+            <Label spacing="md">Platform</Label>
             <Select
               value={platform}
               onChange={(e) => setPlatform(e.target.value)}
-            >
-              <option value="all">All Platforms</option>
-              <option value="twitter">Twitter Only</option>
-              <option value="bluesky">Bluesky Only</option>
-            </Select>
-          </OptionGroup>
+              options={[
+                { value: 'all', label: 'All Platforms' },
+                { value: 'twitter', label: 'Twitter Only' },
+                { value: 'bluesky', label: 'Bluesky Only' },
+              ]}
+              fullWidth
+            />
+          </div>
 
-          <OptionGroup>
-            <Label>Include</Label>
-            <CheckboxGroup>
-              <CheckboxLabel>
-                <Checkbox
-                  type="checkbox"
-                  checked={includeMedia}
-                  onChange={(e) => setIncludeMedia(e.target.checked)}
-                />
-                Media URLs
-              </CheckboxLabel>
-              <CheckboxLabel>
-                <Checkbox
-                  type="checkbox"
-                  checked={includeMetrics}
-                  onChange={(e) => setIncludeMetrics(e.target.checked)}
-                />
-                Engagement Metrics
-              </CheckboxLabel>
-              <CheckboxLabel>
-                <Checkbox
-                  type="checkbox"
-                  checked={includeDeleted}
-                  onChange={(e) => setIncludeDeleted(e.target.checked)}
-                />
-                Deleted Posts History
-              </CheckboxLabel>
-            </CheckboxGroup>
-          </OptionGroup>
-        </OptionsGrid>
+          <div>
+            <Label spacing="md">Include</Label>
+            <Stack gap={2}>
+              <Checkbox
+                label="Media URLs"
+                checked={includeMedia}
+                onChange={(e) => setIncludeMedia(e.target.checked)}
+              />
+              <Checkbox
+                label="Engagement Metrics"
+                checked={includeMetrics}
+                onChange={(e) => setIncludeMetrics(e.target.checked)}
+              />
+              <Checkbox
+                label="Deleted Posts History"
+                checked={includeDeleted}
+                onChange={(e) => setIncludeDeleted(e.target.checked)}
+              />
+            </Stack>
+          </div>
+        </Grid>
 
-        <EstimateInfo>
-          Estimated export size: {estimatedSize} • ~1,250 posts
-        </EstimateInfo>
-      </OptionsCard>
+        <div style={{ marginTop: '8px' }}>
+          <SmallText>Estimated export size: {estimatedSize} • ~1,250 posts</SmallText>
+        </div>
+      </Card>
 
-      <ExportButton>
+      <Stack direction="row" justify="end" gap={3}>
         <Button
           onClick={() => exportMutation.mutate()}
           disabled={exportState.status === 'running'}
@@ -368,11 +250,11 @@ export default function ExportPage() {
           <Archive size={18} />
           Start Export
         </Button>
-      </ExportButton>
+      </Stack>
 
       {exportState.status !== 'idle' && (
-        <ExportStatus padding="lg">
-          <StatusHeader>
+        <Card padding="lg" style={{ marginTop: '24px' }}>
+          <Stack direction="row" gap={3} align="center" style={{ marginBottom: '16px' }}>
             <StatusIcon $status={exportState.status}>
               {exportState.status === 'complete' ? (
                 <CheckCircle size={24} />
@@ -380,12 +262,12 @@ export default function ExportPage() {
                 <Loader size={24} className="animate-spin" />
               )}
             </StatusIcon>
-            <StatusTitle>
+            <Typography variant="h3">
               {exportState.status === 'complete'
                 ? 'Export Complete'
                 : 'Exporting...'}
-            </StatusTitle>
-          </StatusHeader>
+            </Typography>
+          </Stack>
 
           <Progress
             value={exportState.progress}
@@ -401,7 +283,7 @@ export default function ExportPage() {
               Download {exportState.filename}
             </DownloadLink>
           )}
-        </ExportStatus>
+        </Card>
       )}
     </div>
   );

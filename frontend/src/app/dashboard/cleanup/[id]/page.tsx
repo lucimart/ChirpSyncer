@@ -3,7 +3,6 @@
 import { useState, use, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import styled from 'styled-components';
 import {
   ArrowLeft,
   Trash2,
@@ -24,116 +23,18 @@ import {
   StatCard,
   StatsGrid,
   SectionTitle,
+  MetaItem,
+  Stack,
+  PageTitle,
+  SmallText,
+  TruncatedText,
+  IconBadge,
 } from '@/components/ui';
 import {
   useRealtimeMessage,
   CleanupProgressPayload,
 } from '@/providers/RealtimeProvider';
 import { api } from '@/lib/api';
-
-const HeaderContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const BackButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
-  background: none;
-  border: none;
-  color: ${({ theme }) => theme.colors.text.secondary};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  cursor: pointer;
-  margin-bottom: ${({ theme }) => theme.spacing[2]};
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.text.primary};
-  }
-`;
-
-const TitleSection = styled.div``;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[3]};
-`;
-
-const RuleIcon = styled.div<{ $type: string }>`
-  width: 40px;
-  height: 40px;
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: ${({ $type, theme }) =>
-    $type === 'age'
-      ? theme.colors.warning[100]
-      : $type === 'engagement'
-        ? theme.colors.success[100]
-        : theme.colors.primary[100]};
-  color: ${({ $type, theme }) =>
-    $type === 'age'
-      ? theme.colors.warning[600]
-      : $type === 'engagement'
-        ? theme.colors.success[600]
-        : theme.colors.primary[600]};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
-
-const TableActions = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const SelectedInfo = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-const ExecutionCard = styled(Card)`
-  margin-top: ${({ theme }) => theme.spacing[6]};
-`;
-
-const ExecutionHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const TweetContent = styled.div`
-  max-width: 400px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-const TweetMeta = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[4]};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-`;
-
-const MetaItem = styled.span`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[1]};
-`;
 
 interface PreviewTweet {
   id: string;
@@ -158,6 +59,12 @@ interface ExecutionState {
   failed: number;
 }
 
+const RULE_TYPE_VARIANT = {
+  age: 'warning',
+  engagement: 'success',
+  pattern: 'primary',
+} as const;
+
 export default function CleanupPreviewPage({
   params,
 }: {
@@ -177,7 +84,6 @@ export default function CleanupPreviewPage({
     failed: 0,
   });
 
-  // Handle real-time cleanup progress
   useRealtimeMessage(
     'cleanup.progress',
     useCallback(
@@ -194,7 +100,6 @@ export default function CleanupPreviewPage({
     )
   );
 
-  // Handle cleanup completion
   useRealtimeMessage(
     'cleanup.complete',
     useCallback(
@@ -276,7 +181,7 @@ export default function CleanupPreviewPage({
     {
       key: 'content',
       header: 'Tweet',
-      render: (row) => <TweetContent>{row.text}</TweetContent>,
+      render: (row) => <TruncatedText $maxWidth="400px">{row.text}</TruncatedText>,
     },
     {
       key: 'created_at',
@@ -290,17 +195,17 @@ export default function CleanupPreviewPage({
       header: 'Engagement',
       width: '200px',
       render: (row) => (
-        <TweetMeta>
-          <MetaItem>
+        <Stack direction="row" gap={4}>
+          <MetaItem size="xs" color="secondary">
             <Heart size={12} /> {row.likes}
           </MetaItem>
-          <MetaItem>
+          <MetaItem size="xs" color="secondary">
             <MessageSquare size={12} /> {row.retweets}
           </MetaItem>
-          <MetaItem>
+          <MetaItem size="xs" color="secondary">
             <Eye size={12} /> {row.replies}
           </MetaItem>
-        </TweetMeta>
+        </Stack>
       ),
     },
   ];
@@ -314,23 +219,30 @@ export default function CleanupPreviewPage({
 
   return (
     <div>
-      <BackButton onClick={() => router.push('/dashboard/cleanup')}>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => router.push('/dashboard/cleanup')}
+        style={{ marginBottom: '8px' }}
+      >
         <ArrowLeft size={16} />
         Back to rules
-      </BackButton>
+      </Button>
 
-      <HeaderContainer>
-        <TitleSection>
-          <PageTitle>
+      <Stack direction="row" justify="between" align="start" gap={4} style={{ marginBottom: '24px' }}>
+        <div>
+          <Stack direction="row" gap={3} align="center">
             {rule && (
-              <RuleIcon $type={rule.rule_type}>{getRuleIcon(rule.rule_type)}</RuleIcon>
+              <IconBadge variant={RULE_TYPE_VARIANT[rule.rule_type]}>
+                {getRuleIcon(rule.rule_type)}
+              </IconBadge>
             )}
-            {rule?.name ?? 'Loading...'}
-          </PageTitle>
-          <PageDescription>
-            Preview tweets that match this rule before deleting
-          </PageDescription>
-        </TitleSection>
+            <PageTitle>{rule?.name ?? 'Loading...'}</PageTitle>
+          </Stack>
+          <div style={{ marginTop: '4px' }}>
+            <SmallText>Preview tweets that match this rule before deleting</SmallText>
+          </div>
+        </div>
         <Button
           variant="danger"
           onClick={() => setShowConfirm(true)}
@@ -339,7 +251,7 @@ export default function CleanupPreviewPage({
           <Trash2 size={18} />
           Delete {deleteCount} tweets
         </Button>
-      </HeaderContainer>
+      </Stack>
 
       <StatsGrid>
         <StatCard
@@ -366,12 +278,12 @@ export default function CleanupPreviewPage({
       </StatsGrid>
 
       {execution.isRunning || execution.deleted > 0 ? (
-        <ExecutionCard padding="lg">
-          <ExecutionHeader>
-            <SectionTitle>
+        <Card padding="lg" style={{ marginTop: '24px' }}>
+          <Stack direction="row" justify="between" align="center" style={{ marginBottom: '16px' }}>
+            <SectionTitle style={{ marginBottom: 0 }}>
               {execution.isRunning ? 'Deleting tweets...' : 'Execution complete'}
             </SectionTitle>
-          </ExecutionHeader>
+          </Stack>
           <Progress
             value={execution.deleted}
             max={execution.total}
@@ -384,17 +296,17 @@ export default function CleanupPreviewPage({
               { label: 'Remaining', value: execution.total - execution.deleted },
             ]}
           />
-        </ExecutionCard>
+        </Card>
       ) : (
         <>
-          <TableActions>
-            <SectionTitle>Preview Results</SectionTitle>
+          <Stack direction="row" justify="between" align="center" style={{ marginBottom: '16px' }}>
+            <SectionTitle style={{ marginBottom: 0 }}>Preview Results</SectionTitle>
             {selectedIds.size > 0 && (
-              <SelectedInfo>
+              <SmallText>
                 {selectedIds.size} tweet{selectedIds.size !== 1 ? 's' : ''} selected
-              </SelectedInfo>
+              </SmallText>
             )}
-          </TableActions>
+          </Stack>
 
           {isLoading ? (
             <Card padding="lg">

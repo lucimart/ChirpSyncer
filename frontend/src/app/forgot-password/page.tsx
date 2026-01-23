@@ -5,21 +5,7 @@ import Link from 'next/link';
 import styled from 'styled-components';
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Button, Input, Alert, AuthLayout } from '@/components/ui';
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const SuccessMessage = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
+import { Button, Input, Alert, AuthLayout, Form, Stack, Typography, SmallText } from '@/components/ui';
 
 const SuccessIcon = styled.div`
   width: 64px;
@@ -30,17 +16,6 @@ const SuccessIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-`;
-
-const SuccessTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const SuccessText = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
 `;
 
 const DevNoteLink = styled(Link)`
@@ -98,15 +73,15 @@ export default function ForgotPasswordPage() {
       }
     >
       {isSuccess ? (
-        <SuccessMessage>
+        <Stack align="center" gap={4} style={{ textAlign: 'center' }}>
           <SuccessIcon>
             <CheckCircle size={32} />
           </SuccessIcon>
-          <SuccessTitle>Check your email</SuccessTitle>
-          <SuccessText>
+          <Typography variant="h3">Check your email</Typography>
+          <SmallText>
             If an account with that email exists, we&apos;ve sent you a password reset link.
             Please check your inbox and spam folder.
-          </SuccessText>
+          </SmallText>
 
           {devResetUrl && (
             <Alert variant="warning" title="Development Mode">
@@ -120,7 +95,7 @@ export default function ForgotPasswordPage() {
             <ArrowLeft size={16} />
             Back to sign in
           </BackLink>
-        </SuccessMessage>
+        </Stack>
       ) : (
         <>
           <Form onSubmit={handleSubmit}>

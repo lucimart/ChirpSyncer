@@ -8,12 +8,10 @@ import {
   Filter,
   Image as ImageIcon,
   Download,
-  ChevronLeft,
-  ChevronRight,
   Hash,
   User,
 } from 'lucide-react';
-import { Button, Card, Input, PageHeader, EmptyState } from '@/components/ui';
+import { Button, Card, Input, PageHeader, EmptyState, Select, Pagination, MetaItem, Stack } from '@/components/ui';
 import { api, SearchResultItem } from '@/lib/api';
 import type { SearchFilters } from '@/types';
 
@@ -25,32 +23,6 @@ const SearchContainer = styled.div`
 
 const SearchInputWrapper = styled.div`
   flex: 1;
-  position: relative;
-`;
-
-const SearchInputIcon = styled.div`
-  position: absolute;
-  left: ${({ theme }) => theme.spacing[3]};
-  top: 50%;
-  transform: translateY(-50%);
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const StyledSearchInput = styled.input`
-  width: 100%;
-  height: 44px;
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
-  padding-left: ${({ theme }) => theme.spacing[10]};
-  font-size: ${({ theme }) => theme.fontSizes.base};
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  background-color: ${({ theme }) => theme.colors.background.primary};
-
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.primary[500]};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[100]};
-  }
 `;
 
 const FiltersCard = styled(Card)<{ $visible: boolean }>`
@@ -63,8 +35,6 @@ const FiltersGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: ${({ theme }) => theme.spacing[4]};
 `;
-
-const FilterGroup = styled.div``;
 
 const FilterLabel = styled.label`
   font-size: ${({ theme }) => theme.fontSizes.sm};
@@ -89,12 +59,6 @@ const ResultsInfo = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing[4]};
   color: ${({ theme }) => theme.colors.text.secondary};
   font-size: ${({ theme }) => theme.fontSizes.sm};
-`;
-
-const ResultsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[3]};
 `;
 
 const ResultCard = styled(Card)`
@@ -123,11 +87,6 @@ const ResultPlatform = styled.span<{ $platform: string }>`
   color: ${({ $platform }) => ($platform === 'twitter' ? '#1DA1F2' : '#0085FF')};
 `;
 
-const ResultDate = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
 const ResultContent = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.base};
   color: ${({ theme }) => theme.colors.text.primary};
@@ -149,47 +108,8 @@ const ResultMeta = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.sm};
 `;
 
-const MetaItem = styled.span`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[1]};
-`;
-
-const Pagination = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
+const PaginationWrapper = styled.div`
   margin-top: ${({ theme }) => theme.spacing[6]};
-`;
-
-const PageButton = styled.button<{ $active?: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 36px;
-  height: 36px;
-  padding: ${({ theme }) => `0 ${theme.spacing[2]}`};
-  border: 1px solid
-    ${({ $active, theme }) =>
-      $active ? theme.colors.primary[600] : theme.colors.border.default};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  background-color: ${({ $active, theme }) =>
-    $active ? theme.colors.primary[600] : 'transparent'};
-  color: ${({ $active, theme }) =>
-    $active ? 'white' : theme.colors.text.primary};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background-color: ${({ $active, theme }) =>
-      $active ? theme.colors.primary[700] : theme.colors.background.secondary};
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 `;
 
 const ResultCheckbox = styled.input`
@@ -197,15 +117,6 @@ const ResultCheckbox = styled.input`
   height: 16px;
   cursor: pointer;
   margin-right: ${({ theme }) => theme.spacing[3]};
-`;
-
-const ResultCardWrapper = styled.div`
-  display: flex;
-  align-items: flex-start;
-`;
-
-const ResultCardContent = styled.div`
-  flex: 1;
 `;
 
 // Safe text highlighting without dangerouslySetInnerHTML
@@ -315,14 +226,13 @@ export default function SearchPage() {
 
       <SearchContainer>
         <SearchInputWrapper>
-          <SearchInputIcon>
-            <SearchIcon size={20} />
-          </SearchInputIcon>
-          <StyledSearchInput
+          <Input
             type="text"
             placeholder="Search posts..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            startIcon={<SearchIcon size={20} />}
+            fullWidth
           />
         </SearchInputWrapper>
         <Button
@@ -336,7 +246,7 @@ export default function SearchPage() {
 
       <FiltersCard $visible={showFilters} padding="md">
         <FiltersGrid>
-          <FilterGroup>
+          <div>
             <FilterLabel>
               <Checkbox
                 type="checkbox"
@@ -348,8 +258,8 @@ export default function SearchPage() {
               <ImageIcon size={16} />
               Has media
             </FilterLabel>
-          </FilterGroup>
-          <FilterGroup>
+          </div>
+          <div>
             <Input
               label="Minimum likes"
               type="number"
@@ -362,8 +272,8 @@ export default function SearchPage() {
               }
               placeholder="0"
             />
-          </FilterGroup>
-          <FilterGroup>
+          </div>
+          <div>
             <Input
               label="Minimum retweets"
               type="number"
@@ -376,8 +286,8 @@ export default function SearchPage() {
               }
               placeholder="0"
             />
-          </FilterGroup>
-          <FilterGroup>
+          </div>
+          <div>
             <Input
               label="From date"
               type="date"
@@ -389,8 +299,8 @@ export default function SearchPage() {
                 }))
               }
             />
-          </FilterGroup>
-          <FilterGroup>
+          </div>
+          <div>
             <Input
               label="To date"
               type="date"
@@ -402,10 +312,10 @@ export default function SearchPage() {
                 }))
               }
             />
-          </FilterGroup>
-          <FilterGroup>
-            <FilterLabel style={{ marginBottom: '4px', display: 'block' }}>Platform</FilterLabel>
-            <select
+          </div>
+          <div>
+            <Select
+              label="Platform"
               value={filters.platform || ''}
               onChange={(e) =>
                 setFilters((prev) => ({
@@ -413,21 +323,14 @@ export default function SearchPage() {
                   platform: (e.target.value as 'twitter' | 'bluesky') || undefined,
                 }))
               }
-              style={{
-                width: '100%',
-                height: '40px',
-                padding: '8px 12px',
-                fontSize: '14px',
-                border: '1px solid #e2e8f0',
-                borderRadius: '6px',
-                backgroundColor: 'white',
-              }}
-            >
-              <option value="">All platforms</option>
-              <option value="twitter">Twitter</option>
-              <option value="bluesky">Bluesky</option>
-            </select>
-          </FilterGroup>
+              options={[
+                { value: '', label: 'All platforms' },
+                { value: 'twitter', label: 'Twitter' },
+                { value: 'bluesky', label: 'Bluesky' },
+              ]}
+              fullWidth
+            />
+          </div>
         </FiltersGrid>
       </FiltersCard>
 
@@ -461,21 +364,21 @@ export default function SearchPage() {
         </Card>
       ) : paginatedResults && paginatedResults.length > 0 ? (
         <>
-          <ResultsList>
+          <Stack gap={3}>
             {paginatedResults.map((result) => (
               <ResultCard key={result.id} padding="md">
-                <ResultCardWrapper>
+                <Stack direction="row" align="start">
                   <ResultCheckbox
                     type="checkbox"
                     checked={selectedIds.has(result.id)}
                     onChange={() => handleSelectResult(result.id)}
                   />
-                  <ResultCardContent>
+                  <div style={{ flex: 1 }}>
                     <ResultHeader>
                       <ResultPlatform $platform={result.platform}>
                         {result.platform}
                       </ResultPlatform>
-                      <ResultDate>{formatDate(result.created_at)}</ResultDate>
+                      <MetaItem size="xs" color="tertiary">{formatDate(result.created_at)}</MetaItem>
                     </ResultHeader>
                     <ResultContent>
                       <HighlightedContent content={result.content} query={query} />
@@ -494,49 +397,19 @@ export default function SearchPage() {
                         </MetaItem>
                       )}
                     </ResultMeta>
-                  </ResultCardContent>
-                </ResultCardWrapper>
+                  </div>
+                </Stack>
               </ResultCard>
             ))}
-          </ResultsList>
+          </Stack>
 
-          {totalPages > 1 && (
-            <Pagination>
-              <PageButton
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft size={16} />
-              </PageButton>
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum: number;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
-                }
-                return (
-                  <PageButton
-                    key={pageNum}
-                    $active={currentPage === pageNum}
-                    onClick={() => setCurrentPage(pageNum)}
-                  >
-                    {pageNum}
-                  </PageButton>
-                );
-              })}
-              <PageButton
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronRight size={16} />
-              </PageButton>
-            </Pagination>
-          )}
+          <PaginationWrapper>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </PaginationWrapper>
         </>
       ) : (
         <Card padding="lg">
