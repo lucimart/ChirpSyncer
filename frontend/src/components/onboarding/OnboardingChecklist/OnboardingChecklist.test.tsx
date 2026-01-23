@@ -105,7 +105,7 @@ describe('OnboardingChecklist', () => {
     const context = createMockContext({ progress: 40 });
     renderWithContext(context);
 
-    expect(screen.getByText('40%')).toBeInTheDocument();
+    expect(screen.getByText('40% complete')).toBeInTheDocument();
   });
 
   it('has accessible progressbar', () => {

@@ -1,2 +1,2 @@
 export { OnboardingStep } from './OnboardingStep';
-export type { OnboardingStepProps, StepStatus } from './OnboardingStep';
+export type { OnboardingStepProps } from './OnboardingStep';

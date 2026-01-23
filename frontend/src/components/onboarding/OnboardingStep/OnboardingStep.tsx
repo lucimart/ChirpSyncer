@@ -1,27 +1,22 @@
 'use client';
 
+import { useCallback, memo, type FC, type KeyboardEvent } from 'react';
 import styled, { css } from 'styled-components';
-import { Link, RefreshCw, PenLine, Calendar, BarChart2, Check } from 'lucide-react';
-
-export type StepStatus = 'pending' | 'completed' | 'current';
+import { Check } from 'lucide-react';
+import { Stack, SmallText, Caption } from '@/components/ui';
+import { type StepStatus, type StepIconType, STEP_ICONS } from '../types';
 
 export interface OnboardingStepProps {
   id: string;
   title: string;
   description: string;
   status: StepStatus;
-  icon: 'link' | 'sync' | 'rule' | 'calendar' | 'chart';
+  icon: StepIconType;
   onClick?: () => void;
   isCurrent?: boolean;
 }
 
-const iconMap = {
-  link: Link,
-  sync: RefreshCw,
-  rule: PenLine,
-  calendar: Calendar,
-  chart: BarChart2,
-};
+const ICON_SIZE = 20;
 
 const StepContainer = styled.div<{
   $status: StepStatus;
@@ -42,14 +37,14 @@ const StepContainer = styled.div<{
     $isCurrent &&
     css`
       border-color: ${theme.colors.primary[500]};
-      background-color: ${theme.colors.primary[50]};
+      background-color: ${theme.colors.surface.primary.bg};
       box-shadow: ${theme.shadows.md};
     `}
 
   ${({ $status, theme }) =>
     $status === 'completed' &&
     css`
-      background-color: ${theme.colors.success[50]};
+      background-color: ${theme.colors.surface.success.bg};
       border-color: ${theme.colors.success[500]};
     `}
 
@@ -89,35 +84,21 @@ const IconWrapper = styled.div<{
       `;
     }
     return css`
-      background-color: ${theme.colors.neutral[100]};
-      color: ${theme.colors.neutral[500]};
+      background-color: ${theme.colors.background.tertiary};
+      color: ${theme.colors.text.secondary};
     `;
   }}
 `;
 
-const Content = styled.div`
-  flex: 1;
-  min-width: 0;
-`;
-
-const Title = styled.h3<{ $status: StepStatus }>`
-  font-size: ${({ theme }) => theme.fontSizes.base};
+const Title = styled.span<{ $status: StepStatus }>`
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
   color: ${({ theme, $status }) =>
     $status === 'completed'
-      ? theme.colors.success[700]
+      ? theme.colors.surface.success.text
       : theme.colors.text.primary};
-  margin: 0 0 ${({ theme }) => theme.spacing[1]} 0;
 `;
 
-const Description = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin: 0;
-  line-height: 1.5;
-`;
-
-export const OnboardingStep = ({
+export const OnboardingStep: FC<OnboardingStepProps> = memo(({
   id,
   title,
   description,
@@ -125,16 +106,26 @@ export const OnboardingStep = ({
   icon,
   onClick,
   isCurrent = false,
-}: OnboardingStepProps) => {
-  const IconComponent = iconMap[icon];
+}) => {
+  const IconComponent = STEP_ICONS[icon];
   const isCompleted = status === 'completed';
   const isClickable = !isCompleted && !!onClick;
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     if (isClickable) {
       onClick?.();
     }
-  };
+  }, [isClickable, onClick]);
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (isClickable && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        onClick?.();
+      }
+    },
+    [isClickable, onClick]
+  );
 
   return (
     <StepContainer
@@ -146,16 +137,21 @@ export const OnboardingStep = ({
       $isCurrent={isCurrent}
       $clickable={isClickable}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       role="button"
       tabIndex={isClickable ? 0 : -1}
     >
       <IconWrapper $status={status} $isCurrent={isCurrent}>
-        {isCompleted ? <Check size={20} /> : <IconComponent size={20} />}
+        {isCompleted ? <Check size={ICON_SIZE} /> : <IconComponent size={ICON_SIZE} />}
       </IconWrapper>
-      <Content>
-        <Title $status={status}>{title}</Title>
-        <Description>{description}</Description>
-      </Content>
+      <Stack gap={1} style={{ flex: 1, minWidth: 0 }}>
+        <SmallText>
+          <Title $status={status}>{title}</Title>
+        </SmallText>
+        <Caption style={{ lineHeight: 1.5 }}>{description}</Caption>
+      </Stack>
     </StepContainer>
   );
-};
+});
+
+OnboardingStep.displayName = 'OnboardingStep';

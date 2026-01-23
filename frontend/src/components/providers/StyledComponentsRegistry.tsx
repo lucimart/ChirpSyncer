@@ -1,31 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type FC, type ReactNode } from 'react';
 import { useServerInsertedHTML } from 'next/navigation';
-import { ServerStyleSheet, StyleSheetManager, ThemeProvider } from 'styled-components';
-import { theme as defaultTheme } from '@/styles/theme';
+import { ServerStyleSheet, StyleSheetManager } from 'styled-components';
 
-export default function StyledComponentsRegistry({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [styledComponentsStyleSheet] = useState(() => new ServerStyleSheet());
+export interface StyledComponentsRegistryProps {
+  children: ReactNode;
+}
+
+/**
+ * Registry for styled-components SSR support in Next.js App Router.
+ * Collects styles during server rendering and injects them into the HTML.
+ */
+const StyledComponentsRegistry: FC<StyledComponentsRegistryProps> = ({ children }) => {
+  const [styleSheet] = useState(() => new ServerStyleSheet());
 
   useServerInsertedHTML(() => {
-    const styles = styledComponentsStyleSheet.getStyleElement();
-    styledComponentsStyleSheet.instance.clearTag();
+    const styles = styleSheet.getStyleElement();
+    styleSheet.instance.clearTag();
     return <>{styles}</>;
   });
 
-  if (typeof window !== 'undefined') return <>{children}</>;
+  if (typeof window !== 'undefined') {
+    return <>{children}</>;
+  }
 
-  // On server, wrap with default theme to prevent undefined theme errors
   return (
-    <StyleSheetManager sheet={styledComponentsStyleSheet.instance}>
-      <ThemeProvider theme={defaultTheme}>
-        {children}
-      </ThemeProvider>
+    <StyleSheetManager sheet={styleSheet.instance}>
+      {children}
     </StyleSheetManager>
   );
-}
+};
+
+export default StyledComponentsRegistry;

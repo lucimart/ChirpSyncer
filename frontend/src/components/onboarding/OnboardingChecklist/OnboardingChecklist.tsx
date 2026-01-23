@@ -1,65 +1,21 @@
 'use client';
 
-import styled from 'styled-components';
+import { useCallback, memo, type FC } from 'react';
+import styled, { useTheme } from 'styled-components';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2 } from 'lucide-react';
+import { Card, Stack, SectionTitle, SmallText, Button, Progress } from '@/components/ui';
 import { useOnboarding } from '../OnboardingProvider';
 import { OnboardingStep } from '../OnboardingStep';
 
-const ChecklistCard = styled.div`
-  background-color: ${({ theme }) => theme.colors.background.primary};
-  border: 1px solid ${({ theme }) => theme.colors.border.light};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  box-shadow: ${({ theme }) => theme.shadows.sm};
-  overflow: hidden;
-`;
+export interface OnboardingChecklistProps {
+  className?: string;
+}
 
 const Header = styled.div`
   padding: ${({ theme }) => `${theme.spacing[5]} ${theme.spacing[6]}`};
   border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
-`;
-
-const Title = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes.xl};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin: 0 0 ${({ theme }) => theme.spacing[4]} 0;
-`;
-
-const ProgressWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[3]};
-`;
-
-const ProgressTrack = styled.div`
-  flex: 1;
-  height: 8px;
-  background-color: ${({ theme }) => theme.colors.neutral[200]};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  overflow: hidden;
-`;
-
-const ProgressFill = styled.div<{ $progress: number }>`
-  height: 100%;
-  width: ${({ $progress }) => `${$progress}%`};
-  background-color: ${({ theme }) => theme.colors.primary[500]};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  transition: width 0.3s ease-out;
-`;
-
-const ProgressText = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  min-width: 40px;
-`;
-
-const StepsList = styled.div`
-  padding: ${({ theme }) => theme.spacing[4]};
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[3]};
 `;
 
 const Footer = styled.div`
@@ -69,119 +25,127 @@ const Footer = styled.div`
   justify-content: center;
 `;
 
-const SkipButton = styled.button`
-  background: none;
-  border: none;
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  cursor: pointer;
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  transition: ${({ theme }) => theme.transitions.fast};
+const COMPLETE_ICON_SIZE = 64;
 
-  &:hover {
-    color: ${({ theme }) => theme.colors.text.secondary};
-    background-color: ${({ theme }) => theme.colors.neutral[100]};
-  }
+const StepList = styled(motion.div)`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[3]};
+  padding: 16px;
 `;
 
-const CompletionContainer = styled.div`
-  padding: ${({ theme }) => theme.spacing[8]};
+const StepWrapper = styled(motion.div)``;
+
+const CompleteWrapper = styled(motion.div)`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
   gap: ${({ theme }) => theme.spacing[4]};
+  padding: 32px;
+  text-align: center;
 `;
 
-const CompletionIcon = styled.div`
-  color: ${({ theme }) => theme.colors.success[500]};
-`;
-
-const CompletionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes.xl};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin: 0;
-`;
-
-const CompletionText = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.base};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin: 0;
-`;
-
-// Map provider icon types to OnboardingStep icon types
-const iconMap: Record<string, 'link' | 'sync' | 'rule' | 'calendar' | 'chart'> = {
-  link: 'link',
-  sync: 'sync',
-  rule: 'rule',
-  calendar: 'calendar',
-  chart: 'chart',
+const listVariants = {
+  visible: {
+    transition: { staggerChildren: 0.1 },
+  },
 };
 
-export function OnboardingChecklist() {
+const stepVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { opacity: 1, x: 0 },
+};
+
+const completeVariants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: { opacity: 1, scale: 1 },
+};
+
+export const OnboardingChecklist: FC<OnboardingChecklistProps> = memo(({ className }) => {
   const router = useRouter();
+  const theme = useTheme();
   const { steps, currentStep, progress, isComplete, skipOnboarding } = useOnboarding();
+
+  const handleStepClick = useCallback(
+    (targetRoute: string) => {
+      router.push(targetRoute);
+    },
+    [router]
+  );
 
   if (isComplete) {
     return (
-      <ChecklistCard>
-        <CompletionContainer>
-          <CompletionIcon>
-            <CheckCircle2 size={64} />
-          </CompletionIcon>
-          <CompletionTitle>All done!</CompletionTitle>
-          <CompletionText>
+      <Card padding="none" className={className}>
+        <CompleteWrapper
+          variants={completeVariants}
+          initial="hidden"
+          animate="visible"
+          transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+        >
+          <motion.div
+            style={{ color: theme.colors.success[500] }}
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
+          >
+            <CheckCircle2 size={COMPLETE_ICON_SIZE} />
+          </motion.div>
+          <SectionTitle>All done!</SectionTitle>
+          <SmallText>
             You have completed the onboarding. Enjoy using ChirpSyncer!
-          </CompletionText>
-        </CompletionContainer>
-      </ChecklistCard>
+          </SmallText>
+        </CompleteWrapper>
+      </Card>
     );
   }
 
   return (
-    <ChecklistCard>
+    <Card padding="none" className={className}>
       <Header>
-        <Title>Getting Started</Title>
-        <ProgressWrapper>
-          <ProgressTrack
-            role="progressbar"
-            aria-valuenow={progress}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label={`Onboarding progress: ${progress}% complete`}
-          >
-            <ProgressFill $progress={progress} />
-          </ProgressTrack>
-          <ProgressText aria-hidden="true">{progress}%</ProgressText>
-        </ProgressWrapper>
+        <SectionTitle style={{ marginBottom: '16px' }}>Getting Started</SectionTitle>
+        <Progress
+          value={progress}
+          showValue={false}
+          size="md"
+          aria-label={`Onboarding progress: ${progress}% complete`}
+        />
+        <SmallText style={{ marginTop: '8px', textAlign: 'right' }}>
+          {progress}% complete
+        </SmallText>
       </Header>
 
-      <StepsList>
-        {steps.map((step) => {
-          const isCurrent = currentStep?.id === step.id;
-          const mappedIcon = iconMap[step.icon] || 'link';
-
-          return (
+      <StepList
+        variants={listVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {steps.map((step) => (
+          <StepWrapper
+            key={step.id}
+            variants={stepVariants}
+            transition={{ duration: 0.2 }}
+          >
             <OnboardingStep
-              key={step.id}
               id={step.id}
               title={step.title}
               description={step.description}
               status={step.status}
-              icon={mappedIcon}
-              isCurrent={isCurrent}
-              onClick={() => router.push(step.targetRoute)}
+              icon={step.icon}
+              isCurrent={currentStep?.id === step.id}
+              onClick={() => handleStepClick(step.targetRoute)}
             />
-          );
-        })}
-      </StepsList>
+          </StepWrapper>
+        ))}
+      </StepList>
 
       <Footer>
-        <SkipButton onClick={skipOnboarding}>Skip for now</SkipButton>
+        <Button variant="ghost" size="sm" onClick={skipOnboarding}>
+          Skip for now
+        </Button>
       </Footer>
-    </ChecklistCard>
+    </Card>
   );
-}
+});
+
+OnboardingChecklist.displayName = 'OnboardingChecklist';

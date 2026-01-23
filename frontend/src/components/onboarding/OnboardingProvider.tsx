@@ -1,93 +1,62 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  type FC,
+  type ReactNode,
+} from 'react';
+import {
+  type StepStatus,
+  type OnboardingStepData,
+  type OnboardingState,
+  STORAGE_KEY,
+  DEFAULT_STATE,
+  DEFAULT_STEPS,
+} from './types';
 
-export type StepStatus = 'pending' | 'completed' | 'current';
+// Re-export types for backwards compatibility
+export type { StepStatus };
+export type OnboardingStep = OnboardingStepData;
 
-export interface OnboardingStep {
-  id: string;
-  title: string;
-  description: string;
-  icon: 'link' | 'sync' | 'rule' | 'calendar' | 'chart';
-  targetRoute: string;
-  status: StepStatus;
-}
-
-interface OnboardingState {
-  completedSteps: string[];
-  skipped: boolean;
-}
-
-interface OnboardingContextValue {
-  steps: OnboardingStep[];
-  currentStep: OnboardingStep | null;
+/** Onboarding context value */
+export interface OnboardingContextValue {
+  steps: OnboardingStepData[];
+  currentStep: OnboardingStepData | null;
   progress: number;
   isComplete: boolean;
   completeStep: (stepId: string) => void;
   skipOnboarding: () => void;
 }
 
-const STORAGE_KEY = 'chirpsyncer-onboarding';
-
-const DEFAULT_STEPS: Omit<OnboardingStep, 'status'>[] = [
-  {
-    id: 'connect-platform',
-    title: 'Connect your first platform',
-    description: 'Link your social media accounts to get started',
-    icon: 'link',
-    targetRoute: '/dashboard/credentials',
-  },
-  {
-    id: 'first-sync',
-    title: 'Run your first sync',
-    description: 'Synchronize content across your connected platforms',
-    icon: 'sync',
-    targetRoute: '/dashboard/sync',
-  },
-  {
-    id: 'create-rule',
-    title: 'Create a feed rule',
-    description: 'Set up rules to customize your content feed',
-    icon: 'rule',
-    targetRoute: '/dashboard/feed-lab',
-  },
-  {
-    id: 'schedule-post',
-    title: 'Schedule your first post',
-    description: 'Plan and schedule content for optimal engagement',
-    icon: 'calendar',
-    targetRoute: '/dashboard/scheduler',
-  },
-  {
-    id: 'view-analytics',
-    title: 'Explore analytics',
-    description: 'Discover insights about your content performance',
-    icon: 'chart',
-    targetRoute: '/dashboard/analytics',
-  },
-];
+/** @deprecated Use OnboardingContextValue instead */
+export type OnboardingContextType = OnboardingContextValue;
 
 export const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
-export type OnboardingContextType = OnboardingContextValue;
-
+/** Load onboarding state from localStorage */
 function loadState(): OnboardingState {
   if (typeof window === 'undefined') {
-    return { completedSteps: [], skipped: false };
+    return DEFAULT_STATE;
   }
 
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      return JSON.parse(saved);
+      return JSON.parse(saved) as OnboardingState;
     }
   } catch {
     // Ignore parse errors
   }
 
-  return { completedSteps: [], skipped: false };
+  return DEFAULT_STATE;
 }
 
+/** Save onboarding state to localStorage */
 function saveState(state: OnboardingState): void {
   if (typeof window === 'undefined') return;
 
@@ -98,31 +67,41 @@ function saveState(state: OnboardingState): void {
   }
 }
 
-interface OnboardingProviderProps {
+export interface OnboardingProviderProps {
   children: ReactNode;
 }
 
-export function OnboardingProvider({ children }: OnboardingProviderProps) {
-  const [state, setState] = useState<OnboardingState>(() => loadState());
+export const OnboardingProvider: FC<OnboardingProviderProps> = ({ children }) => {
+  const [state, setState] = useState<OnboardingState>(loadState);
 
   // Reload state on mount (for SSR hydration)
   useEffect(() => {
     setState(loadState());
   }, []);
 
-  const steps: OnboardingStep[] = DEFAULT_STEPS.map((step) => {
-    if (state.completedSteps.includes(step.id)) {
-      return { ...step, status: 'completed' as StepStatus };
-    }
-    return { ...step, status: 'pending' as StepStatus };
-  });
+  const steps = useMemo<OnboardingStepData[]>(
+    () =>
+      DEFAULT_STEPS.map((step) => ({
+        ...step,
+        status: state.completedSteps.includes(step.id) ? 'completed' : 'pending',
+      })),
+    [state.completedSteps]
+  );
 
-  // currentStep is the first pending step (without modifying the status array)
-  const currentStep = steps.find((s) => s.status === 'pending') || null;
+  const currentStep = useMemo(
+    () => steps.find((s) => s.status === 'pending') ?? null,
+    [steps]
+  );
 
-  const progress = Math.round((state.completedSteps.length / DEFAULT_STEPS.length) * 100);
+  const progress = useMemo(
+    () => Math.round((state.completedSteps.length / DEFAULT_STEPS.length) * 100),
+    [state.completedSteps.length]
+  );
 
-  const isComplete = state.skipped || state.completedSteps.length === DEFAULT_STEPS.length;
+  const isComplete = useMemo(
+    () => state.skipped || state.completedSteps.length === DEFAULT_STEPS.length,
+    [state.skipped, state.completedSteps.length]
+  );
 
   const completeStep = useCallback((stepId: string) => {
     setState((prev) => {
@@ -130,7 +109,7 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
         return prev;
       }
 
-      const newState = {
+      const newState: OnboardingState = {
         ...prev,
         completedSteps: [...prev.completedSteps, stepId],
       };
@@ -142,7 +121,7 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
 
   const skipOnboarding = useCallback(() => {
     setState((prev) => {
-      const newState = {
+      const newState: OnboardingState = {
         ...prev,
         skipped: true,
       };
@@ -152,22 +131,26 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
     });
   }, []);
 
-  const value: OnboardingContextValue = {
-    steps,
-    currentStep,
-    progress,
-    isComplete,
-    completeStep,
-    skipOnboarding,
-  };
+  const value = useMemo<OnboardingContextValue>(
+    () => ({
+      steps,
+      currentStep,
+      progress,
+      isComplete,
+      completeStep,
+      skipOnboarding,
+    }),
+    [steps, currentStep, progress, isComplete, completeStep, skipOnboarding]
+  );
 
   return (
     <OnboardingContext.Provider value={value}>
       {children}
     </OnboardingContext.Provider>
   );
-}
+};
 
+/** Hook to access onboarding context */
 export function useOnboarding(): OnboardingContextValue {
   const context = useContext(OnboardingContext);
 
