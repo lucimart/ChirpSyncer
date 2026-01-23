@@ -15,6 +15,8 @@ jest.mock('@/lib/api', () => ({
     register: jest.fn(),
     getCurrentUser: jest.fn(),
     setToken: jest.fn(),
+    setRefreshToken: jest.fn(),
+    refreshAccessToken: jest.fn(),
   },
 }));
 
@@ -285,6 +287,159 @@ describe('Auth Store', () => {
 
       expect(result.current.user).toBeNull();
       expect(result.current.isAuthenticated).toBe(false);
+    });
+  });
+
+  describe('Refresh Token', () => {
+    it('should store refresh token on login', async () => {
+      const mockUser = { id: 1, username: 'testuser', email: 'test@example.com', is_admin: false, created_at: '2024-01-01T00:00:00Z' };
+      const mockToken = 'mock-jwt-token';
+      const mockRefreshToken = 'mock-refresh-token';
+
+      mockApi.login.mockResolvedValue({
+        success: true,
+        data: { user: mockUser, token: mockToken, refresh_token: mockRefreshToken },
+      });
+
+      const { result } = renderHook(() => useAuth());
+
+      await act(async () => {
+        await result.current.login('testuser', 'password123');
+      });
+
+      expect(result.current.refreshToken).toBe(mockRefreshToken);
+      expect(mockApi.setRefreshToken).toHaveBeenCalledWith(mockRefreshToken);
+    });
+
+    it('should clear refresh token on logout', async () => {
+      const mockUser = { id: 1, username: 'testuser', email: 'test@example.com', is_admin: false, created_at: '2024-01-01T00:00:00Z' };
+
+      mockApi.login.mockResolvedValue({
+        success: true,
+        data: { user: mockUser, token: 'token', refresh_token: 'refresh' },
+      });
+      mockApi.logout.mockResolvedValue({ success: true });
+
+      const { result } = renderHook(() => useAuth());
+
+      await act(async () => {
+        await result.current.login('testuser', 'password');
+      });
+
+      expect(result.current.refreshToken).toBe('refresh');
+
+      await act(async () => {
+        await result.current.logout();
+      });
+
+      expect(result.current.refreshToken).toBeNull();
+      expect(mockApi.setRefreshToken).toHaveBeenCalledWith(null);
+    });
+
+    it('should refresh access token successfully', async () => {
+      const mockUser = { id: 1, username: 'testuser', email: 'test@example.com', is_admin: false, created_at: '2024-01-01T00:00:00Z' };
+      const newToken = 'new-access-token';
+      const newRefreshToken = 'new-refresh-token';
+
+      // Set initial state with refresh token
+      act(() => {
+        useAuth.setState({
+          token: 'old-token',
+          refreshToken: 'old-refresh-token',
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+      });
+
+      mockApi.refreshAccessToken.mockResolvedValue({
+        success: true,
+        data: { token: newToken, refresh_token: newRefreshToken },
+      });
+      mockApi.getCurrentUser.mockResolvedValue({
+        success: true,
+        data: mockUser,
+      });
+
+      const { result } = renderHook(() => useAuth());
+
+      let refreshResult: boolean;
+      await act(async () => {
+        refreshResult = await result.current.refreshAccessToken();
+      });
+
+      expect(refreshResult!).toBe(true);
+      expect(result.current.token).toBe(newToken);
+      expect(result.current.refreshToken).toBe(newRefreshToken);
+      expect(mockApi.setToken).toHaveBeenCalledWith(newToken);
+      expect(mockApi.setRefreshToken).toHaveBeenCalledWith(newRefreshToken);
+    });
+
+    it('should return false when refresh fails', async () => {
+      act(() => {
+        useAuth.setState({
+          token: 'old-token',
+          refreshToken: 'old-refresh-token',
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+      });
+
+      mockApi.refreshAccessToken.mockResolvedValue({
+        success: false,
+        error: 'Token expired',
+      });
+
+      const { result } = renderHook(() => useAuth());
+
+      let refreshResult: boolean;
+      await act(async () => {
+        refreshResult = await result.current.refreshAccessToken();
+      });
+
+      expect(refreshResult!).toBe(false);
+      expect(result.current.token).toBeNull();
+      expect(result.current.refreshToken).toBeNull();
+      expect(result.current.isAuthenticated).toBe(false);
+    });
+
+    it('should return false when no refresh token available', async () => {
+      act(() => {
+        useAuth.setState({
+          token: null,
+          refreshToken: null,
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+      });
+
+      const { result } = renderHook(() => useAuth());
+
+      let refreshResult: boolean;
+      await act(async () => {
+        refreshResult = await result.current.refreshAccessToken();
+      });
+
+      expect(refreshResult!).toBe(false);
+      expect(mockApi.refreshAccessToken).not.toHaveBeenCalled();
+    });
+
+    it('should set token with refresh token via setToken', () => {
+      const { result } = renderHook(() => useAuth());
+
+      // Mock checkAuth to avoid API calls
+      mockApi.getCurrentUser.mockResolvedValue({ success: true, data: { id: 1, username: 'test', email: 'test@test.com', is_admin: false, created_at: '2024-01-01' } });
+
+      act(() => {
+        result.current.setToken('access-token', 'refresh-token');
+      });
+
+      expect(result.current.token).toBe('access-token');
+      expect(result.current.refreshToken).toBe('refresh-token');
+      expect(mockApi.setToken).toHaveBeenCalledWith('access-token');
+      expect(mockApi.setRefreshToken).toHaveBeenCalledWith('refresh-token');
     });
   });
 });

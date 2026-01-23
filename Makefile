@@ -2,8 +2,8 @@
 # Simple commands for development and deployment
 
 .PHONY: help dev start stop logs test lint setup seed clean \
-        docker-rebuild-frontend docker-rebuild-api restart-frontend restart-api \
-        frontend-clear-cache frontend-reset-cache dev-rebuild docker-clean
+        docker-rebuild-frontend docker-rebuild-api restart-frontend restart-api restart-worker \
+        frontend-clear-cache frontend-reset-cache dev-rebuild docker-clean storybook
 
 # Default target
 help:
@@ -14,7 +14,9 @@ help:
 	@echo "Quick Start (Docker - Recommended):"
 	@echo "  make dev           Start full dev environment (Redis + API + Worker + Frontend)"
 	@echo "  make stop          Stop all containers"
-	@echo "  make logs          View logs"
+	@echo "  make logs          View all logs (follow mode)"
+	@echo "  make logs-api      View API logs only"
+	@echo "  make logs-frontend View frontend logs only"
 	@echo ""
 	@echo "Quick Start (Local - No Docker for app):"
 	@echo "  make redis         Start Redis only (Docker)"
@@ -30,17 +32,22 @@ help:
 	@echo "  make test          Run unit tests"
 	@echo "  make test-all      Run all tests with coverage"
 	@echo "  make lint          Run linters"
+	@echo "  make storybook     Start Storybook on :6006"
 	@echo ""
-	@echo "Production:"
-	@echo "  make start         Start production containers"
-	@echo "  make rebuild       Rebuild and restart containers"
+	@echo "Hot Reload:"
+	@echo "  Frontend (Next.js):  Automatic - changes reflect instantly"
+	@echo "  Backend (Flask):     Automatic - API restarts on .py changes"
+	@echo "  Worker (Celery):     Manual - use 'make restart-worker'"
 	@echo ""
-	@echo "Docker Management:"
-	@echo "  make dev-rebuild            Rebuild all services (no cache)"
-	@echo "  make docker-rebuild-frontend  Rebuild frontend only (no cache)"
-	@echo "  make frontend-clear-cache   Clear Next.js cache and restart"
-	@echo "  make restart-frontend       Restart frontend (no rebuild)"
-	@echo "  make docker-clean           Remove all containers and prune"
+	@echo "Restart Services (without rebuild):"
+	@echo "  make restart-api       Restart API container"
+	@echo "  make restart-frontend  Restart frontend container"
+	@echo "  make restart-worker    Restart Celery worker"
+	@echo ""
+	@echo "Rebuild (when deps change):"
+	@echo "  make dev-rebuild       Rebuild all (no cache)"
+	@echo "  make docker-rebuild-api      Rebuild API only"
+	@echo "  make docker-rebuild-frontend Rebuild frontend only"
 	@echo ""
 
 # =============================================================================
@@ -49,12 +56,17 @@ help:
 
 dev:
 	@echo "Starting development environment..."
-	docker compose -f docker-compose.dev.yml up -d
+	@mkdir -p data logs
+	docker compose -f docker-compose.dev.yml up -d --build
 	@echo ""
-	@echo "Services starting:"
+	@echo "Services starting (may take a moment on first run):"
 	@echo "  Frontend: http://localhost:3000"
 	@echo "  API:      http://localhost:5000"
 	@echo "  Redis:    localhost:6379"
+	@echo ""
+	@echo "Hot Reload enabled:"
+	@echo "  - Frontend: Automatic (Next.js Fast Refresh)"
+	@echo "  - Backend:  Automatic (Flask debug reloader)"
 	@echo ""
 	@echo "Run 'make logs' to view output"
 	@echo "Run 'make stop' to stop all services"
@@ -65,6 +77,15 @@ stop:
 
 logs:
 	docker compose -f docker-compose.dev.yml logs -f 2>/dev/null || docker compose logs -f
+
+logs-api:
+	docker compose -f docker-compose.dev.yml logs -f api
+
+logs-frontend:
+	docker compose -f docker-compose.dev.yml logs -f frontend
+
+logs-worker:
+	docker compose -f docker-compose.dev.yml logs -f worker
 
 # =============================================================================
 # DEVELOPMENT (Local - Hybrid)
@@ -125,11 +146,17 @@ setup-env:
 
 seed:
 	@echo "Creating sample data..."
-	python scripts/seed_data.py
+	@mkdir -p data
+	DATABASE_PATH=data/chirpsyncer.db python scripts/seed_data.py
 
 seed-clean:
 	@echo "Resetting database and creating fresh data..."
-	python scripts/seed_data.py --clean
+	@mkdir -p data
+	DATABASE_PATH=data/chirpsyncer.db python scripts/seed_data.py --clean
+
+# Seed data inside Docker container
+seed-docker:
+	docker compose -f docker-compose.dev.yml exec api python scripts/seed_data.py
 
 # =============================================================================
 # TESTING
@@ -197,6 +224,15 @@ restart-frontend:
 
 restart-api:
 	docker compose -f docker-compose.dev.yml restart api
+
+restart-worker:
+	docker compose -f docker-compose.dev.yml restart worker
+	@echo "Worker restarted"
+
+# Storybook
+storybook:
+	docker compose -f docker-compose.dev.yml --profile storybook up -d storybook
+	@echo "Storybook starting on http://localhost:6006"
 
 # Clear Next.js cache inside container and restart
 frontend-clear-cache:

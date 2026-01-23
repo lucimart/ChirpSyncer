@@ -110,6 +110,16 @@ export type {
   NavCommandConfig,
 } from './CommandPalette';
 
+// Connection Wizard & Platform Setup
+export { ConnectionWizard, useWizard } from './ConnectionWizard';
+export type { WizardStep, ConnectionWizardProps } from './ConnectionWizard';
+export { PlatformIntro } from './PlatformIntro';
+export type { PlatformIntroProps, PlatformFeature } from './PlatformIntro';
+export { ServerSelector } from './ServerSelector';
+export type { ServerSelectorProps, ServerOption } from './ServerSelector';
+export { OAuthGuide } from './OAuthGuide';
+export type { OAuthGuideProps, OAuthStep } from './OAuthGuide';
+
 // Motion / Animations (framer-motion)
 export {
   // Variants

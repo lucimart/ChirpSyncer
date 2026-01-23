@@ -8,6 +8,8 @@ Manages user creation/linking for SSO authentication.
 import os
 import json
 import time
+import base64
+import hashlib
 import secrets
 import sqlite3
 import logging
@@ -17,6 +19,23 @@ from urllib.parse import urlencode
 
 import requests
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+
+def _generate_pkce_pair() -> Tuple[str, str]:
+    """
+    Generate PKCE code verifier and challenge (S256).
+
+    Returns:
+        Tuple of (code_verifier, code_challenge)
+    """
+    # Generate 32 random bytes -> 43 char base64url string
+    code_verifier = secrets.token_urlsafe(32)
+
+    # S256: SHA256 hash, then base64url encode
+    digest = hashlib.sha256(code_verifier.encode("ascii")).digest()
+    code_challenge = base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii")
+
+    return code_verifier, code_challenge
 
 from app.auth.oauth_providers import (
     get_provider_config,
@@ -107,6 +126,7 @@ class OAuthHandler:
                 provider TEXT NOT NULL,
                 redirect_uri TEXT NOT NULL,
                 code_verifier TEXT,
+                user_id INTEGER,
                 created_at INTEGER NOT NULL
             )
         """)
@@ -147,13 +167,16 @@ class OAuthHandler:
         plaintext = self.aesgcm.decrypt(iv, encrypted, None)
         return plaintext.decode("utf-8")
 
-    def generate_auth_url(self, provider: str, redirect_uri: str) -> Optional[str]:
+    def generate_auth_url(
+        self, provider: str, redirect_uri: str, user_id: Optional[int] = None
+    ) -> Optional[str]:
         """
         Generate OAuth authorization URL.
 
         Args:
             provider: OAuth provider name
             redirect_uri: Callback URL after authorization
+            user_id: Optional user ID for account linking flow
 
         Returns:
             Authorization URL or None if provider not configured
@@ -164,20 +187,17 @@ class OAuthHandler:
 
         # Generate state for CSRF protection
         state = secrets.token_urlsafe(32)
-        code_verifier = None
 
-        # Provider-specific handling
-        if provider == "twitter":
-            # Twitter OAuth 2.0 requires PKCE
-            code_verifier = secrets.token_urlsafe(64)
+        # Generate PKCE pair for all providers (enhanced security)
+        code_verifier, code_challenge = _generate_pkce_pair()
 
         # Store state in database (persistent across requests)
         conn = self._get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            """INSERT INTO oauth_states (state, provider, redirect_uri, code_verifier, created_at)
-               VALUES (?, ?, ?, ?, ?)""",
-            (state, provider, redirect_uri, code_verifier, int(time.time())),
+            """INSERT INTO oauth_states (state, provider, redirect_uri, code_verifier, user_id, created_at)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (state, provider, redirect_uri, code_verifier, user_id, int(time.time())),
         )
         conn.commit()
         conn.close()
@@ -190,14 +210,16 @@ class OAuthHandler:
             "response_type": "code",
         }
 
+        # PKCE params (S256 for all providers that support it)
+        if provider in ("google", "twitter"):
+            params["code_challenge"] = code_challenge
+            params["code_challenge_method"] = "S256"
+        # Note: GitHub doesn't support PKCE yet, but we store verifier for future use
+
         # Provider-specific params
         if provider == "google":
             params["access_type"] = "offline"
             params["prompt"] = "consent"
-        elif provider == "twitter":
-            # For simplicity, using plain challenge (production should use S256)
-            params["code_challenge"] = code_verifier
-            params["code_challenge_method"] = "plain"
 
         return f"{config.authorize_url}?{urlencode(params)}"
 
@@ -216,7 +238,7 @@ class OAuthHandler:
 
         # Get and delete state in one operation
         cursor.execute(
-            "SELECT provider, redirect_uri, code_verifier, created_at FROM oauth_states WHERE state = ?",
+            "SELECT provider, redirect_uri, code_verifier, user_id, created_at FROM oauth_states WHERE state = ?",
             (state,),
         )
         row = cursor.fetchone()
@@ -239,6 +261,7 @@ class OAuthHandler:
             "provider": row["provider"],
             "redirect_uri": row["redirect_uri"],
             "code_verifier": row["code_verifier"],
+            "user_id": row["user_id"],
             "created_at": row["created_at"],
         }
 

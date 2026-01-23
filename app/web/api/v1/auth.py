@@ -1,13 +1,26 @@
 import logging
 import os
 from datetime import datetime
+from functools import wraps
 
 from flask import Blueprint, request, make_response, g, current_app, redirect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 logger = logging.getLogger(__name__)
 
 from app.auth.api_auth import require_auth
-from app.auth.jwt_handler import create_token
+from app.auth.jwt_handler import (
+    create_token,
+    create_refresh_token,
+    rotate_refresh_token,
+    revoke_all_user_tokens,
+    get_user_sessions,
+    revoke_session,
+    revoke_other_sessions,
+    update_session_last_used,
+    AuthError,
+)
 from app.auth.user_manager import UserManager
 from app.auth.oauth_handler import OAuthHandler
 from app.auth.oauth_providers import (
@@ -19,14 +32,34 @@ from app.web.api.v1.responses import api_error, api_response
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
+# Rate limiter for auth endpoints
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://",
+)
+
+
+def init_limiter(app):
+    """Initialize rate limiter with Flask app."""
+    limiter.init_app(app)
+
+
+_oauth_handler_initialized = False
+
 
 def _get_oauth_handler():
     """Get OAuth handler instance."""
+    global _oauth_handler_initialized
     db_path = current_app.config.get("DB_PATH", "chirpsyncer.db")
     master_key = current_app.config.get("MASTER_KEY")
     if master_key and isinstance(master_key, str):
         master_key = master_key.encode("utf-8")[:32].ljust(32, b"\0")
-    return OAuthHandler(db_path, master_key)
+    handler = OAuthHandler(db_path, master_key)
+    if not _oauth_handler_initialized:
+        handler.init_db()
+        _oauth_handler_initialized = True
+    return handler
 
 
 def _get_user_manager():
@@ -48,6 +81,7 @@ def _format_user(user):
 
 
 @auth_bp.route("/login", methods=["POST"])
+@limiter.limit("5 per minute")  # Strict limit to prevent brute force
 def login():
     data = request.get_json(silent=True) or {}
     username = data.get("username")
@@ -66,12 +100,29 @@ def login():
         )
 
     token = create_token(user.id, user.username, user.is_admin)
-    response_data = {"token": token, "user": _format_user(user)}
+    refresh_token = create_refresh_token(
+        user.id,
+        user_agent=request.headers.get("User-Agent"),
+        ip_address=request.remote_addr,
+    )
+    response_data = {
+        "token": token,
+        "refresh_token": refresh_token,
+        "user": _format_user(user),
+    }
     response, status = api_response(response_data, status=200)
 
     if data.get("use_cookie"):
         resp = make_response(response, status)
         resp.set_cookie("auth_token", token, httponly=True, samesite="Lax", secure=True)
+        resp.set_cookie(
+            "refresh_token",
+            refresh_token,
+            httponly=True,
+            samesite="Lax",
+            secure=True,
+            max_age=30 * 24 * 60 * 60,  # 30 days
+        )
         return resp
 
     return response, status
@@ -80,15 +131,61 @@ def login():
 @auth_bp.route("/logout", methods=["POST"])
 @require_auth
 def logout():
+    # Revoke all refresh tokens for user
+    revoke_all_user_tokens(g.user.id)
+
     response, status = api_response({"logout": True}, status=200)
     resp = make_response(response, status)
     resp.set_cookie(
         "auth_token", "", expires=0, httponly=True, samesite="Lax", secure=True
     )
+    resp.set_cookie(
+        "refresh_token", "", expires=0, httponly=True, samesite="Lax", secure=True
+    )
     return resp
 
 
+@auth_bp.route("/refresh", methods=["POST"])
+@limiter.limit("30 per minute")
+def refresh():
+    """Refresh access token using refresh token.
+
+    Implements token rotation: old refresh token is invalidated,
+    new access and refresh tokens are issued.
+    """
+    data = request.get_json(silent=True) or {}
+    refresh_token = data.get("refresh_token") or request.cookies.get("refresh_token")
+
+    if not refresh_token:
+        return api_error("INVALID_REQUEST", "Refresh token is required", status=400)
+
+    try:
+        new_access, new_refresh = rotate_refresh_token(refresh_token)
+    except AuthError as e:
+        return api_error(e.code, e.message, status=e.status_code)
+
+    response_data = {"token": new_access, "refresh_token": new_refresh}
+    response, status = api_response(response_data, status=200)
+
+    # Also set cookies if they were used
+    if request.cookies.get("refresh_token"):
+        resp = make_response(response, status)
+        resp.set_cookie("auth_token", new_access, httponly=True, samesite="Lax", secure=True)
+        resp.set_cookie(
+            "refresh_token",
+            new_refresh,
+            httponly=True,
+            samesite="Lax",
+            secure=True,
+            max_age=30 * 24 * 60 * 60,
+        )
+        return resp
+
+    return response, status
+
+
 @auth_bp.route("/register", methods=["POST"])
+@limiter.limit("3 per minute")  # Prevent mass account creation
 def register():
     data = request.get_json(silent=True) or {}
     username = data.get("username")
@@ -117,7 +214,12 @@ def register():
             "REGISTRATION_FAILED", "Failed to retrieve created user", status=500
         )
     token = create_token(user.id, user.username, user.is_admin)
-    return api_response({"token": token, "user": _format_user(user)}, status=201)
+    refresh_token = create_refresh_token(user.id)
+    return api_response({
+        "token": token,
+        "refresh_token": refresh_token,
+        "user": _format_user(user),
+    }, status=201)
 
 
 @auth_bp.route("/me", methods=["GET"])
@@ -290,6 +392,77 @@ def validate_reset_token():
 
 
 # ============================================================================
+# Session Management Endpoints
+# ============================================================================
+
+
+@auth_bp.route("/sessions", methods=["GET"])
+@require_auth
+def list_sessions():
+    """List all active sessions for the current user."""
+    sessions = get_user_sessions(g.user.id)
+
+    # Format sessions for response
+    formatted = []
+    for session in sessions:
+        formatted.append({
+            "id": session["id"],
+            "created_at": datetime.utcfromtimestamp(session["created_at"]).isoformat() if session["created_at"] else None,
+            "last_used_at": datetime.utcfromtimestamp(session["last_used_at"]).isoformat() if session["last_used_at"] else None,
+            "user_agent": session["user_agent"],
+            "ip_address": session["ip_address"],
+            "expires_at": datetime.utcfromtimestamp(session["expires_at"]).isoformat() if session["expires_at"] else None,
+            "is_current": False,  # Will be set by frontend based on stored family_id
+        })
+
+    return api_response({"sessions": formatted, "count": len(formatted)})
+
+
+@auth_bp.route("/sessions/<int:session_id>", methods=["DELETE"])
+@require_auth
+def delete_session(session_id: int):
+    """Revoke a specific session."""
+    success = revoke_session(g.user.id, session_id)
+
+    if not success:
+        return api_error("SESSION_NOT_FOUND", "Session not found or already revoked", status=404)
+
+    return api_response({"success": True})
+
+
+@auth_bp.route("/sessions/revoke-others", methods=["POST"])
+@require_auth
+def revoke_other_sessions_endpoint():
+    """Revoke all sessions except the current one."""
+    data = request.get_json(silent=True) or {}
+    current_refresh_token = data.get("refresh_token") or request.cookies.get("refresh_token")
+
+    if not current_refresh_token:
+        return api_error("INVALID_REQUEST", "Current refresh token is required", status=400)
+
+    # Get family_id from current token
+    import hashlib
+    from flask import current_app
+
+    db_path = current_app.config.get("DB_PATH", "chirpsyncer.db")
+    token_hash = hashlib.sha256(current_refresh_token.encode()).hexdigest()
+
+    import sqlite3
+    with sqlite3.connect(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT family_id FROM refresh_tokens WHERE token_hash = ?", (token_hash,))
+        row = cursor.fetchone()
+
+    if not row:
+        return api_error("INVALID_TOKEN", "Invalid refresh token", status=401)
+
+    family_id = row[0]
+    count = revoke_other_sessions(g.user.id, family_id)
+
+    return api_response({"success": True, "revoked_count": count})
+
+
+# ============================================================================
 # SSO / OAuth Endpoints
 # ============================================================================
 
@@ -305,6 +478,7 @@ def get_sso_providers():
 
 
 @auth_bp.route("/sso/<provider>", methods=["GET"])
+@limiter.limit("10 per minute")  # Prevent SSO abuse
 def sso_redirect(provider: str):
     """
     Initiate SSO authentication flow.
@@ -332,6 +506,7 @@ def sso_redirect(provider: str):
 
 
 @auth_bp.route("/sso/<provider>/callback", methods=["GET"])
+@limiter.limit("20 per minute")  # Prevent callback abuse
 def sso_callback(provider: str):
     """
     Handle OAuth callback from provider.
@@ -414,11 +589,12 @@ def sso_callback(provider: str):
     if not user:
         return redirect(f"{frontend_url}/login?error=user_creation_failed")
 
-    # Create JWT token
+    # Create JWT token and refresh token
     jwt_token = create_token(user.id, user.username, user.is_admin)
+    refresh_token = create_refresh_token(user.id)
 
-    # Redirect to frontend with token
-    return redirect(f"{frontend_url}/auth/callback?token={jwt_token}")
+    # Redirect to frontend with tokens
+    return redirect(f"{frontend_url}/auth/callback?token={jwt_token}&refresh_token={refresh_token}")
 
 
 @auth_bp.route("/sso/link/<provider>", methods=["POST"])
@@ -442,11 +618,71 @@ def link_sso_account(provider: str):
     oauth_handler = _get_oauth_handler()
     redirect_uri = f"{OAUTH_REDIRECT_BASE}/api/v1/auth/sso/{provider}/link/callback"
 
-    auth_url = oauth_handler.generate_auth_url(provider, redirect_uri)
+    # Store user_id in state for callback
+    auth_url = oauth_handler.generate_auth_url(provider, redirect_uri, user_id=g.user.id)
     if not auth_url:
         return api_error("SSO_ERROR", "Failed to generate authorization URL", status=500)
 
     return api_response({"auth_url": auth_url})
+
+
+@auth_bp.route("/sso/<provider>/link/callback", methods=["GET"])
+@limiter.limit("20 per minute")
+def sso_link_callback(provider: str):
+    """
+    Handle OAuth callback for linking account to existing user.
+    """
+    code = request.args.get("code")
+    state = request.args.get("state")
+    error = request.args.get("error")
+
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    settings_url = f"{frontend_url}/dashboard/settings"
+
+    if error:
+        logger.error(f"OAuth link error from {provider}: {error}")
+        return redirect(f"{settings_url}?error=oauth_denied")
+
+    if not code or not state:
+        return redirect(f"{settings_url}?error=oauth_invalid")
+
+    oauth_handler = _get_oauth_handler()
+
+    # Validate state and get user_id
+    state_data = oauth_handler.validate_state(state)
+    if not state_data:
+        return redirect(f"{settings_url}?error=oauth_state_invalid")
+
+    user_id = state_data.get("user_id")
+    if not user_id:
+        return redirect(f"{settings_url}?error=oauth_state_invalid")
+
+    redirect_uri = state_data["redirect_uri"]
+    code_verifier = state_data.get("code_verifier")
+
+    # Exchange code for tokens
+    tokens = oauth_handler.exchange_code(provider, code, redirect_uri, code_verifier)
+    if not tokens:
+        return redirect(f"{settings_url}?error=oauth_token_error")
+
+    access_token = tokens.get("access_token")
+    if not access_token:
+        return redirect(f"{settings_url}?error=oauth_token_missing")
+
+    # Fetch user info from provider
+    user_info = oauth_handler.fetch_user_info(provider, access_token)
+    if not user_info:
+        return redirect(f"{settings_url}?error=oauth_userinfo_error")
+
+    # Check if this OAuth account is already linked to another user
+    existing_oauth = oauth_handler.find_oauth_account(provider, user_info.provider_user_id)
+    if existing_oauth and existing_oauth["user_id"] != user_id:
+        return redirect(f"{settings_url}?error=oauth_already_linked")
+
+    # Link the OAuth account to the user
+    oauth_handler.link_oauth_account(user_id, user_info, tokens)
+
+    return redirect(f"{settings_url}?linked={provider}")
 
 
 @auth_bp.route("/sso/unlink/<provider>", methods=["DELETE"])

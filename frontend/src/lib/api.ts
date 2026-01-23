@@ -22,14 +22,22 @@ export interface SyncPreviewData {
 
 class ApiClient {
   private token: string | null = null;
+  private refreshToken: string | null = null;
+  private isRefreshing = false;
+  private refreshPromise: Promise<boolean> | null = null;
 
   setToken(token: string | null) {
     this.token = token;
   }
 
+  setRefreshToken(token: string | null) {
+    this.refreshToken = token;
+  }
+
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    retry = true
   ): Promise<ApiResponse<T>> {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -50,10 +58,27 @@ class ApiClient {
       const data = await response.json();
 
       if (!response.ok) {
+        const errorCode = data?.error?.code || '';
         const errorMessage =
           typeof data?.error === 'string'
             ? data.error
             : data?.error?.message || `HTTP ${response.status}`;
+
+        // Auto-refresh on token expiration (skip for refresh endpoint itself)
+        if (
+          retry &&
+          response.status === 401 &&
+          (errorCode === 'TOKEN_EXPIRED' || errorMessage.includes('expired')) &&
+          endpoint !== '/auth/refresh' &&
+          this.refreshToken
+        ) {
+          const refreshed = await this.tryRefresh();
+          if (refreshed) {
+            // Retry original request with new token
+            return this.request<T>(endpoint, options, false);
+          }
+        }
+
         return {
           success: false,
           error: errorMessage,
@@ -71,6 +96,57 @@ class ApiClient {
         success: false,
         error: error instanceof Error ? error.message : 'Network error',
       };
+    }
+  }
+
+  private async tryRefresh(): Promise<boolean> {
+    // Prevent multiple simultaneous refresh attempts
+    if (this.isRefreshing && this.refreshPromise) {
+      return this.refreshPromise;
+    }
+
+    this.isRefreshing = true;
+    this.refreshPromise = this.doRefresh();
+
+    try {
+      return await this.refreshPromise;
+    } finally {
+      this.isRefreshing = false;
+      this.refreshPromise = null;
+    }
+  }
+
+  private async doRefresh(): Promise<boolean> {
+    if (!this.refreshToken) return false;
+
+    try {
+      const response = await fetch(`${API_BASE}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ refresh_token: this.refreshToken }),
+      });
+
+      if (!response.ok) return false;
+
+      const data = await response.json();
+      if (data.data?.token) {
+        this.token = data.data.token;
+        this.refreshToken = data.data.refresh_token;
+
+        // Notify auth store of new tokens
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('auth:tokens-refreshed', {
+              detail: { token: this.token, refreshToken: this.refreshToken },
+            })
+          );
+        }
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
     }
   }
 
@@ -113,6 +189,43 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
     });
+  }
+
+  // SSO / OAuth endpoints
+  async getSsoProviders(): Promise<ApiResponse<SsoProvidersResponse>> {
+    return this.request('/auth/sso/providers');
+  }
+
+  async getLinkedAccounts(): Promise<ApiResponse<LinkedAccountsResponse>> {
+    return this.request('/auth/sso/accounts');
+  }
+
+  async linkSsoAccount(provider: string): Promise<ApiResponse<{ auth_url: string }>> {
+    return this.request(`/auth/sso/link/${provider}`, { method: 'POST' });
+  }
+
+  async unlinkSsoAccount(provider: string): Promise<ApiResponse<{ success: boolean }>> {
+    return this.request(`/auth/sso/unlink/${provider}`, { method: 'DELETE' });
+  }
+
+  // Session management
+  async getSessions(): Promise<ApiResponse<SessionsResponse>> {
+    return this.request('/auth/sessions');
+  }
+
+  async revokeSession(sessionId: number): Promise<ApiResponse<{ success: boolean }>> {
+    return this.request(`/auth/sessions/${sessionId}`, { method: 'DELETE' });
+  }
+
+  async revokeOtherSessions(refreshToken?: string): Promise<ApiResponse<{ success: boolean; revoked_count: number }>> {
+    const body = refreshToken ? JSON.stringify({ refresh_token: refreshToken }) : undefined;
+    return this.request('/auth/sessions/revoke-others', { method: 'POST', body });
+  }
+
+  async refreshAccessToken(tokenToRefresh?: string): Promise<ApiResponse<{ token: string; refresh_token: string }>> {
+    // If refresh token provided, send it in body; otherwise rely on cookies
+    const body = tokenToRefresh ? JSON.stringify({ refresh_token: tokenToRefresh }) : undefined;
+    return this.request('/auth/refresh', { method: 'POST', body });
   }
 
   async forgotPassword(email: string): Promise<ApiResponse<{ success: boolean; message: string; dev_token?: string; dev_reset_url?: string }>> {
@@ -577,6 +690,40 @@ class ApiClient {
   async getWebhookEventTypes(): Promise<ApiResponse<{ events: string[] }>> {
     return this.request('/webhooks/events');
   }
+}
+
+// SSO types
+export interface LinkedAccount {
+  provider: string;
+  provider_username: string | null;
+  provider_email: string | null;
+  linked_at: string;
+}
+
+export interface SsoProvidersResponse {
+  providers: string[];
+  enabled: Record<string, boolean>;
+}
+
+export interface LinkedAccountsResponse {
+  accounts: LinkedAccount[];
+  available_providers: string[];
+}
+
+// Active session types (user device sessions, not auth Session)
+export interface ActiveSession {
+  id: number;
+  created_at: string | null;
+  last_used_at: string | null;
+  user_agent: string | null;
+  ip_address: string | null;
+  expires_at: string | null;
+  is_current: boolean;
+}
+
+export interface SessionsResponse {
+  sessions: ActiveSession[];
+  count: number;
 }
 
 // Scheduling types

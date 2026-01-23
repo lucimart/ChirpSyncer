@@ -35,6 +35,16 @@ import {
 } from '@/components/ui';
 import { FlowDiagram, FlowDiagramData, Platform, SyncConnection } from '@/components/flow';
 import {
+  NostrConnect,
+  BlueskyConnect,
+  MastodonConnect,
+  TwitterConnect,
+  MatrixConnect,
+  DiscordConnect,
+  OAuthConnect,
+  OAUTH_CONFIGS,
+} from '@/components/connectors';
+import {
   useConnectors,
   useConnections,
   useSyncConfigs,
@@ -421,33 +431,43 @@ export default function ConnectorsPage() {
         );
       case 'atproto':
         return (
-          <Stack gap={4}>
-            <Input
-              label="Handle"
-              type="text"
-              value={credentials.handle || ''}
-              onChange={(e) => setCredentials({ ...credentials, handle: e.target.value })}
-              placeholder="yourname.bsky.social"
-              fullWidth
-            />
-            <Input
-              label="App Password"
-              type="password"
-              value={credentials.app_password || ''}
-              onChange={(e) => setCredentials({ ...credentials, app_password: e.target.value })}
-              hint="Create an app password at bsky.app/settings/app-passwords"
-              fullWidth
-            />
-          </Stack>
+          <BlueskyConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
         );
       case 'oauth2':
-        // Instagram vs Threads vs Mastodon OAuth handling
+        // Platform-specific OAuth wizards
+        if (connectModal.platform === 'mastodon') {
+          return (
+            <MastodonConnect
+              credentials={credentials}
+              onCredentialsChange={setCredentials}
+              onConnect={handleConnect}
+              isConnecting={connectMutation.isPending}
+            />
+          );
+        }
+        // Use OAuthConnect for platforms with configs
+        if (OAUTH_CONFIGS[connectModal.platform]) {
+          return (
+            <OAuthConnect
+              config={OAUTH_CONFIGS[connectModal.platform]}
+              credentials={credentials}
+              onCredentialsChange={setCredentials}
+              onConnect={handleConnect}
+              isConnecting={connectMutation.isPending}
+            />
+          );
+        }
+        // Fallback for Instagram (keep simple form for now)
         if (connectModal.platform === 'instagram') {
           return (
             <Stack gap={4}>
               <SmallText>
                 Instagram requires a Business or Creator account connected to a Facebook Page.
-                You&apos;ll need to provide your access token from the Meta Developer Console.
               </SmallText>
               <Input
                 label="Instagram User ID"
@@ -469,227 +489,33 @@ export default function ConnectorsPage() {
             </Stack>
           );
         }
-        // Threads OAuth (Meta Graph API)
-        if (connectModal.platform === 'threads') {
-          return (
-            <Stack gap={4}>
-              <SmallText>
-                Threads uses the same Meta authentication as Instagram.
-                You&apos;ll need a Threads access token with threads_basic and threads_content_publish permissions.
-              </SmallText>
-              <Input
-                label="Threads User ID"
-                type="text"
-                value={credentials.user_id || ''}
-                onChange={(e) => setCredentials({ ...credentials, user_id: e.target.value })}
-                placeholder="17841405822304"
-                hint="Your Threads User ID from Meta Developer Console"
-                fullWidth
-              />
-              <Input
-                label="Access Token"
-                type="password"
-                value={credentials.access_token || ''}
-                onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
-                hint="Threads access token with threads_basic scope"
-                fullWidth
-              />
-            </Stack>
-          );
-        }
-        // LinkedIn OAuth
-        if (connectModal.platform === 'linkedin') {
-          return (
-            <Stack gap={4}>
-              <SmallText>
-                LinkedIn requires OAuth 2.0 authentication. Get your access token from the LinkedIn Developer Portal
-                with r_liteprofile and w_member_social scopes.
-              </SmallText>
-              <Input
-                label="Access Token"
-                type="password"
-                value={credentials.access_token || ''}
-                onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
-                hint="OAuth 2.0 access token from LinkedIn Developer Portal"
-                fullWidth
-              />
-            </Stack>
-          );
-        }
-        // Facebook OAuth
-        if (connectModal.platform === 'facebook') {
-          return (
-            <Stack gap={4}>
-              <SmallText>
-                Facebook requires a Page access token with pages_manage_posts and pages_read_engagement permissions.
-                You can get this from the Meta Developer Console or Graph API Explorer.
-              </SmallText>
-              <Input
-                label="Access Token"
-                type="password"
-                value={credentials.access_token || ''}
-                onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
-                hint="Page access token from Meta Developer Console"
-                fullWidth
-              />
-            </Stack>
-          );
-        }
-        // Mastodon OAuth
-        return (
-          <Input
-            label="Instance URL"
-            type="text"
-            value={credentials.instance || ''}
-            onChange={(e) => setCredentials({ ...credentials, instance: e.target.value })}
-            placeholder="mastodon.social"
-            hint="You'll be redirected to authorize the app"
-            fullWidth
-          />
-        );
+        return null;
       case 'api_key':
-        // Twitter dual-mode: API keys for full access, or scraper for read-only
         return (
-          <Stack gap={4}>
-            <Tabs
-              items={[
-                { id: 'api', label: 'API Keys (Full Access)' },
-                { id: 'scraper', label: 'Scraper (Read-Only)' },
-              ]}
-              value={credentials._mode || 'api'}
-              onChange={(id) => setCredentials({ ...credentials, _mode: id })}
-              variant="soft"
-            />
-            {(credentials._mode || 'api') === 'api' ? (
-              <Stack gap={3}>
-                <SmallText>
-                  For full read/write access, you need Twitter API credentials.
-                  Note: Twitter API requires a paid subscription ($100+/month).
-                </SmallText>
-                <Input
-                  label="API Key (Consumer Key)"
-                  type="text"
-                  value={credentials.api_key || ''}
-                  onChange={(e) => setCredentials({ ...credentials, api_key: e.target.value })}
-                  placeholder="xxxxxxxxxxxxxxxxxxxxxxx"
-                  fullWidth
-                />
-                <Input
-                  label="API Secret (Consumer Secret)"
-                  type="password"
-                  value={credentials.api_secret || ''}
-                  onChange={(e) => setCredentials({ ...credentials, api_secret: e.target.value })}
-                  fullWidth
-                />
-                <Input
-                  label="Access Token"
-                  type="text"
-                  value={credentials.access_token || ''}
-                  onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
-                  fullWidth
-                />
-                <Input
-                  label="Access Token Secret"
-                  type="password"
-                  value={credentials.access_secret || ''}
-                  onChange={(e) => setCredentials({ ...credentials, access_secret: e.target.value })}
-                  fullWidth
-                />
-                <Input
-                  label="Bearer Token (Optional)"
-                  type="password"
-                  value={credentials.bearer_token || ''}
-                  onChange={(e) => setCredentials({ ...credentials, bearer_token: e.target.value })}
-                  hint="For faster read operations"
-                  fullWidth
-                />
-              </Stack>
-            ) : (
-              <Stack gap={3}>
-                <SmallText>
-                  Scraper mode provides read-only access without API costs.
-                  Cannot post, delete, like, or retweet.
-                </SmallText>
-                <Input
-                  label="Username"
-                  type="text"
-                  value={credentials.username || ''}
-                  onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-                  placeholder="@username"
-                  fullWidth
-                />
-                <Input
-                  label="Password"
-                  type="password"
-                  value={credentials.password || ''}
-                  onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                  hint="Used for scraping authentication"
-                  fullWidth
-                />
-              </Stack>
-            )}
-          </Stack>
+          <TwitterConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
         );
       case 'nostr':
         return (
-          <Stack gap={4}>
-            <SmallText>
-              Nostr uses cryptographic key pairs for identity.
-              You can provide your private key (nsec) for full access, or just public key (npub) for read-only.
-            </SmallText>
-            <Input
-              label="Private Key (nsec or hex)"
-              type="password"
-              value={credentials.private_key || ''}
-              onChange={(e) => setCredentials({ ...credentials, private_key: e.target.value })}
-              hint="Your Nostr private key for signing events"
-              fullWidth
-            />
-            <Input
-              label="Public Key (optional if private key provided)"
-              type="text"
-              value={credentials.public_key || ''}
-              onChange={(e) => setCredentials({ ...credentials, public_key: e.target.value })}
-              placeholder="npub1... or hex"
-              hint="Your Nostr public key (npub or hex format)"
-              fullWidth
-            />
-            <Input
-              label="Custom Relays (optional)"
-              type="text"
-              value={credentials.relays || ''}
-              onChange={(e) => setCredentials({ ...credentials, relays: e.target.value })}
-              placeholder="wss://relay.damus.io,wss://nos.lol"
-              hint="Comma-separated list of relay URLs"
-              fullWidth
-            />
-          </Stack>
+          <NostrConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
         );
       case 'matrix':
         return (
-          <Stack gap={4}>
-            <SmallText>
-              Matrix uses homeserver-based authentication.
-              You&apos;ll need an access token from your Matrix homeserver.
-            </SmallText>
-            <Input
-              label="Homeserver URL"
-              type="text"
-              value={credentials.homeserver || ''}
-              onChange={(e) => setCredentials({ ...credentials, homeserver: e.target.value })}
-              placeholder="https://matrix.org"
-              hint="Your Matrix homeserver URL"
-              fullWidth
-            />
-            <Input
-              label="Access Token"
-              type="password"
-              value={credentials.access_token || ''}
-              onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
-              hint="Get this from Element: Settings > Help & About > Access Token"
-              fullWidth
-            />
-          </Stack>
+          <MatrixConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
         );
       case 'dsnp':
         return (
@@ -754,225 +580,35 @@ export default function ConnectorsPage() {
         );
       case 'discord':
         return (
-          <Stack gap={4}>
-            <SmallText>
-              Discord supports both webhooks (for notifications) and Bot API (for richer functionality).
-              You can use either or both.
-            </SmallText>
-            <Input
-              label="Webhook URL (for notifications)"
-              type="text"
-              value={credentials.webhook_url || ''}
-              onChange={(e) => setCredentials({ ...credentials, webhook_url: e.target.value })}
-              placeholder="https://discord.com/api/webhooks/..."
-              hint="Get this from Server Settings > Integrations > Webhooks"
-              fullWidth
-            />
-            <Input
-              label="Bot Token (optional, for full access)"
-              type="password"
-              value={credentials.bot_token || ''}
-              onChange={(e) => setCredentials({ ...credentials, bot_token: e.target.value })}
-              hint="Create a bot at discord.com/developers/applications"
-              fullWidth
-            />
-          </Stack>
+          <DiscordConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
         );
       case 'reddit':
-        return (
-          <Stack gap={4}>
-            <SmallText>
-              Reddit uses OAuth 2.0 authentication. You need to create a Reddit app at
-              reddit.com/prefs/apps to get your client ID and secret.
-            </SmallText>
-            <Input
-              label="Client ID"
-              type="text"
-              value={credentials.client_id || ''}
-              onChange={(e) => setCredentials({ ...credentials, client_id: e.target.value })}
-              placeholder="xxxxxxxxxxxxxxx"
-              hint="From your Reddit app settings"
-              fullWidth
-            />
-            <Input
-              label="Client Secret"
-              type="password"
-              value={credentials.client_secret || ''}
-              onChange={(e) => setCredentials({ ...credentials, client_secret: e.target.value })}
-              fullWidth
-            />
-            <Input
-              label="Refresh Token"
-              type="password"
-              value={credentials.refresh_token || ''}
-              onChange={(e) => setCredentials({ ...credentials, refresh_token: e.target.value })}
-              hint="Obtained through OAuth flow"
-              fullWidth
-            />
-          </Stack>
-        );
       case 'tumblr':
         return (
-          <Stack gap={4}>
-            <SmallText>
-              Tumblr uses OAuth 1.0a authentication. You need to register an app at
-              tumblr.com/oauth/apps to get your consumer key and secret.
-            </SmallText>
-            <Input
-              label="Consumer Key"
-              type="text"
-              value={credentials.consumer_key || ''}
-              onChange={(e) => setCredentials({ ...credentials, consumer_key: e.target.value })}
-              placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-              hint="From your Tumblr app registration"
-              fullWidth
-            />
-            <Input
-              label="Consumer Secret"
-              type="password"
-              value={credentials.consumer_secret || ''}
-              onChange={(e) => setCredentials({ ...credentials, consumer_secret: e.target.value })}
-              fullWidth
-            />
-            <Input
-              label="OAuth Token"
-              type="text"
-              value={credentials.oauth_token || ''}
-              onChange={(e) => setCredentials({ ...credentials, oauth_token: e.target.value })}
-              hint="Access token from OAuth flow"
-              fullWidth
-            />
-            <Input
-              label="OAuth Token Secret"
-              type="password"
-              value={credentials.oauth_token_secret || ''}
-              onChange={(e) => setCredentials({ ...credentials, oauth_token_secret: e.target.value })}
-              fullWidth
-            />
-          </Stack>
+          <OAuthConnect
+            config={OAUTH_CONFIGS[connectModal.platform]}
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
         );
       case 'pinterest':
-        return (
-          <Stack gap={4}>
-            <SmallText>
-              Pinterest uses OAuth 2.0 authentication. You need to create an app at
-              developers.pinterest.com to get your client ID and secret.
-            </SmallText>
-            <Input
-              label="Client ID"
-              type="text"
-              value={credentials.client_id || ''}
-              onChange={(e) => setCredentials({ ...credentials, client_id: e.target.value })}
-              placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-              hint="From your Pinterest app settings"
-              fullWidth
-            />
-            <Input
-              label="Client Secret"
-              type="password"
-              value={credentials.client_secret || ''}
-              onChange={(e) => setCredentials({ ...credentials, client_secret: e.target.value })}
-              fullWidth
-            />
-            <Input
-              label="Access Token"
-              type="password"
-              value={credentials.access_token || ''}
-              onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
-              hint="OAuth 2.0 access token"
-              fullWidth
-            />
-            <Input
-              label="Refresh Token"
-              type="password"
-              value={credentials.refresh_token || ''}
-              onChange={(e) => setCredentials({ ...credentials, refresh_token: e.target.value })}
-              hint="For automatic token refresh"
-              fullWidth
-            />
-          </Stack>
-        );
       case 'youtube':
-        return (
-          <Stack gap={4}>
-            <SmallText>
-              YouTube uses Google OAuth 2.0 authentication. You need to create a project at
-              console.cloud.google.com and enable the YouTube Data API v3.
-            </SmallText>
-            <Input
-              label="Client ID"
-              type="text"
-              value={credentials.client_id || ''}
-              onChange={(e) => setCredentials({ ...credentials, client_id: e.target.value })}
-              placeholder="xxxxx.apps.googleusercontent.com"
-              hint="From Google Cloud Console"
-              fullWidth
-            />
-            <Input
-              label="Client Secret"
-              type="password"
-              value={credentials.client_secret || ''}
-              onChange={(e) => setCredentials({ ...credentials, client_secret: e.target.value })}
-              fullWidth
-            />
-            <Input
-              label="Access Token"
-              type="password"
-              value={credentials.access_token || ''}
-              onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
-              hint="OAuth 2.0 access token"
-              fullWidth
-            />
-            <Input
-              label="Refresh Token"
-              type="password"
-              value={credentials.refresh_token || ''}
-              onChange={(e) => setCredentials({ ...credentials, refresh_token: e.target.value })}
-              hint="For automatic token refresh"
-              fullWidth
-            />
-          </Stack>
-        );
       case 'tiktok':
         return (
-          <Stack gap={4}>
-            <SmallText>
-              TikTok uses OAuth 2.0 authentication. You need to register an app at
-              developers.tiktok.com and get approved for the required scopes.
-            </SmallText>
-            <Input
-              label="Client Key"
-              type="text"
-              value={credentials.client_key || ''}
-              onChange={(e) => setCredentials({ ...credentials, client_key: e.target.value })}
-              placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-              hint="From your TikTok developer app"
-              fullWidth
-            />
-            <Input
-              label="Client Secret"
-              type="password"
-              value={credentials.client_secret || ''}
-              onChange={(e) => setCredentials({ ...credentials, client_secret: e.target.value })}
-              fullWidth
-            />
-            <Input
-              label="Access Token"
-              type="password"
-              value={credentials.access_token || ''}
-              onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
-              hint="OAuth 2.0 access token"
-              fullWidth
-            />
-            <Input
-              label="Refresh Token"
-              type="password"
-              value={credentials.refresh_token || ''}
-              onChange={(e) => setCredentials({ ...credentials, refresh_token: e.target.value })}
-              hint="For automatic token refresh"
-              fullWidth
-            />
-          </Stack>
+          <OAuthConnect
+            config={OAUTH_CONFIGS[connectModal.platform]}
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
         );
       default:
         return null;
@@ -1220,24 +856,27 @@ export default function ConnectorsPage() {
         }}
         title={`Connect to ${connectModal?.name}`}
         footer={
-          <Stack direction="row" justify="end" gap={2}>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setConnectModal(null);
-                setCredentials({});
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConnect}
-              isLoading={connectMutation.isPending}
-            >
-              <Link2 size={16} />
-              Connect
-            </Button>
-          </Stack>
+          // Hide footer for platforms with wizard components (they have their own navigation)
+          ['nostr', 'bluesky', 'mastodon', 'twitter', 'matrix', 'discord', 'linkedin', 'facebook', 'threads', 'reddit', 'tumblr', 'pinterest', 'youtube', 'tiktok'].includes(connectModal?.platform || '') ? null : (
+            <Stack direction="row" justify="end" gap={2}>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setConnectModal(null);
+                  setCredentials({});
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConnect}
+                isLoading={connectMutation.isPending}
+              >
+                <Link2 size={16} />
+                Connect
+              </Button>
+            </Stack>
+          )
         }
       >
         {renderConnectForm()}

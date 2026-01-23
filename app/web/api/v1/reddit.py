@@ -138,9 +138,8 @@ def get_user(user_id: int, username: str):
 
 
     try:
-        # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
         # username is from URL path and REDDIT_API_BASE is fixed to oauth.reddit.com
-        response = http_requests.get(
+        response = http_requests.get(  # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
             f"{REDDIT_API_BASE}/user/{username}/about",
             headers=get_reddit_headers(creds["access_token"]),
             timeout=10,
@@ -236,9 +235,8 @@ def get_subreddit(user_id: int, subreddit: str):
 
 
     try:
-        # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
         # subreddit is from URL path and REDDIT_API_BASE is fixed to oauth.reddit.com
-        response = http_requests.get(
+        response = http_requests.get(  # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
             f"{REDDIT_API_BASE}/r/{subreddit}/about",
             headers=get_reddit_headers(creds["access_token"]),
             timeout=10,
@@ -295,9 +293,8 @@ def get_subreddit_posts(user_id: int, subreddit: str):
         if sort == "top":
             params["t"] = time_filter
 
-        # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
-        # nosemgrep: python.django.security.injection.ssrf.ssrf-injection-requests.ssrf-injection-requests
         # subreddit from URL path, sort is one of [hot, new, top, rising], REDDIT_API_BASE is fixed
+        # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests, python.django.security.injection.ssrf.ssrf-injection-requests.ssrf-injection-requests
         response = http_requests.get(
             f"{REDDIT_API_BASE}/r/{subreddit}/{sort}",
             headers=get_reddit_headers(creds["access_token"]),
@@ -552,8 +549,8 @@ def get_comments(user_id: int, post_id: str):
 
 
     try:
-        # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
         # post_id is from URL path and REDDIT_API_BASE is fixed to oauth.reddit.com
+        # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
         response = http_requests.get(
             f"{REDDIT_API_BASE}/comments/{post_id}",
             headers=get_reddit_headers(creds["access_token"]),
@@ -739,8 +736,6 @@ def search(user_id: int):
 
 
     try:
-        # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
-        # nosemgrep: python.django.security.injection.ssrf.ssrf-injection-requests.ssrf-injection-requests
         # subreddit from request.args, REDDIT_API_BASE is fixed to oauth.reddit.com
         url = f"{REDDIT_API_BASE}/r/{subreddit}/search" if subreddit else f"{REDDIT_API_BASE}/search"
 
@@ -752,6 +747,7 @@ def search(user_id: int):
             "restrict_sr": "on" if subreddit else "off",
         }
 
+        # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests, python.django.security.injection.ssrf.ssrf-injection-requests.ssrf-injection-requests
         response = http_requests.get(
             url,
             headers=get_reddit_headers(creds["access_token"]),
@@ -809,9 +805,8 @@ def get_feed(user_id: int):
 
 
     try:
-        # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
-        # nosemgrep: python.django.security.injection.ssrf.ssrf-injection-requests.ssrf-injection-requests
         # sort is one of [best, hot, new, top, rising], REDDIT_API_BASE is fixed to oauth.reddit.com
+        # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests, python.django.security.injection.ssrf.ssrf-injection-requests.ssrf-injection-requests
         response = http_requests.get(
             f"{REDDIT_API_BASE}/{sort}",
             headers=get_reddit_headers(creds["access_token"]),

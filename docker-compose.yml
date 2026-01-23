@@ -14,6 +14,13 @@ services:
       REDIS_PORT: "${REDIS_PORT:-6379}"
       CELERY_BROKER_URL: "${CELERY_BROKER_URL:-redis://redis:6379/0}"
       CELERY_RESULT_BACKEND: "${CELERY_RESULT_BACKEND:-redis://redis:6379/1}"
+      # Email notifications (Resend)
+      SMTP_ENABLED: "${SMTP_ENABLED:-false}"
+      SMTP_HOST: "${SMTP_HOST:-smtp.resend.com}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_USER: "${SMTP_USER:-resend}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD}"
+      SMTP_FROM: "${SMTP_FROM}"
     volumes:
       - ./app:/app
       - ./data.db:/app/data.db
@@ -40,6 +47,13 @@ services:
       REDIS_PORT: "${REDIS_PORT:-6379}"
       CELERY_BROKER_URL: "${CELERY_BROKER_URL:-redis://redis:6379/0}"
       CELERY_RESULT_BACKEND: "${CELERY_RESULT_BACKEND:-redis://redis:6379/1}"
+      # Email notifications (Resend)
+      SMTP_ENABLED: "${SMTP_ENABLED:-false}"
+      SMTP_HOST: "${SMTP_HOST:-smtp.resend.com}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_USER: "${SMTP_USER:-resend}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD}"
+      SMTP_FROM: "${SMTP_FROM}"
     volumes:
       - ./app:/app
       - ./data.db:/app/data.db
@@ -65,3 +79,28 @@ services:
     ports:
       - "6379:6379"
     restart: unless-stopped
+
+  # Celery Beat - Scheduled tasks (weekly reports)
+  chirp-beat:
+    build: .
+    container_name: chirp-beat
+    environment:
+      PYTHONPATH: "/app"
+      REDIS_HOST: "${REDIS_HOST:-redis}"
+      REDIS_PORT: "${REDIS_PORT:-6379}"
+      CELERY_BROKER_URL: "${CELERY_BROKER_URL:-redis://redis:6379/0}"
+      CELERY_RESULT_BACKEND: "${CELERY_RESULT_BACKEND:-redis://redis:6379/1}"
+      SMTP_ENABLED: "${SMTP_ENABLED:-false}"
+      SMTP_HOST: "${SMTP_HOST:-smtp.resend.com}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_USER: "${SMTP_USER:-resend}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD}"
+      SMTP_FROM: "${SMTP_FROM}"
+    volumes:
+      - ./app:/app
+      - ./data.db:/app/data.db
+    working_dir: /app
+    command: celery -A app.core.celery_app.celery_app beat --loglevel=info
+    restart: unless-stopped
+    depends_on:
+      - redis

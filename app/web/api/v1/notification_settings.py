@@ -171,11 +171,11 @@ def send_test_notification():
 
     notification_service = NotificationService()
 
-    # Check if SMTP is configured
+    # Check if SMTP is enabled
     if not notification_service.smtp_config.get("enabled"):
         return api_error(
             "SMTP_DISABLED",
-            "SMTP is not configured. Contact administrator.",
+            "SMTP is not enabled. Set SMTP_ENABLED=true in configuration.",
             status=503,
         )
 

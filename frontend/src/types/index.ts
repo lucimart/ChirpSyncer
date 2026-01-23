@@ -20,6 +20,7 @@ export interface AdminUser {
 
 export interface Session {
   token: string;
+  refresh_token?: string;
   user: User;
 }
 

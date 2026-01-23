@@ -81,6 +81,10 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
     # Initialize SocketIO
     socketio.init_app(app)
 
+    # Initialize rate limiter for auth endpoints
+    from app.web.api.v1.auth import init_limiter
+    init_limiter(app)
+
     # Register API blueprint
     app.register_blueprint(api_v1)
 

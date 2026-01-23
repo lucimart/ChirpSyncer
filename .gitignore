@@ -21,6 +21,7 @@ docker-compose.override.yml
 logs/
 
 # SQLite Database
+data/
 data.db
 *.db
 *.db-shm

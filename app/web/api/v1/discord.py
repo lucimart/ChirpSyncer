@@ -224,9 +224,8 @@ def get_guild_channels(user_id: int, guild_id: str):
 
 
     try:
-        # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
         # guild_id is from URL path and requests go to fixed Discord API base URL
-        response = http_requests.get(
+        response = http_requests.get(  # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
             f"https://discord.com/api/v10/guilds/{guild_id}/channels",
             headers=get_bot_headers(creds["bot_token"]),
             timeout=10,
@@ -272,9 +271,8 @@ def get_channel_messages(user_id: int, channel_id: str):
 
 
     try:
-        # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
         # channel_id is from URL path and requests go to fixed Discord API base URL
-        response = http_requests.get(
+        response = http_requests.get(  # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
             f"https://discord.com/api/v10/channels/{channel_id}/messages",
             headers=get_bot_headers(creds["bot_token"]),
             params={"limit": limit},
@@ -345,9 +343,8 @@ def send_channel_message(user_id: int, channel_id: str):
         payload["message_reference"] = {"message_id": data["reply_to"]}
 
     try:
-        # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
         # channel_id is from URL path and requests go to fixed Discord API base URL
-        response = http_requests.post(
+        response = http_requests.post(  # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
             f"https://discord.com/api/v10/channels/{channel_id}/messages",
             headers=get_bot_headers(creds["bot_token"]),
             json=payload,
@@ -384,9 +381,8 @@ def delete_message(user_id: int, channel_id: str, message_id: str):
 
 
     try:
-        # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
         # channel_id, message_id from URL path and requests go to fixed Discord API base URL
-        response = http_requests.delete(
+        response = http_requests.delete(  # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
             f"https://discord.com/api/v10/channels/{channel_id}/messages/{message_id}",
             headers=get_bot_headers(creds["bot_token"]),
             timeout=10,
@@ -431,9 +427,8 @@ def add_reaction(user_id: int, channel_id: str, message_id: str):
     encoded_emoji = quote(emoji, safe="")
 
     try:
-        # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
         # channel_id, message_id from URL path, emoji is URL-encoded, requests go to fixed Discord API
-        response = http_requests.put(
+        response = http_requests.put(  # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
             f"https://discord.com/api/v10/channels/{channel_id}/messages/{message_id}/reactions/{encoded_emoji}/@me",
             headers=get_bot_headers(creds["bot_token"]),
             timeout=10,
@@ -545,9 +540,8 @@ def broadcast_message(user_id: int):
                 if embeds:
                     payload["embeds"] = embeds[:10]
 
-                # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
                 # target_id is user's own webhook URL stored in their configuration
-                response = http_requests.post(target_id, json=payload, timeout=10)
+                response = http_requests.post(target_id, json=payload, timeout=10)  # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
                 results.append({
                     "target": target_id[:50] + "...",
                     "type": "webhook",
@@ -571,9 +565,8 @@ def broadcast_message(user_id: int):
                 if embeds:
                     payload["embeds"] = embeds[:10]
 
-                # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
                 # target_id is channel ID from user config, requests go to fixed Discord API
-                response = http_requests.post(
+                response = http_requests.post(  # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
                     f"https://discord.com/api/v10/channels/{target_id}/messages",
                     headers=get_bot_headers(creds["bot_token"]),
                     json=payload,

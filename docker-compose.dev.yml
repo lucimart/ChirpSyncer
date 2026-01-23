@@ -1,7 +1,24 @@
 # Development Docker Compose - Hot reload enabled
-# Usage: docker compose -f docker-compose.dev.yml up
+# Usage: make dev (or docker compose -f docker-compose.dev.yml up)
+#
+# Hot Reload:
+#   - Frontend: Automatic (Next.js Fast Refresh)
+#   - Backend: Automatic (Flask debug + watchdog)
+#   - Worker: Manual restart needed (make restart-worker)
 
 services:
+  # Mailpit - Local email testing (captures all emails)
+  # UI: http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: chirp-mailpit-dev
+    ports:
+      - "8025:8025"  # Web UI
+      - "1025:1025"  # SMTP
+    environment:
+      - MP_SMTP_AUTH_ACCEPT_ANY=true
+      - MP_SMTP_AUTH_ALLOW_INSECURE=true
+
   # Redis - Required for Celery
   redis:
     image: redis:7-alpine
@@ -14,25 +31,34 @@ services:
       timeout: 3s
       retries: 3
 
-  # Flask Backend API
+  # Flask Backend API - Hot reload enabled
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: chirp-api-dev
     environment:
       - PYTHONPATH=/app
       - FLASK_DEBUG=true
       - FLASK_ENV=development
+      - DATABASE_PATH=/app/data/chirpsyncer.db
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      # Mailpit SMTP config (overrides .env for dev)
+      - SMTP_ENABLED=true
+      - SMTP_HOST=mailpit
+      - SMTP_PORT=1025
+      - SMTP_USER=
+      - SMTP_PASSWORD=
+      - SMTP_FROM=noreply@chirpsyncer.local
     env_file:
       - .env
     volumes:
-      - ./app:/app/app
-      - ./chirpsyncer.db:/app/chirpsyncer.db
+      - ./app:/app/app:cached
+      - ./scripts:/app/scripts:cached
+      - ./data:/app/data
       - ./logs:/app/logs
     ports:
       - "5000:5000"
@@ -41,36 +67,74 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 15s
 
   # Celery Worker
   worker:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: chirp-worker-dev
     environment:
       - PYTHONPATH=/app
+      - DATABASE_PATH=/app/data/chirpsyncer.db
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      # Mailpit SMTP config (overrides .env for dev)
+      - SMTP_ENABLED=true
+      - SMTP_HOST=mailpit
+      - SMTP_PORT=1025
+      - SMTP_USER=
+      - SMTP_PASSWORD=
+      - SMTP_FROM=noreply@chirpsyncer.local
     env_file:
       - .env
     volumes:
-      - ./app:/app/app
-      - ./chirpsyncer.db:/app/chirpsyncer.db
+      - ./app:/app/app:cached
+      - ./data:/app/data
       - ./logs:/app/logs
     command: celery -A app.core.celery_app.celery_app worker --loglevel=info
     depends_on:
       redis:
         condition: service_healthy
 
-  # Next.js Frontend
+  # Celery Beat - Scheduled tasks (weekly reports)
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: chirp-beat-dev
+    environment:
+      - PYTHONPATH=/app
+      - DATABASE_PATH=/app/data/chirpsyncer.db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - SMTP_ENABLED=true
+      - SMTP_HOST=mailpit
+      - SMTP_PORT=1025
+      - SMTP_USER=
+      - SMTP_PASSWORD=
+      - SMTP_FROM=noreply@chirpsyncer.local
+    env_file:
+      - .env
+    volumes:
+      - ./app:/app/app:cached
+      - ./data:/app/data
+      - ./logs:/app/logs
+    command: celery -A app.core.celery_app.celery_app beat --loglevel=info
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  # Next.js Frontend - Hot reload enabled
   frontend:
     image: node:20-alpine
     container_name: chirp-frontend-dev
@@ -81,9 +145,9 @@ services:
       - WATCHPACK_POLLING=true
       - CHOKIDAR_USEPOLLING=true
     volumes:
-      - ./frontend:/app
-      - frontend_node_modules:/app/node_modules
-      - frontend_next:/app/.next
+      - ./frontend:/app:cached
+      - /app/node_modules
+      - /app/.next
     ports:
       - "3000:3000"
     command: sh -c "npm install && npm run dev"
@@ -91,7 +155,7 @@ services:
       api:
         condition: service_healthy
 
-  # Storybook (optional)
+  # Storybook (optional - run with: make storybook)
   storybook:
     image: node:20-alpine
     container_name: chirp-storybook-dev
@@ -105,15 +169,11 @@ services:
       - STORYBOOK_DISABLE_TELEMETRY=1
       - STORYBOOK_DISABLE_CRASH_REPORTS=1
     volumes:
-      - ./frontend:/app
-      - frontend_node_modules:/app/node_modules
+      - ./frontend:/app:cached
+      - /app/node_modules
     ports:
       - "6006:6006"
     command: sh -c "npm install && npm run storybook -- --ci --quiet"
     depends_on:
       api:
         condition: service_healthy
-
-volumes:
-  frontend_node_modules:
-  frontend_next:

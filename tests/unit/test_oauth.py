@@ -407,3 +407,104 @@ class TestOAuthHandler:
         providers = [a["provider"] for a in accounts]
         assert "google" in providers
         assert "github" in providers
+
+
+class TestOAuthStateWithUserId:
+    """Tests for OAuth state with user_id for account linking."""
+
+    @pytest.fixture
+    def oauth_handler(self, tmp_path):
+        """Create OAuth handler with temp database."""
+        db_path = str(tmp_path / "test.db")
+
+        import sqlite3
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                email TEXT UNIQUE,
+                password_hash TEXT NOT NULL,
+                created_at INTEGER NOT NULL,
+                has_password INTEGER DEFAULT 1
+            )
+        """)
+        conn.commit()
+        conn.close()
+
+        handler = OAuthHandler(db_path=db_path)
+        handler.init_db()
+        return handler
+
+    def test_validate_state_returns_user_id(self, oauth_handler):
+        """Test that validate_state returns user_id when present."""
+        import sqlite3
+        conn = sqlite3.connect(oauth_handler.db_path)
+        conn.execute(
+            """INSERT INTO oauth_states
+               (state, provider, redirect_uri, code_verifier, user_id, created_at)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            ("link-state", "github", "http://localhost/callback", None, 42, int(time.time())),
+        )
+        conn.commit()
+        conn.close()
+
+        result = oauth_handler.validate_state("link-state")
+        assert result is not None
+        assert result["user_id"] == 42
+        assert result["provider"] == "github"
+
+    def test_validate_state_user_id_none_for_login(self, oauth_handler):
+        """Test that user_id is None for regular login flow."""
+        import sqlite3
+        conn = sqlite3.connect(oauth_handler.db_path)
+        conn.execute(
+            """INSERT INTO oauth_states
+               (state, provider, redirect_uri, code_verifier, user_id, created_at)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            ("login-state", "google", "http://localhost/callback", None, None, int(time.time())),
+        )
+        conn.commit()
+        conn.close()
+
+        result = oauth_handler.validate_state("login-state")
+        assert result is not None
+        assert result["user_id"] is None
+
+    @patch("app.auth.oauth_handler.is_provider_configured")
+    @patch("app.auth.oauth_handler.get_provider_config")
+    def test_generate_auth_url_stores_user_id(
+        self, mock_get_config, mock_is_configured, oauth_handler
+    ):
+        """Test that generate_auth_url stores user_id in state."""
+        from app.auth.oauth_providers import OAuthProviderConfig
+
+        mock_is_configured.return_value = True
+        mock_get_config.return_value = OAuthProviderConfig(
+            client_id="test-id",
+            client_secret="test-secret",
+            authorize_url="https://provider.com/auth",
+            token_url="https://provider.com/token",
+            userinfo_url="https://provider.com/user",
+            scope="openid email",
+        )
+
+        url = oauth_handler.generate_auth_url(
+            "google",
+            "http://localhost/callback",
+            user_id=123,
+        )
+
+        assert url is not None
+
+        # Extract state from URL and verify it's stored with user_id
+        import sqlite3
+        conn = sqlite3.connect(oauth_handler.db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT user_id FROM oauth_states")
+        row = cursor.fetchone()
+        conn.close()
+
+        assert row is not None
+        assert row[0] == 123

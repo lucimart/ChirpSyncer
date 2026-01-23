@@ -30,6 +30,7 @@ function AuthCallbackContent() {
 
   useEffect(() => {
     const token = searchParams.get('token');
+    const refreshToken = searchParams.get('refresh_token');
     const errorParam = searchParams.get('error');
 
     if (errorParam) {
@@ -49,8 +50,8 @@ function AuthCallbackContent() {
     }
 
     if (token) {
-      // Store the token and redirect to dashboard
-      setToken(token);
+      // Store the token (and refresh token if present) and redirect to dashboard
+      setToken(token, refreshToken || undefined);
       setStatus('success');
 
       // Small delay for UX before redirect
