@@ -441,7 +441,7 @@ export default function ConnectorsPage() {
           </Stack>
         );
       case 'oauth2':
-        // Instagram vs Mastodon OAuth handling
+        // Instagram vs Threads vs Mastodon OAuth handling
         if (connectModal.platform === 'instagram') {
           return (
             <Stack gap={4}>
@@ -464,6 +464,34 @@ export default function ConnectorsPage() {
                 value={credentials.access_token || ''}
                 onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
                 hint="Long-lived access token from Meta Developer Console"
+                fullWidth
+              />
+            </Stack>
+          );
+        }
+        // Threads OAuth (Meta Graph API)
+        if (connectModal.platform === 'threads') {
+          return (
+            <Stack gap={4}>
+              <SmallText>
+                Threads uses the same Meta authentication as Instagram.
+                You&apos;ll need a Threads access token with threads_basic and threads_content_publish permissions.
+              </SmallText>
+              <Input
+                label="Threads User ID"
+                type="text"
+                value={credentials.user_id || ''}
+                onChange={(e) => setCredentials({ ...credentials, user_id: e.target.value })}
+                placeholder="17841405822304"
+                hint="Your Threads User ID from Meta Developer Console"
+                fullWidth
+              />
+              <Input
+                label="Access Token"
+                type="password"
+                value={credentials.access_token || ''}
+                onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
+                hint="Threads access token with threads_basic scope"
                 fullWidth
               />
             </Stack>

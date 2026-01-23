@@ -83,7 +83,7 @@ export interface PlatformMapping {
 }
 
 // Supported platforms
-export type PlatformType = 'twitter' | 'bluesky' | 'mastodon' | 'instagram';
+export type PlatformType = 'twitter' | 'bluesky' | 'mastodon' | 'instagram' | 'threads';
 
 // Platform connector configuration
 export interface PlatformConnector {
@@ -230,6 +230,30 @@ export const PLATFORM_DEFAULTS: Record<PlatformType, PlatformCapabilities> = {
     characterLimit: 2200,
     altTextLimit: 100,
   },
+  threads: {
+    publish: true,
+    delete: false,
+    edit: false,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: true, // Native thread support
+    media: {
+      images: true,
+      videos: true,
+      gifs: false,
+      maxImages: 10, // Carousel support
+    },
+    interactions: {
+      like: false, // API doesn't support liking
+      repost: false, // API doesn't support reposting
+      reply: true,
+      quote: true,
+      bookmark: false,
+    },
+    characterLimit: 500,
+    altTextLimit: 1000,
+  },
 };
 
 // Available connectors
@@ -275,6 +299,17 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     icon: 'I',
     color: '#E4405F',
     capabilities: PLATFORM_DEFAULTS.instagram,
+    auth_type: 'oauth2',
+    status: 'beta',
+  },
+  {
+    id: 'threads',
+    platform: 'threads',
+    name: 'Threads',
+    description: 'Publish and read posts on Meta Threads',
+    icon: '@',
+    color: '#000000',
+    capabilities: PLATFORM_DEFAULTS.threads,
     auth_type: 'oauth2',
     status: 'beta',
   },
@@ -390,7 +425,7 @@ export function useConnectPlatform() {
         // Remove internal _mode field before sending
         const { _mode, ...cleanCredentials } = credentials;
         credentials = cleanCredentials;
-      } else if (platform === 'bluesky' || platform === 'instagram') {
+      } else if (platform === 'bluesky' || platform === 'instagram' || platform === 'threads') {
         credentialType = 'api';
       } else {
         credentialType = 'scraping';
