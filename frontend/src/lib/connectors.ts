@@ -111,6 +111,21 @@ export type PlatformType =
   // Fediverse and utilities
   | 'pixelfed'
   | 'lemmy'
+  | 'misskey'
+  | 'peertube'
+  | 'bookwyrm'
+  // Blog/CMS
+  | 'wordpress'
+  | 'ghost'
+  | 'writeas'
+  | 'microblog'
+  // Newsletters
+  | 'buttondown'
+  | 'convertkit'
+  | 'beehiiv'
+  // Web3
+  | 'lens'
+  // Utilities
   | 'rss'
   | 'webhooks';
 
@@ -123,7 +138,7 @@ export interface PlatformConnector {
   icon: string;
   color: string;
   capabilities: PlatformCapabilities;
-  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix' | 'dsnp' | 'ssb' | 'discord' | 'reddit' | 'tumblr' | 'pinterest' | 'youtube' | 'tiktok' | 'mastodon' | 'telegram' | 'medium' | 'substack' | 'devto' | 'hashnode' | 'cohost' | 'pixelfed' | 'lemmy' | 'rss' | 'webhooks';
+  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix' | 'dsnp' | 'ssb' | 'discord' | 'reddit' | 'tumblr' | 'pinterest' | 'youtube' | 'tiktok' | 'mastodon' | 'telegram' | 'medium' | 'substack' | 'devto' | 'hashnode' | 'cohost' | 'pixelfed' | 'lemmy' | 'misskey' | 'peertube' | 'bookwyrm' | 'wordpress' | 'ghost' | 'writeas' | 'microblog' | 'buttondown' | 'convertkit' | 'beehiiv' | 'lens' | 'rss' | 'webhooks';
   status: 'available' | 'coming_soon' | 'beta';
 }
 
@@ -617,6 +632,153 @@ export const PLATFORM_DEFAULTS: Record<PlatformType, PlatformCapabilities> = {
     characterLimit: 0, // JSON payload
     altTextLimit: 0,
   },
+  // Additional Fediverse platforms
+  misskey: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: true,
+    media: { images: true, videos: true, gifs: true, maxImages: 16 },
+    interactions: { like: true, repost: true, reply: true, quote: true, bookmark: true },
+    characterLimit: 3000,
+    altTextLimit: 1500,
+  },
+  peertube: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: true, // Comments
+    media: { images: true, videos: true, gifs: false, maxImages: 1 },
+    interactions: { like: true, repost: false, reply: true, quote: false, bookmark: false },
+    characterLimit: 10000,
+    altTextLimit: 500,
+  },
+  bookwyrm: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: true,
+    media: { images: true, videos: false, gifs: false, maxImages: 4 },
+    interactions: { like: true, repost: true, reply: true, quote: false, bookmark: true },
+    characterLimit: 5000,
+    altTextLimit: 500,
+  },
+  // Blog/CMS platforms
+  wordpress: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: false,
+    schedule: true,
+    threads: true, // Comments
+    media: { images: true, videos: true, gifs: true, maxImages: 50 },
+    interactions: { like: false, repost: false, reply: true, quote: false, bookmark: false },
+    characterLimit: 0, // No limit
+    altTextLimit: 500,
+  },
+  ghost: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: false,
+    media: { images: true, videos: true, gifs: true, maxImages: 50 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 0, // No limit
+    altTextLimit: 500,
+  },
+  writeas: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: false, gifs: false, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 0, // No limit
+    altTextLimit: 0,
+  },
+  microblog: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: true,
+    media: { images: true, videos: false, gifs: true, maxImages: 4 },
+    interactions: { like: true, repost: true, reply: true, quote: false, bookmark: true },
+    characterLimit: 10000,
+    altTextLimit: 500,
+  },
+  // Newsletter platforms
+  buttondown: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: false,
+    media: { images: true, videos: false, gifs: true, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 0, // No limit
+    altTextLimit: 500,
+  },
+  convertkit: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: false,
+    media: { images: true, videos: false, gifs: true, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 0, // No limit
+    altTextLimit: 500,
+  },
+  beehiiv: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: false,
+    media: { images: true, videos: false, gifs: true, maxImages: 20 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 0, // No limit
+    altTextLimit: 500,
+  },
+  // Web3
+  lens: {
+    publish: true,
+    delete: false, // Blockchain - immutable
+    edit: false,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: true,
+    media: { images: true, videos: true, gifs: true, maxImages: 10 },
+    interactions: { like: true, repost: true, reply: true, quote: true, bookmark: true },
+    characterLimit: 30000,
+    altTextLimit: 500,
+  },
 };
 
 // Available connectors
@@ -933,6 +1095,131 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     color: '#6B7280',
     capabilities: PLATFORM_DEFAULTS.webhooks,
     auth_type: 'webhooks',
+    status: 'available',
+  },
+  // Additional Fediverse platforms
+  {
+    id: 'misskey',
+    platform: 'misskey',
+    name: 'Misskey / Firefish',
+    description: 'Federated microblogging with custom reactions and MFM',
+    icon: '🌟',
+    color: '#86B300',
+    capabilities: PLATFORM_DEFAULTS.misskey,
+    auth_type: 'misskey',
+    status: 'available',
+  },
+  {
+    id: 'peertube',
+    platform: 'peertube',
+    name: 'PeerTube',
+    description: 'Decentralized video platform with P2P streaming',
+    icon: '▶️',
+    color: '#F1680D',
+    capabilities: PLATFORM_DEFAULTS.peertube,
+    auth_type: 'peertube',
+    status: 'available',
+  },
+  {
+    id: 'bookwyrm',
+    platform: 'bookwyrm',
+    name: 'BookWyrm',
+    description: 'Social reading in the fediverse',
+    icon: '📚',
+    color: '#002549',
+    capabilities: PLATFORM_DEFAULTS.bookwyrm,
+    auth_type: 'bookwyrm',
+    status: 'available',
+  },
+  // Blog/CMS platforms
+  {
+    id: 'wordpress',
+    platform: 'wordpress',
+    name: 'WordPress',
+    description: 'Self-hosted or WordPress.com blogging platform',
+    icon: 'W',
+    color: '#21759B',
+    capabilities: PLATFORM_DEFAULTS.wordpress,
+    auth_type: 'wordpress',
+    status: 'available',
+  },
+  {
+    id: 'ghost',
+    platform: 'ghost',
+    name: 'Ghost',
+    description: 'Modern publishing platform for creators',
+    icon: '👻',
+    color: '#15171A',
+    capabilities: PLATFORM_DEFAULTS.ghost,
+    auth_type: 'ghost',
+    status: 'available',
+  },
+  {
+    id: 'writeas',
+    platform: 'writeas',
+    name: 'Write.as',
+    description: 'Minimalist, privacy-focused blogging',
+    icon: '✍️',
+    color: '#5A5A5A',
+    capabilities: PLATFORM_DEFAULTS.writeas,
+    auth_type: 'writeas',
+    status: 'available',
+  },
+  {
+    id: 'microblog',
+    platform: 'microblog',
+    name: 'Micro.blog',
+    description: 'Independent microblogging and IndieWeb publishing',
+    icon: 'μ',
+    color: '#FF8C00',
+    capabilities: PLATFORM_DEFAULTS.microblog,
+    auth_type: 'microblog',
+    status: 'available',
+  },
+  // Newsletter platforms
+  {
+    id: 'buttondown',
+    platform: 'buttondown',
+    name: 'Buttondown',
+    description: 'Simple, elegant newsletter service',
+    icon: '📧',
+    color: '#0069FF',
+    capabilities: PLATFORM_DEFAULTS.buttondown,
+    auth_type: 'buttondown',
+    status: 'available',
+  },
+  {
+    id: 'convertkit',
+    platform: 'convertkit',
+    name: 'ConvertKit',
+    description: 'Email marketing for creators',
+    icon: '📬',
+    color: '#FB6970',
+    capabilities: PLATFORM_DEFAULTS.convertkit,
+    auth_type: 'convertkit',
+    status: 'available',
+  },
+  {
+    id: 'beehiiv',
+    platform: 'beehiiv',
+    name: 'Beehiiv',
+    description: 'Newsletter platform built for growth',
+    icon: '🐝',
+    color: '#F7C948',
+    capabilities: PLATFORM_DEFAULTS.beehiiv,
+    auth_type: 'beehiiv',
+    status: 'available',
+  },
+  // Web3
+  {
+    id: 'lens',
+    platform: 'lens',
+    name: 'Lens Protocol',
+    description: 'Decentralized social graph on Polygon blockchain',
+    icon: '🌿',
+    color: '#00501E',
+    capabilities: PLATFORM_DEFAULTS.lens,
+    auth_type: 'lens',
     status: 'available',
   },
 ];
