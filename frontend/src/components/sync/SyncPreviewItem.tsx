@@ -1,7 +1,7 @@
 'use client';
 
 import styled from 'styled-components';
-import { Twitter, Cloud, Image, ArrowRight } from 'lucide-react';
+import { Twitter, Cloud, Image as ImageIcon, ArrowRight } from 'lucide-react';
 import type { SyncPreviewItemData } from '@/lib/api';
 
 interface SyncPreviewItemProps {
@@ -179,7 +179,7 @@ export function SyncPreviewItem({ item, onToggle }: SyncPreviewItemProps) {
           {item.hasMedia && (
             <MediaIndicator data-testid="media-indicator">
               <MediaIcon data-testid="media-icon">
-                <Image />
+                <ImageIcon aria-hidden="true" focusable="false" />
               </MediaIcon>
               {item.mediaCount && item.mediaCount > 0 && (
                 <span>{item.mediaCount}</span>

@@ -56,6 +56,25 @@ const meta: Meta<typeof DataTable> = {
 export default meta;
 type Story = StoryObj<typeof DataTable<User>>;
 
+const SelectableDemo = () => {
+  const [selected, setSelected] = useState<Set<string | number>>(new Set());
+  return (
+    <div>
+      <p style={{ marginBottom: '16px' }}>
+        Selected: {selected.size} item(s)
+      </p>
+      <DataTable
+        columns={columns}
+        data={sampleData}
+        selectable
+        selectedIds={selected}
+        onSelectionChange={setSelected}
+        pageSize={5}
+      />
+    </div>
+  );
+};
+
 export const Default: Story = {
   args: {
     columns,
@@ -72,24 +91,7 @@ export const WithPagination: Story = {
 };
 
 export const Selectable: Story = {
-  render: () => {
-    const [selected, setSelected] = useState<Set<string | number>>(new Set());
-    return (
-      <div>
-        <p style={{ marginBottom: '16px' }}>
-          Selected: {selected.size} item(s)
-        </p>
-        <DataTable
-          columns={columns}
-          data={sampleData}
-          selectable
-          selectedIds={selected}
-          onSelectionChange={setSelected}
-          pageSize={5}
-        />
-      </div>
-    );
-  },
+  render: () => <SelectableDemo />,
 };
 
 export const Empty: Story = {

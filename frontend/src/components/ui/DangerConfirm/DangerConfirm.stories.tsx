@@ -26,7 +26,7 @@ const DangerConfirmDemo = (args: React.ComponentProps<typeof DangerConfirm>) => 
       </Button>
       {lastReason && (
         <p style={{ marginTop: '16px', color: '#666' }}>
-          Last confirmed with reason: "{lastReason}"
+          Last confirmed with reason: &quot;{lastReason}&quot;
         </p>
       )}
       <DangerConfirm
@@ -37,6 +37,36 @@ const DangerConfirmDemo = (args: React.ComponentProps<typeof DangerConfirm>) => 
           setLastReason(reason);
           setIsOpen(false);
         }}
+      />
+    </div>
+  );
+};
+
+const LoadingDemo = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleConfirm = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setIsOpen(false);
+    }, 2000);
+  };
+
+  return (
+    <div>
+      <Button variant="danger" onClick={() => setIsOpen(true)}>
+        Delete Project
+      </Button>
+      <DangerConfirm
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        onConfirm={handleConfirm}
+        title="Delete Project"
+        description="This will delete the project and all its files."
+        confirmPhrase="delete project"
+        isLoading={isLoading}
       />
     </div>
   );
@@ -65,35 +95,7 @@ export const WithoutReason: Story = {
 };
 
 export const Loading: Story = {
-  render: () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handleConfirm = () => {
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
-        setIsOpen(false);
-      }, 2000);
-    };
-
-    return (
-      <div>
-        <Button variant="danger" onClick={() => setIsOpen(true)}>
-          Delete Project
-        </Button>
-        <DangerConfirm
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
-          onConfirm={handleConfirm}
-          title="Delete Project"
-          description="This will delete the project and all its files."
-          confirmPhrase="delete project"
-          isLoading={isLoading}
-        />
-      </div>
-    );
-  },
+  render: () => <LoadingDemo />,
 };
 
 export const CustomPhrase: Story = {
