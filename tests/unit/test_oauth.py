@@ -73,10 +73,8 @@ class TestOAuthHandler:
     def oauth_handler(self, tmp_path):
         """Create OAuth handler with temp database."""
         db_path = str(tmp_path / "test.db")
-        handler = OAuthHandler(db_path=db_path)
-        handler.init_db()
 
-        # Also init user tables
+        # Create users table FIRST (oauth_accounts has FK to users)
         import sqlite3
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
@@ -95,6 +93,10 @@ class TestOAuthHandler:
         """)
         conn.commit()
         conn.close()
+
+        # Now init OAuth handler (creates oauth_accounts table)
+        handler = OAuthHandler(db_path=db_path)
+        handler.init_db()
 
         return handler
 
