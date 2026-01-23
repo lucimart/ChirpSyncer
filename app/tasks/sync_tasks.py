@@ -85,6 +85,12 @@ def run_sync_job(self, job_id: str, user_id: int, direction: str, db_path: str) 
             user_id,
             sync_progress_message(job_id, "completed", current=posts_synced),
         )
+
+        # Send sync completion notification
+        from app.tasks.notification_tasks import send_sync_notification
+        send_sync_notification.delay(
+            user_id, job_id, "completed", {"posts_synced": posts_synced}
+        )
     except Exception as exc:
         if direction in {"both", "twitter_to_bluesky"}:
             _record_sync_stats(
@@ -115,6 +121,12 @@ def run_sync_job(self, job_id: str, user_id: int, direction: str, db_path: str) 
         emit_sync_progress(
             user_id,
             sync_progress_message(job_id, "failed", current=0),
+        )
+
+        # Send sync failure notification
+        from app.tasks.notification_tasks import send_sync_notification
+        send_sync_notification.delay(
+            user_id, job_id, "failed", {"error": str(exc)}
         )
         raise
 

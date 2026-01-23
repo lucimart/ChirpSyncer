@@ -1202,7 +1202,9 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
 
 def main():
     """Run dashboard server"""
-    app = create_app()
+    # Get database path from environment or use default
+    db_path = os.getenv("DATABASE_PATH", "chirpsyncer.db")
+    app = create_app(db_path=db_path)
     # Use environment variable for debug mode (defaults to False for security)
     debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
     # Use socketio.run() for WebSocket support
@@ -1213,6 +1215,7 @@ def main():
         port=5000,
         debug=debug_mode,
         allow_unsafe_werkzeug=True,  # Allow Werkzeug in debug mode
+        use_reloader=debug_mode,  # Enable hot reload in debug mode
     )
 
 

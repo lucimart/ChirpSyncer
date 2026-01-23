@@ -220,17 +220,10 @@ def forgot_password():
     if user:
         try:
             token = user_manager.create_password_reset_token(user.id)
-            # In production: send email with reset link
-            # For development: return token in response (remove in production!)
-            return api_response(
-                {
-                    "success": True,
-                    "message": "If an account with that email exists, a password reset link has been sent.",
-                    # DEV ONLY - remove in production
-                    "dev_token": token,
-                    "dev_reset_url": f"/reset-password?token={token}",
-                }
-            )
+            # Send password reset email asynchronously
+            from app.tasks.notification_tasks import send_password_reset_email
+            send_password_reset_email.delay(user.id, token, user.email)
+            logger.info(f"Password reset email queued for user {user.id}")
         except Exception as e:
             # Log error but don't expose to user (security: prevent enumeration)
             logger.error(f"Password reset token creation failed: {e}")

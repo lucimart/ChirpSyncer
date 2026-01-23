@@ -100,6 +100,23 @@ class OAuthHandler:
             "CREATE INDEX IF NOT EXISTS idx_oauth_provider ON oauth_accounts(provider, provider_user_id)"
         )
 
+        # Create oauth_states table for CSRF state storage
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS oauth_states (
+                state TEXT PRIMARY KEY,
+                provider TEXT NOT NULL,
+                redirect_uri TEXT NOT NULL,
+                code_verifier TEXT,
+                created_at INTEGER NOT NULL
+            )
+        """)
+
+        # Clean up expired states (older than 10 minutes)
+        cursor.execute(
+            "DELETE FROM oauth_states WHERE created_at < ?",
+            (int(time.time()) - 600,),
+        )
+
         # Add has_password column to users if not exists
         cursor.execute("PRAGMA table_info(users)")
         columns = [row["name"] for row in cursor.fetchall()]
@@ -147,11 +164,23 @@ class OAuthHandler:
 
         # Generate state for CSRF protection
         state = secrets.token_urlsafe(32)
-        self._state_store[state] = {
-            "provider": provider,
-            "redirect_uri": redirect_uri,
-            "created_at": time.time(),
-        }
+        code_verifier = None
+
+        # Provider-specific handling
+        if provider == "twitter":
+            # Twitter OAuth 2.0 requires PKCE
+            code_verifier = secrets.token_urlsafe(64)
+
+        # Store state in database (persistent across requests)
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """INSERT INTO oauth_states (state, provider, redirect_uri, code_verifier, created_at)
+               VALUES (?, ?, ?, ?, ?)""",
+            (state, provider, redirect_uri, code_verifier, int(time.time())),
+        )
+        conn.commit()
+        conn.close()
 
         params = {
             "client_id": config.client_id,
@@ -166,9 +195,6 @@ class OAuthHandler:
             params["access_type"] = "offline"
             params["prompt"] = "consent"
         elif provider == "twitter":
-            # Twitter OAuth 2.0 requires PKCE
-            code_verifier = secrets.token_urlsafe(64)
-            self._state_store[state]["code_verifier"] = code_verifier
             # For simplicity, using plain challenge (production should use S256)
             params["code_challenge"] = code_verifier
             params["code_challenge_method"] = "plain"
@@ -185,15 +211,36 @@ class OAuthHandler:
         Returns:
             State data dict or None if invalid/expired
         """
-        state_data = self._state_store.pop(state, None)
-        if not state_data:
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        # Get and delete state in one operation
+        cursor.execute(
+            "SELECT provider, redirect_uri, code_verifier, created_at FROM oauth_states WHERE state = ?",
+            (state,),
+        )
+        row = cursor.fetchone()
+
+        if row:
+            # Delete used state
+            cursor.execute("DELETE FROM oauth_states WHERE state = ?", (state,))
+            conn.commit()
+
+        conn.close()
+
+        if not row:
             return None
 
         # Check expiration (10 minutes)
-        if time.time() - state_data["created_at"] > 600:
+        if time.time() - row["created_at"] > 600:
             return None
 
-        return state_data
+        return {
+            "provider": row["provider"],
+            "redirect_uri": row["redirect_uri"],
+            "code_verifier": row["code_verifier"],
+            "created_at": row["created_at"],
+        }
 
     def exchange_code(
         self, provider: str, code: str, redirect_uri: str, code_verifier: Optional[str] = None
