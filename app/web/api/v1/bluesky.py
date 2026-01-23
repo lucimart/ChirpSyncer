@@ -11,7 +11,7 @@ Provides endpoints for:
 
 from flask import Blueprint, request
 from atproto import Client
-from atproto.exceptions import AtProtocolError
+from atproto_core.exceptions import AtProtocolError
 
 from app.auth.auth_decorators import require_auth
 from app.auth.credential_manager import CredentialManager
