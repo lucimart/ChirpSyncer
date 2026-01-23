@@ -1,9 +1,9 @@
 /**
- * Theme Configuration - ChirpSyncer Design System
- * 
+ * Theme Configuration - Swoop Design System
+ *
  * This file re-exports the new token-based theme system
  * while maintaining backward compatibility with existing components.
- * 
+ *
  * MIGRATION: Components should gradually migrate to using
  * tokens directly from './tokens' or theme from ThemeContext.
  */
@@ -20,8 +20,12 @@ import { transition } from './tokens/transitions';
 export const theme = {
   mode: 'light' as const,
   colors: {
-    // Primary - Social Hub Blue (mapped from new tokens)
-    primary: colors.blue,
+    // Primary - Swoop Purple (mapped from new tokens)
+    primary: colors.purple,
+    // Secondary - Swoop Mint
+    secondary: colors.mint,
+    // Accent - Swoop Orange
+    accent: colors.orange,
     // Neutral - Gray scale (mapped from new tokens)
     neutral: colors.slate,
     // Success - Green
@@ -78,15 +82,15 @@ export const theme = {
     },
     // Semantic surface colors for badges, alerts, etc. (light mode defaults)
     surface: {
-      primary: { bg: colors.blue[50], text: colors.blue[800], border: colors.blue[200] },
-      success: { bg: colors.green[50], text: colors.green[800], border: colors.green[200] },
-      warning: { bg: colors.yellow[50], text: colors.yellow[800], border: colors.yellow[200] },
+      primary: { bg: colors.purple[50], text: colors.purple[800], border: colors.purple[200] },
+      success: { bg: colors.mint[50], text: colors.mint[800], border: colors.mint[200] },
+      warning: { bg: colors.orange[50], text: colors.orange[800], border: colors.orange[200] },
       danger: { bg: colors.red[50], text: colors.red[800], border: colors.red[200] },
-      info: { bg: colors.blue[50], text: colors.blue[800], border: colors.blue[200] },
+      info: { bg: colors.purple[50], text: colors.purple[800], border: colors.purple[200] },
       neutral: { bg: colors.slate[100], text: colors.slate[800], border: colors.slate[200] },
-      primarySubtle: { bg: colors.blue[100], text: colors.blue[800], border: colors.blue[200] },
-      successSubtle: { bg: colors.green[100], text: colors.green[800], border: colors.green[200] },
-      warningSubtle: { bg: colors.yellow[100], text: colors.yellow[800], border: colors.yellow[200] },
+      primarySubtle: { bg: colors.purple[100], text: colors.purple[800], border: colors.purple[200] },
+      successSubtle: { bg: colors.mint[100], text: colors.mint[800], border: colors.mint[200] },
+      warningSubtle: { bg: colors.orange[100], text: colors.orange[800], border: colors.orange[200] },
       dangerSubtle: { bg: colors.red[100], text: colors.red[800], border: colors.red[200] },
     },
   },
