@@ -112,7 +112,7 @@ export interface PlatformConnector {
   icon: string;
   color: string;
   capabilities: PlatformCapabilities;
-  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix';
+  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix' | 'dsnp' | 'ssb';
   status: 'available' | 'coming_soon' | 'beta';
 }
 
@@ -653,8 +653,8 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     icon: '◈',
     color: '#6366F1',
     capabilities: PLATFORM_DEFAULTS.dsnp,
-    auth_type: 'api_key',
-    status: 'coming_soon',
+    auth_type: 'dsnp',
+    status: 'beta',
   },
   {
     id: 'ssb',
@@ -664,8 +664,8 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     icon: '🦀',
     color: '#FF6B6B',
     capabilities: PLATFORM_DEFAULTS.ssb,
-    auth_type: 'api_key',
-    status: 'coming_soon',
+    auth_type: 'ssb',
+    status: 'beta',
   },
 ];
 

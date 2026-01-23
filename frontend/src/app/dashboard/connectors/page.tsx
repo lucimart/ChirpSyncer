@@ -691,6 +691,67 @@ export default function ConnectorsPage() {
             />
           </Stack>
         );
+      case 'dsnp':
+        return (
+          <Stack gap={4}>
+            <SmallText>
+              DSNP (Decentralized Social Networking Protocol) runs on the Frequency blockchain.
+              You need a Frequency provider URL and optionally your MSA seed phrase for write access.
+            </SmallText>
+            <Input
+              label="Frequency Provider URL"
+              type="text"
+              value={credentials.provider_url || ''}
+              onChange={(e) => setCredentials({ ...credentials, provider_url: e.target.value })}
+              placeholder="wss://rpc.frequency.xyz"
+              hint="Frequency blockchain RPC endpoint"
+              fullWidth
+            />
+            <Input
+              label="MSA ID (optional)"
+              type="text"
+              value={credentials.msa_id || ''}
+              onChange={(e) => setCredentials({ ...credentials, msa_id: e.target.value })}
+              placeholder="123456"
+              hint="Your Message Source Account ID (if you have one)"
+              fullWidth
+            />
+            <Input
+              label="Seed Phrase (optional)"
+              type="password"
+              value={credentials.seed_phrase || ''}
+              onChange={(e) => setCredentials({ ...credentials, seed_phrase: e.target.value })}
+              hint="12-24 word seed phrase for signing transactions"
+              fullWidth
+            />
+          </Stack>
+        );
+      case 'ssb':
+        return (
+          <Stack gap={4}>
+            <SmallText>
+              SSB (Secure Scuttlebutt) is a peer-to-peer social protocol.
+              You need an SSB server running locally or accessible via RPC.
+            </SmallText>
+            <Input
+              label="SSB Server URL"
+              type="text"
+              value={credentials.ssb_server_url || ''}
+              onChange={(e) => setCredentials({ ...credentials, ssb_server_url: e.target.value })}
+              placeholder="http://localhost:8989"
+              hint="URL of your ssb-server instance"
+              fullWidth
+            />
+            <Input
+              label="Secret (optional)"
+              type="password"
+              value={credentials.secret || ''}
+              onChange={(e) => setCredentials({ ...credentials, secret: e.target.value })}
+              hint="Your SSB secret for authentication (usually in ~/.ssb/secret)"
+              fullWidth
+            />
+          </Stack>
+        );
       default:
         return null;
     }

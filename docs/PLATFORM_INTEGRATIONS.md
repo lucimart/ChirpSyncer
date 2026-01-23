@@ -159,12 +159,123 @@ POST /api/v1/matrix/broadcast
 | **Tumblr** | Microblogging | Multimedia posts |
 | **Discord** | Community chat (webhooks) | Notifications to channels |
 
-### Experimental Protocols
+### Experimental Protocols (Available)
 
-| Protocol | Description | Complexity | Use Case |
-|----------|-------------|------------|----------|
-| **DSNP** | Decentralized Social Networking Protocol (Frequency blockchain) | High | Web3 social identity |
-| **SSB** | Secure Scuttlebutt (P2P, offline-first) | High | P2P social networking |
+| Protocol | Auth Type | Publish | Read | Interactions | Status |
+|----------|-----------|---------|------|--------------|--------|
+| **DSNP** | Seed Phrase / MSA | ✅ | ✅ | Reactions, Replies | Experimental |
+| **SSB** | Secret Key | ✅ | ✅ | Votes, Replies | Experimental |
+
+---
+
+## Experimental Protocols Detail
+
+### DSNP (Decentralized Social Networking Protocol)
+
+**Overview:**
+DSNP is a decentralized social networking protocol built on the Frequency blockchain. It provides portable social identity and content ownership through blockchain-based Message Source Accounts (MSA).
+
+**Key Concepts:**
+- **MSA (Message Source Account)**: Your on-chain social identity
+- **Announcements**: Content published to the network (broadcasts, replies, reactions)
+- **Graph**: Social connections stored on-chain
+- **Schemas**: Defined formats for different content types
+- **Frequency**: The blockchain that powers DSNP
+
+**Use Cases in ChirpSyncer:**
+1. **Web3 Identity**: Portable social identity across platforms
+2. **Content Ownership**: True ownership of your posts on-chain
+3. **Censorship Resistance**: Decentralized content storage
+4. **Cross-posting**: Backup content to decentralized storage
+
+**API Endpoints:**
+```
+GET  /api/v1/dsnp/identity           # Get MSA identity
+POST /api/v1/dsnp/identity           # Create MSA identity
+GET  /api/v1/dsnp/identity/resolve/:handle
+GET  /api/v1/dsnp/profile            # Get profile
+GET  /api/v1/dsnp/profile/:msa_id
+PUT  /api/v1/dsnp/profile            # Update profile
+GET  /api/v1/dsnp/broadcasts         # Get broadcasts
+POST /api/v1/dsnp/broadcast          # Create broadcast
+GET  /api/v1/dsnp/broadcast/:id
+DELETE /api/v1/dsnp/broadcast/:id
+GET  /api/v1/dsnp/broadcast/:id/replies
+GET  /api/v1/dsnp/broadcast/:id/reactions
+POST /api/v1/dsnp/reply
+POST /api/v1/dsnp/reaction
+GET  /api/v1/dsnp/graph/following
+GET  /api/v1/dsnp/graph/followers
+POST /api/v1/dsnp/graph/follow
+POST /api/v1/dsnp/graph/unfollow
+GET  /api/v1/dsnp/delegations
+DELETE /api/v1/dsnp/delegation/:provider_id
+```
+
+**Configuration:**
+```json
+{
+  "provider_url": "wss://rpc.frequency.xyz",
+  "msa_id": "123456",
+  "seed_phrase": "twelve word seed phrase..."
+}
+```
+
+---
+
+### SSB (Secure Scuttlebutt)
+
+**Overview:**
+Secure Scuttlebutt is a peer-to-peer protocol for social networking that works offline-first. Data is stored locally and synced with peers when connected.
+
+**Key Concepts:**
+- **Feed**: Append-only log of signed messages
+- **Identity**: ed25519 keypair (@pubkey.ed25519)
+- **Message**: Signed content with references (links)
+- **Pubs**: Public servers for peer discovery
+- **Blobs**: Binary data (images, files)
+
+**Use Cases in ChirpSyncer:**
+1. **Offline-First**: Continue posting without internet
+2. **P2P Sync**: Direct sync with followers
+3. **Privacy**: No central server sees your data
+4. **Local-First**: Data stored on your device
+
+**API Endpoints:**
+```
+GET  /api/v1/ssb/whoami              # Get identity
+GET  /api/v1/ssb/profile             # Get profile
+GET  /api/v1/ssb/profile/:feed_id
+PUT  /api/v1/ssb/profile             # Update profile
+GET  /api/v1/ssb/posts               # Get posts
+POST /api/v1/ssb/post                # Create post
+GET  /api/v1/ssb/post/:key
+GET  /api/v1/ssb/thread/:root_key
+POST /api/v1/ssb/reply
+GET  /api/v1/ssb/post/:key/votes
+POST /api/v1/ssb/vote
+GET  /api/v1/ssb/following
+GET  /api/v1/ssb/followers
+POST /api/v1/ssb/follow
+POST /api/v1/ssb/unfollow
+POST /api/v1/ssb/block
+GET  /api/v1/ssb/blocked
+GET  /api/v1/ssb/pubs
+POST /api/v1/ssb/pub/join
+POST /api/v1/ssb/blob               # Upload blob
+GET  /api/v1/ssb/blob/:id
+GET  /api/v1/ssb/channels
+POST /api/v1/ssb/channel/subscribe
+GET  /api/v1/ssb/sync/status
+```
+
+**Configuration:**
+```json
+{
+  "ssb_server_url": "http://localhost:8989",
+  "secret": "contents of ~/.ssb/secret"
+}
+```
 
 ---
 
@@ -214,6 +325,8 @@ User Post → ChirpSyncer → Platform APIs
 | **Keypair** | Nostr | Private key for signing |
 | **Access Token** | Matrix | Homeserver token |
 | **Session/Scraper** | Twitter (free) | Cookie-based |
+| **Seed Phrase** | DSNP (Frequency) | Substrate-based signing |
+| **SSB Secret** | Secure Scuttlebutt | ed25519 keypair |
 
 ---
 
