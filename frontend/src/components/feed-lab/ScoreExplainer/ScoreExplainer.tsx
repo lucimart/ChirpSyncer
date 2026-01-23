@@ -1,71 +1,204 @@
-import React from 'react';
+'use client';
 
-interface MatchedCondition {
-  field: string;
-  operator: string;
-  value: string;
-}
-
-interface AppliedRule {
-  ruleId: string;
-  ruleName: string;
-  contribution: number;
-  matchedConditions?: MatchedCondition[];
-}
-
-interface Post {
-  id: string;
-  content: string;
-  author: string;
-  timestamp: string;
-  score: number;
-  appliedRules: AppliedRule[];
-}
+import React, { useMemo } from 'react';
+import styled from 'styled-components';
+import {
+  BASE_SCORE,
+  formatCondition,
+  calculatePercentage,
+  formatContribution,
+} from '../shared';
+import type { Post } from '../shared';
 
 interface ScoreExplainerProps {
   post: Post;
 }
 
-const BASE_SCORE = 100;
+const Container = styled.div`
+  padding: ${({ theme }) => theme.spacing[6]};
+  background: ${({ theme }) => theme.colors.background.primary};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  box-shadow: ${({ theme }) => theme.shadows.md};
+`;
+
+const Title = styled.h3`
+  font-size: ${({ theme }) => theme.fontSizes.xl};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.text.primary};
+  margin: 0 0 ${({ theme }) => theme.spacing[4]} 0;
+`;
+
+const TotalScoreText = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  color: ${({ theme }) => theme.colors.text.primary};
+  margin: 0 0 ${({ theme }) => theme.spacing[4]} 0;
+`;
+
+const ProgressBarContainer = styled.div`
+  margin-top: ${({ theme }) => theme.spacing[4]};
+`;
+
+const ProgressTrack = styled.div`
+  position: relative;
+  width: 100%;
+  height: 32px;
+  background: ${({ theme }) => theme.colors.background.tertiary};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  overflow: hidden;
+`;
+
+const ProgressSegment = styled.div<{ $variant: 'base' | 'positive' | 'negative' }>`
+  position: absolute;
+  top: 0;
+  height: 100%;
+
+  ${({ theme, $variant }) => {
+    switch ($variant) {
+      case 'base':
+        return `background: ${theme.colors.primary[300]};`;
+      case 'positive':
+        return `background: ${theme.colors.success[400]};`;
+      case 'negative':
+        return `background: ${theme.colors.danger[400]};`;
+    }
+  }}
+`;
+
+const RulesContainer = styled.div`
+  margin-top: ${({ theme }) => theme.spacing[6]};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[4]};
+`;
+
+const BaseScoreCard = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: ${({ theme }) => theme.spacing[3]};
+  background: ${({ theme }) => theme.colors.surface.primary.bg};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+`;
+
+const BaseScoreLabel = styled.span`
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const BaseScoreValue = styled.span`
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const EmptyState = styled.div`
+  padding: ${({ theme }) => theme.spacing[4]};
+  background: ${({ theme }) => theme.colors.background.secondary};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  text-align: center;
+`;
+
+const EmptyTitle = styled.p`
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  margin: 0;
+`;
+
+const EmptySubtitle = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text.tertiary};
+  margin: ${({ theme }) => theme.spacing[1]} 0 0 0;
+`;
+
+const RulesListContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[3]};
+`;
+
+const RuleCard = styled.div<{ $positive: boolean }>`
+  padding: ${({ theme }) => theme.spacing[4]};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  border-left: 4px solid ${({ theme, $positive }) =>
+    $positive ? theme.colors.success[500] : theme.colors.danger[500]};
+  background: ${({ theme, $positive }) =>
+    $positive ? theme.colors.surface.success.bg : theme.colors.surface.danger.bg};
+`;
+
+const RuleHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: ${({ theme }) => theme.spacing[2]};
+`;
+
+const RuleName = styled.span`
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const RuleContributionContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+`;
+
+const ContributionValue = styled.span<{ $positive: boolean }>`
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme, $positive }) =>
+    $positive ? theme.colors.success[600] : theme.colors.danger[600]};
+`;
+
+const PercentageText = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text.tertiary};
+`;
+
+const ConditionsBlock = styled.div`
+  margin-top: ${({ theme }) => theme.spacing[2]};
+  padding-top: ${({ theme }) => theme.spacing[2]};
+  border-top: 1px solid ${({ theme }) => theme.colors.border.light};
+`;
+
+const ConditionsTitle = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  margin: 0 0 ${({ theme }) => theme.spacing[1]} 0;
+`;
+
+const ConditionsList = styled.ul`
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[1]};
+`;
+
+const ConditionItem = styled.li`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  margin-left: ${({ theme }) => theme.spacing[2]};
+`;
 
 export const ScoreExplainer: React.FC<ScoreExplainerProps> = ({ post }) => {
   const totalScore = post.score;
-  const hasRules = post.appliedRules.length > 0;
+  const appliedRules = post.appliedRules || [];
+  const hasRules = appliedRules.length > 0;
 
-  const positiveRules = post.appliedRules.filter((r) => r.contribution > 0);
-  const negativeRules = post.appliedRules.filter((r) => r.contribution < 0);
-
-  const formatOperator = (operator: string): string => {
-    const operatorMap: Record<string, string> = {
-      contains: 'contains',
-      not_contains: 'does not contain',
-      equals: 'equals',
-      not_equals: 'does not equal',
-      greater_than: 'is greater than',
-      less_than: 'is less than',
-      greater_than_or_equal: 'is greater than or equal to',
-      less_than_or_equal: 'is less than or equal to',
-    };
-    return operatorMap[operator] || operator;
-  };
-
-  const formatCondition = (condition: MatchedCondition): string => {
-    return `${condition.field} ${formatOperator(condition.operator)} "${condition.value}"`;
-  };
-
-  const calculatePercentage = (contribution: number): number => {
-    return Math.abs((contribution / totalScore) * 100);
-  };
+  const { positiveRules, negativeRules, maxScore, baseWidth } = useMemo(() => {
+    const positive = appliedRules.filter((r) => r.contribution > 0);
+    const negative = appliedRules.filter((r) => r.contribution < 0);
+    const max = Math.max(200, totalScore);
+    const base = (BASE_SCORE / max) * 100;
+    return { positiveRules: positive, negativeRules: negative, maxScore: max, baseWidth: base };
+  }, [appliedRules, totalScore]);
 
   const renderProgressBar = () => {
-    // Calculate widths for visualization
-    const maxScore = Math.max(200, totalScore); // Visual scale
-    const baseWidth = (BASE_SCORE / maxScore) * 100;
-
     return (
-      <div className="mt-4">
-        <div
-          className="relative w-full h-8 bg-gray-200 rounded-lg overflow-hidden"
+      <ProgressBarContainer>
+        <ProgressTrack
           role="progressbar"
           aria-valuenow={totalScore}
           aria-valuemin={0}
@@ -73,9 +206,9 @@ export const ScoreExplainer: React.FC<ScoreExplainerProps> = ({ post }) => {
           aria-label={`Score breakdown: ${totalScore} out of ${maxScore}`}
         >
           {/* Base score segment */}
-          <div
-            className="absolute top-0 left-0 h-full bg-blue-300"
-            style={{ width: `${baseWidth}%` }}
+          <ProgressSegment
+            $variant="base"
+            style={{ left: 0, width: `${baseWidth}%` }}
           />
 
           {/* Positive contributions */}
@@ -87,14 +220,11 @@ export const ScoreExplainer: React.FC<ScoreExplainerProps> = ({ post }) => {
             const left = ((BASE_SCORE + previousPositive) / maxScore) * 100;
 
             return (
-              <div
+              <ProgressSegment
                 key={rule.ruleId}
                 data-testid={`positive-segment-${index}`}
-                className="absolute top-0 h-full bg-green-400"
-                style={{
-                  left: `${left}%`,
-                  width: `${width}%`,
-                }}
+                $variant="positive"
+                style={{ left: `${left}%`, width: `${width}%` }}
               />
             );
           })}
@@ -109,92 +239,74 @@ export const ScoreExplainer: React.FC<ScoreExplainerProps> = ({ post }) => {
             const left = ((BASE_SCORE + totalPositive + previousNegative) / maxScore) * 100;
 
             return (
-              <div
+              <ProgressSegment
                 key={rule.ruleId}
                 data-testid={`negative-segment-${index}`}
-                className="absolute top-0 h-full bg-red-400"
-                style={{
-                  left: `${left}%`,
-                  width: `${width}%`,
-                }}
+                $variant="negative"
+                style={{ left: `${left}%`, width: `${width}%` }}
               />
             );
           })}
-        </div>
-      </div>
+        </ProgressTrack>
+      </ProgressBarContainer>
     );
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md" data-testid="score-explainer">
-      <h3 className="text-xl font-bold mb-4">Score Breakdown</h3>
+    <Container data-testid="score-explainer">
+      <Title>Score Breakdown</Title>
 
-      <div className="mb-4">
-        <p className="text-lg font-semibold">Total Score: {totalScore}</p>
-      </div>
+      <TotalScoreText>Total Score: {totalScore}</TotalScoreText>
 
       {renderProgressBar()}
 
-      <div className="mt-6 space-y-4">
-        <div className="flex items-center justify-between p-3 bg-blue-50 rounded">
-          <span className="font-medium">Base Score</span>
-          <span className="font-semibold">{BASE_SCORE}</span>
-        </div>
+      <RulesContainer>
+        <BaseScoreCard>
+          <BaseScoreLabel>Base Score</BaseScoreLabel>
+          <BaseScoreValue>{BASE_SCORE}</BaseScoreValue>
+        </BaseScoreCard>
 
         {!hasRules ? (
-          <div className="p-4 bg-gray-50 rounded text-center">
-            <p className="text-gray-600 font-medium">No rules applied</p>
-            <p className="text-sm text-gray-500 mt-1">Base score only</p>
-          </div>
+          <EmptyState>
+            <EmptyTitle>No rules applied</EmptyTitle>
+            <EmptySubtitle>Base score only</EmptySubtitle>
+          </EmptyState>
         ) : (
-          <div className="space-y-3">
-            {post.appliedRules.map((rule) => {
-              const percentage = calculatePercentage(rule.contribution);
-              const sign = rule.contribution >= 0 ? '+' : '';
+          <RulesListContainer>
+            {appliedRules.map((rule) => {
+              const percentage = calculatePercentage(rule.contribution, totalScore);
+              const isPositive = rule.contribution >= 0;
 
               return (
-                <div
-                  key={rule.ruleId}
-                  className={`p-4 rounded-lg border-l-4 ${
-                    rule.contribution >= 0
-                      ? 'bg-green-50 border-green-500'
-                      : 'bg-red-50 border-red-500'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">{rule.ruleName}</span>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`font-bold ${
-                          rule.contribution >= 0 ? 'text-green-600' : 'text-red-600'
-                        }`}
-                      >
-                        {sign}{rule.contribution}
-                      </span>
-                      <span className="text-sm text-gray-500">({percentage.toFixed(1)}%)</span>
-                    </div>
-                  </div>
+                <RuleCard key={rule.ruleId} $positive={isPositive}>
+                  <RuleHeader>
+                    <RuleName>{rule.ruleName}</RuleName>
+                    <RuleContributionContainer>
+                      <ContributionValue $positive={isPositive}>
+                        {formatContribution(rule.contribution)}
+                      </ContributionValue>
+                      <PercentageText>({percentage.toFixed(1)}%)</PercentageText>
+                    </RuleContributionContainer>
+                  </RuleHeader>
 
                   {rule.matchedConditions && rule.matchedConditions.length > 0 && (
-                    <div className="mt-2 pt-2 border-t border-gray-200">
-                      <p className="text-xs font-semibold text-gray-600 mb-1">
-                        Matched Conditions:
-                      </p>
-                      <ul className="text-sm text-gray-700 space-y-1">
+                    <ConditionsBlock>
+                      <ConditionsTitle>Matched Conditions:</ConditionsTitle>
+                      <ConditionsList>
                         {rule.matchedConditions.map((condition, idx) => (
-                          <li key={idx} className="ml-2">
+                          <ConditionItem key={idx}>
                             • {formatCondition(condition)}
-                          </li>
+                          </ConditionItem>
                         ))}
-                      </ul>
-                    </div>
+                      </ConditionsList>
+                    </ConditionsBlock>
                   )}
-                </div>
+                </RuleCard>
               );
             })}
-          </div>
+          </RulesListContainer>
         )}
-      </div>
-    </div>
+      </RulesContainer>
+    </Container>
   );
 };

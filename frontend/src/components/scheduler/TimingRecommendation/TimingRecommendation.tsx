@@ -1,56 +1,24 @@
 'use client';
 
+import { useState, useCallback, useMemo, memo, type FC } from 'react';
 import styled, { css } from 'styled-components';
-import { useState } from 'react';
+import { Clock } from 'lucide-react';
+import { Card, Stack, SectionTitle, Button, EmptyState, SmallText } from '@/components/ui';
+import { type BestSlot, type ScoreLevel, getScoreLevel } from '../types';
 
-export interface BestSlot {
-  day: number;
-  hour: number;
-  score: number;
-  label: string;
-}
+// Re-export type for backwards compatibility
+export type { BestSlot };
 
 export interface TimingRecommendationProps {
   bestSlots: BestSlot[];
   onSlotSelect?: (slot: BestSlot) => void;
 }
 
-type ScoreLevel = 'high' | 'medium' | 'low';
-
-const getScoreLevel = (score: number): ScoreLevel => {
-  if (score >= 80) return 'high';
-  if (score >= 60) return 'medium';
-  return 'low';
-};
-
-const Container = styled.div`
-  background-color: ${({ theme }) => theme.colors.background.secondary};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  border: 1px solid ${({ theme }) => theme.colors.border.light};
-  padding: ${({ theme }) => theme.spacing[6]};
-`;
-
-const Title = styled.h3`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin: 0 0 ${({ theme }) => theme.spacing[4]} 0;
-`;
-
-const SlotList = styled.ul`
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[2]};
-`;
-
-const SlotItem = styled.li<{ $isHovered: boolean }>`
+const SlotItem = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing[3]} ${({ theme }) => theme.spacing[4]};
+  padding: ${({ theme }) => `${theme.spacing[3]} ${theme.spacing[4]}`};
   background-color: ${({ theme }) => theme.colors.background.primary};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   border: 1px solid ${({ theme }) => theme.colors.border.light};
@@ -59,34 +27,22 @@ const SlotItem = styled.li<{ $isHovered: boolean }>`
 
   &:hover {
     border-color: ${({ theme }) => theme.colors.primary[300]};
-    background-color: ${({ theme }) => theme.colors.primary[50]};
+    background-color: ${({ theme }) => theme.colors.surface.primary.bg};
   }
-`;
-
-const SlotInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[3]};
-`;
-
-const SlotLabel = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
 const scoreLevelStyles = {
   high: css`
-    background-color: ${({ theme }) => theme.colors.success[100]};
-    color: ${({ theme }) => theme.colors.success[700]};
+    background-color: ${({ theme }) => theme.colors.surface.success.bg};
+    color: ${({ theme }) => theme.colors.surface.success.text};
   `,
   medium: css`
-    background-color: ${({ theme }) => theme.colors.warning[100]};
-    color: ${({ theme }) => theme.colors.warning[700]};
+    background-color: ${({ theme }) => theme.colors.surface.warning.bg};
+    color: ${({ theme }) => theme.colors.surface.warning.text};
   `,
   low: css`
-    background-color: ${({ theme }) => theme.colors.neutral[100]};
-    color: ${({ theme }) => theme.colors.neutral[700]};
+    background-color: ${({ theme }) => theme.colors.background.tertiary};
+    color: ${({ theme }) => theme.colors.text.secondary};
   `,
 };
 
@@ -102,69 +58,57 @@ const ScoreBadge = styled.span<{ $level: ScoreLevel }>`
   ${({ $level }) => scoreLevelStyles[$level]}
 `;
 
-const UseTimeButton = styled.button`
-  padding: ${({ theme }) => theme.spacing[1]} ${({ theme }) => theme.spacing[3]};
-  background-color: ${({ theme }) => theme.colors.primary[500]};
-  color: white;
-  border: none;
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  cursor: pointer;
-  transition: ${({ theme }) => theme.transitions.fast};
-
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.primary[600]};
-  }
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: ${({ theme }) => theme.spacing[8]} ${({ theme }) => theme.spacing[4]};
-`;
-
-const EmptyTitle = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.base};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin: 0 0 ${({ theme }) => theme.spacing[2]} 0;
-`;
-
-const EmptySubtitle = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin: 0;
-`;
-
-export const TimingRecommendation = ({
+export const TimingRecommendation: FC<TimingRecommendationProps> = memo(({
   bestSlots,
   onSlotSelect,
-}: TimingRecommendationProps) => {
+}) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  // Sort slots by score (highest first)
-  const sortedSlots = [...bestSlots].sort((a, b) => b.score - a.score);
+  const sortedSlots = useMemo(
+    () => [...bestSlots].sort((a, b) => b.score - a.score),
+    [bestSlots]
+  );
 
-  const handleSlotClick = (slot: BestSlot) => {
-    onSlotSelect?.(slot);
-  };
+  const handleSlotClick = useCallback(
+    (slot: BestSlot) => {
+      onSlotSelect?.(slot);
+    },
+    [onSlotSelect]
+  );
+
+  const handleUseTimeClick = useCallback(
+    (e: React.MouseEvent, slot: BestSlot) => {
+      e.stopPropagation();
+      onSlotSelect?.(slot);
+    },
+    [onSlotSelect]
+  );
+
+  const handleMouseEnter = useCallback((index: number) => {
+    setHoveredIndex(index);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setHoveredIndex(null);
+  }, []);
 
   if (sortedSlots.length === 0) {
     return (
-      <Container data-testid="timing-recommendation">
-        <Title>Best Times to Post</Title>
-        <EmptyState>
-          <EmptyTitle>No recommendations</EmptyTitle>
-          <EmptySubtitle>Sync more posts to get timing recommendations</EmptySubtitle>
-        </EmptyState>
-      </Container>
+      <Card padding="lg" data-testid="timing-recommendation">
+        <SectionTitle style={{ marginBottom: '16px' }}>Best Times to Post</SectionTitle>
+        <EmptyState
+          icon={Clock}
+          title="No recommendations"
+          description="Sync more posts to get timing recommendations"
+        />
+      </Card>
     );
   }
 
   return (
-    <Container data-testid="timing-recommendation">
-      <Title>Best Times to Post</Title>
-      <SlotList>
+    <Card padding="lg" data-testid="timing-recommendation">
+      <SectionTitle style={{ marginBottom: '16px' }}>Best Times to Post</SectionTitle>
+      <Stack gap={2}>
         {sortedSlots.map((slot, index) => {
           const scoreLevel = getScoreLevel(slot.score);
           const isHovered = hoveredIndex === index;
@@ -173,13 +117,12 @@ export const TimingRecommendation = ({
             <SlotItem
               key={`${slot.day}-${slot.hour}`}
               data-testid={`recommendation-slot-${index}`}
-              $isHovered={isHovered}
               onClick={() => handleSlotClick(slot)}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
+              onMouseEnter={() => handleMouseEnter(index)}
+              onMouseLeave={handleMouseLeave}
             >
-              <SlotInfo>
-                <SlotLabel>{slot.label}</SlotLabel>
+              <Stack direction="row" align="center" gap={3}>
+                <SmallText>{slot.label}</SmallText>
                 <ScoreBadge
                   data-testid={`score-badge-${index}`}
                   data-score-level={scoreLevel}
@@ -187,23 +130,22 @@ export const TimingRecommendation = ({
                 >
                   {slot.score}%
                 </ScoreBadge>
-              </SlotInfo>
+              </Stack>
               {isHovered && (
-                <UseTimeButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSlotClick(slot);
-                  }}
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={(e) => handleUseTimeClick(e, slot)}
                 >
                   Use this time
-                </UseTimeButton>
+                </Button>
               )}
             </SlotItem>
           );
         })}
-      </SlotList>
-    </Container>
+      </Stack>
+    </Card>
   );
-};
+});
 
 TimingRecommendation.displayName = 'TimingRecommendation';

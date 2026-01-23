@@ -11,29 +11,10 @@ import { RefreshCw, Info } from 'lucide-react';
 import { RuleContributionChart } from '../RuleContributionChart';
 import { useFeedExplanation } from '@/hooks/useFeedExplanation';
 import { Spinner, Modal, Button } from '@/components/ui';
+import { formatCondition, formatContribution } from '../shared';
+import type { MatchedCondition, AppliedRule, FeedExplanation, RuleType } from '../shared';
 
-export interface MatchedCondition {
-  field: string;
-  operator: string;
-  value: string;
-}
-
-export interface AppliedRule {
-  ruleId: string;
-  ruleName: string;
-  type: 'boost' | 'demote' | 'filter';
-  contribution: number;
-  percentage: number;
-  matchedConditions: MatchedCondition[];
-}
-
-export interface FeedExplanation {
-  postId: string;
-  baseScore: number;
-  totalScore: number;
-  appliedRules: AppliedRule[];
-  feedPosition?: number;
-}
+export type { MatchedCondition, AppliedRule, FeedExplanation };
 
 export interface WhyAmISeeingThisProps {
   postId: string;
@@ -140,14 +121,14 @@ const RuleCardContainer = styled.div<{ $variant?: 'boost' | 'demote' }>`
   ${({ $variant, theme }) =>
     $variant === 'boost' &&
     css`
-      background: ${theme.colors.success[50]};
+      background: ${theme.colors.surface.success.bg};
       border-left-color: ${theme.colors.success[500]};
     `}
 
   ${({ $variant, theme }) =>
     $variant === 'demote' &&
     css`
-      background: ${theme.colors.danger[50]};
+      background: ${theme.colors.surface.danger.bg};
       border-left-color: ${theme.colors.danger[500]};
     `}
 `;
@@ -226,17 +207,6 @@ const ModalHeaderActions = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.spacing[2]};
 `;
-
-const formatCondition = (condition: MatchedCondition): string => {
-  return `${condition.field} ${condition.operator} "${condition.value}"`;
-};
-
-const formatContribution = (contribution: number): string => {
-  if (contribution >= 0) {
-    return `+${contribution}`;
-  }
-  return `${contribution}`;
-};
 
 export function WhyAmISeeingThis({
   postId,

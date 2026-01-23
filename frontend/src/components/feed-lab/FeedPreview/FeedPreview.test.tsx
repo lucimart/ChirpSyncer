@@ -1,4 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { ThemeProvider } from 'styled-components';
+import { theme } from '@/styles/theme';
 import { FeedPreview } from './FeedPreview';
 
 // Mock WhyAmISeeingThis component
@@ -7,6 +9,10 @@ jest.mock('../WhyAmISeeingThis', () => ({
     <div data-testid={`why-seeing-${postId}`}>Why Am I Seeing This?</div>
   ),
 }));
+
+const renderWithTheme = (ui: React.ReactElement) => {
+  return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+};
 
 describe('FeedPreview', () => {
   const mockPosts = [
@@ -47,12 +53,12 @@ describe('FeedPreview', () => {
   });
 
   it('renders empty state when no posts', () => {
-    render(<FeedPreview posts={[]} onPostClick={mockOnPostClick} />);
+    renderWithTheme(<FeedPreview posts={[]} onPostClick={mockOnPostClick} />);
     expect(screen.getByText('No posts to display')).toBeInTheDocument();
   });
 
   it('renders all posts', () => {
-    render(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
+    renderWithTheme(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
 
     expect(screen.getByText('First post content')).toBeInTheDocument();
     expect(screen.getByText('Second post content')).toBeInTheDocument();
@@ -60,7 +66,7 @@ describe('FeedPreview', () => {
   });
 
   it('displays author and timestamp for each post', () => {
-    render(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
+    renderWithTheme(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
 
     expect(screen.getByText('@user1')).toBeInTheDocument();
     expect(screen.getByText('1 hour ago')).toBeInTheDocument();
@@ -69,7 +75,7 @@ describe('FeedPreview', () => {
   });
 
   it('displays score badges for each post', () => {
-    render(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
+    renderWithTheme(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
 
     expect(screen.getByTestId('score-badge-1')).toHaveTextContent('Score: 25');
     expect(screen.getByTestId('score-badge-2')).toHaveTextContent('Score: -10');
@@ -77,7 +83,7 @@ describe('FeedPreview', () => {
   });
 
   it('sorts posts by score in descending order', () => {
-    render(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
+    renderWithTheme(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
 
     const postElements = screen.getAllByTestId(/^post-preview-/);
     expect(postElements[0]).toHaveAttribute('data-testid', 'post-preview-1'); // score 25
@@ -86,27 +92,27 @@ describe('FeedPreview', () => {
   });
 
   it('calls onPostClick when a post is clicked', () => {
-    render(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
+    renderWithTheme(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
 
     fireEvent.click(screen.getByTestId('post-preview-1'));
     expect(mockOnPostClick).toHaveBeenCalledWith(mockPosts[0]);
   });
 
   it('displays applied rules for posts with rules', () => {
-    render(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
+    renderWithTheme(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
 
     expect(screen.getByText('Boost Rule: +25')).toBeInTheDocument();
     expect(screen.getByText('Demote Rule: -10')).toBeInTheDocument();
   });
 
   it('displays "No rules applied" for posts without rules', () => {
-    render(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
+    renderWithTheme(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
 
     expect(screen.getByText('No rules applied')).toBeInTheDocument();
   });
 
   it('renders WhyAmISeeingThis component for each post', () => {
-    render(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
+    renderWithTheme(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
 
     expect(screen.getByTestId('why-seeing-1')).toBeInTheDocument();
     expect(screen.getByTestId('why-seeing-2')).toBeInTheDocument();
@@ -114,14 +120,14 @@ describe('FeedPreview', () => {
   });
 
   it('applies boosted styling to posts with positive scores', () => {
-    render(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
+    renderWithTheme(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
 
     const boostedPost = screen.getByTestId('post-preview-1');
     expect(boostedPost).toHaveClass('boosted');
   });
 
   it('does not apply boosted styling to posts with zero or negative scores', () => {
-    render(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
+    renderWithTheme(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
 
     const neutralPost = screen.getByTestId('post-preview-3');
     const demotedPost = screen.getByTestId('post-preview-2');
@@ -131,7 +137,7 @@ describe('FeedPreview', () => {
   });
 
   it('stops propagation when clicking WhyAmISeeingThis', () => {
-    render(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
+    renderWithTheme(<FeedPreview posts={mockPosts} onPostClick={mockOnPostClick} />);
 
     const whySection = screen.getByTestId('why-seeing-1').parentElement;
     fireEvent.click(whySection!);

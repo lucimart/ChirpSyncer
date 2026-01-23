@@ -3,34 +3,19 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { ConditionEditor } from '../ConditionEditor';
-import { Button, Input, Select } from '@/components/ui';
-
-interface Condition {
-  field: string;
-  operator: string;
-  value: string | number | boolean;
-}
-
-interface ConditionWithId extends Condition {
-  _id: string;
-}
+import { Button, Input, Select, Label } from '@/components/ui';
+import { RULE_TYPE_OPTIONS } from '../shared';
+import type { Condition, ConditionWithId, Rule, RuleType } from '../shared';
 
 interface RuleBuilderProps {
   onSubmit: (rule: {
     name: string;
-    type: 'boost' | 'demote' | 'filter';
+    type: RuleType;
     weight: number;
     conditions: Condition[];
   }) => void;
   onCancel: () => void;
-  initialRule?: {
-    id: string;
-    name: string;
-    type: 'boost' | 'demote' | 'filter';
-    weight: number;
-    conditions: Condition[];
-    enabled: boolean;
-  };
+  initialRule?: Rule;
 }
 
 const FormContainer = styled.form`
@@ -47,12 +32,6 @@ const FormField = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing[1]};
-`;
-
-const Label = styled.label`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
 const WeightSlider = styled.input`
@@ -114,19 +93,13 @@ const ButtonGroup = styled.div`
   justify-content: flex-end;
 `;
 
-const ruleTypeOptions = [
-  { value: 'boost', label: 'Boost' },
-  { value: 'demote', label: 'Demote' },
-  { value: 'filter', label: 'Filter' },
-];
-
 export const RuleBuilder: React.FC<RuleBuilderProps> = ({
   onSubmit,
   onCancel,
   initialRule,
 }) => {
   const [ruleName, setRuleName] = useState(initialRule?.name || '');
-  const [ruleType, setRuleType] = useState<'boost' | 'demote' | 'filter'>(
+  const [ruleType, setRuleType] = useState<RuleType>(
     initialRule?.type || 'boost'
   );
   const [weight, setWeight] = useState(initialRule?.weight ?? 0);
@@ -224,13 +197,13 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
         id="rule-type"
         label="Rule Type"
         value={ruleType}
-        onChange={(e) => setRuleType(e.target.value as 'boost' | 'demote' | 'filter')}
-        options={ruleTypeOptions}
+        onChange={(e) => setRuleType(e.target.value as RuleType)}
+        options={RULE_TYPE_OPTIONS}
         fullWidth
       />
 
       <FormField>
-        <Label htmlFor="weight-slider">Weight: {weight}</Label>
+        <Label htmlFor="weight-slider" spacing="none">Weight: {weight}</Label>
         <WeightSlider
           id="weight-slider"
           type="range"

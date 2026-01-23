@@ -1,5 +1,11 @@
 import { render, screen } from '@testing-library/react';
+import { ThemeProvider } from 'styled-components';
+import { theme } from '@/styles/theme';
 import { ScoreExplainer } from './ScoreExplainer';
+
+const renderWithTheme = (ui: React.ReactElement) => {
+  return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+};
 
 describe('ScoreExplainer', () => {
   const createMockPost = (overrides = {}) => ({
@@ -13,23 +19,23 @@ describe('ScoreExplainer', () => {
   });
 
   it('renders the component', () => {
-    render(<ScoreExplainer post={createMockPost()} />);
+    renderWithTheme(<ScoreExplainer post={createMockPost()} />);
     expect(screen.getByTestId('score-explainer')).toBeInTheDocument();
   });
 
   it('displays the total score', () => {
-    render(<ScoreExplainer post={createMockPost({ score: 150 })} />);
+    renderWithTheme(<ScoreExplainer post={createMockPost({ score: 150 })} />);
     expect(screen.getByText(/total score.*150/i)).toBeInTheDocument();
   });
 
   it('displays base score', () => {
-    render(<ScoreExplainer post={createMockPost()} />);
+    renderWithTheme(<ScoreExplainer post={createMockPost()} />);
     expect(screen.getByText('Base Score')).toBeInTheDocument();
     expect(screen.getByText('100')).toBeInTheDocument();
   });
 
   it('shows "No rules applied" when no rules', () => {
-    render(<ScoreExplainer post={createMockPost()} />);
+    renderWithTheme(<ScoreExplainer post={createMockPost()} />);
     expect(screen.getByText(/no rules applied/i)).toBeInTheDocument();
   });
 
@@ -45,7 +51,7 @@ describe('ScoreExplainer', () => {
       ],
     });
 
-    render(<ScoreExplainer post={post} />);
+    renderWithTheme(<ScoreExplainer post={post} />);
     expect(screen.getByText('Boost Rule')).toBeInTheDocument();
     expect(screen.getByText('+30')).toBeInTheDocument();
   });
@@ -62,7 +68,7 @@ describe('ScoreExplainer', () => {
       ],
     });
 
-    render(<ScoreExplainer post={post} />);
+    renderWithTheme(<ScoreExplainer post={post} />);
     expect(screen.getByText('Demote Rule')).toBeInTheDocument();
     expect(screen.getByText('-30')).toBeInTheDocument();
   });
@@ -76,13 +82,13 @@ describe('ScoreExplainer', () => {
       ],
     });
 
-    render(<ScoreExplainer post={post} />);
+    renderWithTheme(<ScoreExplainer post={post} />);
     expect(screen.getByText('Boost A')).toBeInTheDocument();
     expect(screen.getByText('Boost B')).toBeInTheDocument();
   });
 
   it('renders progress bar', () => {
-    render(<ScoreExplainer post={createMockPost({ score: 150 })} />);
+    renderWithTheme(<ScoreExplainer post={createMockPost({ score: 150 })} />);
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
@@ -101,7 +107,7 @@ describe('ScoreExplainer', () => {
       ],
     });
 
-    render(<ScoreExplainer post={post} />);
+    renderWithTheme(<ScoreExplainer post={post} />);
     expect(screen.getByText(/matched conditions/i)).toBeInTheDocument();
     expect(screen.getByText(/content.*contains.*"tech"/i)).toBeInTheDocument();
   });
@@ -114,7 +120,7 @@ describe('ScoreExplainer', () => {
       ],
     });
 
-    render(<ScoreExplainer post={post} />);
+    renderWithTheme(<ScoreExplainer post={post} />);
     // 50/150 = 33.3%
     expect(screen.getByText(/33\.3%/)).toBeInTheDocument();
   });
@@ -127,7 +133,7 @@ describe('ScoreExplainer', () => {
       ],
     });
 
-    render(<ScoreExplainer post={post} />);
+    renderWithTheme(<ScoreExplainer post={post} />);
     expect(screen.getByTestId('positive-segment-0')).toBeInTheDocument();
   });
 
@@ -139,7 +145,7 @@ describe('ScoreExplainer', () => {
       ],
     });
 
-    render(<ScoreExplainer post={post} />);
+    renderWithTheme(<ScoreExplainer post={post} />);
     expect(screen.getByTestId('negative-segment-0')).toBeInTheDocument();
   });
 
@@ -152,7 +158,7 @@ describe('ScoreExplainer', () => {
       ],
     });
 
-    render(<ScoreExplainer post={post} />);
+    renderWithTheme(<ScoreExplainer post={post} />);
     expect(screen.getByTestId('positive-segment-0')).toBeInTheDocument();
     expect(screen.getByTestId('negative-segment-0')).toBeInTheDocument();
   });

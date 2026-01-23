@@ -1,10 +1,40 @@
 'use client';
 
+import { memo, useCallback, type FC } from 'react';
 import styled from 'styled-components';
 import { Twitter, Cloud, Image as ImageIcon, ArrowRight } from 'lucide-react';
+import { Stack } from '@/components/ui';
 import type { SyncPreviewItemData } from '@/lib/api';
 
-interface SyncPreviewItemProps {
+// Local styled components that properly forward data-testid
+const ContentText = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  margin: 0;
+`;
+
+const TimestampText = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.text.tertiary};
+`;
+import {
+  type Platform,
+  type PlatformIconMap,
+  PLATFORM_COLORS,
+  truncateContent,
+  formatTimestamp,
+} from '../types';
+
+// Constants
+const TRUNCATE_LENGTH = 100;
+const ICON_SIZE = 14;
+
+const PLATFORM_ICONS: PlatformIconMap = {
+  twitter: Twitter,
+  bluesky: Cloud,
+};
+
+export interface SyncPreviewItemProps {
   item: SyncPreviewItemData;
   onToggle: (id: string) => void;
 }
@@ -30,63 +60,24 @@ const Checkbox = styled.input`
   margin-top: 2px;
   cursor: pointer;
   accent-color: ${({ theme }) => theme.colors.primary[600]};
+  flex-shrink: 0;
 `;
 
-const ContentWrapper = styled.div`
-  flex: 1;
-  min-width: 0;
-`;
-
-const ContentText = styled.p`
-  margin: 0 0 ${({ theme }) => theme.spacing[2]};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.primary};
-  line-height: 1.5;
-`;
-
-const MetaRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[3]};
-  flex-wrap: wrap;
-`;
-
-const PlatformInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-`;
-
-const PlatformIcon = styled.span<{ $platform: 'twitter' | 'bluesky' }>`
+const PlatformIcon = styled.span<{ $platform: Platform }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 24px;
   height: 24px;
   border-radius: ${({ theme }) => theme.borderRadius.full};
-  background: ${({ $platform }) =>
-    $platform === 'twitter' ? '#1DA1F2' : '#0085FF'};
+  background: ${({ $platform }) => PLATFORM_COLORS[$platform]};
   color: white;
-
-  svg {
-    width: 14px;
-    height: 14px;
-  }
+  flex-shrink: 0;
 `;
 
 const DirectionArrow = styled.span`
   display: flex;
   align-items: center;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-`;
-
-const Timestamp = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
   color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
@@ -101,42 +92,13 @@ const MediaIndicator = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.sm};
 `;
 
-const MediaIcon = styled.span`
-  display: flex;
-  align-items: center;
-
-  svg {
-    width: 14px;
-    height: 14px;
-  }
-`;
-
-function truncateContent(content: string, maxLength: number = 100): string {
-  if (content.length <= maxLength) {
-    return content;
-  }
-  return content.slice(0, maxLength) + '...';
-}
-
-function formatTimestamp(timestamp: string): string {
-  const date = new Date(timestamp);
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-function PlatformIconContent({ platform }: { platform: 'twitter' | 'bluesky' }) {
-  return platform === 'twitter' ? <Twitter /> : <Cloud />;
-}
-
-export function SyncPreviewItem({ item, onToggle }: SyncPreviewItemProps) {
-  const handleCheckboxChange = () => {
+export const SyncPreviewItem: FC<SyncPreviewItemProps> = memo(({ item, onToggle }) => {
+  const handleCheckboxChange = useCallback(() => {
     onToggle(item.id);
-  };
+  }, [onToggle, item.id]);
+
+  const SourceIcon = PLATFORM_ICONS[item.sourcePlatform];
+  const TargetIcon = PLATFORM_ICONS[item.targetPlatform];
 
   return (
     <ItemContainer
@@ -149,45 +111,45 @@ export function SyncPreviewItem({ item, onToggle }: SyncPreviewItemProps) {
         onChange={handleCheckboxChange}
         aria-label={`Select item ${item.id}`}
       />
-      <ContentWrapper>
-        <ContentText data-testid="preview-content">
-          {truncateContent(item.content)}
+      <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
+        <ContentText data-testid="preview-content" style={{ lineHeight: 1.5 }}>
+          {truncateContent(item.content, TRUNCATE_LENGTH)}
         </ContentText>
-        <MetaRow>
-          <PlatformInfo>
+        <Stack direction="row" align="center" gap={3} wrap>
+          <Stack direction="row" align="center" gap={2}>
             <PlatformIcon
               $platform={item.sourcePlatform}
               data-testid="source-platform-icon"
               data-platform={item.sourcePlatform}
             >
-              <PlatformIconContent platform={item.sourcePlatform} />
+              <SourceIcon size={ICON_SIZE} />
             </PlatformIcon>
             <DirectionArrow data-testid="sync-direction-indicator">
-              <ArrowRight />
+              <ArrowRight size={16} />
             </DirectionArrow>
             <PlatformIcon
               $platform={item.targetPlatform}
               data-testid="target-platform-icon"
               data-platform={item.targetPlatform}
             >
-              <PlatformIconContent platform={item.targetPlatform} />
+              <TargetIcon size={ICON_SIZE} />
             </PlatformIcon>
-          </PlatformInfo>
-          <Timestamp data-testid="item-timestamp">
+          </Stack>
+          <TimestampText data-testid="item-timestamp">
             {formatTimestamp(item.timestamp)}
-          </Timestamp>
+          </TimestampText>
           {item.hasMedia && (
             <MediaIndicator data-testid="media-indicator">
-              <MediaIcon data-testid="media-icon">
-                <ImageIcon aria-hidden="true" focusable="false" />
-              </MediaIcon>
+              <ImageIcon size={ICON_SIZE} aria-hidden="true" data-testid="media-icon" />
               {item.mediaCount && item.mediaCount > 0 && (
                 <span>{item.mediaCount}</span>
               )}
             </MediaIndicator>
           )}
-        </MetaRow>
-      </ContentWrapper>
+        </Stack>
+      </Stack>
     </ItemContainer>
   );
-}
+});
+
+SyncPreviewItem.displayName = 'SyncPreviewItem';

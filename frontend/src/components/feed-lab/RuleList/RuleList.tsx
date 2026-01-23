@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { GripVertical, Pencil, Trash2, Zap, TrendingDown, Filter } from 'lucide-react';
 import {
@@ -23,21 +23,10 @@ import { CSS } from '@dnd-kit/utilities';
 import { Button } from '../../ui/Button';
 import { Badge } from '../../ui/Badge';
 import { Switch } from '../../ui/Switch';
+import { formatConditionCount, getRuleTypeLabel } from '../shared';
+import type { Rule, RuleType } from '../shared';
 
-interface Condition {
-  field: string;
-  operator: string;
-  value: string | number | boolean;
-}
-
-export interface Rule {
-  id: string;
-  name: string;
-  type: 'boost' | 'demote' | 'filter';
-  weight: number;
-  conditions: Condition[];
-  enabled: boolean;
-}
+export type { Rule };
 
 interface RuleListProps {
   rules: Rule[];
@@ -163,6 +152,18 @@ const EmptyText = styled.p`
   margin-top: ${({ theme }) => theme.spacing[2]};
 `;
 
+// Helper function for rule type icons
+const getRuleTypeIcon = (type: RuleType) => {
+  switch (type) {
+    case 'boost':
+      return <Zap size={12} />;
+    case 'demote':
+      return <TrendingDown size={12} />;
+    case 'filter':
+      return <Filter size={12} />;
+  }
+};
+
 // Sortable Rule Item Component
 interface SortableRuleItemProps {
   rule: Rule;
@@ -172,7 +173,7 @@ interface SortableRuleItemProps {
   isDraggable: boolean;
 }
 
-const SortableRuleItem: React.FC<SortableRuleItemProps> = ({
+const SortableRuleItemComponent: React.FC<SortableRuleItemProps> = ({
   rule,
   onToggle,
   onEdit,
@@ -188,29 +189,29 @@ const SortableRuleItem: React.FC<SortableRuleItemProps> = ({
     isDragging,
   } = useSortable({ id: rule.id });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
+  const style = useMemo(
+    () => ({
+      transform: CSS.Transform.toString(transform),
+      transition,
+    }),
+    [transform, transition]
+  );
 
-  const getRuleTypeLabel = (type: 'boost' | 'demote' | 'filter') => {
-    return type.charAt(0).toUpperCase() + type.slice(1);
-  };
+  // Memoized callbacks
+  const handleToggle = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onToggle(rule.id, e.target.checked);
+    },
+    [onToggle, rule.id]
+  );
 
-  const getRuleTypeIcon = (type: 'boost' | 'demote' | 'filter') => {
-    switch (type) {
-      case 'boost':
-        return <Zap size={12} />;
-      case 'demote':
-        return <TrendingDown size={12} />;
-      case 'filter':
-        return <Filter size={12} />;
-    }
-  };
+  const handleEdit = useCallback(() => {
+    onEdit(rule.id);
+  }, [onEdit, rule.id]);
 
-  const getConditionCountText = (count: number) => {
-    return count === 1 ? '1 condition' : `${count} conditions`;
-  };
+  const handleDelete = useCallback(() => {
+    onDelete(rule.id);
+  }, [onDelete, rule.id]);
 
   return (
     <div ref={setNodeRef} style={style}>
@@ -246,7 +247,7 @@ const SortableRuleItem: React.FC<SortableRuleItemProps> = ({
               </RuleTitleRow>
 
               <RuleMeta>
-                <span>{getConditionCountText(rule.conditions.length)}</span>
+                <span>{formatConditionCount(rule.conditions.length)}</span>
                 {rule.type !== 'filter' && (
                   <WeightBadge>Weight: {rule.weight}</WeightBadge>
                 )}
@@ -257,7 +258,7 @@ const SortableRuleItem: React.FC<SortableRuleItemProps> = ({
           <RuleActions>
             <Switch
               checked={rule.enabled}
-              onChange={(e) => onToggle(rule.id, e.target.checked)}
+              onChange={handleToggle}
               aria-label="Toggle rule"
               size="md"
             />
@@ -265,7 +266,7 @@ const SortableRuleItem: React.FC<SortableRuleItemProps> = ({
             <Button
               variant="soft"
               size="sm"
-              onClick={() => onEdit(rule.id)}
+              onClick={handleEdit}
               aria-label="Edit"
             >
               <Pencil size={14} />
@@ -275,7 +276,7 @@ const SortableRuleItem: React.FC<SortableRuleItemProps> = ({
             <Button
               variant="danger-soft"
               size="sm"
-              onClick={() => onDelete(rule.id)}
+              onClick={handleDelete}
               aria-label="Delete"
             >
               <Trash2 size={14} />
@@ -287,6 +288,9 @@ const SortableRuleItem: React.FC<SortableRuleItemProps> = ({
     </div>
   );
 };
+
+// Memoize the component to prevent unnecessary re-renders
+const SortableRuleItem = memo(SortableRuleItemComponent);
 
 export const RuleList: React.FC<RuleListProps> = ({
   rules,
@@ -306,16 +310,22 @@ export const RuleList: React.FC<RuleListProps> = ({
     })
   );
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
 
-    if (over && active.id !== over.id && onReorder) {
-      const oldIndex = rules.findIndex((rule) => rule.id === active.id);
-      const newIndex = rules.findIndex((rule) => rule.id === over.id);
-      const reordered = arrayMove(rules, oldIndex, newIndex);
-      onReorder(reordered);
-    }
-  };
+      if (over && active.id !== over.id && onReorder) {
+        const oldIndex = rules.findIndex((rule) => rule.id === active.id);
+        const newIndex = rules.findIndex((rule) => rule.id === over.id);
+        const reordered = arrayMove(rules, oldIndex, newIndex);
+        onReorder(reordered);
+      }
+    },
+    [rules, onReorder]
+  );
+
+  const ruleIds = useMemo(() => rules.map((r) => r.id), [rules]);
+  const isDraggable = !!onReorder && rules.length > 1;
 
   if (rules.length === 0) {
     return (
@@ -326,15 +336,13 @@ export const RuleList: React.FC<RuleListProps> = ({
     );
   }
 
-  const isDraggable = !!onReorder && rules.length > 1;
-
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <SortableContext items={rules.map((r) => r.id)} strategy={verticalListSortingStrategy}>
+      <SortableContext items={ruleIds} strategy={verticalListSortingStrategy}>
         <RulesContainer>
           {rules.map((rule) => (
             <SortableRuleItem

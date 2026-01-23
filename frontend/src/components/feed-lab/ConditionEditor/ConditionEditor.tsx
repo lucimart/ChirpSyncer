@@ -3,39 +3,18 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Button, Input, Select } from '@/components/ui';
+import {
+  FIELD_OPTIONS,
+  TEXT_OPERATORS,
+  NUMERIC_OPERATORS,
+} from '../shared';
+import type { Condition } from '../shared';
 
 interface ConditionEditorProps {
-  condition: {
-    field: string;
-    operator: string;
-    value: string | number | boolean;
-  };
-  onChange: (condition: { field: string; operator: string; value: string | number | boolean }) => void;
+  condition: Condition;
+  onChange: (condition: Condition) => void;
   onRemove: () => void;
 }
-
-type FieldType = 'text' | 'numeric' | 'timestamp';
-
-const FIELD_OPTIONS = [
-  { value: 'content', label: 'Content', type: 'text' as FieldType },
-  { value: 'author', label: 'Author', type: 'text' as FieldType },
-  { value: 'score', label: 'Score', type: 'numeric' as FieldType },
-  { value: 'timestamp', label: 'Timestamp', type: 'timestamp' as FieldType },
-];
-
-const TEXT_OPERATORS = [
-  { value: 'contains', label: 'Contains' },
-  { value: 'not_contains', label: 'Excludes' },
-  { value: 'equals', label: 'Equals' },
-  { value: 'not_equals', label: 'Not equals' },
-];
-
-const NUMERIC_OPERATORS = [
-  { value: 'equals', label: 'Equals' },
-  { value: 'not_equals', label: 'Not Equals' },
-  { value: 'greater_than', label: 'Greater Than' },
-  { value: 'less_than', label: 'Less Than' },
-];
 
 const Container = styled.div`
   display: flex;

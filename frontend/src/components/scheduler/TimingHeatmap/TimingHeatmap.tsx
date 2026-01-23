@@ -1,29 +1,24 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import { Fragment, useState, useCallback, useMemo, memo, type FC, type MouseEvent } from 'react';
 import styled, { keyframes, css, useTheme } from 'styled-components';
-import { Badge, EmptyState as UIEmptyState } from '@/components/ui';
+import { Badge, EmptyState, Stack, SmallText, Caption } from '@/components/ui';
+import {
+  type HeatmapCell,
+  type TimingHeatmapData,
+  HOURS_COUNT,
+  DAYS_COUNT,
+  DAY_NAMES,
+  DAY_NAMES_FULL,
+  QUALITY_LABELS,
+  formatHour,
+  getScoreColor,
+  getQualityColor,
+  getCellKey,
+} from '../types';
 
-// Types
-export interface HeatmapCell {
-  day: number; // 0-6 (Sunday-Saturday)
-  hour: number; // 0-23
-  score: number; // 0-100 engagement score
-  postCount?: number;
-  avgEngagement?: number;
-}
-
-export interface TimingHeatmapData {
-  cells: HeatmapCell[];
-  bestSlots: Array<{
-    day: number;
-    hour: number;
-    score: number;
-    label: string;
-  }>;
-  dataQuality: 'low' | 'medium' | 'high';
-  basedOnPosts: number;
-}
+// Re-export types for backwards compatibility
+export type { HeatmapCell, TimingHeatmapData };
 
 export interface TimingHeatmapProps {
   data: TimingHeatmapData | null;
@@ -34,43 +29,15 @@ export interface TimingHeatmapProps {
   compact?: boolean;
 }
 
-// Helper functions
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const DAY_NAMES_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-function formatHour(hour: number): string {
-  if (hour === 0) return '12 AM';
-  if (hour === 12) return '12 PM';
-  return hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
-}
-
-function getScoreColor(score: number, theme: any): string {
-  if (score >= 80) return theme.colors.success[500];
-  if (score >= 60) return theme.colors.success[300];
-  if (score >= 40) return theme.colors.warning[500];
-  if (score >= 20) return theme.colors.warning[300];
-  return theme.colors.neutral[200];
-}
-
 // Animations
 const shimmer = keyframes`
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 `;
 
 const fadeIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 `;
 
 // Styled Components
@@ -78,18 +45,10 @@ const Container = styled.div<{ $compact?: boolean }>`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing[4]};
-  padding: ${({ theme, $compact }) => $compact ? theme.spacing[3] : theme.spacing[4]};
+  padding: ${({ theme, $compact }) => ($compact ? theme.spacing[3] : theme.spacing[4])};
   background: ${({ theme }) => theme.colors.background.primary};
   border-radius: ${({ theme }) => theme.borderRadius.lg};
   border: 1px solid ${({ theme }) => theme.colors.border.light};
-`;
-
-const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: ${({ theme }) => theme.spacing[3]};
 `;
 
 const Title = styled.h3`
@@ -110,14 +69,14 @@ const GridWrapper = styled.div`
 
 const Grid = styled.div<{ $compact?: boolean }>`
   display: grid;
-  grid-template-columns: ${({ $compact }) => $compact ? '40px' : '50px'} repeat(7, 1fr);
+  grid-template-columns: ${({ $compact }) => ($compact ? '40px' : '50px')} repeat(7, 1fr);
   gap: 2px;
-  min-width: ${({ $compact }) => $compact ? '400px' : '500px'};
+  min-width: ${({ $compact }) => ($compact ? '400px' : '500px')};
 `;
 
 const DayHeader = styled.div<{ $compact?: boolean }>`
   text-align: center;
-  font-size: ${({ theme, $compact }) => $compact ? theme.fontSizes.xs : theme.fontSizes.sm};
+  font-size: ${({ theme, $compact }) => ($compact ? theme.fontSizes.xs : theme.fontSizes.sm)};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   color: ${({ theme }) => theme.colors.text.secondary};
   padding: ${({ theme }) => theme.spacing[2]};
@@ -131,7 +90,7 @@ const HourLabel = styled.div<{ $compact?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  height: ${({ $compact }) => $compact ? '20px' : '24px'};
+  height: ${({ $compact }) => ($compact ? '20px' : '24px')};
 `;
 
 const Cell = styled.div<{
@@ -140,7 +99,7 @@ const Cell = styled.div<{
   $best?: boolean;
   $compact?: boolean;
 }>`
-  height: ${({ $compact }) => $compact ? '20px' : '24px'};
+  height: ${({ $compact }) => ($compact ? '20px' : '24px')};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   cursor: pointer;
   transition: ${({ theme }) => theme.transitions.fast};
@@ -176,7 +135,7 @@ const Cell = styled.div<{
 `;
 
 const SkeletonCell = styled.div<{ $compact?: boolean }>`
-  height: ${({ $compact }) => $compact ? '20px' : '24px'};
+  height: ${({ $compact }) => ($compact ? '20px' : '24px')};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   background: linear-gradient(
     90deg,
@@ -199,40 +158,6 @@ const Tooltip = styled.div`
   min-width: 150px;
   animation: ${fadeIn} 0.15s ease-out;
 `;
-
-const TooltipTitle = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: ${({ theme }) => theme.spacing[2]};
-`;
-
-const TooltipRow = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  display: flex;
-  justify-content: space-between;
-  gap: ${({ theme }) => theme.spacing[3]};
-
-  & + & {
-    margin-top: ${({ theme }) => theme.spacing[1]};
-  }
-`;
-
-const TooltipValue = styled.span`
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const Legend = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-const LegendLabel = styled.span``;
 
 const LegendGradient = styled.div`
   display: flex;
@@ -258,21 +183,17 @@ const Footer = styled.div`
   border-top: 1px solid ${({ theme }) => theme.colors.border.light};
 `;
 
-
-const PostsCount = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-
-const LoadingContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
+// Legend color constants
+const LEGEND_COLORS = [
+  { color: '#E2E8F0', opacity: 0.3 },
+  { color: '#FDE047', opacity: 0.5 },
+  { color: '#FDE047', opacity: 0.7 },
+  { color: '#86EFAC', opacity: 0.8 },
+  { color: '#22C55E', opacity: 1 },
+] as const;
 
 // Component
-export const TimingHeatmap: React.FC<TimingHeatmapProps> = ({
+export const TimingHeatmap: FC<TimingHeatmapProps> = memo(({
   data,
   onCellSelect,
   selectedDay,
@@ -284,27 +205,27 @@ export const TimingHeatmap: React.FC<TimingHeatmapProps> = ({
   const [hoveredCell, setHoveredCell] = useState<HeatmapCell | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-  const getQualityColor = (quality: 'low' | 'medium' | 'high') => {
-    switch (quality) {
-      case 'high':
-        return theme.colors.success[500];
-      case 'medium':
-        return theme.colors.warning[500];
-      case 'low':
-        return theme.colors.danger[500];
-    }
-  };
+  // Create lookup maps for O(1) access
+  const cellMap = useMemo(() => {
+    const map = new Map<string, HeatmapCell>();
+    data?.cells.forEach((cell) => {
+      map.set(getCellKey(cell.day, cell.hour), cell);
+    });
+    return map;
+  }, [data?.cells]);
 
-  const handleMouseEnter = useCallback(
-    (cell: HeatmapCell, event: React.MouseEvent) => {
-      setHoveredCell(cell);
-      setTooltipPosition({
-        x: event.clientX + 10,
-        y: event.clientY + 10,
-      });
-    },
-    []
-  );
+  const bestSlotsSet = useMemo(() => {
+    const set = new Set<string>();
+    data?.bestSlots.forEach((slot) => {
+      set.add(getCellKey(slot.day, slot.hour));
+    });
+    return set;
+  }, [data?.bestSlots]);
+
+  const handleMouseEnter = useCallback((cell: HeatmapCell, event: MouseEvent) => {
+    setHoveredCell(cell);
+    setTooltipPosition({ x: event.clientX + 10, y: event.clientY + 10 });
+  }, []);
 
   const handleMouseLeave = useCallback(() => {
     setHoveredCell(null);
@@ -312,63 +233,51 @@ export const TimingHeatmap: React.FC<TimingHeatmapProps> = ({
 
   const handleCellClick = useCallback(
     (cell: HeatmapCell) => {
-      if (onCellSelect) {
-        onCellSelect(cell);
-      }
+      onCellSelect?.(cell);
     },
     [onCellSelect]
   );
 
-  const getCellData = useCallback(
-    (day: number, hour: number): HeatmapCell | undefined => {
-      return data?.cells.find((c) => c.day === day && c.hour === hour);
-    },
-    [data]
-  );
-
-  const isBestSlot = useCallback(
-    (day: number, hour: number): boolean => {
-      return data?.bestSlots.some((s) => s.day === day && s.hour === hour) ?? false;
-    },
-    [data]
-  );
+  // Shared grid content
+  const gridContent = useMemo(() => (
+    <>
+      <div />
+      {DAY_NAMES.map((day, index) => (
+        <DayHeader key={day} $compact={compact} data-testid={`day-header-${index}`}>
+          {day}
+        </DayHeader>
+      ))}
+    </>
+  ), [compact]);
 
   // Loading state
   if (loading) {
     return (
       <Container $compact={compact} data-testid="heatmap-loading">
-        <LoadingContainer>
-          <Header>
+        <Stack gap={4}>
+          <Stack direction="row" justify="between" align="center" wrap gap={3}>
             <Title>Engagement Heatmap</Title>
-          </Header>
+          </Stack>
           <GridWrapper tabIndex={0} aria-label="Scrollable engagement heatmap grid (loading)">
             <Grid $compact={compact}>
-              {/* Empty corner */}
-              <div />
-              {/* Day headers */}
-              {DAY_NAMES.map((day, index) => (
-                <DayHeader key={day} $compact={compact} data-testid={`day-header-${index}`}>
-                  {day}
-                </DayHeader>
-              ))}
-              {/* Hour rows with skeleton cells */}
-              {Array.from({ length: 24 }, (_, hour) => (
-                <React.Fragment key={hour}>
+              {gridContent}
+              {Array.from({ length: HOURS_COUNT }, (_, hour) => (
+                <Fragment key={hour}>
                   <HourLabel $compact={compact} data-testid={`hour-label-${hour}`}>
                     {formatHour(hour)}
                   </HourLabel>
-                  {Array.from({ length: 7 }, (_, day) => (
+                  {Array.from({ length: DAYS_COUNT }, (_, day) => (
                     <SkeletonCell
-                      key={`${day}-${hour}`}
+                      key={getCellKey(day, hour)}
                       $compact={compact}
                       data-testid={`skeleton-cell-${day}-${hour}`}
                     />
                   ))}
-                </React.Fragment>
+                </Fragment>
               ))}
             </Grid>
           </GridWrapper>
-        </LoadingContainer>
+        </Stack>
       </Container>
     );
   }
@@ -377,7 +286,7 @@ export const TimingHeatmap: React.FC<TimingHeatmapProps> = ({
   if (!data || data.cells.length === 0) {
     return (
       <Container $compact={compact} data-testid="heatmap-empty">
-        <UIEmptyState
+        <EmptyState
           title="Not Enough Data"
           description="Sync more posts to generate engagement insights for optimal posting times."
           size="sm"
@@ -392,63 +301,53 @@ export const TimingHeatmap: React.FC<TimingHeatmapProps> = ({
       data-testid="timing-heatmap"
       data-compact={compact ? 'true' : undefined}
     >
-      <Header>
+      <Stack direction="row" justify="between" align="center" wrap gap={3}>
         <Title>Engagement Heatmap</Title>
-        <Legend data-testid="heatmap-legend">
-          <LegendLabel>Low</LegendLabel>
+        <Stack direction="row" align="center" gap={2} data-testid="heatmap-legend">
+          <SmallText>Low</SmallText>
           <LegendGradient>
-            <LegendBlock $color="#E2E8F0" $opacity={0.3} />
-            <LegendBlock $color="#FDE047" $opacity={0.5} />
-            <LegendBlock $color="#FDE047" $opacity={0.7} />
-            <LegendBlock $color="#86EFAC" $opacity={0.8} />
-            <LegendBlock $color="#22C55E" $opacity={1} />
+            {LEGEND_COLORS.map((item, i) => (
+              <LegendBlock key={i} $color={item.color} $opacity={item.opacity} />
+            ))}
           </LegendGradient>
-          <LegendLabel>Best</LegendLabel>
-        </Legend>
-      </Header>
+          <SmallText>Best</SmallText>
+        </Stack>
+      </Stack>
 
       <GridWrapper tabIndex={0} aria-label="Scrollable engagement heatmap grid">
         <Grid $compact={compact}>
-          {/* Empty corner */}
-          <div />
-          {/* Day headers */}
-          {DAY_NAMES.map((day, index) => (
-            <DayHeader key={day} $compact={compact} data-testid={`day-header-${index}`}>
-              {day}
-            </DayHeader>
-          ))}
-          {/* Hour rows */}
-          {Array.from({ length: 24 }, (_, hour) => (
-            <React.Fragment key={hour}>
+          {gridContent}
+          {Array.from({ length: HOURS_COUNT }, (_, hour) => (
+            <Fragment key={hour}>
               <HourLabel $compact={compact} data-testid={`hour-label-${hour}`}>
                 {formatHour(hour)}
               </HourLabel>
-              {Array.from({ length: 7 }, (_, day) => {
-                const cellData = getCellData(day, hour);
+              {Array.from({ length: DAYS_COUNT }, (_, day) => {
+                const key = getCellKey(day, hour);
+                const cellData = cellMap.get(key);
                 const score = cellData?.score ?? 0;
                 const isSelected = selectedDay === day && selectedHour === hour;
-                const best = isBestSlot(day, hour);
+                const isBest = bestSlotsSet.has(key);
                 const displayCell: HeatmapCell = cellData ?? { day, hour, score: 0 };
 
                 return (
                   <Cell
-                    key={`${day}-${hour}`}
+                    key={key}
                     $score={score}
                     $selected={isSelected}
-                    $best={best}
+                    $best={isBest}
                     $compact={compact}
                     data-testid={`heatmap-cell-${day}-${hour}`}
                     data-score={score.toString()}
                     data-selected={isSelected ? 'true' : undefined}
-                    data-best={best ? 'true' : undefined}
+                    data-best={isBest ? 'true' : undefined}
                     onClick={() => handleCellClick(displayCell)}
                     onMouseEnter={(e) => handleMouseEnter(displayCell, e)}
                     onMouseLeave={handleMouseLeave}
-                    style={{ cursor: 'pointer' }}
                   />
                 );
               })}
-            </React.Fragment>
+            </Fragment>
           ))}
         </Grid>
       </GridWrapper>
@@ -458,47 +357,48 @@ export const TimingHeatmap: React.FC<TimingHeatmapProps> = ({
           variant="text"
           size="xs"
           dot
-          dotColor={getQualityColor(data.dataQuality)}
+          dotColor={getQualityColor(data.dataQuality, theme)}
           data-testid="data-quality-indicator"
           style={{ padding: 0, gap: theme.spacing[2] }}
         >
-          {data.dataQuality === 'high' && 'High confidence'}
-          {data.dataQuality === 'medium' && 'Medium confidence'}
-          {data.dataQuality === 'low' && 'Low confidence'}
+          {QUALITY_LABELS[data.dataQuality]}
         </Badge>
-        <PostsCount>Based on {data.basedOnPosts} posts</PostsCount>
+        <SmallText>Based on {data.basedOnPosts} posts</SmallText>
       </Footer>
 
       {/* Tooltip */}
       {hoveredCell && (
         <Tooltip
           data-testid="heatmap-tooltip"
-          style={{
-            left: tooltipPosition.x,
-            top: tooltipPosition.y,
-          }}
+          style={{ left: tooltipPosition.x, top: tooltipPosition.y }}
         >
-          <TooltipTitle>
-            {DAY_NAMES_FULL[hoveredCell.day]} {formatHour(hoveredCell.hour)}
-          </TooltipTitle>
-          <TooltipRow>
-            <span>Score</span>
-            <TooltipValue>{hoveredCell.score}%</TooltipValue>
-          </TooltipRow>
-          {hoveredCell.postCount !== undefined && (
-            <TooltipRow>
-              <span>Posts</span>
-              <TooltipValue>{hoveredCell.postCount}</TooltipValue>
-            </TooltipRow>
-          )}
-          {hoveredCell.avgEngagement !== undefined && (
-            <TooltipRow>
-              <span>Avg. Engagement</span>
-              <TooltipValue>{Math.round(hoveredCell.avgEngagement)}</TooltipValue>
-            </TooltipRow>
-          )}
+          <Stack gap={2}>
+            <SmallText style={{ fontWeight: 600 }}>
+              {DAY_NAMES_FULL[hoveredCell.day]} {formatHour(hoveredCell.hour)}
+            </SmallText>
+            <Stack gap={1}>
+              <Stack direction="row" justify="between" gap={3}>
+                <Caption>Score</Caption>
+                <Caption style={{ fontWeight: 500 }}>{hoveredCell.score}%</Caption>
+              </Stack>
+              {hoveredCell.postCount !== undefined && (
+                <Stack direction="row" justify="between" gap={3}>
+                  <Caption>Posts</Caption>
+                  <Caption style={{ fontWeight: 500 }}>{hoveredCell.postCount}</Caption>
+                </Stack>
+              )}
+              {hoveredCell.avgEngagement !== undefined && (
+                <Stack direction="row" justify="between" gap={3}>
+                  <Caption>Avg. Engagement</Caption>
+                  <Caption style={{ fontWeight: 500 }}>{Math.round(hoveredCell.avgEngagement)}</Caption>
+                </Stack>
+              )}
+            </Stack>
+          </Stack>
         </Tooltip>
       )}
     </Container>
   );
-};
+});
+
+TimingHeatmap.displayName = 'TimingHeatmap';

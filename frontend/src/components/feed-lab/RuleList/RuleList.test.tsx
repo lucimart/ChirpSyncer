@@ -104,8 +104,8 @@ describe('RuleList', () => {
     const onToggle = jest.fn();
     renderWithTheme(<RuleList {...defaultProps} onToggle={onToggle} />);
 
-    const checkboxes = screen.getAllByRole('checkbox');
-    fireEvent.click(checkboxes[0]);
+    const switches = screen.getAllByRole('switch');
+    fireEvent.click(switches[0]);
 
     expect(onToggle).toHaveBeenCalledWith('rule-1', false);
   });

@@ -3,14 +3,14 @@
  * Bar chart showing rule contributions to post score
  */
 
-import React, { useState, useCallback, useMemo, useId } from 'react';
+'use client';
 
-export interface RuleContribution {
-  ruleId: string;
-  ruleName: string;
-  ruleType: 'boost' | 'demote' | 'filter';
-  contribution: number;
-}
+import React, { useState, useCallback, useMemo, useId } from 'react';
+import styled from 'styled-components';
+import { CHART_COLORS, CHART_CONFIG, formatContribution } from '../shared';
+import type { AppliedRule, FeedExplanation, RuleContribution } from '../shared';
+
+export type { RuleContribution };
 
 export interface RuleContributionChartProps {
   contributions: RuleContribution[];
@@ -20,24 +20,8 @@ export interface RuleContributionChartProps {
   onRuleClick?: (ruleId: string) => void;
 }
 
-interface AppliedRule {
-  ruleId: string;
-  ruleName: string;
-  type: 'boost' | 'demote' | 'filter';
-  contribution: number;
-  percentage: number;
-  matchedConditions: Array<{ field: string; operator: string; value: string }>;
-}
-
-interface Explanation {
-  postId: string;
-  baseScore: number;
-  totalScore: number;
-  appliedRules: AppliedRule[];
-}
-
 interface RuleContributionChartWithExplanationProps {
-  explanation: Explanation;
+  explanation: FeedExplanation;
 }
 
 // Detect which props format is being used
@@ -47,76 +31,86 @@ function isExplanationProps(props: CombinedProps): props is RuleContributionChar
   return 'explanation' in props;
 }
 
-// Styles as CSS-in-JS for portability
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '16px',
-    padding: '16px',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  totalScore: {
-    fontSize: '24px',
-    fontWeight: 600,
-  },
-  chartContainer: {
-    position: 'relative' as const,
-    width: '100%',
-  },
-  emptyState: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '32px',
-    color: '#666',
-    textAlign: 'center' as const,
-  },
-  tooltip: {
-    position: 'absolute' as const,
-    backgroundColor: '#1a1a1a',
-    color: '#fff',
-    padding: '8px 12px',
-    borderRadius: '6px',
-    fontSize: '14px',
-    zIndex: 1000,
-    pointerEvents: 'none' as const,
-    whiteSpace: 'nowrap' as const,
-    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-  },
-  label: {
-    fontSize: '12px',
-    fill: '#333',
-  },
-  truncate: {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap' as const,
-    maxWidth: '120px',
-  },
-};
+const ChartContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[4]};
+  padding: ${({ theme }) => theme.spacing[4]};
+  position: relative;
+`;
 
-const COLORS = {
-  boost: '#22c55e', // green-500
-  demote: '#ef4444', // red-500
-  baseline: '#6b7280', // gray-500
-  background: '#f3f4f6', // gray-100
-};
+const ChartHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
 
-const CHART_CONFIG = {
-  barHeight: 32,
-  barGap: 8,
-  leftMargin: 140,
-  rightMargin: 60,
-  topMargin: 40,
-  bottomMargin: 20,
-};
+const ChartTitle = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const TotalScoreValue = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: ${({ theme }) => theme.spacing[8]};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  text-align: center;
+`;
+
+const EmptyText = styled.p`
+  margin: 0;
+`;
+
+const Tooltip = styled.div`
+  position: absolute;
+  background-color: ${({ theme }) => theme.colors.text.primary};
+  color: ${({ theme }) => theme.colors.background.primary};
+  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  z-index: 1000;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: ${({ theme }) => theme.shadows.lg};
+`;
+
+const TooltipTitle = styled.div`
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  margin-bottom: ${({ theme }) => theme.spacing[1]};
+`;
+
+const LabelContainer = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.text.primary};
+  text-align: right;
+  padding-right: ${({ theme }) => theme.spacing[2]};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+`;
+
+const ScreenReaderOnly = styled.div`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+`;
 
 export function RuleContributionChart(props: CombinedProps) {
   const [hoveredRule, setHoveredRule] = useState<AppliedRule | null>(null);
@@ -200,36 +194,30 @@ export function RuleContributionChart(props: CombinedProps) {
   // Empty state
   if (sortedRules.length === 0) {
     return (
-      <div
+      <ChartContainer
         data-testid="contribution-chart"
         aria-label="Feed score breakdown chart"
-        style={styles.container}
       >
-        <div style={styles.emptyState}>
-          <p>No rules applied</p>
-          <p>Showing base score only</p>
-        </div>
-      </div>
+        <EmptyState>
+          <EmptyText>No rules applied</EmptyText>
+          <EmptyText>Showing base score only</EmptyText>
+        </EmptyState>
+      </ChartContainer>
     );
   }
 
-  const formatContribution = (value: number) => {
-    return value > 0 ? `+${value}` : `${value}`;
-  };
-
   return (
-    <div
+    <ChartContainer
       data-testid="contribution-chart"
       aria-label="Feed score breakdown chart"
-      style={{ ...styles.container, position: 'relative' }}
     >
       {/* Total Score Header */}
-      <div style={styles.header}>
-        <span>Score Breakdown</span>
-        <span data-testid="total-score" style={styles.totalScore}>
+      <ChartHeader>
+        <ChartTitle>Score Breakdown</ChartTitle>
+        <TotalScoreValue data-testid="total-score">
           {totalScore}
-        </span>
-      </div>
+        </TotalScoreValue>
+      </ChartHeader>
 
       {/* SVG Chart */}
       <svg
@@ -243,7 +231,7 @@ export function RuleContributionChart(props: CombinedProps) {
           y={CHART_CONFIG.topMargin - 10}
           width={barAreaWidth}
           height={chartHeight - CHART_CONFIG.topMargin - CHART_CONFIG.bottomMargin + 20}
-          fill={COLORS.background}
+          fill={CHART_COLORS.background}
           rx={4}
         />
 
@@ -254,7 +242,7 @@ export function RuleContributionChart(props: CombinedProps) {
             y1={CHART_CONFIG.topMargin - 15}
             x2={baselineX}
             y2={chartHeight - CHART_CONFIG.bottomMargin + 5}
-            stroke={COLORS.baseline}
+            stroke={CHART_COLORS.baseline}
             strokeWidth={2}
             strokeDasharray="4,4"
           />
@@ -263,7 +251,7 @@ export function RuleContributionChart(props: CombinedProps) {
             y={CHART_CONFIG.topMargin - 20}
             textAnchor="middle"
             fontSize={12}
-            fill={COLORS.baseline}
+            fill={CHART_COLORS.baseline}
           >
             {baseScore}
           </text>
@@ -294,7 +282,7 @@ export function RuleContributionChart(props: CombinedProps) {
           const barWidth = Math.abs(rule.contribution) * scale;
           const isPositive = rule.contribution >= 0;
           const barX = isPositive ? baselineX : baselineX - barWidth;
-          const color = rule.type === 'boost' ? COLORS.boost : COLORS.demote;
+          const color = rule.type === 'boost' ? CHART_COLORS.boost : CHART_COLORS.demote;
 
           return (
             <g key={rule.ruleId}>
@@ -305,20 +293,12 @@ export function RuleContributionChart(props: CombinedProps) {
                 width={CHART_CONFIG.leftMargin - 8}
                 height={20}
               >
-                <div
+                <LabelContainer
                   data-testid={`chart-label-${rule.ruleId}`}
-                  className="truncate"
-                  style={{
-                    ...styles.label,
-                    ...styles.truncate,
-                    color: '#333',
-                    textAlign: 'right',
-                    paddingRight: '8px',
-                  }}
                   title={rule.ruleName}
                 >
                   {rule.ruleName}
-                </div>
+                </LabelContainer>
               </foreignObject>
 
               {/* Bar */}
@@ -326,18 +306,13 @@ export function RuleContributionChart(props: CombinedProps) {
                 data-testid={`chart-bar-${rule.ruleId}`}
                 data-height={barWidth}
                 data-position={isPositive ? 'above-baseline' : 'below-baseline'}
-                className={`${rule.type === 'boost' ? 'boost-bar' : 'demote-bar'} animate-grow`}
                 x={barX}
                 y={y}
                 width={barWidth}
                 height={CHART_CONFIG.barHeight}
                 fill={color}
                 rx={4}
-                style={{
-                  backgroundColor: color,
-                  cursor: 'pointer',
-                  transition: 'opacity 0.2s',
-                }}
+                style={{ cursor: 'pointer', transition: 'opacity 0.2s' }}
                 aria-label={`${rule.ruleName}: ${formatContribution(rule.contribution)} points (${rule.percentage}%)`}
                 onMouseEnter={(e) => {
                   handleMouseEnter(rule, e);
@@ -375,31 +350,24 @@ export function RuleContributionChart(props: CombinedProps) {
 
       {/* Tooltip */}
       {hoveredRule && (
-        <div
+        <Tooltip
           role="tooltip"
           id={tooltipId}
           style={{
-            ...styles.tooltip,
             left: tooltipPosition.x,
             top: tooltipPosition.y,
           }}
         >
-          <div style={{ fontWeight: 600, marginBottom: '4px' }}>
-            {hoveredRule.ruleName}
-          </div>
-          <div>
-            Contribution: {formatContribution(hoveredRule.contribution)}
-          </div>
-          <div>
-            Impact: {hoveredRule.percentage}%
-          </div>
-        </div>
+          <TooltipTitle>{hoveredRule.ruleName}</TooltipTitle>
+          <div>Contribution: {formatContribution(hoveredRule.contribution)}</div>
+          <div>Impact: {hoveredRule.percentage}%</div>
+        </Tooltip>
       )}
 
       {/* Screen reader summary */}
-      <div className="sr-only" aria-live="polite">
+      <ScreenReaderOnly aria-live="polite">
         {`Chart showing ${sortedRules.length} rules. Base score: ${baseScore}. Total score: ${totalScore}.`}
-      </div>
-    </div>
+      </ScreenReaderOnly>
+    </ChartContainer>
   );
 }

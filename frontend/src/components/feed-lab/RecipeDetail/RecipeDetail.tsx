@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Recipe, RecipeCondition } from '../RecipeCard';
+import { formatOperator, formatWeight } from '../shared';
+import type { Recipe, Condition } from '../shared';
 
 // Re-export types for consumers
-export type { Recipe, RecipeCondition };
+export type { Recipe };
+export type RecipeCondition = Condition;
 
 export interface RecipeDetailProps {
   recipe: Recipe;
@@ -200,22 +202,6 @@ const SimilarRecipeName = styled.p`
   margin: 0;
   font-size: ${({ theme }) => theme.fontSizes.sm};
 `;
-
-// Helper functions
-const formatOperator = (operator: RecipeCondition['operator']): string => {
-  const operatorMap: Record<RecipeCondition['operator'], string> = {
-    contains: 'contains',
-    equals: 'equals',
-    gt: 'greater than',
-    lt: 'less than',
-    regex: 'matches',
-  };
-  return operatorMap[operator];
-};
-
-const formatWeight = (weight: number): string => {
-  return weight >= 0 ? `+${weight}` : `${weight}`;
-};
 
 // Component
 export const RecipeDetail: React.FC<RecipeDetailProps> = ({

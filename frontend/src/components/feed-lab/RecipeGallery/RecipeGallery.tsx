@@ -3,10 +3,13 @@
 import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { Search, ChevronDown } from 'lucide-react';
-import { RecipeCard, Recipe, RecipeCondition } from '../RecipeCard';
+import { RecipeCard } from '../RecipeCard';
 import { Input, Select } from '@/components/ui';
+import { CATEGORY_OPTIONS, SORT_OPTIONS } from '../shared';
+import type { Recipe, Condition, RecipeCategory } from '../shared';
 
-export type { Recipe, RecipeCondition };
+export type { Recipe };
+export type RecipeCondition = Condition;
 
 export interface RecipeGalleryProps {
   recipes: Recipe[];
@@ -15,7 +18,7 @@ export interface RecipeGalleryProps {
   viewMode?: 'grid' | 'list';
 }
 
-type CategoryFilter = 'all' | 'engagement' | 'filtering' | 'discovery' | 'productivity';
+type CategoryFilter = 'all' | RecipeCategory;
 type SortOption = 'name' | 'popularity' | 'weight';
 
 const GalleryContainer = styled.div`
@@ -101,14 +104,14 @@ const DropdownOption = styled.div<{ $isActive: boolean }>`
   padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme, $isActive }) =>
-    $isActive ? theme.colors.primary[600] : theme.colors.text.primary};
+    $isActive ? theme.colors.surface.primary.text : theme.colors.text.primary};
   background: ${({ theme, $isActive }) =>
-    $isActive ? theme.colors.primary[50] : 'transparent'};
+    $isActive ? theme.colors.surface.primary.bg : 'transparent'};
   cursor: pointer;
   transition: all ${({ theme }) => theme.transitions.fast};
 
   &:hover {
-    background: ${({ theme }) => theme.colors.neutral[50]};
+    background: ${({ theme }) => theme.colors.background.secondary};
   }
 
   &:first-child {
@@ -155,20 +158,6 @@ const EmptyText = styled.p`
   color: ${({ theme }) => theme.colors.text.secondary};
   margin: 0;
 `;
-
-const categories: { value: CategoryFilter; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'engagement', label: 'Engagement' },
-  { value: 'filtering', label: 'Filtering' },
-  { value: 'discovery', label: 'Discovery' },
-  { value: 'productivity', label: 'Productivity' },
-];
-
-const sortOptions = [
-  { value: 'name', label: 'Sort by Name' },
-  { value: 'popularity', label: 'Sort by Popularity' },
-  { value: 'weight', label: 'Sort by Weight' },
-];
 
 export const RecipeGallery: React.FC<RecipeGalleryProps> = ({
   recipes,
@@ -222,7 +211,7 @@ export const RecipeGallery: React.FC<RecipeGalleryProps> = ({
   };
 
   const selectedCategoryLabel =
-    categories.find((c) => c.value === categoryFilter)?.label ?? 'All';
+    CATEGORY_OPTIONS.find((c) => c.value === categoryFilter)?.label ?? 'All';
 
   if (recipes.length === 0) {
     return (
@@ -269,12 +258,12 @@ export const RecipeGallery: React.FC<RecipeGalleryProps> = ({
               <ChevronDown />
             </FilterButton>
             <DropdownMenu $isOpen={isDropdownOpen}>
-              {categories.map((category) => (
+              {CATEGORY_OPTIONS.map((category) => (
                 <DropdownOption
                   key={category.value}
                   role="option"
                   $isActive={categoryFilter === category.value}
-                  onClick={() => handleCategorySelect(category.value)}
+                  onClick={() => handleCategorySelect(category.value as CategoryFilter)}
                 >
                   {category.label}
                 </DropdownOption>
@@ -286,7 +275,7 @@ export const RecipeGallery: React.FC<RecipeGalleryProps> = ({
             data-testid="sort-select"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            options={sortOptions}
+            options={SORT_OPTIONS}
             aria-label="Sort recipes"
           />
         </FilterBar>

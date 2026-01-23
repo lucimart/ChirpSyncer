@@ -1,5 +1,11 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { ThemeProvider } from 'styled-components';
+import { theme } from '@/styles/theme';
 import { RuleContributionChart } from './RuleContributionChart';
+
+const renderWithTheme = (ui: React.ReactElement) => {
+  return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+};
 
 describe('RuleContributionChart', () => {
   const mockContributions = [
@@ -18,7 +24,7 @@ describe('RuleContributionChart', () => {
   ];
 
   it('renders the chart container', () => {
-    render(
+    renderWithTheme(
       <RuleContributionChart
         contributions={mockContributions}
         baseScore={50}
@@ -30,7 +36,7 @@ describe('RuleContributionChart', () => {
   });
 
   it('displays total score', () => {
-    render(
+    renderWithTheme(
       <RuleContributionChart
         contributions={mockContributions}
         baseScore={50}
@@ -42,7 +48,7 @@ describe('RuleContributionChart', () => {
   });
 
   it('shows empty state when no contributions', () => {
-    render(
+    renderWithTheme(
       <RuleContributionChart
         contributions={[]}
         baseScore={50}
@@ -53,7 +59,7 @@ describe('RuleContributionChart', () => {
   });
 
   it('renders base score line', () => {
-    render(
+    renderWithTheme(
       <RuleContributionChart
         contributions={mockContributions}
         baseScore={50}
@@ -65,7 +71,7 @@ describe('RuleContributionChart', () => {
   });
 
   it('renders bars for each contribution', () => {
-    render(
+    renderWithTheme(
       <RuleContributionChart
         contributions={mockContributions}
         baseScore={50}
@@ -78,7 +84,7 @@ describe('RuleContributionChart', () => {
   });
 
   it('renders labels for each rule', () => {
-    render(
+    renderWithTheme(
       <RuleContributionChart
         contributions={mockContributions}
         baseScore={50}
@@ -91,7 +97,7 @@ describe('RuleContributionChart', () => {
   });
 
   it('positions boost bars above baseline', () => {
-    render(
+    renderWithTheme(
       <RuleContributionChart
         contributions={[mockContributions[0]]}
         baseScore={50}
@@ -104,7 +110,7 @@ describe('RuleContributionChart', () => {
   });
 
   it('positions demote bars below baseline', () => {
-    render(
+    renderWithTheme(
       <RuleContributionChart
         contributions={[mockContributions[1]]}
         baseScore={50}
@@ -119,7 +125,7 @@ describe('RuleContributionChart', () => {
   it('calls onRuleHover when hovering over a bar', () => {
     const mockOnHover = jest.fn();
 
-    render(
+    renderWithTheme(
       <RuleContributionChart
         contributions={mockContributions}
         baseScore={50}
@@ -137,7 +143,7 @@ describe('RuleContributionChart', () => {
   it('calls onRuleClick when clicking a bar', () => {
     const mockOnClick = jest.fn();
 
-    render(
+    renderWithTheme(
       <RuleContributionChart
         contributions={mockContributions}
         baseScore={50}
@@ -153,7 +159,7 @@ describe('RuleContributionChart', () => {
   });
 
   it('shows tooltip on hover', () => {
-    render(
+    renderWithTheme(
       <RuleContributionChart
         contributions={mockContributions}
         baseScore={50}
@@ -168,7 +174,7 @@ describe('RuleContributionChart', () => {
   });
 
   it('hides tooltip on mouse leave', () => {
-    render(
+    renderWithTheme(
       <RuleContributionChart
         contributions={mockContributions}
         baseScore={50}
@@ -184,7 +190,7 @@ describe('RuleContributionChart', () => {
   });
 
   it('accepts explanation format', () => {
-    render(
+    renderWithTheme(
       <RuleContributionChart
         explanation={{
           postId: 'post-1',
@@ -209,7 +215,7 @@ describe('RuleContributionChart', () => {
   });
 
   it('has accessible labels', () => {
-    render(
+    renderWithTheme(
       <RuleContributionChart
         contributions={mockContributions}
         baseScore={50}
@@ -225,7 +231,7 @@ describe('RuleContributionChart', () => {
   it('supports keyboard navigation on bars', () => {
     const mockOnClick = jest.fn();
 
-    render(
+    renderWithTheme(
       <RuleContributionChart
         contributions={mockContributions}
         baseScore={50}
