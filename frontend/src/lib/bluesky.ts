@@ -456,10 +456,13 @@ export function useCreateBlueskyPost() {
   return useMutation({
     mutationFn: async (post: Partial<CanonicalPost>): Promise<PlatformMapping> => {
       const response = await blueskyApi.createPost(post.content || '');
+      // Extract DID from URI (at://did:plc:xxx/app.bsky.feed.post/rkey)
+      const parsed = parseATUri(response.uri);
+      const did = parsed?.repo || 'unknown';
       return {
         platform: 'bluesky',
         native_id: response.uri,
-        url: getPostUrl('user.bsky.social', response.uri), // TODO: get actual handle
+        url: getPostUrl(did, response.uri),
         status: 'synced',
         synced_at: new Date().toISOString(),
       };
