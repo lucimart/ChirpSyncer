@@ -8,6 +8,7 @@ const config = {
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '\\.css$': '<rootDir>/src/__tests__/__mocks__/styleMock.js',
   },
   testMatch: [
     '<rootDir>/src/**/*.test.{ts,tsx}',
@@ -16,7 +17,11 @@ const config = {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
       tsconfig: 'tsconfig.jest.json',
     }],
+    '^.+\\.(js|jsx)$': 'babel-jest',
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@nivo|d3|d3-.*|internmap|delaunator|robust-predicates)/)',
+  ],
   collectCoverageFrom: [
     'src/components/**/*.{ts,tsx}',
     'src/hooks/**/*.{ts,tsx}',

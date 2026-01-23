@@ -1,7 +1,9 @@
 # ChirpSyncer Makefile
 # Simple commands for development and deployment
 
-.PHONY: help dev dev-docker start stop logs test lint setup seed clean
+.PHONY: help dev start stop logs test lint setup seed clean \
+        docker-rebuild-frontend docker-rebuild-api restart-frontend restart-api \
+        frontend-clear-cache frontend-reset-cache dev-rebuild docker-clean
 
 # Default target
 help:
@@ -32,6 +34,13 @@ help:
 	@echo "Production:"
 	@echo "  make start         Start production containers"
 	@echo "  make rebuild       Rebuild and restart containers"
+	@echo ""
+	@echo "Docker Management:"
+	@echo "  make dev-rebuild            Rebuild all services (no cache)"
+	@echo "  make docker-rebuild-frontend  Rebuild frontend only (no cache)"
+	@echo "  make frontend-clear-cache   Clear Next.js cache and restart"
+	@echo "  make restart-frontend       Restart frontend (no rebuild)"
+	@echo "  make docker-clean           Remove all containers and prune"
 	@echo ""
 
 # =============================================================================
@@ -170,3 +179,41 @@ docker-shell-api:
 
 docker-shell-frontend:
 	docker exec -it chirp-frontend-dev /bin/sh
+
+# Rebuild specific service without cache
+docker-rebuild-frontend:
+	docker compose -f docker-compose.dev.yml build --no-cache frontend
+	docker compose -f docker-compose.dev.yml up -d frontend
+	@echo "Frontend rebuilt and restarted"
+
+docker-rebuild-api:
+	docker compose -f docker-compose.dev.yml build --no-cache api
+	docker compose -f docker-compose.dev.yml up -d api
+	@echo "API rebuilt and restarted"
+
+# Restart services (no rebuild)
+restart-frontend:
+	docker compose -f docker-compose.dev.yml restart frontend
+
+restart-api:
+	docker compose -f docker-compose.dev.yml restart api
+
+# Clear Next.js cache inside container and restart
+frontend-clear-cache:
+	docker compose -f docker-compose.dev.yml exec frontend rm -rf .next 2>/dev/null || true
+	docker compose -f docker-compose.dev.yml restart frontend
+	@echo "Frontend cache cleared and restarted"
+
+# Full cache clear (removes Docker volume - use when cache issues persist)
+frontend-reset-cache:
+	docker compose -f docker-compose.dev.yml stop frontend
+	docker volume rm chirpsyncer_frontend_next 2>/dev/null || true
+	docker compose -f docker-compose.dev.yml up -d frontend
+	@echo "Frontend cache volume removed and service restarted"
+
+# Full dev rebuild (all services, no cache)
+dev-rebuild:
+	docker compose -f docker-compose.dev.yml down
+	docker compose -f docker-compose.dev.yml build --no-cache
+	docker compose -f docker-compose.dev.yml up -d
+	@echo "All services rebuilt and started"
