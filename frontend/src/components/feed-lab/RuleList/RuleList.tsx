@@ -54,12 +54,13 @@ const RulesContainer = styled.div`
 `;
 
 const RuleCard = styled.div<{ $enabled: boolean; $isDragging?: boolean }>`
-  background: ${({ theme }) => theme.colors.background.primary};
+  background: ${({ theme, $enabled }) =>
+    $enabled ? theme.colors.background.primary : theme.colors.background.tertiary};
   border: 1px solid ${({ theme }) => theme.colors.border.light};
   border-radius: ${({ theme }) => theme.borderRadius.lg};
   padding: ${({ theme }) => theme.spacing[4]};
   transition: all ${({ theme }) => theme.transitions.fast};
-  opacity: ${({ $enabled, $isDragging }) => ($isDragging ? 0.5 : $enabled ? 1 : 0.85)};
+  opacity: ${({ $isDragging }) => ($isDragging ? 0.5 : 1)};
   cursor: ${({ $isDragging }) => ($isDragging ? 'grabbing' : 'default')};
 
   &:hover {

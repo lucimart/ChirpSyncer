@@ -120,7 +120,7 @@ const ConditionsPreview = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.spacing[2]};
   font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
+  color: ${({ theme }) => theme.colors.text.secondary};
   margin-bottom: ${({ theme }) => theme.spacing[3]};
 `;
 

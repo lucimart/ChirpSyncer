@@ -50,7 +50,7 @@ const CloseButton = styled.button`
   border: none;
   cursor: pointer;
   padding: ${({ theme }) => theme.spacing[2]};
-  color: ${({ theme }) => theme.colors.text.tertiary};
+  color: ${({ theme }) => theme.colors.text.secondary};
   font-size: ${({ theme }) => theme.fontSizes.xl};
   line-height: 1;
   transition: ${({ theme }) => theme.transitions.fast};

@@ -49,7 +49,6 @@ const StepContainer = styled.div<{
   ${({ $status, theme }) =>
     $status === 'completed' &&
     css`
-      opacity: 0.7;
       background-color: ${theme.colors.success[50]};
       border-color: ${theme.colors.success[500]};
     `}
