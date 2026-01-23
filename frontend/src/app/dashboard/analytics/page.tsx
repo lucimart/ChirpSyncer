@@ -304,8 +304,8 @@ export default function AnalyticsPage() {
     return { nodes, links };
   }, []);
 
-  const handleNetworkNodeClick = (node: NetworkNode) => {
-    console.log('Clicked node:', node);
+  const handleNetworkNodeClick = (_node: NetworkNode) => {
+    // Node click handling - could show node details in a modal
   };
 
   const handleExportData = () => {

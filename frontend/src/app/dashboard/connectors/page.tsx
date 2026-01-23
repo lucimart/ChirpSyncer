@@ -218,12 +218,12 @@ export default function ConnectorsPage() {
     });
   }
 
-  const handleNodeClick = (platform: Platform) => {
-    console.log('Node clicked:', platform);
+  const handleNodeClick = (_platform: Platform) => {
+    // Platform node click handling - could show platform settings
   };
 
-  const handleEdgeClick = (connection: SyncConnection) => {
-    console.log('Edge clicked:', connection);
+  const handleEdgeClick = (_connection: SyncConnection) => {
+    // Connection edge click handling - could show sync settings
   };
 
   const getConnection = (platform: PlatformType): PlatformConnection | undefined => {
@@ -480,6 +480,7 @@ export default function ConnectorsPage() {
             data={flowDiagramData}
             onNodeClick={handleNodeClick}
             onEdgeClick={handleEdgeClick}
+            showParticles
           />
         </div>
       ) : (
