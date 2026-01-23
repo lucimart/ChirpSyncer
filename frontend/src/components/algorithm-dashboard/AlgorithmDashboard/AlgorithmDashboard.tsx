@@ -3,9 +3,9 @@
  * Transparency dashboard showing how the algorithm affects the feed
  */
 
-import React, { useCallback } from 'react';
-import { FeedCompositionChart } from './FeedCompositionChart';
-import { RuleImpactSummary, RuleImpact as SummaryRuleImpact } from './RuleImpactSummary';
+import { useCallback, useMemo, type FC, type CSSProperties } from 'react';
+import { FeedCompositionChart } from '../FeedCompositionChart';
+import { RuleImpactSummary, type RuleImpact as SummaryRuleImpact } from '../RuleImpactSummary';
 
 export interface FeedComposition {
   boosted: number;
@@ -105,7 +105,7 @@ function mapTopRulesToSummaryFormat(topRules: RuleImpact[]): SummaryRuleImpact[]
   });
 }
 
-export function AlgorithmDashboard({
+export const AlgorithmDashboard: FC<AlgorithmDashboardProps> = ({
   stats,
   isLoading = false,
   error = null,
@@ -113,7 +113,7 @@ export function AlgorithmDashboard({
   onToggleAlgorithm,
   onEditRules,
   onViewRule,
-}: AlgorithmDashboardProps) {
+}) => {
   const handleToggle = useCallback(() => {
     onToggleAlgorithm?.(!algorithmEnabled);
   }, [algorithmEnabled, onToggleAlgorithm]);
@@ -126,6 +126,37 @@ export function AlgorithmDashboard({
   const handleRuleClick = useCallback((ruleId: string) => {
     onViewRule?.(ruleId);
   }, [onViewRule]);
+
+  // Memoized computed values
+  const lastUpdatedRaw = useMemo(
+    () => stats?.lastUpdated || stats?.lastUpdate || '',
+    [stats?.lastUpdated, stats?.lastUpdate]
+  );
+
+  const formattedTimestamp = useMemo(
+    () => (lastUpdatedRaw ? formatTimestamp(lastUpdatedRaw) : ''),
+    [lastUpdatedRaw]
+  );
+
+  const transparencyScore = useMemo(
+    () => stats?.transparencyScore ?? 0,
+    [stats?.transparencyScore]
+  );
+
+  const isLowTransparency = useMemo(
+    () => transparencyScore < LOW_TRANSPARENCY_THRESHOLD,
+    [transparencyScore]
+  );
+
+  const mappedTopRules = useMemo(
+    () => (stats?.topRules ? mapTopRulesToSummaryFormat(stats.topRules) : []),
+    [stats?.topRules]
+  );
+
+  const scoreBarStyle = useMemo<CSSProperties>(
+    () => ({ '--score-percentage': `${transparencyScore}%` } as CSSProperties),
+    [transparencyScore]
+  );
 
   // Loading state
   if (isLoading) {
@@ -167,18 +198,6 @@ export function AlgorithmDashboard({
       </div>
     );
   }
-
-  // Get timestamp from either field
-  const lastUpdatedRaw = stats?.lastUpdated || stats?.lastUpdate || '';
-  const formattedTimestamp = lastUpdatedRaw ? formatTimestamp(lastUpdatedRaw) : '';
-
-  const transparencyScore = stats?.transparencyScore ?? 0;
-  const isLowTransparency = transparencyScore < LOW_TRANSPARENCY_THRESHOLD;
-
-  // Map topRules to correct format (tests use different property names)
-  const mappedTopRules = stats?.topRules
-    ? mapTopRulesToSummaryFormat(stats.topRules as unknown as RuleImpact[])
-    : [];
 
   return (
     <div
@@ -251,7 +270,7 @@ export function AlgorithmDashboard({
 
               <div
                 className="algorithm-dashboard__score-bar"
-                style={{ '--score-percentage': `${transparencyScore}%` } as React.CSSProperties}
+                style={scoreBarStyle}
                 aria-hidden="true"
               >
                 <div className="algorithm-dashboard__score-bar-fill" />

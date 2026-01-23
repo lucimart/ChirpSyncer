@@ -3,6 +3,7 @@
 import styled from 'styled-components';
 import { Heart, MessageCircle, Repeat2, Quote, MoreHorizontal, ExternalLink } from 'lucide-react';
 import { ATProtoPost, getProfileUrl } from '@/lib/bluesky';
+import { Avatar } from '@/components/ui';
 
 const PostCard = styled.article`
   padding: ${({ theme }) => theme.spacing[4]};
@@ -18,22 +19,6 @@ const PostHeader = styled.div`
   display: flex;
   align-items: flex-start;
   gap: ${({ theme }) => theme.spacing[3]};
-`;
-
-const Avatar = styled.div<{ $src?: string }>`
-  width: 48px;
-  height: 48px;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  background-color: ${({ theme }) => theme.colors.primary[100]};
-  background-image: ${({ $src }) => ($src ? `url(${$src})` : 'none')};
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${({ theme }) => theme.colors.primary[600]};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  flex-shrink: 0;
 `;
 
 const PostContent = styled.div`
@@ -184,12 +169,12 @@ const ActionButton = styled.button<{ $active?: boolean; $type?: 'reply' | 'repos
             : theme.colors.primary[500]};
     background-color: ${({ $type, theme }) =>
       $type === 'reply'
-        ? theme.colors.primary[50]
+        ? theme.colors.surface.primary.bg
         : $type === 'repost'
-          ? theme.colors.success[50]
+          ? theme.colors.surface.success.bg
           : $type === 'like'
-            ? theme.colors.danger[50]
-            : theme.colors.primary[50]};
+            ? theme.colors.surface.danger.bg
+            : theme.colors.surface.primary.bg};
   }
 
   ${({ $active, $type, theme }) =>
@@ -220,7 +205,7 @@ const MoreButton = styled.button`
   border-radius: ${({ theme }) => theme.borderRadius.full};
 
   &:hover {
-    background-color: ${({ theme }) => theme.colors.primary[50]};
+    background-color: ${({ theme }) => theme.colors.surface.primary.bg};
     color: ${({ theme }) => theme.colors.primary[500]};
   }
 
@@ -238,8 +223,8 @@ const Labels = styled.div`
 
 const Label = styled.span`
   padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  background-color: ${({ theme }) => theme.colors.warning[100]};
-  color: ${({ theme }) => theme.colors.warning[700]};
+  background-color: ${({ theme }) => theme.colors.surface.warning.bg};
+  color: ${({ theme }) => theme.colors.surface.warning.text};
   font-size: ${({ theme }) => theme.fontSizes.xs};
   border-radius: ${({ theme }) => theme.borderRadius.full};
 `;
@@ -289,9 +274,7 @@ export function BlueskyPost({
   return (
     <PostCard>
       <PostHeader>
-        <Avatar $src={post.author.avatar}>
-          {!post.author.avatar && post.author.handle[0].toUpperCase()}
-        </Avatar>
+        <Avatar name={post.author.handle} src={post.author.avatar} size="lg" />
         <PostContent>
           <AuthorRow>
             <DisplayName href={profileUrl} target="_blank" rel="noopener noreferrer">

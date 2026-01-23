@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { ErrorCard } from './ErrorCard';
+import { useEffect, useMemo, type FC } from 'react';
+import { ErrorCard } from '../ErrorCard';
 import { useApiError, createFallbackError, type ErrorDefinition } from '@/hooks/useApiError';
 
 interface ApiErrorDisplayProps {
@@ -17,57 +17,30 @@ interface ApiErrorDisplayProps {
   className?: string;
 }
 
-/**
- * ApiErrorDisplay - Displays API errors with contextual information
- * 
- * Automatically matches errors to the error catalog and displays
- * user-friendly messages with actionable solutions.
- * 
- * @example
- * ```tsx
- * const [error, setError] = useState<string | null>(null);
- * 
- * const handleAction = async () => {
- *   const result = await api.someAction();
- *   if (!result.success) {
- *     setError(result.error);
- *   }
- * };
- * 
- * return (
- *   <>
- *     <ApiErrorDisplay 
- *       error={error}
- *       onRetry={handleAction}
- *       onDismiss={() => setError(null)}
- *     />
- *     <button onClick={handleAction}>Do Action</button>
- *   </>
- * );
- * ```
- */
-export function ApiErrorDisplay({
+export const ApiErrorDisplay: FC<ApiErrorDisplayProps> = ({
   error,
   onRetry,
   onDismiss,
   showTechnicalDetails = true,
   className,
-}: ApiErrorDisplayProps) {
+}) => {
   const { error: matchedError, originalError, isRetryable, setError } = useApiError();
 
   // Update the hook when error prop changes
-  React.useEffect(() => {
+  useEffect(() => {
     setError(error);
   }, [error, setError]);
 
-  if (!error) {
+  const errorToDisplay = useMemo<ErrorDefinition | null>(() => {
+    if (!error) return null;
+    return matchedError || createFallbackError(
+      typeof error === 'string' ? error : error.message
+    );
+  }, [error, matchedError]);
+
+  if (!error || !errorToDisplay) {
     return null;
   }
-
-  // Use matched error or create a fallback
-  const errorToDisplay: ErrorDefinition = matchedError || createFallbackError(
-    typeof error === 'string' ? error : error.message
-  );
 
   return (
     <div className={className}>
@@ -80,6 +53,6 @@ export function ApiErrorDisplay({
       />
     </div>
   );
-}
+};
 
 export default ApiErrorDisplay;

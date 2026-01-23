@@ -5,10 +5,14 @@
  * mark all as read functionality, and settings link.
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo, memo, type FC } from 'react';
 import styled from 'styled-components';
+import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Settings, Check } from 'lucide-react';
-import { NotificationItem, Notification } from './NotificationItem';
+import { Stack, Typography, SmallText } from '@/components/ui';
+import { NotificationItem } from '../NotificationItem';
+import { type Notification, DROPDOWN_CONFIG, ICON_SIZES } from '../types';
 
 export interface NotificationCenterProps {
   notifications: Notification[];
@@ -16,6 +20,30 @@ export interface NotificationCenterProps {
   onMarkAllAsRead: () => void;
   onDismiss: (id: string) => void;
 }
+
+// Animation variants
+const dropdownVariants = {
+  hidden: { opacity: 0, y: -10, scale: 0.95 },
+  visible: { opacity: 1, y: 0, scale: 1 },
+  exit: { opacity: 0, y: -10, scale: 0.95 },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: { opacity: 1, x: 0 },
+};
+
+const containerVariants = {
+  visible: {
+    transition: { staggerChildren: 0.05 },
+  },
+};
+
+const badgeVariants = {
+  initial: { scale: 0 },
+  animate: { scale: 1 },
+  exit: { scale: 0 },
+};
 
 // Styled Components
 const Container = styled.div`
@@ -48,7 +76,7 @@ const BellButton = styled.button`
   }
 `;
 
-const UnreadBadge = styled.span`
+const UnreadBadge = styled(motion.span)`
   position: absolute;
   top: 4px;
   right: 4px;
@@ -65,12 +93,12 @@ const UnreadBadge = styled.span`
   border-radius: ${({ theme }) => theme.borderRadius.full};
 `;
 
-const Dropdown = styled.div`
+const Dropdown = styled(motion.div)`
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  width: 380px;
-  max-height: 500px;
+  width: ${DROPDOWN_CONFIG.width}px;
+  max-height: ${DROPDOWN_CONFIG.maxHeight}px;
   background: ${({ theme }) => theme.colors.background.primary};
   border: 1px solid ${({ theme }) => theme.colors.border.default};
   border-radius: ${({ theme }) => theme.borderRadius.lg};
@@ -85,13 +113,6 @@ const DropdownHeader = styled.div`
   justify-content: space-between;
   padding: ${({ theme }) => theme.spacing[4]};
   border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
-`;
-
-const HeaderTitle = styled.h3`
-  margin: 0;
-  font-size: ${({ theme }) => theme.fontSizes.base};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
 const MarkAllReadButton = styled.button`
@@ -109,7 +130,7 @@ const MarkAllReadButton = styled.button`
   transition: ${({ theme }) => theme.transitions.fast};
 
   &:hover {
-    background: ${({ theme }) => theme.colors.primary[50]};
+    background: ${({ theme }) => theme.colors.surface.primary.bg};
   }
 
   &:focus {
@@ -118,8 +139,8 @@ const MarkAllReadButton = styled.button`
   }
 `;
 
-const NotificationList = styled.div`
-  max-height: 380px;
+const NotificationList = styled(motion.div)`
+  max-height: ${DROPDOWN_CONFIG.listMaxHeight}px;
   overflow-y: auto;
 
   /* Custom scrollbar */
@@ -141,21 +162,12 @@ const NotificationList = styled.div`
   }
 `;
 
-const NotificationItemWrapper = styled.div`
+const NotificationItemWrapper = styled(motion.div)`
   border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
 
   &:last-child {
     border-bottom: none;
   }
-`;
-
-const EmptyState = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: ${({ theme }) => theme.spacing[8]};
-  text-align: center;
 `;
 
 const EmptyIcon = styled.div`
@@ -164,16 +176,9 @@ const EmptyIcon = styled.div`
   justify-content: center;
   width: 48px;
   height: 48px;
-  margin-bottom: ${({ theme }) => theme.spacing[3]};
-  background: ${({ theme }) => theme.colors.neutral[100]};
+  background: ${({ theme }) => theme.colors.background.tertiary};
   border-radius: ${({ theme }) => theme.borderRadius.full};
   color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const EmptyText = styled.p`
-  margin: 0;
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
 const DropdownFooter = styled.div`
@@ -184,7 +189,7 @@ const DropdownFooter = styled.div`
   border-top: 1px solid ${({ theme }) => theme.colors.border.light};
 `;
 
-const SettingsLink = styled.a`
+const SettingsLink = styled(Link)`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing[2]};
@@ -198,14 +203,14 @@ const SettingsLink = styled.a`
 
   &:hover {
     color: ${({ theme }) => theme.colors.primary[600]};
-    background: ${({ theme }) => theme.colors.primary[50]};
+    background: ${({ theme }) => theme.colors.surface.primary.bg};
   }
 `;
 
 /**
  * NotificationCenter Component
  */
-export const NotificationCenter: React.FC<NotificationCenterProps> = ({
+export const NotificationCenter: FC<NotificationCenterProps> = memo(({
   notifications,
   onMarkAsRead,
   onMarkAllAsRead,
@@ -214,24 +219,38 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => !n.read).length,
+    [notifications]
+  );
 
   const handleToggle = useCallback(() => {
     setIsOpen((prev) => !prev);
   }, []);
 
-  const handleClickOutside = useCallback((event: MouseEvent) => {
-    if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-      setIsOpen(false);
-    }
-  }, []);
-
+  // Click outside and keyboard handlers (only when open)
   useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleClickOutside]);
+  }, [isOpen]);
 
   return (
     <Container ref={containerRef}>
@@ -242,36 +261,70 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        <Bell size={20} />
-        {unreadCount > 0 && (
-          <UnreadBadge data-testid="unread-count">{unreadCount}</UnreadBadge>
-        )}
+        <Bell size={ICON_SIZES.bell} />
+        <AnimatePresence>
+          {unreadCount > 0 && (
+            <UnreadBadge
+              data-testid="unread-count"
+              variants={badgeVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+            >
+              {unreadCount}
+            </UnreadBadge>
+          )}
+        </AnimatePresence>
       </BellButton>
 
-      {isOpen && (
-        <Dropdown data-testid="notification-dropdown" role="menu">
+      <AnimatePresence>
+        {isOpen && (
+          <Dropdown
+            data-testid="notification-dropdown"
+            role="menu"
+            variants={dropdownVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            transition={{ duration: 0.15 }}
+          >
           <DropdownHeader>
-            <HeaderTitle>Notifications</HeaderTitle>
+            <Typography variant="h4" as="h3">Notifications</Typography>
             <MarkAllReadButton
               onClick={onMarkAllAsRead}
               aria-label="Mark all as read"
             >
-              <Check size={14} />
+              <Check size={ICON_SIZES.action} />
               Mark all as read
             </MarkAllReadButton>
           </DropdownHeader>
 
-          <NotificationList>
+          <NotificationList
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
             {notifications.length === 0 ? (
-              <EmptyState data-testid="notifications-empty">
+              <Stack
+                align="center"
+                justify="center"
+                gap={3}
+                style={{ padding: '2rem', textAlign: 'center' }}
+                data-testid="notifications-empty"
+              >
                 <EmptyIcon>
-                  <Bell size={24} />
+                  <Bell size={ICON_SIZES.empty} />
                 </EmptyIcon>
-                <EmptyText>No notifications</EmptyText>
-              </EmptyState>
+                <SmallText>No notifications</SmallText>
+              </Stack>
             ) : (
               notifications.map((notification) => (
-                <NotificationItemWrapper key={notification.id}>
+                <NotificationItemWrapper
+                  key={notification.id}
+                  variants={itemVariants}
+                  transition={{ duration: 0.15 }}
+                >
                   <NotificationItem
                     notification={notification}
                     onMarkAsRead={onMarkAsRead}
@@ -287,12 +340,15 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
               href="/dashboard/settings/notifications"
               data-testid="notification-settings-link"
             >
-              <Settings size={16} />
+              <Settings size={ICON_SIZES.settings} />
               Notification Settings
             </SettingsLink>
           </DropdownFooter>
         </Dropdown>
-      )}
+        )}
+      </AnimatePresence>
     </Container>
   );
-};
+});
+
+NotificationCenter.displayName = 'NotificationCenter';

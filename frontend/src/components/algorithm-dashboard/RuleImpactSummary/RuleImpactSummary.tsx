@@ -3,7 +3,7 @@
  * Lists top 5 most impactful rules with sorting and interactions
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, type FC, type KeyboardEvent, type MouseEvent } from 'react';
 
 export interface RuleImpact {
   id: string;
@@ -13,12 +13,15 @@ export interface RuleImpact {
   averageImpact?: number;
 }
 
+type SortField = 'impact' | 'postsAffected';
+type SortDirection = 'asc' | 'desc';
+
 export interface RuleImpactSummaryProps {
   rules: RuleImpact[];
   totalPosts?: number;
-  sortBy?: 'impact' | 'postsAffected';
-  sortOrder?: 'asc' | 'desc';
-  onSortChange?: (sortBy: 'impact' | 'postsAffected', sortOrder: 'asc' | 'desc') => void;
+  sortBy?: SortField;
+  sortOrder?: SortDirection;
+  onSortChange?: (sortBy: SortField, sortOrder: SortDirection) => void;
   onViewDetails?: (ruleId: string) => void;
   onRuleClick?: (ruleId: string) => void;
   onViewAllClick?: () => void;
@@ -30,15 +33,19 @@ const TYPE_COLORS: Record<RuleImpact['type'], string> = {
   boost: '#22c55e',
   demote: '#f97316',
   filter: '#ef4444',
-};
+} as const;
 
 const TYPE_LABELS: Record<RuleImpact['type'], string> = {
   boost: 'Boost',
   demote: 'Demote',
   filter: 'Filter',
+} as const;
+
+const formatAverageImpact = (impact: number): string => {
+  return impact >= 0 ? `+${impact} avg` : `${impact} avg`;
 };
 
-export function RuleImpactSummary({
+export const RuleImpactSummary: FC<RuleImpactSummaryProps> = ({
   rules,
   totalPosts,
   sortBy: controlledSortBy,
@@ -47,9 +54,9 @@ export function RuleImpactSummary({
   onViewDetails,
   onRuleClick,
   onViewAllClick,
-}: RuleImpactSummaryProps) {
-  const [internalSortBy, setInternalSortBy] = useState<'impact' | 'postsAffected'>('impact');
-  const [internalSortOrder, setInternalSortOrder] = useState<'asc' | 'desc'>('desc');
+}) => {
+  const [internalSortBy, setInternalSortBy] = useState<SortField>('impact');
+  const [internalSortOrder, setInternalSortOrder] = useState<SortDirection>('desc');
 
   const sortBy = controlledSortBy ?? internalSortBy;
   const sortOrder = controlledSortOrder ?? internalSortOrder;
@@ -62,17 +69,21 @@ export function RuleImpactSummary({
     [onViewDetails, onRuleClick]
   );
 
-  const handleSortClick = useCallback(
-    (newSortBy: 'impact' | 'postsAffected') => {
-      let newSortOrder: 'asc' | 'desc';
-
-      if (sortBy === newSortBy) {
-        // Toggle between asc and desc
-        newSortOrder = sortOrder === 'desc' ? 'asc' : 'desc';
-      } else {
-        // Default to descending when switching to a new sort field
-        newSortOrder = 'desc';
+  const handleRuleKeyDown = useCallback(
+    (ruleId: string) => (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onViewDetails?.(ruleId);
+        onRuleClick?.(ruleId);
       }
+    },
+    [onViewDetails, onRuleClick]
+  );
+
+  const handleSortClick = useCallback(
+    (newSortBy: SortField) => {
+      const newSortOrder: SortDirection =
+        sortBy === newSortBy ? (sortOrder === 'desc' ? 'asc' : 'desc') : 'desc';
 
       if (onSortChange) {
         onSortChange(newSortBy, newSortOrder);
@@ -84,17 +95,20 @@ export function RuleImpactSummary({
     [sortBy, sortOrder, onSortChange]
   );
 
+  const handleViewAllClick = useCallback(
+    (e: MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      onViewAllClick?.();
+    },
+    [onViewAllClick]
+  );
+
   const sortedRules = useMemo(() => {
     const sorted = [...rules].sort((a, b) => {
-      let comparison: number;
-
-      if (sortBy === 'impact') {
-        const aImpact = a.averageImpact ?? 0;
-        const bImpact = b.averageImpact ?? 0;
-        comparison = Math.abs(aImpact) - Math.abs(bImpact);
-      } else {
-        comparison = a.postsAffected - b.postsAffected;
-      }
+      const comparison =
+        sortBy === 'impact'
+          ? Math.abs(a.averageImpact ?? 0) - Math.abs(b.averageImpact ?? 0)
+          : a.postsAffected - b.postsAffected;
 
       return sortOrder === 'asc' ? comparison : -comparison;
     });
@@ -109,10 +123,6 @@ export function RuleImpactSummary({
     },
     [totalPosts]
   );
-
-  const formatAverageImpact = (impact: number): string => {
-    return impact >= 0 ? `+${impact} avg` : `${impact} avg`;
-  };
 
   if (rules.length === 0) {
     return (
@@ -182,12 +192,7 @@ export function RuleImpactSummary({
               data-testid={`rule-impact-item-${rule.id}`}
               className="rule-impact-summary__item"
               onClick={() => handleRuleClick(rule.id)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleRuleClick(rule.id);
-                }
-              }}
+              onKeyDown={handleRuleKeyDown(rule.id)}
               role="button"
               tabIndex={0}
               aria-label={`${rule.name}, ${TYPE_LABELS[rule.type]} rule, ${rule.postsAffected} posts affected`}
@@ -242,10 +247,7 @@ export function RuleImpactSummary({
       <div className="rule-impact-summary__footer">
         <a
           href="#view-all-rules"
-          onClick={(e) => {
-            e.preventDefault();
-            onViewAllClick?.();
-          }}
+          onClick={handleViewAllClick}
           className="rule-impact-summary__view-all-link"
           aria-label="View all rules"
         >
@@ -254,4 +256,4 @@ export function RuleImpactSummary({
       </div>
     </div>
   );
-}
+};

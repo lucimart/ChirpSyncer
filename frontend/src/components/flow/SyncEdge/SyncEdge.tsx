@@ -1,18 +1,18 @@
 'use client';
 
-import React from 'react';
+import { memo, useCallback, useMemo, type FC, type CSSProperties } from 'react';
 import styled, { css, keyframes } from 'styled-components';
 import { Badge } from '@/components/ui';
+import type { SyncConnection } from '../types';
+import {
+  STATUS_COLORS,
+  STATUS_BADGE_VARIANTS,
+  DEFAULT_COLOR,
+  formatRelativeTime,
+} from '../constants';
 
-export interface SyncConnection {
-  id: string;
-  sourceId: string;
-  targetId: string;
-  status: 'active' | 'paused' | 'error';
-  lastSync?: string;
-  syncCount?: number;
-  direction: 'unidirectional' | 'bidirectional';
-}
+// Re-export for backwards compatibility
+export type { SyncConnection };
 
 interface SyncEdgeProps {
   connection: SyncConnection;
@@ -20,10 +20,9 @@ interface SyncEdgeProps {
   isHovered: boolean;
 }
 
-const statusColors = {
-  active: '#22C55E',
-  paused: '#EAB308',
-  error: '#EF4444',
+const BADGE_STYLE: CSSProperties = {
+  textTransform: 'capitalize',
+  marginBottom: '12px',
 };
 
 const flowAnimation = keyframes`
@@ -36,7 +35,7 @@ const flowAnimation = keyframes`
 `;
 
 const EdgeContainer = styled.div<{
-  $status: string;
+  $status: SyncConnection['status'];
   $isHovered: boolean;
   $animated: boolean;
 }>`
@@ -45,7 +44,7 @@ const EdgeContainer = styled.div<{
   align-items: center;
   padding: ${({ theme }) => theme.spacing[3]};
   background: ${({ theme }) => theme.colors.background.tertiary};
-  border: 2px solid ${({ $status }) => statusColors[$status as keyof typeof statusColors] || '#ccc'};
+  border: 2px solid ${({ $status }) => STATUS_COLORS[$status] || DEFAULT_COLOR};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   cursor: pointer;
   transition: all 0.2s ease;
@@ -60,7 +59,11 @@ const EdgeContainer = styled.div<{
     `}
 `;
 
-const DirectionIndicator = styled.div<{ $direction: string; $status: string; $animated: boolean }>`
+const DirectionIndicator = styled.div<{
+  $direction: SyncConnection['direction'];
+  $status: SyncConnection['status'];
+  $animated: boolean;
+}>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -69,7 +72,7 @@ const DirectionIndicator = styled.div<{ $direction: string; $status: string; $an
   svg {
     width: 32px;
     height: 32px;
-    color: ${({ $status }) => statusColors[$status as keyof typeof statusColors]};
+    color: ${({ $status }) => STATUS_COLORS[$status]};
 
     ${({ $animated }) =>
       $animated &&
@@ -101,45 +104,51 @@ const LastSync = styled.span`
 `;
 
 
-const ArrowRight = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line className="arrow-line" x1="4" y1="12" x2="20" y2="12" />
-    <polyline points="14,6 20,12 14,18" />
-  </svg>
-);
+// Icon components - memoized since they never change
+const ArrowRight: FC = memo(function ArrowRight() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line className="arrow-line" x1="4" y1="12" x2="20" y2="12" />
+      <polyline points="14,6 20,12 14,18" />
+    </svg>
+  );
+});
 
-const ArrowBidirectional = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line className="arrow-line" x1="4" y1="12" x2="20" y2="12" />
-    <polyline points="8,6 2,12 8,18" />
-    <polyline points="16,6 22,12 16,18" />
-  </svg>
-);
+const ArrowBidirectional: FC = memo(function ArrowBidirectional() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line className="arrow-line" x1="4" y1="12" x2="20" y2="12" />
+      <polyline points="8,6 2,12 8,18" />
+      <polyline points="16,6 22,12 16,18" />
+    </svg>
+  );
+});
 
-function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
+// Direction icons map for O(1) lookup
+const DIRECTION_ICONS: Record<SyncConnection['direction'], FC> = {
+  unidirectional: ArrowRight,
+  bidirectional: ArrowBidirectional,
+};
 
-  if (diffMins < 1) return 'Just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays}d ago`;
-}
-
-export const SyncEdge: React.FC<SyncEdgeProps> = ({
+export const SyncEdge: FC<SyncEdgeProps> = memo(function SyncEdge({
   connection,
   onClick,
   isHovered,
-}) => {
-  const handleClick = () => {
+}) {
+  const handleClick = useCallback(() => {
     onClick(connection);
-  };
+  }, [onClick, connection]);
 
   const isAnimated = connection.status === 'active';
+
+  // Memoize formatted last sync time
+  const formattedLastSync = useMemo(
+    () => (connection.lastSync ? formatRelativeTime(connection.lastSync) : null),
+    [connection.lastSync]
+  );
+
+  // Get the direction icon component
+  const DirectionIcon = DIRECTION_ICONS[connection.direction];
 
   return (
     <EdgeContainer
@@ -159,19 +168,13 @@ export const SyncEdge: React.FC<SyncEdgeProps> = ({
         $status={connection.status}
         $animated={isAnimated}
       >
-        {connection.direction === 'bidirectional' ? <ArrowBidirectional /> : <ArrowRight />}
+        <DirectionIcon />
       </DirectionIndicator>
 
       <Badge
-        variant={
-          connection.status === 'active'
-            ? 'status-success'
-            : connection.status === 'paused'
-              ? 'status-warning'
-              : 'status-danger'
-        }
+        variant={STATUS_BADGE_VARIANTS[connection.status]}
         size="xs"
-        style={{ textTransform: 'capitalize', marginBottom: '12px' }}
+        style={BADGE_STYLE}
       >
         {connection.status}
       </Badge>
@@ -180,12 +183,12 @@ export const SyncEdge: React.FC<SyncEdgeProps> = ({
         {connection.syncCount !== undefined && (
           <SyncCount>{connection.syncCount} synced</SyncCount>
         )}
-        {connection.lastSync && (
+        {formattedLastSync && (
           <LastSync data-testid="edge-last-sync">
-            {formatRelativeTime(connection.lastSync)}
+            {formattedLastSync}
           </LastSync>
         )}
       </StatsRow>
     </EdgeContainer>
   );
-};
+});

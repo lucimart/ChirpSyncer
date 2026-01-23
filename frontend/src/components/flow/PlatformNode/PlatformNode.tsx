@@ -1,19 +1,16 @@
 'use client';
 
-import React from 'react';
+import { memo, useCallback, useMemo, type FC } from 'react';
 import styled, { css } from 'styled-components';
+import type { Platform } from '../types';
+import {
+  PLATFORM_COLORS,
+  DEFAULT_COLOR,
+  formatRelativeTime,
+} from '../constants';
 
-export interface Platform {
-  id: string;
-  name: string;
-  connected: boolean;
-  icon?: string;
-  color?: string;
-  status?: 'active' | 'paused';
-  handle?: string;
-  lastSync?: string;
-  postsCount?: number;
-}
+// Re-export for backwards compatibility
+export type { Platform };
 
 interface PlatformNodeProps {
   platform: Platform;
@@ -22,10 +19,8 @@ interface PlatformNodeProps {
   isSelected: boolean;
 }
 
-const platformColors: Record<string, string> = {
-  twitter: '#1DA1F2',
-  bluesky: '#0085FF',
-};
+// Component-specific constants
+const ICON_SIZE = 24;
 
 const NodeContainer = styled.div<{
   $platform: string;
@@ -38,7 +33,7 @@ const NodeContainer = styled.div<{
   align-items: center;
   padding: ${({ theme }) => theme.spacing[4]};
   background: ${({ theme }) => theme.colors.background.secondary};
-  border: 2px solid ${({ $platform }) => platformColors[$platform] || '#ccc'};
+  border: 2px solid ${({ $platform }) => PLATFORM_COLORS[$platform] || DEFAULT_COLOR};
   border-radius: ${({ theme }) => theme.borderRadius.lg};
   cursor: pointer;
   transition: ${({ theme }) => theme.transitions.default};
@@ -56,7 +51,7 @@ const NodeContainer = styled.div<{
     $isSelected &&
     css`
       border-width: 3px;
-      background: ${platformColors[$platform]}10;
+      background: ${PLATFORM_COLORS[$platform]}10;
     `}
 
   ${({ $connected }) =>
@@ -71,7 +66,7 @@ const IconWrapper = styled.div<{ $platform: string }>`
   width: 48px;
   height: 48px;
   border-radius: 9999px;
-  background: ${({ $platform }) => platformColors[$platform] || '#ccc'};
+  background: ${({ $platform }) => PLATFORM_COLORS[$platform] || DEFAULT_COLOR};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -117,41 +112,47 @@ const StatusDot = styled.div<{ $connected: boolean }>`
   right: 8px;
 `;
 
-const TwitterIcon = () => (
-  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-  </svg>
-);
+// Icon components - memoized since they never change
+const TwitterIcon: FC = memo(function TwitterIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={ICON_SIZE} height={ICON_SIZE} fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+});
 
-const BlueskyIcon = () => (
-  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-    <path d="M12 2C8.5 5.5 5 9 5 12.5c0 2.5 1.5 4.5 4 5-.5.5-1.5 1-2.5 1.5 2.5.5 5 0 7-.5-3 1-6 1.5-7.5 2 5-1 10-1 13 0-1.5-.5-4.5-1-7.5-2 2 .5 4.5 1 7 .5-1-.5-2-1-2.5-1.5 2.5-.5 4-2.5 4-5C19 9 15.5 5.5 12 2z" />
-  </svg>
-);
+const BlueskyIcon: FC = memo(function BlueskyIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={ICON_SIZE} height={ICON_SIZE} fill="currentColor">
+      <path d="M12 2C8.5 5.5 5 9 5 12.5c0 2.5 1.5 4.5 4 5-.5.5-1.5 1-2.5 1.5 2.5.5 5 0 7-.5-3 1-6 1.5-7.5 2 5-1 10-1 13 0-1.5-.5-4.5-1-7.5-2 2 .5 4.5 1 7 .5-1-.5-2-1-2.5-1.5 2.5-.5 4-2.5 4-5C19 9 15.5 5.5 12 2z" />
+    </svg>
+  );
+});
 
-function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
+// Platform icon map for O(1) lookup
+const PLATFORM_ICONS: Record<string, FC> = {
+  twitter: TwitterIcon,
+  bluesky: BlueskyIcon,
+};
 
-  if (diffMins < 1) return 'Just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays}d ago`;
-}
-
-export const PlatformNode: React.FC<PlatformNodeProps> = ({
+export const PlatformNode: FC<PlatformNodeProps> = memo(function PlatformNode({
   platform,
   onClick,
   isHovered,
   isSelected,
-}) => {
-  const handleClick = () => {
+}) {
+  const handleClick = useCallback(() => {
     onClick(platform);
-  };
+  }, [onClick, platform]);
+
+  // Memoize formatted last sync time
+  const formattedLastSync = useMemo(
+    () => (platform.lastSync ? formatRelativeTime(platform.lastSync) : null),
+    [platform.lastSync]
+  );
+
+  // Get the icon component for this platform
+  const IconComponent = PLATFORM_ICONS[platform.name] ?? BlueskyIcon;
 
   return (
     <NodeContainer
@@ -168,19 +169,19 @@ export const PlatformNode: React.FC<PlatformNodeProps> = ({
     >
       <StatusDot $connected={platform.connected} />
       <IconWrapper $platform={platform.name} data-testid="platform-icon">
-        {platform.name === 'twitter' ? <TwitterIcon /> : <BlueskyIcon />}
+        <IconComponent />
       </IconWrapper>
       <PlatformName>{platform.name}</PlatformName>
       <StatsContainer>
         {platform.postsCount !== undefined && (
           <PostsCount>{platform.postsCount} posts</PostsCount>
         )}
-        {platform.lastSync && (
+        {formattedLastSync && (
           <LastSyncTime data-testid="last-sync-time">
-            Last sync: {formatRelativeTime(platform.lastSync)}
+            Last sync: {formattedLastSync}
           </LastSyncTime>
         )}
       </StatsContainer>
     </NodeContainer>
   );
-};
+});

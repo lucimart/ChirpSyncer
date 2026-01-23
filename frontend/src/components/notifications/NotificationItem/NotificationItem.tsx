@@ -5,32 +5,19 @@
  * timestamp, action buttons and dismiss functionality.
  */
 
-import React from 'react';
+import { useCallback, memo, type FC, type MouseEvent } from 'react';
 import styled, { css } from 'styled-components';
+import { X } from 'lucide-react';
+import { Stack } from '@/components/ui';
 import {
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  Info,
-  Clock,
-  TrendingDown,
-  RefreshCw,
-  Bell,
-  X,
-} from 'lucide-react';
-
-// Types
-export interface Notification {
-  id: string;
-  type: 'sync_complete' | 'sync_failed' | 'rate_limit' | 'credential_expired' | 'scheduled_post' | 'engagement_alert';
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-  severity: 'info' | 'warning' | 'error' | 'success';
-  actionUrl?: string;
-  actionLabel?: string;
-}
+  type Notification,
+  type NotificationSeverity,
+  SEVERITY_COLORS,
+  TYPE_ICONS,
+  DEFAULT_ICON,
+  ICON_SIZES,
+  formatRelativeTime,
+} from '../types';
 
 export interface NotificationItemProps {
   notification: Notification;
@@ -38,49 +25,15 @@ export interface NotificationItemProps {
   onDismiss: (id: string) => void;
 }
 
-// Severity color mapping
-const severityColors = {
-  success: {
-    bg: 'rgba(34, 197, 94, 0.1)',
-    border: '#22c55e',
-    icon: '#22c55e',
-  },
-  error: {
-    bg: 'rgba(239, 68, 68, 0.1)',
-    border: '#ef4444',
-    icon: '#ef4444',
-  },
-  warning: {
-    bg: 'rgba(245, 158, 11, 0.1)',
-    border: '#f59e0b',
-    icon: '#f59e0b',
-  },
-  info: {
-    bg: 'rgba(59, 130, 246, 0.1)',
-    border: '#3b82f6',
-    icon: '#3b82f6',
-  },
-};
-
-// Type to icon mapping
-const typeIcons: Record<Notification['type'], React.ComponentType<{ size?: number | string; className?: string }>> = {
-  sync_complete: CheckCircle,
-  sync_failed: XCircle,
-  rate_limit: AlertTriangle,
-  credential_expired: AlertTriangle,
-  scheduled_post: Clock,
-  engagement_alert: TrendingDown,
-};
-
 // Styled Components
-const ItemContainer = styled.div<{ $severity: Notification['severity']; $read: boolean }>`
+const ItemContainer = styled.div<{ $severity: NotificationSeverity; $read: boolean }>`
   display: flex;
   align-items: flex-start;
   gap: ${({ theme }) => theme.spacing[3]};
   padding: ${({ theme }) => theme.spacing[4]};
   background: ${({ theme, $read }) =>
     $read ? theme.colors.background.secondary : theme.colors.background.primary};
-  border-left: 3px solid ${({ $severity }) => severityColors[$severity].border};
+  border-left: 3px solid ${({ $severity }) => SEVERITY_COLORS[$severity].border};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   cursor: pointer;
   transition: ${({ theme }) => theme.transitions.fast};
@@ -104,21 +57,16 @@ const ItemContainer = styled.div<{ $severity: Notification['severity']; $read: b
   }
 `;
 
-const IconWrapper = styled.div<{ $severity: Notification['severity'] }>`
+const IconWrapper = styled.div<{ $severity: NotificationSeverity }>`
   display: flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
   border-radius: ${({ theme }) => theme.borderRadius.full};
-  background: ${({ $severity }) => severityColors[$severity].bg};
-  color: ${({ $severity }) => severityColors[$severity].icon};
+  background: ${({ $severity }) => SEVERITY_COLORS[$severity].bg};
+  color: ${({ $severity }) => SEVERITY_COLORS[$severity].icon};
   flex-shrink: 0;
-`;
-
-const ContentWrapper = styled.div`
-  flex: 1;
-  min-width: 0;
 `;
 
 const Title = styled.h4`
@@ -143,32 +91,25 @@ const Timestamp = styled.span`
   color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
-const ActionsWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-  margin-top: ${({ theme }) => theme.spacing[3]};
-`;
-
 const ActionButton = styled.button`
   padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[3]}`};
   font-size: ${({ theme }) => theme.fontSizes.xs};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.primary[600]};
-  background: ${({ theme }) => theme.colors.primary[50]};
-  border: 1px solid ${({ theme }) => theme.colors.primary[200]};
+  color: ${({ theme }) => theme.colors.surface.primary.text};
+  background: ${({ theme }) => theme.colors.surface.primary.bg};
+  border: 1px solid ${({ theme }) => theme.colors.surface.primary.border};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   cursor: pointer;
   transition: ${({ theme }) => theme.transitions.fast};
 
   &:hover {
-    background: ${({ theme }) => theme.colors.primary[100]};
+    background: ${({ theme }) => theme.colors.surface.primary.bg};
     border-color: ${({ theme }) => theme.colors.primary[300]};
   }
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary[200]};
+    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.surface.primary.border};
   }
 `;
 
@@ -190,7 +131,7 @@ const DismissButton = styled.button`
   transition: ${({ theme }) => theme.transitions.fast};
 
   &:hover {
-    background: ${({ theme }) => theme.colors.neutral[100]};
+    background: ${({ theme }) => theme.colors.background.tertiary};
     color: ${({ theme }) => theme.colors.text.secondary};
   }
 
@@ -201,61 +142,33 @@ const DismissButton = styled.button`
 `;
 
 /**
- * Formats a timestamp into a relative time string
- */
-function formatRelativeTime(timestamp: string): string {
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffSeconds = Math.floor(diffMs / 1000);
-  const diffMinutes = Math.floor(diffSeconds / 60);
-  const diffHours = Math.floor(diffMinutes / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffSeconds < 60) {
-    return 'just now';
-  } else if (diffMinutes < 60) {
-    return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
-  } else if (diffHours < 24) {
-    return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
-  } else if (diffDays < 7) {
-    return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-  } else {
-    return date.toLocaleDateString();
-  }
-}
-
-/**
  * NotificationItem Component
  */
-export const NotificationItem: React.FC<NotificationItemProps> = ({
+export const NotificationItem: FC<NotificationItemProps> = memo(({
   notification,
   onMarkAsRead,
   onDismiss,
 }) => {
   const { id, type, title, message, timestamp, read, severity, actionUrl, actionLabel } = notification;
 
-  const IconComponent = typeIcons[type] || Bell;
+  const IconComponent = TYPE_ICONS[type] || DEFAULT_ICON;
 
-  const handleClick = (e: React.MouseEvent) => {
-    // Don't trigger mark as read if clicking dismiss or action button
+  const handleClick = useCallback((e: MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest('[data-testid="dismiss-button"]') || target.closest('button[type="button"]')) {
       return;
     }
     onMarkAsRead(id);
-  };
+  }, [id, onMarkAsRead]);
 
-  const handleDismiss = (e: React.MouseEvent) => {
+  const handleDismiss = useCallback((e: MouseEvent) => {
     e.stopPropagation();
     onDismiss(id);
-  };
+  }, [id, onDismiss]);
 
-  const handleAction = (e: React.MouseEvent) => {
+  const handleAction = useCallback((e: MouseEvent) => {
     e.stopPropagation();
-    // Action button click - could navigate to actionUrl or trigger action
-    // For now, we just prevent propagation
-  };
+  }, []);
 
   return (
     <ItemContainer
@@ -269,10 +182,10 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
       aria-label={`Notification: ${title}`}
     >
       <IconWrapper $severity={severity}>
-        <IconComponent size={18} data-testid="notification-icon" />
+        <IconComponent size={ICON_SIZES.notification} data-testid="notification-icon" />
       </IconWrapper>
 
-      <ContentWrapper>
+      <Stack gap={1} style={{ flex: 1, minWidth: 0 }}>
         <Title>{title}</Title>
         <Message>{message}</Message>
         <Timestamp data-testid="notification-timestamp">
@@ -280,13 +193,13 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
         </Timestamp>
 
         {actionUrl && actionLabel && (
-          <ActionsWrapper>
+          <div style={{ marginTop: '8px' }}>
             <ActionButton type="button" onClick={handleAction}>
               {actionLabel}
             </ActionButton>
-          </ActionsWrapper>
+          </div>
         )}
-      </ContentWrapper>
+      </Stack>
 
       <DismissButton
         data-testid="dismiss-button"
@@ -294,8 +207,10 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
         aria-label="Dismiss notification"
         type="button"
       >
-        <X size={14} />
+        <X size={ICON_SIZES.action} />
       </DismissButton>
     </ItemContainer>
   );
-};
+});
+
+NotificationItem.displayName = 'NotificationItem';

@@ -3,7 +3,7 @@
  * Donut chart showing feed composition breakdown by segment type
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import { memo, useState, useCallback, useMemo, type MouseEvent } from 'react';
 
 export interface FeedComposition {
   boosted: number;
@@ -40,6 +40,19 @@ const SVG_SIZE = 200;
 const CENTER = SVG_SIZE / 2;
 const OUTER_RADIUS = 80;
 const INNER_RADIUS = 50;
+const FULL_CIRCLE_ADJUSTMENT = 359.99;
+const TOOLTIP_OFFSET = 10;
+
+const DEFAULT_COMPOSITION: FeedComposition = {
+  boosted: 0,
+  demoted: 0,
+  filtered: 0,
+  unaffected: 0,
+};
+
+function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
 interface ArcPath {
   key: keyof FeedComposition;
@@ -90,7 +103,7 @@ function describeArc(
   return d;
 }
 
-export function FeedCompositionChart({
+export const FeedCompositionChart = memo(function FeedCompositionChart({
   data,
   composition,
   showLegend = true,
@@ -103,7 +116,7 @@ export function FeedCompositionChart({
 
   // Support both `data` and `composition` props (composition is an alias)
   const safeData = useMemo(
-    () => data ?? composition ?? { boosted: 0, demoted: 0, filtered: 0, unaffected: 0 },
+    () => data ?? composition ?? DEFAULT_COMPOSITION,
     [data, composition]
   );
 
@@ -123,7 +136,7 @@ export function FeedCompositionChart({
       const sweepAngle = (percentage / 100) * 360;
 
       // Avoid rendering a full circle as a single arc (causes rendering issues)
-      const adjustedSweepAngle = sweepAngle >= 360 ? 359.99 : sweepAngle;
+      const adjustedSweepAngle = sweepAngle >= 360 ? FULL_CIRCLE_ADJUSTMENT : sweepAngle;
 
       result.push({
         key: config.key,
@@ -149,7 +162,7 @@ export function FeedCompositionChart({
   }, [safeData, total]);
 
   const handleMouseEnter = useCallback(
-    (segment: keyof FeedComposition, event: React.MouseEvent) => {
+    (segment: keyof FeedComposition, event: MouseEvent) => {
       setHoveredSegment(segment);
       setTooltipPosition({ x: event.clientX, y: event.clientY });
       onSegmentHover?.(segment);
@@ -169,10 +182,37 @@ export function FeedCompositionChart({
     [onSegmentClick]
   );
 
-  const getPercentage = (key: keyof FeedComposition): number => {
-    if (total === 0) return 0;
-    return Math.round((safeData[key] / total) * 100);
-  };
+  // Pre-calculate percentages for all segments
+  const percentages = useMemo(() => {
+    const result: Record<keyof FeedComposition, number> = {
+      boosted: 0,
+      demoted: 0,
+      filtered: 0,
+      unaffected: 0,
+    };
+    if (total === 0) return result;
+    for (const key of Object.keys(safeData) as Array<keyof FeedComposition>) {
+      result[key] = Math.round((safeData[key] / total) * 100);
+    }
+    return result;
+  }, [safeData, total]);
+
+  // Memoize visible legend items
+  const visibleLegendItems = useMemo(
+    () => SEGMENT_CONFIGS.filter((config) => safeData[config.key] > 0),
+    [safeData]
+  );
+
+  // Memoize center display values
+  const centerDisplay = useMemo(() => {
+    if (hoveredSegment) {
+      return {
+        value: `${percentages[hoveredSegment]}%`,
+        label: capitalize(hoveredSegment),
+      };
+    }
+    return { value: '100%', label: 'Total' };
+  }, [hoveredSegment, percentages]);
 
   return (
     <div
@@ -219,7 +259,7 @@ export function FeedCompositionChart({
           textAnchor="middle"
           style={{ fontSize: '14px', fontWeight: 600, fill: '#374151' }}
         >
-          {hoveredSegment ? `${getPercentage(hoveredSegment)}%` : '100%'}
+          {centerDisplay.value}
         </text>
         <text
           x={CENTER}
@@ -227,9 +267,7 @@ export function FeedCompositionChart({
           textAnchor="middle"
           style={{ fontSize: '11px', fill: '#6b7280' }}
         >
-          {hoveredSegment
-            ? hoveredSegment.charAt(0).toUpperCase() + hoveredSegment.slice(1)
-            : 'Total'}
+          {centerDisplay.label}
         </text>
       </svg>
 
@@ -239,8 +277,8 @@ export function FeedCompositionChart({
           role="tooltip"
           style={{
             position: 'fixed',
-            left: tooltipPosition.x + 10,
-            top: tooltipPosition.y + 10,
+            left: tooltipPosition.x + TOOLTIP_OFFSET,
+            top: tooltipPosition.y + TOOLTIP_OFFSET,
             backgroundColor: '#1f2937',
             color: 'white',
             padding: '8px 12px',
@@ -251,7 +289,7 @@ export function FeedCompositionChart({
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           }}
         >
-          {hoveredSegment.charAt(0).toUpperCase() + hoveredSegment.slice(1)}: {getPercentage(hoveredSegment)}%
+          {capitalize(hoveredSegment)}: {percentages[hoveredSegment]}%
         </div>
       )}
 
@@ -269,42 +307,34 @@ export function FeedCompositionChart({
             minWidth: '180px',
           }}
         >
-          {SEGMENT_CONFIGS.map((config) => {
-            const percentage = getPercentage(config.key);
-            const value = safeData[config.key];
-
-            // Only show segments with values > 0
-            if (value === 0) return null;
-
-            return (
-              <div
-                key={config.key}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '8px',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div
-                    style={{
-                      width: '12px',
-                      height: '12px',
-                      borderRadius: '2px',
-                      backgroundColor: config.color,
-                    }}
-                  />
-                  <span style={{ fontSize: '13px', color: '#374151' }}>{config.label}</span>
-                </div>
-                {showPercentages && (
-                  <span style={{ fontSize: '13px', fontWeight: 500, color: '#1f2937' }}>
-                    {percentage}%
-                  </span>
-                )}
+          {visibleLegendItems.map((config) => (
+            <div
+              key={config.key}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '2px',
+                    backgroundColor: config.color,
+                  }}
+                />
+                <span style={{ fontSize: '13px', color: '#374151' }}>{config.label}</span>
               </div>
-            );
-          })}
+              {showPercentages && (
+                <span style={{ fontSize: '13px', fontWeight: 500, color: '#1f2937' }}>
+                  {percentages[config.key]}%
+                </span>
+              )}
+            </div>
+          ))}
 
           {/* Total row */}
           <div
@@ -323,4 +353,4 @@ export function FeedCompositionChart({
       )}
     </div>
   );
-}
+});
