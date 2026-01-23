@@ -43,7 +43,7 @@ const variantStyles = {
   `,
   success: css`
     background-color: ${({ theme }) => theme.colors.success[50]};
-    color: ${({ theme }) => theme.colors.success[700]};
+    color: ${({ theme }) => theme.colors.success[800]};
     border-color: ${({ theme }) => theme.colors.success[100]};
   `,
   warning: css`
