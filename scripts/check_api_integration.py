@@ -10,7 +10,9 @@ BACKEND_ROOT = ROOT / "app" / "web" / "api" / "v1"
 
 def _strip_query(path: str) -> str:
     if "?" in path:
-        return path.split("?", 1)[0]
+        path = path.split("?", 1)[0]
+    # Strip MSW glob patterns (e.g., /api/v1/foo*)
+    path = path.rstrip("*")
     return path
 
 
