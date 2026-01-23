@@ -25,6 +25,12 @@ import {
   Lightbulb,
   FolderOpen,
   Instagram,
+  Inbox,
+  Bell,
+  Library,
+  Zap,
+  Wand2,
+  Command,
 } from 'lucide-react';
 
 // Navigation Types
@@ -104,6 +110,17 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/dashboard/workspaces', icon: Users, label: 'Workspaces' },
       { href: '/dashboard/bookmarks', icon: Bookmark, label: 'Bookmarks' },
       { href: '/dashboard/export', icon: Download, label: 'Export' },
+    ],
+  },
+  {
+    label: 'Command Center',
+    icon: Command,
+    items: [
+      { href: '/dashboard/inbox', icon: Inbox, label: 'Unified Inbox' },
+      { href: '/dashboard/notifications', icon: Bell, label: 'Notifications' },
+      { href: '/dashboard/library', icon: Library, label: 'Content Library' },
+      { href: '/dashboard/workflows', icon: Zap, label: 'Workflows' },
+      { href: '/dashboard/atomize', icon: Wand2, label: 'Atomize' },
     ],
   },
 ];

@@ -30,3 +30,21 @@ export type { NotificationItemProps } from './NotificationItem';
 
 export { NotificationSettings } from './NotificationSettings';
 export type { NotificationSettingsProps } from './NotificationSettings';
+
+// New Notifications Hub components
+export { NotificationCard } from './NotificationCard';
+export type {
+  NotificationCardProps,
+  NotificationWithCategory,
+  NotificationCategory,
+  NotificationPriority,
+} from './NotificationCard';
+
+export { NotificationBell } from './NotificationBell';
+export type { NotificationBellProps } from './NotificationBell';
+
+export { NotificationList } from './NotificationList';
+export type { NotificationListProps } from './NotificationList';
+
+export { PreferencesPanel } from './PreferencesPanel';
+export type { PreferencesPanelProps, NotificationChannelPreferences } from './PreferencesPanel';

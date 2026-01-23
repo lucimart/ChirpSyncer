@@ -33,6 +33,11 @@ from app.auth.auth_decorators import require_auth, require_admin, require_self_o
 from app.auth.security_utils import validate_password
 from app.features.analytics_tracker import AnalyticsTracker
 from app.features.search_engine import SearchEngine
+from app.features.inbox.service import InboxService
+from app.features.notifications.models import init_notifications_hub_db
+from app.features.workflows.models import WorkflowManager
+from app.features.recycling.models import ContentLibrary, RecycleSuggestion
+from app.features.atomization.service import AtomizationService
 from app.models.feed_rule import init_feed_rules_db
 from app.models.workspace import init_workspace_db
 from app.services.user_settings import UserSettings
@@ -120,6 +125,23 @@ def create_app(db_path="chirpsyncer.db", master_key=None):
     # Initialize user settings table for algorithm preferences
     user_settings = UserSettings(db_path)
     user_settings.init_db()
+
+    # Initialize new feature databases
+    inbox_service = InboxService(db_path)
+    inbox_service.init_db()
+
+    init_notifications_hub_db(db_path)
+
+    # WorkflowManager initializes its tables in __init__
+    WorkflowManager(db_path)
+
+    content_library = ContentLibrary(db_path)
+    content_library.init_db()
+    recycle_suggestion = RecycleSuggestion(db_path)
+    recycle_suggestion.init_db()
+
+    # AtomizationService initializes its tables in __init__
+    AtomizationService(db_path)
 
     # ========================================================================
     # HEALTH CHECK

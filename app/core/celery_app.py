@@ -24,6 +24,14 @@ celery_app.conf.beat_schedule = {
         "task": "app.tasks.notification_tasks.send_weekly_reports",
         "schedule": crontab(hour=9, minute=0, day_of_week=1),  # Monday 9 AM UTC
     },
+    "check-scheduled-workflows-every-5-min": {
+        "task": "app.tasks.workflow_tasks.check_scheduled_workflows",
+        "schedule": crontab(minute="*/5"),  # Every 5 minutes
+    },
+    "publish-scheduled-content-every-minute": {
+        "task": "app.tasks.atomization_tasks.publish_scheduled_content",
+        "schedule": crontab(minute="*"),  # Every minute
+    },
 }
 
 celery_app.autodiscover_tasks(["app.tasks"])
