@@ -269,7 +269,7 @@ export function DataTable<T extends { id: string | number }>({
                       ) : sortKey === col.key && sortDirection === 'desc' ? (
                         <ChevronDown size={14} />
                       ) : (
-                        <ChevronUp size={14} style={{ opacity: 0.3 }} />
+                        <ChevronUp size={14} />
                       )}
                     </SortIcon>
                   )}
