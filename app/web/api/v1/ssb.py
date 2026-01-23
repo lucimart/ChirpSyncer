@@ -96,7 +96,7 @@ def _ssb_rpc(
                 error_data = response.json()
                 if "error" in error_data:
                     error_msg = error_data["error"]
-            except Exception:
+            except Exception:  # nosec B110 - intentionally ignore JSON parse errors for error message
                 pass
             raise ApiError("SSB_RPC_ERROR", error_msg, response.status_code)
 
