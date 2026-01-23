@@ -127,7 +127,7 @@ const ConditionsPreview = styled.div`
 const WeightIndicator = styled.span<{ $positive: boolean }>`
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
   color: ${({ $positive, theme }) =>
-    $positive ? theme.colors.success[600] : theme.colors.danger[600]};
+    $positive ? theme.colors.success[700] : theme.colors.danger[700]};
 `;
 
 const MetaRow = styled.div`

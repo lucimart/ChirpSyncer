@@ -118,7 +118,7 @@ const WeightDisplay = styled.div<{ $positive: boolean }>`
   font-size: ${({ theme }) => theme.fontSizes['3xl']};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
   color: ${({ theme, $positive }) =>
-    $positive ? theme.colors.success[600] : theme.colors.danger[600]};
+    $positive ? theme.colors.success[700] : theme.colors.danger[700]};
   text-align: center;
 `;
 
