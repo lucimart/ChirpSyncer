@@ -4,7 +4,7 @@ import { AxeBuilder } from '@axe-core/playwright';
 const config: TestRunnerConfig = {
   async postRender(page) {
     const results = await new AxeBuilder({ page })
-      .include('#root')
+      .include('#storybook-root')
       .analyze();
 
     if (results.violations.length > 0) {
