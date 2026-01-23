@@ -31,6 +31,7 @@ jobs:
   backend-unit:
     name: Backend Unit Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -66,6 +67,7 @@ jobs:
   backend-lint:
     name: Backend Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
 
@@ -91,6 +93,7 @@ jobs:
   frontend-unit:
     name: Frontend Unit Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: frontend
@@ -119,6 +122,7 @@ jobs:
   frontend-lint:
     name: Frontend Lint & Type Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: frontend
@@ -147,6 +151,7 @@ jobs:
   frontend-build:
     name: Frontend Build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [frontend-unit, frontend-lint]
     defaults:
       run:
@@ -181,6 +186,7 @@ jobs:
   docker-build:
     name: Verify Docker Build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [frontend-build] # Optional: wait for frontend build check
     steps:
       - uses: actions/checkout@v4
@@ -197,6 +203,7 @@ jobs:
   ci-passed:
     name: CI Passed
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [backend-unit, backend-lint, frontend-unit, frontend-lint, frontend-build, docker-build]
     if: always()
     steps:
