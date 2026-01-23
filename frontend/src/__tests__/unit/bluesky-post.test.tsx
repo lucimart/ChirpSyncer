@@ -88,7 +88,7 @@ describe('BlueskyPost Component', () => {
       expect(links.some(link => link.textContent === 'noname.bsky.social')).toBe(true);
     });
 
-    it('renders avatar initial when no avatar URL', () => {
+    it('renders avatar initials when no avatar URL', () => {
       const post = createMockPost({
         author: {
           did: 'did:plc:test',
@@ -103,7 +103,8 @@ describe('BlueskyPost Component', () => {
       });
       renderWithTheme(<BlueskyPost post={post} />);
 
-      expect(screen.getByText('T')).toBeInTheDocument();
+      // Avatar component shows first 2 chars of handle, uppercased via CSS
+      expect(screen.getByText('te')).toBeInTheDocument();
     });
   });
 

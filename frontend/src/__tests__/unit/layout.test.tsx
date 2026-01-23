@@ -79,9 +79,10 @@ describe('Sidebar Component', () => {
       expect(screen.getByText('testuser')).toBeInTheDocument();
     });
 
-    it('renders user avatar initial', () => {
+    it('renders user avatar initials', () => {
       renderWithTheme(<Sidebar />);
-      expect(screen.getByText('T')).toBeInTheDocument();
+      // Avatar component shows first 2 chars for single-word names: 'testuser' -> 'te' (CSS uppercases visually)
+      expect(screen.getByText('te')).toBeInTheDocument();
     });
 
     it('renders sign out button', () => {
@@ -229,7 +230,7 @@ describe('Sidebar Component', () => {
   });
 
   describe('User Display', () => {
-    it('shows U as avatar initial when username is missing', () => {
+    it('shows avatar initials when username is missing', () => {
       mockUseAuth.mockReturnValue({
         user: { id: 1, username: '', email: 'test@example.com', is_admin: false, created_at: '2024-01-01' },
         token: 'test-token',
@@ -243,7 +244,8 @@ describe('Sidebar Component', () => {
       });
 
       renderWithTheme(<Sidebar />);
-      expect(screen.getByText('U')).toBeInTheDocument();
+      // Avatar component shows first 2 chars for single-word names, fallback is 'User' -> 'Us'
+      expect(screen.getByText('Us')).toBeInTheDocument();
     });
 
     it('shows User as username when username is missing', () => {

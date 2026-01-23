@@ -321,13 +321,13 @@ describe('RuleList Component', () => {
     expect(within(firstRule).getByText(/boost/i)).toBeInTheDocument();
     expect(within(firstRule).getByText(/weight: 50/i)).toBeInTheDocument();
 
-    // Check enabled toggle state (uses checkbox, not switch role)
-    const enabledSwitch = within(firstRule).getByRole('checkbox');
+    // Check enabled toggle state
+    const enabledSwitch = within(firstRule).getByRole('switch');
     expect(enabledSwitch).toBeChecked();
 
     // Check second rule (disabled)
     const secondRule = screen.getByTestId('rule-item-2');
-    const disabledSwitch = within(secondRule).getByRole('checkbox');
+    const disabledSwitch = within(secondRule).getByRole('switch');
     expect(disabledSwitch).not.toBeChecked();
   });
 
@@ -343,7 +343,7 @@ describe('RuleList Component', () => {
     );
 
     const firstRule = screen.getByTestId('rule-item-1');
-    const toggleSwitch = within(firstRule).getByRole('checkbox');
+    const toggleSwitch = within(firstRule).getByRole('switch');
 
     await user.click(toggleSwitch);
 
