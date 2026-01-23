@@ -43,18 +43,24 @@ def api_response(data=None, status: int = 200):
 
 
 def _sanitize_details(details):
-    """Sanitize error details to avoid exposing stack traces in production."""
+    """Sanitize error details to avoid exposing stack traces."""
     if details is None:
         return None
-    if os.environ.get("FLASK_ENV") == "production":
-        # In production, only return safe error details
-        if isinstance(details, dict):
-            # Allow only known safe keys
-            safe_keys = {"field", "fields", "validation_errors", "constraint"}
-            return {k: v for k, v in details.items() if k in safe_keys}
-        # Don't expose string details that might contain stack traces
-        return None
-    return details
+    # Always sanitize to prevent information exposure
+    if isinstance(details, dict):
+        # Allow only known safe keys with safe string values
+        safe_keys = {"field", "fields", "validation_errors", "constraint"}
+        sanitized = {}
+        for k, v in details.items():
+            if k in safe_keys:
+                # Ensure values are safe strings, not exception objects
+                if isinstance(v, str) and not _contains_stack_trace(v):
+                    sanitized[k] = v
+                elif isinstance(v, (list, dict)) and not _contains_stack_trace(v):
+                    sanitized[k] = v
+        return sanitized if sanitized else None
+    # Don't expose string details that might contain stack traces
+    return None
 
 
 def api_error(code: str, message: str, status: int = 400, details=None):

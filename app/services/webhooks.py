@@ -626,14 +626,14 @@ class WebhookService:
                 # Non-success status code, will retry
                 last_error = f"HTTP {response.status_code}"
 
-            except requests.exceptions.Timeout as e:
-                logger.warning("Webhook %s timeout: %s", webhook_id, e)
+            except requests.exceptions.Timeout:
+                logger.warning("Webhook %s delivery timeout on attempt %d", webhook_id, attempt)
                 last_error = "Request timeout"
-            except requests.exceptions.ConnectionError as e:
-                logger.warning("Webhook %s connection error: %s", webhook_id, e)
+            except requests.exceptions.ConnectionError:
+                logger.warning("Webhook %s connection failed on attempt %d", webhook_id, attempt)
                 last_error = "Connection error"
-            except Exception as e:
-                logger.exception("Webhook %s unexpected error: %s", webhook_id, e)
+            except Exception:
+                logger.exception("Webhook %s unexpected error on attempt %d", webhook_id, attempt)
                 last_error = "Unexpected error"
 
             # Backoff before retry (except on last attempt)

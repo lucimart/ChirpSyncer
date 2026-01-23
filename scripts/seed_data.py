@@ -674,9 +674,8 @@ def main():
     print("=" * 50)
     print("\nTest Credentials:")
     print("-" * 30)
-    for username, data in users.items():
-        # nosec B105 - Intentional: dev seed script prints test credentials for local development
-        print(f"  {username}: {data['password']}")
+    print("  See CLAUDE.md for test credentials")
+    print(f"  Users created: {', '.join(users.keys())}")
     print("\nYou can now start the dev environment:")
     print("  ./scripts/dev-start.sh  (Linux/macOS)")
     print("  .\\scripts\\dev-start.ps1 (Windows)")
