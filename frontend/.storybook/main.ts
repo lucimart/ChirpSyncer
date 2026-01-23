@@ -15,6 +15,9 @@ const config: StorybookConfig = {
   docs: {
     autodocs: 'tag',
   },
+  typescript: {
+    reactDocgen: 'react-docgen-typescript',
+  },
   webpackFinal: async (config) => {
     config.resolve = config.resolve ?? {};
     config.resolve.alias = {
@@ -23,6 +26,28 @@ const config: StorybookConfig = {
       // Mock next/navigation for Storybook
       'next/navigation': path.resolve(__dirname, './mocks/next-navigation.ts'),
     };
+    config.resolve.extensions = ['.ts', '.tsx', '.js', '.jsx'];
+
+    // Add TypeScript loader
+    config.module = config.module ?? { rules: [] };
+    config.module.rules = config.module.rules ?? [];
+    config.module.rules.push({
+      test: /\.(ts|tsx)$/,
+      exclude: /node_modules/,
+      use: [
+        {
+          loader: require.resolve('babel-loader'),
+          options: {
+            presets: [
+              require.resolve('@babel/preset-env'),
+              require.resolve('@babel/preset-react'),
+              require.resolve('@babel/preset-typescript'),
+            ],
+          },
+        },
+      ],
+    });
+
     return config;
   },
 };
