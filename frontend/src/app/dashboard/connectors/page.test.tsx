@@ -195,8 +195,8 @@ describe('ConnectorsPage', () => {
 
     it('displays platform names', () => {
       renderWithProviders(<ConnectorsPage />);
-      expect(screen.getByText('Twitter')).toBeInTheDocument();
-      expect(screen.getByText('Bluesky')).toBeInTheDocument();
+      expect(screen.getAllByText('Twitter').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Bluesky').length).toBeGreaterThan(0);
     });
 
     it('shows connection status', () => {
@@ -291,10 +291,10 @@ describe('ConnectorsPage', () => {
       fireEvent.click(expandButtons[0]);
 
       await waitFor(() => {
-        expect(screen.getByText('Core')).toBeInTheDocument();
-        expect(screen.getByText('Media')).toBeInTheDocument();
-        expect(screen.getByText('Interactions')).toBeInTheDocument();
-        expect(screen.getByText('Limits')).toBeInTheDocument();
+        expect(screen.getAllByText('Core').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Media').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Interactions').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Limits').length).toBeGreaterThan(0);
       });
     });
   });

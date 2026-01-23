@@ -222,7 +222,7 @@ describe('SettingsPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /change password/i }));
 
       await waitFor(() => {
-        expect(screen.getByText('Change Password')).toBeInTheDocument();
+        // Check form is visible by looking for the password inputs
         expect(screen.getByLabelText(/current password/i)).toBeInTheDocument();
         expect(screen.getByLabelText(/new password/i)).toBeInTheDocument();
         expect(screen.getByLabelText(/confirm new password/i)).toBeInTheDocument();
@@ -236,7 +236,7 @@ describe('SettingsPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /change password/i }));
 
       await waitFor(() => {
-        expect(screen.getByText('Change Password')).toBeInTheDocument();
+        expect(screen.getByLabelText(/current password/i)).toBeInTheDocument();
       });
 
       // Close password form

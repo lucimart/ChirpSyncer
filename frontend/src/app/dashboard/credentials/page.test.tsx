@@ -265,13 +265,14 @@ describe('CredentialsPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /add credential/i }));
 
       await waitFor(() => {
-        expect(screen.getByText('Add Credential')).toBeInTheDocument();
+        // Modal is open - check for form elements
+        expect(screen.getByLabelText(/platform/i)).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
 
       await waitFor(() => {
-        expect(screen.queryByText(/Add Credential/)).not.toBeInTheDocument();
+        expect(screen.queryByLabelText(/platform/i)).not.toBeInTheDocument();
       });
     });
   });
