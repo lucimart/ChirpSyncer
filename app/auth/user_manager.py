@@ -369,8 +369,8 @@ class UserManager:
 
             # Execute update
             values.append(user_id)
-            # nosec B608 - updates contains validated column names
-            query = f"UPDATE users SET {', '.join(updates)} WHERE id = ?"
+            # updates contains validated column names from whitelist
+            query = f"UPDATE users SET {', '.join(updates)} WHERE id = ?"  # nosec B608
             cursor.execute(query, values)
             conn.commit()
 
