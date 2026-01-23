@@ -21,6 +21,9 @@ import {
   Progress,
   Column,
   useToast,
+  StatCard,
+  StatsGrid,
+  SectionTitle,
 } from '@/components/ui';
 import {
   useRealtimeMessage,
@@ -28,7 +31,7 @@ import {
 } from '@/providers/RealtimeProvider';
 import { api } from '@/lib/api';
 
-const PageHeader = styled.div`
+const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -87,36 +90,6 @@ const RuleIcon = styled.div<{ $type: string }>`
 const PageDescription = styled.p`
   color: ${({ theme }) => theme.colors.text.secondary};
   margin-top: ${({ theme }) => theme.spacing[1]};
-`;
-
-const StatsRow = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: ${({ theme }) => theme.spacing[4]};
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const StatCard = styled(Card)`
-  text-align: center;
-`;
-
-const StatValue = styled.div<{ $danger?: boolean }>`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ $danger, theme }) =>
-    $danger ? theme.colors.danger[600] : theme.colors.text.primary};
-`;
-
-const StatLabel = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-const SectionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
 `;
 
 const TableActions = styled.div`
@@ -346,7 +319,7 @@ export default function CleanupPreviewPage({
         Back to rules
       </BackButton>
 
-      <PageHeader>
+      <HeaderContainer>
         <TitleSection>
           <PageTitle>
             {rule && (
@@ -366,28 +339,31 @@ export default function CleanupPreviewPage({
           <Trash2 size={18} />
           Delete {deleteCount} tweets
         </Button>
-      </PageHeader>
+      </HeaderContainer>
 
-      <StatsRow>
-        <StatCard padding="md">
-          <StatValue $danger>{preview?.length ?? 0}</StatValue>
-          <StatLabel>Matching Tweets</StatLabel>
-        </StatCard>
-        <StatCard padding="md">
-          <StatValue>{selectedIds.size}</StatValue>
-          <StatLabel>Selected</StatLabel>
-        </StatCard>
-        <StatCard padding="md">
-          <StatValue>
-            {rule?.rule_type === 'age'
+      <StatsGrid>
+        <StatCard
+          value={preview?.length ?? 0}
+          label="Matching Tweets"
+          variant="centered"
+        />
+        <StatCard
+          value={selectedIds.size}
+          label="Selected"
+          variant="centered"
+        />
+        <StatCard
+          value={
+            rule?.rule_type === 'age'
               ? `${(rule.config.max_age_days as number) ?? (rule.config.days as number) ?? 90} days`
               : rule?.rule_type === 'engagement'
                 ? `< ${(rule.config.min_likes as number) ?? 5} likes`
-                : 'Pattern'}
-          </StatValue>
-          <StatLabel>Rule Criteria</StatLabel>
-        </StatCard>
-      </StatsRow>
+                : 'Pattern'
+          }
+          label="Rule Criteria"
+          variant="centered"
+        />
+      </StatsGrid>
 
       {execution.isRunning || execution.deleted > 0 ? (
         <ExecutionCard padding="lg">

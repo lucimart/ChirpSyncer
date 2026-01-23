@@ -17,11 +17,11 @@ import {
   ToggleLeft,
   ToggleRight,
 } from 'lucide-react';
-import { Button, Card, Input } from '@/components/ui';
+import { Button, Card, Input, Badge } from '@/components/ui';
 import { api } from '@/lib/api';
 import type { AdminUser } from '@/types';
 
-const PageHeader = styled.div`
+const HeaderContainer = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing[4]};
@@ -49,6 +49,7 @@ const PageTitle = styled.h1`
   font-size: ${({ theme }) => theme.fontSizes['2xl']};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
   color: ${({ theme }) => theme.colors.text.primary};
+  flex: 1;
 `;
 
 const ContentGrid = styled.div`
@@ -114,17 +115,6 @@ const InfoValue = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.md};
   color: ${({ theme }) => theme.colors.text.primary};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
-`;
-
-const StatusBadge = styled.span<{ $active: boolean }>`
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  background-color: ${({ $active, theme }) =>
-    $active ? theme.colors.success[100] : theme.colors.danger[100]};
-  color: ${({ $active, theme }) =>
-    $active ? theme.colors.success[700] : theme.colors.danger[700]};
 `;
 
 const FormActions = styled.div`
@@ -336,21 +326,21 @@ export default function UserDetailPage() {
 
   return (
     <div>
-      <PageHeader>
+      <HeaderContainer>
         <BackButton onClick={() => router.push('/dashboard/admin/users')}>
           <ArrowLeft size={16} />
           Back
         </BackButton>
         <PageTitle>{user.username}</PageTitle>
-        <StatusBadge $active={user.is_active}>
+        <Badge variant={user.is_active ? 'success-soft' : 'danger'} size="sm">
           {user.is_active ? 'Active' : 'Inactive'}
-        </StatusBadge>
+        </Badge>
         {user.is_admin && (
-          <StatusBadge $active={true}>
+          <Badge variant="primary" size="sm">
             Admin
-          </StatusBadge>
+          </Badge>
         )}
-      </PageHeader>
+      </HeaderContainer>
 
       {error && <ErrorMessage>{error}</ErrorMessage>}
       {success && <SuccessMessage>{success}</SuccessMessage>}

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import { Search, Trash2, Shield, ShieldOff, UserCheck, UserX } from 'lucide-react';
-import { Button, Card, Modal, Input } from '@/components/ui';
+import { Button, Card, Modal, Input, Badge, PageHeader, EmptyState, DataTable, Column } from '@/components/ui';
 import {
   useAdminUsers,
   useDeleteAdminUser,
@@ -11,21 +11,6 @@ import {
   useToggleUserAdmin,
 } from '@/hooks/useAdminUsers';
 import type { AdminUser } from '@/types';
-
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-  gap: ${({ theme }) => theme.spacing[4]};
-  flex-wrap: wrap;
-`;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
 
 const SearchBox = styled.div`
   position: relative;
@@ -57,74 +42,9 @@ const SearchInput = styled.input`
   }
 `;
 
-const UsersTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-`;
-
-const TableHead = styled.thead`
-  background-color: ${({ theme }) => theme.colors.background.secondary};
-`;
-
-const TableHeader = styled.th`
-  text-align: left;
-  padding: ${({ theme }) => theme.spacing[3]};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.default};
-`;
-
-const TableBody = styled.tbody``;
-
-const TableRow = styled.tr`
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.background.secondary};
-  }
-`;
-
-const TableCell = styled.td`
-  padding: ${({ theme }) => theme.spacing[3]};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const StatusBadge = styled.span<{ $active: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[1]};
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  background-color: ${({ $active, theme }) =>
-    $active ? theme.colors.success[50] : theme.colors.danger[50]};
-  color: ${({ $active, theme }) =>
-    $active ? theme.colors.success[700] : theme.colors.danger[700]};
-`;
-
-const AdminBadge = styled.span<{ $isAdmin: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[1]};
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  background-color: ${({ $isAdmin, theme }) =>
-    $isAdmin ? theme.colors.primary[50] : theme.colors.background.secondary};
-  color: ${({ $isAdmin, theme }) =>
-    $isAdmin ? theme.colors.primary[700] : theme.colors.text.tertiary};
-`;
-
 const Actions = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing[1]};
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: ${({ theme }) => theme.spacing[10]};
-  color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
 const ModalContent = styled.div`
@@ -161,112 +81,121 @@ export default function AdminUsersPage() {
     setDeleteModalUser(null);
   };
 
+  const columns: Column<AdminUser>[] = [
+    { key: 'username', header: 'Username' },
+    { key: 'email', header: 'Email' },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (user) => (
+        <Badge variant={user.is_active ? 'success-soft' : 'danger'} size="sm">
+          {user.is_active ? 'Active' : 'Inactive'}
+        </Badge>
+      ),
+    },
+    {
+      key: 'role',
+      header: 'Role',
+      render: (user) => (
+        <Badge variant={user.is_admin ? 'primary' : 'neutral'} size="sm">
+          {user.is_admin ? (
+            <>
+              <Shield size={12} /> Admin
+            </>
+          ) : (
+            'User'
+          )}
+        </Badge>
+      ),
+    },
+    {
+      key: 'created_at',
+      header: 'Created',
+      render: (user) => formatDate(user.created_at),
+    },
+    {
+      key: 'last_login',
+      header: 'Last Login',
+      render: (user) => formatDate(user.last_login),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (user) => (
+        <Actions>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => toggleActiveMutation.mutate(user.id)}
+            disabled={toggleActiveMutation.isPending}
+            title={user.is_active ? 'Deactivate user' : 'Activate user'}
+          >
+            {user.is_active ? <UserX size={16} /> : <UserCheck size={16} />}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => toggleAdminMutation.mutate(user.id)}
+            disabled={toggleAdminMutation.isPending}
+            title={user.is_admin ? 'Remove admin' : 'Make admin'}
+          >
+            {user.is_admin ? <ShieldOff size={16} /> : <Shield size={16} />}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setDeleteModalUser(user)}
+            title="Delete user"
+          >
+            <Trash2 size={16} />
+          </Button>
+        </Actions>
+      ),
+    },
+  ];
+
   if (error) {
     return (
       <Card padding="lg">
-        <EmptyState>Error loading users: {error.message}</EmptyState>
+        <EmptyState title={`Error loading users: ${error.message}`} />
       </Card>
     );
   }
 
   return (
     <div>
-      <PageHeader>
-        <PageTitle>User Management</PageTitle>
-        <SearchBox>
-          <SearchIcon>
-            <Search size={18} />
-          </SearchIcon>
-          <SearchInput
-            type="text"
-            placeholder="Search users..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </SearchBox>
-      </PageHeader>
+      <PageHeader
+        title="User Management"
+        actions={
+          <SearchBox>
+            <SearchIcon>
+              <Search size={18} />
+            </SearchIcon>
+            <SearchInput
+              type="text"
+              placeholder="Search users..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </SearchBox>
+        }
+      />
 
       {isLoading ? (
         <Card padding="lg">
-          <EmptyState>Loading users...</EmptyState>
+          <EmptyState title="Loading users..." />
         </Card>
       ) : users && users.length > 0 ? (
-        <Card padding="none">
-          <UsersTable>
-            <TableHead>
-              <tr>
-                <TableHeader>Username</TableHeader>
-                <TableHeader>Email</TableHeader>
-                <TableHeader>Status</TableHeader>
-                <TableHeader>Role</TableHeader>
-                <TableHeader>Created</TableHeader>
-                <TableHeader>Last Login</TableHeader>
-                <TableHeader>Actions</TableHeader>
-              </tr>
-            </TableHead>
-            <TableBody>
-              {users.map((user: AdminUser) => (
-                <TableRow key={user.id}>
-                  <TableCell>{user.username}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <StatusBadge $active={user.is_active}>
-                      {user.is_active ? 'Active' : 'Inactive'}
-                    </StatusBadge>
-                  </TableCell>
-                  <TableCell>
-                    <AdminBadge $isAdmin={user.is_admin}>
-                      {user.is_admin ? (
-                        <>
-                          <Shield size={12} /> Admin
-                        </>
-                      ) : (
-                        'User'
-                      )}
-                    </AdminBadge>
-                  </TableCell>
-                  <TableCell>{formatDate(user.created_at)}</TableCell>
-                  <TableCell>{formatDate(user.last_login)}</TableCell>
-                  <TableCell>
-                    <Actions>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleActiveMutation.mutate(user.id)}
-                        disabled={toggleActiveMutation.isPending}
-                        title={user.is_active ? 'Deactivate user' : 'Activate user'}
-                      >
-                        {user.is_active ? <UserX size={16} /> : <UserCheck size={16} />}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleAdminMutation.mutate(user.id)}
-                        disabled={toggleAdminMutation.isPending}
-                        title={user.is_admin ? 'Remove admin' : 'Make admin'}
-                      >
-                        {user.is_admin ? <ShieldOff size={16} /> : <Shield size={16} />}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeleteModalUser(user)}
-                        title="Delete user"
-                      >
-                        <Trash2 size={16} />
-                      </Button>
-                    </Actions>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </UsersTable>
-        </Card>
+        <DataTable
+          columns={columns}
+          data={users}
+          emptyMessage={search ? `No users found matching "${search}"` : 'No users found'}
+        />
       ) : (
         <Card padding="lg">
-          <EmptyState>
-            {search ? `No users found matching "${search}"` : 'No users found'}
-          </EmptyState>
+          <EmptyState
+            title={search ? `No users found matching "${search}"` : 'No users found'}
+          />
         </Card>
       )}
 
