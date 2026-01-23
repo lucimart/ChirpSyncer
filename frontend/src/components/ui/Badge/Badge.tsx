@@ -84,7 +84,7 @@ const lightVariantStyles = {
   `,
   text: css`
     background-color: transparent;
-    color: ${({ theme }) => theme.colors.text.secondary};
+    color: ${({ theme }) => theme.colors.text.primary};
     border-color: transparent;
   `,
   'status-success': css`
@@ -163,7 +163,7 @@ const darkVariantStyles = {
   `,
   text: css`
     background-color: transparent;
-    color: ${({ theme }) => theme.colors.text.secondary};
+    color: ${({ theme }) => theme.colors.text.primary};
     border-color: transparent;
   `,
   'status-success': css`
