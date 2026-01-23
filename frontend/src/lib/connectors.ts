@@ -83,7 +83,7 @@ export interface PlatformMapping {
 }
 
 // Supported platforms
-export type PlatformType = 'twitter' | 'bluesky' | 'mastodon' | 'instagram' | 'threads';
+export type PlatformType = 'twitter' | 'bluesky' | 'mastodon' | 'instagram' | 'threads' | 'linkedin';
 
 // Platform connector configuration
 export interface PlatformConnector {
@@ -254,6 +254,30 @@ export const PLATFORM_DEFAULTS: Record<PlatformType, PlatformCapabilities> = {
     characterLimit: 500,
     altTextLimit: 1000,
   },
+  linkedin: {
+    publish: true,
+    delete: true,
+    edit: false,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: false,
+    media: {
+      images: true,
+      videos: true,
+      gifs: true,
+      maxImages: 20,
+    },
+    interactions: {
+      like: true,
+      repost: false, // No native repost
+      reply: true,
+      quote: false,
+      bookmark: false,
+    },
+    characterLimit: 3000,
+    altTextLimit: 300,
+  },
 };
 
 // Available connectors
@@ -310,6 +334,17 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     icon: '@',
     color: '#000000',
     capabilities: PLATFORM_DEFAULTS.threads,
+    auth_type: 'oauth2',
+    status: 'beta',
+  },
+  {
+    id: 'linkedin',
+    platform: 'linkedin',
+    name: 'LinkedIn',
+    description: 'Professional networking with posts and company pages',
+    icon: 'in',
+    color: '#0A66C2',
+    capabilities: PLATFORM_DEFAULTS.linkedin,
     auth_type: 'oauth2',
     status: 'beta',
   },
@@ -425,7 +460,7 @@ export function useConnectPlatform() {
         // Remove internal _mode field before sending
         const { _mode, ...cleanCredentials } = credentials;
         credentials = cleanCredentials;
-      } else if (platform === 'bluesky' || platform === 'instagram' || platform === 'threads') {
+      } else if (platform === 'bluesky' || platform === 'instagram' || platform === 'threads' || platform === 'linkedin') {
         credentialType = 'api';
       } else {
         credentialType = 'scraping';

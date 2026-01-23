@@ -497,6 +497,25 @@ export default function ConnectorsPage() {
             </Stack>
           );
         }
+        // LinkedIn OAuth
+        if (connectModal.platform === 'linkedin') {
+          return (
+            <Stack gap={4}>
+              <SmallText>
+                LinkedIn requires OAuth 2.0 authentication. Get your access token from the LinkedIn Developer Portal
+                with r_liteprofile and w_member_social scopes.
+              </SmallText>
+              <Input
+                label="Access Token"
+                type="password"
+                value={credentials.access_token || ''}
+                onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
+                hint="OAuth 2.0 access token from LinkedIn Developer Portal"
+                fullWidth
+              />
+            </Stack>
+          );
+        }
         // Mastodon OAuth
         return (
           <Input
