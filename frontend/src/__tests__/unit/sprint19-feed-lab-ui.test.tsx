@@ -17,12 +17,12 @@ import { ConditionEditor } from '@/components/feed-lab/ConditionEditor';
 import { FeedPreview } from '@/components/feed-lab/FeedPreview';
 import { ScoreExplainer } from '@/components/feed-lab/ScoreExplainer';
 
-// Theme wrapper for tests
-const ThemeProvider = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+import { ThemeProvider } from 'styled-components';
+import { theme } from '@/styles/theme';
 
 // Test wrapper with ThemeProvider
 const renderWithTheme = (component: React.ReactElement) => {
-  return render(<ThemeProvider>{component}</ThemeProvider>);
+  return render(<ThemeProvider theme={theme}>{component}</ThemeProvider>);
 };
 
 // Mock data
@@ -108,20 +108,20 @@ describe('RuleBuilder Component', () => {
 
     const typeSelect = screen.getByLabelText(/rule type/i);
 
-    // Select boost
-    await user.click(typeSelect);
-    await user.click(screen.getByRole('option', { name: /boost/i }));
+    // Default value should be boost
     expect(typeSelect).toHaveValue('boost');
 
     // Select demote
-    await user.click(typeSelect);
-    await user.click(screen.getByRole('option', { name: /demote/i }));
+    await user.selectOptions(typeSelect, 'demote');
     expect(typeSelect).toHaveValue('demote');
 
     // Select filter
-    await user.click(typeSelect);
-    await user.click(screen.getByRole('option', { name: /filter/i }));
+    await user.selectOptions(typeSelect, 'filter');
     expect(typeSelect).toHaveValue('filter');
+
+    // Select boost again
+    await user.selectOptions(typeSelect, 'boost');
+    expect(typeSelect).toHaveValue('boost');
   });
 
   it('allows adding/removing conditions', async () => {
@@ -243,14 +243,15 @@ describe('RuleBuilder Component', () => {
     renderWithTheme(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     const typeSelect = screen.getByLabelText(/rule type/i);
-    const weightSlider = screen.getByLabelText(/weight/i);
 
     // Select filter type
-    await user.click(typeSelect);
-    await user.click(screen.getByRole('option', { name: /filter/i }));
+    await user.selectOptions(typeSelect, 'filter');
 
     // Weight slider should be disabled for filter type
-    expect(weightSlider).toBeDisabled();
+    await waitFor(() => {
+      const weightSlider = screen.getByLabelText(/weight/i);
+      expect(weightSlider).toBeDisabled();
+    });
   });
 
   it('calls onCancel when cancel button is clicked', async () => {
@@ -320,13 +321,13 @@ describe('RuleList Component', () => {
     expect(within(firstRule).getByText(/boost/i)).toBeInTheDocument();
     expect(within(firstRule).getByText(/weight: 50/i)).toBeInTheDocument();
 
-    // Check enabled switch state
-    const enabledSwitch = within(firstRule).getByRole('switch');
+    // Check enabled toggle state (uses checkbox, not switch role)
+    const enabledSwitch = within(firstRule).getByRole('checkbox');
     expect(enabledSwitch).toBeChecked();
 
     // Check second rule (disabled)
     const secondRule = screen.getByTestId('rule-item-2');
-    const disabledSwitch = within(secondRule).getByRole('switch');
+    const disabledSwitch = within(secondRule).getByRole('checkbox');
     expect(disabledSwitch).not.toBeChecked();
   });
 
@@ -342,7 +343,7 @@ describe('RuleList Component', () => {
     );
 
     const firstRule = screen.getByTestId('rule-item-1');
-    const toggleSwitch = within(firstRule).getByRole('switch');
+    const toggleSwitch = within(firstRule).getByRole('checkbox');
 
     await user.click(toggleSwitch);
 
@@ -545,7 +546,7 @@ describe('ConditionEditor Component', () => {
 
     // For numeric fields, should show comparison operators
     rerender(
-      <ThemeProvider>
+      <ThemeProvider theme={theme}>
         <ConditionEditor
           condition={{ field: 'score', operator: 'greater_than', value: '0' }}
           onChange={mockOnChange}
@@ -612,7 +613,7 @@ describe('FeedPreview Component', () => {
     ];
 
     rerender(
-      <ThemeProvider>
+      <ThemeProvider theme={theme}>
         <FeedPreview posts={updatedPosts} onPostClick={mockOnPostClick} />
       </ThemeProvider>
     );

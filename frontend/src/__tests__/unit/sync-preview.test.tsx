@@ -186,11 +186,11 @@ describe('SyncPreviewModal Component', () => {
       expect(screen.queryByText('Sync Preview')).not.toBeInTheDocument();
     });
 
-    it('renders with data-testid="sync-preview-modal"', async () => {
+    it('renders modal dialog', async () => {
       renderWithProviders(<SyncPreviewModal {...defaultProps} />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('sync-preview-modal')).toBeInTheDocument();
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
       });
     });
   });
@@ -225,7 +225,7 @@ describe('SyncPreviewModal Component', () => {
 
       renderWithProviders(<SyncPreviewModal {...defaultProps} />);
 
-      expect(screen.getByRole('progressbar') || screen.getByTestId('loading-spinner')).toBeInTheDocument();
+      expect(screen.getByRole('status')).toBeInTheDocument();
     });
   });
 
@@ -333,11 +333,16 @@ describe('SyncPreviewModal Component', () => {
       renderWithProviders(<SyncPreviewModal {...defaultProps} onClose={onClose} />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('sync-preview-modal')).toBeInTheDocument();
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
       });
 
-      const overlay = screen.getByTestId('modal-overlay');
-      fireEvent.click(overlay);
+      // Click outside the modal (on the overlay area)
+      // The overlay is the parent that receives the click
+      const dialog = screen.getByRole('dialog');
+      const overlay = dialog.parentElement;
+      if (overlay) {
+        fireEvent.click(overlay);
+      }
 
       expect(onClose).toHaveBeenCalledTimes(1);
     });
@@ -347,7 +352,7 @@ describe('SyncPreviewModal Component', () => {
       renderWithProviders(<SyncPreviewModal {...defaultProps} onClose={onClose} />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('sync-preview-modal')).toBeInTheDocument();
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
       });
 
       fireEvent.keyDown(document, { key: 'Escape' });
