@@ -1,6 +1,9 @@
+import logging
 from datetime import datetime
 
 from flask import Blueprint, request, make_response, g, current_app
+
+logger = logging.getLogger(__name__)
 
 from app.auth.api_auth import require_auth
 from app.auth.jwt_handler import create_token
@@ -212,8 +215,9 @@ def forgot_password():
                     "dev_reset_url": f"/reset-password?token={token}",
                 }
             )
-        except Exception:
-            pass
+        except Exception as e:
+            # Log error but don't expose to user (security: prevent enumeration)
+            logger.error(f"Password reset token creation failed: {e}")
 
     # Return same response even if user not found (security)
     return api_response(
