@@ -752,6 +752,105 @@ export default function ConnectorsPage() {
             />
           </Stack>
         );
+      case 'discord':
+        return (
+          <Stack gap={4}>
+            <SmallText>
+              Discord supports both webhooks (for notifications) and Bot API (for richer functionality).
+              You can use either or both.
+            </SmallText>
+            <Input
+              label="Webhook URL (for notifications)"
+              type="text"
+              value={credentials.webhook_url || ''}
+              onChange={(e) => setCredentials({ ...credentials, webhook_url: e.target.value })}
+              placeholder="https://discord.com/api/webhooks/..."
+              hint="Get this from Server Settings > Integrations > Webhooks"
+              fullWidth
+            />
+            <Input
+              label="Bot Token (optional, for full access)"
+              type="password"
+              value={credentials.bot_token || ''}
+              onChange={(e) => setCredentials({ ...credentials, bot_token: e.target.value })}
+              hint="Create a bot at discord.com/developers/applications"
+              fullWidth
+            />
+          </Stack>
+        );
+      case 'reddit':
+        return (
+          <Stack gap={4}>
+            <SmallText>
+              Reddit uses OAuth 2.0 authentication. You need to create a Reddit app at
+              reddit.com/prefs/apps to get your client ID and secret.
+            </SmallText>
+            <Input
+              label="Client ID"
+              type="text"
+              value={credentials.client_id || ''}
+              onChange={(e) => setCredentials({ ...credentials, client_id: e.target.value })}
+              placeholder="xxxxxxxxxxxxxxx"
+              hint="From your Reddit app settings"
+              fullWidth
+            />
+            <Input
+              label="Client Secret"
+              type="password"
+              value={credentials.client_secret || ''}
+              onChange={(e) => setCredentials({ ...credentials, client_secret: e.target.value })}
+              fullWidth
+            />
+            <Input
+              label="Refresh Token"
+              type="password"
+              value={credentials.refresh_token || ''}
+              onChange={(e) => setCredentials({ ...credentials, refresh_token: e.target.value })}
+              hint="Obtained through OAuth flow"
+              fullWidth
+            />
+          </Stack>
+        );
+      case 'tumblr':
+        return (
+          <Stack gap={4}>
+            <SmallText>
+              Tumblr uses OAuth 1.0a authentication. You need to register an app at
+              tumblr.com/oauth/apps to get your consumer key and secret.
+            </SmallText>
+            <Input
+              label="Consumer Key"
+              type="text"
+              value={credentials.consumer_key || ''}
+              onChange={(e) => setCredentials({ ...credentials, consumer_key: e.target.value })}
+              placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              hint="From your Tumblr app registration"
+              fullWidth
+            />
+            <Input
+              label="Consumer Secret"
+              type="password"
+              value={credentials.consumer_secret || ''}
+              onChange={(e) => setCredentials({ ...credentials, consumer_secret: e.target.value })}
+              fullWidth
+            />
+            <Input
+              label="OAuth Token"
+              type="text"
+              value={credentials.oauth_token || ''}
+              onChange={(e) => setCredentials({ ...credentials, oauth_token: e.target.value })}
+              hint="Access token from OAuth flow"
+              fullWidth
+            />
+            <Input
+              label="OAuth Token Secret"
+              type="password"
+              value={credentials.oauth_token_secret || ''}
+              onChange={(e) => setCredentials({ ...credentials, oauth_token_secret: e.target.value })}
+              fullWidth
+            />
+          </Stack>
+        );
       default:
         return null;
     }

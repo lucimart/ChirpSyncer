@@ -112,7 +112,7 @@ export interface PlatformConnector {
   icon: string;
   color: string;
   capabilities: PlatformCapabilities;
-  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix' | 'dsnp' | 'ssb';
+  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix' | 'dsnp' | 'ssb' | 'discord' | 'reddit' | 'tumblr';
   status: 'available' | 'coming_soon' | 'beta';
 }
 
@@ -619,8 +619,8 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     icon: 't',
     color: '#36465D',
     capabilities: PLATFORM_DEFAULTS.tumblr,
-    auth_type: 'oauth2',
-    status: 'coming_soon',
+    auth_type: 'tumblr',
+    status: 'beta',
   },
   {
     id: 'reddit',
@@ -630,8 +630,8 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     icon: '®',
     color: '#FF4500',
     capabilities: PLATFORM_DEFAULTS.reddit,
-    auth_type: 'oauth2',
-    status: 'coming_soon',
+    auth_type: 'reddit',
+    status: 'beta',
   },
   {
     id: 'discord',
@@ -641,8 +641,8 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     icon: 'D',
     color: '#5865F2',
     capabilities: PLATFORM_DEFAULTS.discord,
-    auth_type: 'api_key', // Webhooks
-    status: 'coming_soon',
+    auth_type: 'discord',
+    status: 'beta',
   },
   // Experimental decentralized protocols
   {
