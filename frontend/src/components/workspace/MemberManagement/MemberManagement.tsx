@@ -8,9 +8,11 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { UserPlus, Trash2 } from 'lucide-react';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
-import { Modal } from '../ui/Modal';
+import { Button } from '../../ui/Button';
+import { Input } from '../../ui/Input';
+import { Modal } from '../../ui/Modal';
+import { Badge } from '../../ui/Badge';
+import { Select } from '../../ui/Select';
 
 export type MemberRole = 'admin' | 'editor' | 'viewer';
 
@@ -114,81 +116,9 @@ const MemberEmail = styled.span`
   font-size: ${({ theme }) => theme.fontSizes.xs};
 `;
 
-const RoleBadge = styled.span<{ $role: MemberRole }>`
-  display: inline-flex;
-  align-items: center;
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  text-transform: capitalize;
-  background-color: ${({ $role, theme }) => {
-    switch ($role) {
-      case 'admin':
-        return theme.colors.primary[100];
-      case 'editor':
-        return theme.colors.warning[100];
-      case 'viewer':
-        return theme.colors.neutral[100];
-    }
-  }};
-  color: ${({ $role, theme }) => {
-    switch ($role) {
-      case 'admin':
-        return theme.colors.primary[700];
-      case 'editor':
-        return theme.colors.warning[700];
-      case 'viewer':
-        return theme.colors.neutral[700];
-    }
-  }};
-`;
-
-const RoleSelect = styled.select`
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  background-color: ${({ theme }) => theme.colors.background.primary};
-  color: ${({ theme }) => theme.colors.text.primary};
-  cursor: pointer;
-
-  &:hover {
-    border-color: ${({ theme }) => theme.colors.border.dark};
-  }
-
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.primary[500]};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[100]};
-  }
-`;
-
 const LastActive = styled.span`
   color: ${({ theme }) => theme.colors.text.secondary};
   font-size: ${({ theme }) => theme.fontSizes.xs};
-`;
-
-const Actions = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[2]};
-`;
-
-const RemoveButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: ${({ theme }) => theme.spacing[2]};
-  background: none;
-  border: none;
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  color: ${({ theme }) => theme.colors.danger[600]};
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.fast};
-
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.danger[50]};
-  }
 `;
 
 const InviteForm = styled.form`
@@ -197,19 +127,18 @@ const InviteForm = styled.form`
   gap: ${({ theme }) => theme.spacing[4]};
 `;
 
-const FormGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[1]};
-`;
-
-const Label = styled.label`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
 const ROLES: MemberRole[] = ['admin', 'editor', 'viewer'];
+
+const ROLE_OPTIONS = ROLES.map((role) => ({
+  value: role,
+  label: role.charAt(0).toUpperCase() + role.slice(1),
+}));
+
+const ROLE_BADGE_VARIANT: Record<MemberRole, 'primary' | 'warning' | 'neutral'> = {
+  admin: 'primary',
+  editor: 'warning',
+  viewer: 'neutral',
+};
 
 function formatLastActive(lastActive: string): string {
   const date = new Date(lastActive);
@@ -295,23 +224,22 @@ export function MemberManagement({
                   </Td>
                   <Td>
                     {isAdmin && !isCurrentUser ? (
-                      <RoleSelect
+                      <Select
                         value={member.role}
                         onChange={(e) =>
                           handleRoleChange(member.id, e.target.value as MemberRole)
                         }
                         aria-label={`Change role for ${member.name}`}
-                      >
-                        {ROLES.map((role) => (
-                          <option key={role} value={role}>
-                            {role.charAt(0).toUpperCase() + role.slice(1)}
-                          </option>
-                        ))}
-                      </RoleSelect>
+                        options={ROLE_OPTIONS}
+                      />
                     ) : (
-                      <RoleBadge $role={member.role} data-testid={`role-badge-${member.role}`}>
+                      <Badge
+                        variant={ROLE_BADGE_VARIANT[member.role]}
+                        size="sm"
+                        data-testid={`role-badge-${member.role}`}
+                      >
                         {member.role}
-                      </RoleBadge>
+                      </Badge>
                     )}
                   </Td>
                   <Td>
@@ -319,17 +247,17 @@ export function MemberManagement({
                   </Td>
                   {isAdmin && (
                     <Td>
-                      <Actions>
-                        {canRemove && (
-                          <RemoveButton
-                            onClick={() => onRemove(member.id)}
-                            aria-label={`Remove ${member.name}`}
-                            title={`Remove ${member.name}`}
-                          >
-                            <Trash2 size={16} />
-                          </RemoveButton>
-                        )}
-                      </Actions>
+                      {canRemove && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onRemove(member.id)}
+                          aria-label={`Remove ${member.name}`}
+                          title={`Remove ${member.name}`}
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      )}
                     </Td>
                   )}
                 </Tr>
@@ -366,20 +294,14 @@ export function MemberManagement({
             fullWidth
             required
           />
-          <FormGroup>
-            <Label htmlFor="invite-role">Role</Label>
-            <RoleSelect
-              id="invite-role"
-              value={inviteRole}
-              onChange={(e) => setInviteRole(e.target.value as MemberRole)}
-            >
-              {ROLES.map((role) => (
-                <option key={role} value={role}>
-                  {role.charAt(0).toUpperCase() + role.slice(1)}
-                </option>
-              ))}
-            </RoleSelect>
-          </FormGroup>
+          <Select
+            label="Role"
+            id="invite-role"
+            value={inviteRole}
+            onChange={(e) => setInviteRole(e.target.value as MemberRole)}
+            options={ROLE_OPTIONS}
+            fullWidth
+          />
         </InviteForm>
       </Modal>
     </Container>

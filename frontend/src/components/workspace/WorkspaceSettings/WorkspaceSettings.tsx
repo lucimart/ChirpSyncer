@@ -8,10 +8,11 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { AlertTriangle } from 'lucide-react';
-import type { Workspace } from './WorkspaceSwitcher';
-import { Input } from '../ui/Input';
-import { Button } from '../ui/Button';
-import { Modal } from '../ui/Modal';
+import type { Workspace } from '../WorkspaceSwitcher';
+import { Input } from '../../ui/Input';
+import { Button } from '../../ui/Button';
+import { Modal } from '../../ui/Modal';
+import { Label } from '../../ui/Label';
 
 export interface WorkspaceSettingsProps {
   workspace: Workspace;
@@ -47,12 +48,6 @@ const FieldGroup = styled.div`
   gap: ${({ theme }) => theme.spacing[2]};
 `;
 
-const Label = styled.label`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
 const TypeDisplay = styled.span`
   font-size: ${({ theme }) => theme.fontSizes.base};
   color: ${({ theme }) => theme.colors.text.secondary};
@@ -60,16 +55,16 @@ const TypeDisplay = styled.span`
 `;
 
 const DangerZone = styled.section`
-  border: 1px solid ${({ theme }) => theme.colors.danger[200]};
+  border: 1px solid ${({ theme }) => theme.colors.surface.danger.border};
   border-radius: ${({ theme }) => theme.borderRadius.lg};
   padding: ${({ theme }) => theme.spacing[4]};
-  background-color: ${({ theme }) => theme.colors.danger[50]};
+  background-color: ${({ theme }) => theme.colors.surface.danger.bg};
 `;
 
 const DangerZoneTitle = styled.h3`
   font-size: ${({ theme }) => theme.fontSizes.base};
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.danger[700]};
+  color: ${({ theme }) => theme.colors.surface.danger.text};
   margin: 0 0 ${({ theme }) => theme.spacing[3]} 0;
 `;
 
@@ -89,7 +84,7 @@ const IconCircle = styled.div`
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background-color: ${({ theme }) => theme.colors.danger[100]};
+  background-color: ${({ theme }) => theme.colors.surface.danger.bg};
   color: ${({ theme }) => theme.colors.danger[600]};
   display: flex;
   align-items: center;
@@ -166,7 +161,7 @@ export function WorkspaceSettings({
         </FieldGroup>
 
         <FieldGroup>
-          <Label>Workspace Type</Label>
+          <Label spacing="none">Workspace Type</Label>
           <TypeDisplay>{workspace.type}</TypeDisplay>
         </FieldGroup>
 

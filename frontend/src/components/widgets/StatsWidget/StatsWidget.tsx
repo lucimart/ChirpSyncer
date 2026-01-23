@@ -1,11 +1,9 @@
 'use client';
 
-import React from 'react';
+import { type FC } from 'react';
 import styled from 'styled-components';
+import { Stack } from '@/components/ui';
 
-/**
- * Single stat item interface
- */
 export interface StatItem {
   label: string;
   value: number | string;
@@ -13,9 +11,6 @@ export interface StatItem {
   icon?: string;
 }
 
-/**
- * StatsWidget props interface
- */
 export interface StatsWidgetProps {
   stats: StatItem[];
   title: string;
@@ -23,7 +18,19 @@ export interface StatsWidgetProps {
   layout?: 'grid' | 'list';
 }
 
-const StatsContainer = styled.div<{ $compact?: boolean; $layout?: 'grid' | 'list' }>`
+type ChangeType = 'positive' | 'negative' | 'neutral';
+type LayoutType = 'grid' | 'list';
+
+const getChangeType = (change?: number): ChangeType => {
+  if (change === undefined || change === 0) return 'neutral';
+  return change > 0 ? 'positive' : 'negative';
+};
+
+const formatChange = (change: number): string => {
+  return change > 0 ? `+${change}` : `${change}`;
+};
+
+const StatsContainer = styled.div<{ $compact?: boolean; $layout?: LayoutType }>`
   display: ${({ $layout }) => ($layout === 'grid' ? 'grid' : 'flex')};
   ${({ $layout }) =>
     $layout === 'grid'
@@ -35,7 +42,7 @@ const StatsContainer = styled.div<{ $compact?: boolean; $layout?: 'grid' | 'list
   border-radius: ${({ theme }) => theme.borderRadius.lg};
 `;
 
-const StatItemContainer = styled.div<{ $change?: 'positive' | 'negative' | 'neutral'; $compact?: boolean }>`
+const StatItemContainer = styled.div<{ $change?: ChangeType; $compact?: boolean }>`
   display: flex;
   flex-direction: column;
   gap: ${({ theme, $compact }) => ($compact ? theme.spacing[1] : theme.spacing[2])};
@@ -73,70 +80,45 @@ const StatChange = styled.span<{ $positive?: boolean }>`
     $positive ? theme.colors.success[600] : theme.colors.danger[600]};
 `;
 
-const StatRow = styled.div`
-  display: flex;
-  align-items: baseline;
-  gap: ${({ theme }) => theme.spacing[2]};
-`;
-
-/**
- * StatsWidget - Displays a collection of stat items with optional change indicators
- *
- * Features:
- * - Grid or list layout
- * - Compact mode for smaller spaces
- * - Change indicators (positive/negative)
- * - Themed styling
- */
-export const StatsWidget: React.FC<StatsWidgetProps> = ({
+export const StatsWidget: FC<StatsWidgetProps> = ({
   stats,
   title,
   compact = false,
   layout = 'list',
-}) => {
-  const getChangeType = (change?: number): 'positive' | 'negative' | 'neutral' => {
-    if (change === undefined || change === 0) return 'neutral';
-    return change > 0 ? 'positive' : 'negative';
-  };
+}) => (
+  <StatsContainer
+    data-testid="stats-widget"
+    data-compact={compact ? 'true' : undefined}
+    data-layout={layout}
+    $compact={compact}
+    $layout={layout}
+    aria-label={title}
+  >
+    {stats.map((stat, index) => {
+      const changeType = getChangeType(stat.change);
+      const showChange = stat.change !== undefined && stat.change !== 0;
 
-  const formatChange = (change: number): string => {
-    return change > 0 ? `+${change}` : `${change}`;
-  };
-
-  return (
-    <StatsContainer
-      data-testid="stats-widget"
-      data-compact={compact ? 'true' : undefined}
-      data-layout={layout}
-      $compact={compact}
-      $layout={layout}
-      aria-label={title}
-    >
-      {stats.map((stat, index) => {
-        const changeType = getChangeType(stat.change);
-
-        return (
-          <StatItemContainer
-            key={`${stat.label}-${index}`}
-            data-testid={`stat-item-${index}`}
-            data-change={changeType}
-            $change={changeType}
-            $compact={compact}
-          >
-            <StatLabel $compact={compact}>{stat.label}</StatLabel>
-            <StatRow>
-              <StatValue $compact={compact}>{stat.value}</StatValue>
-              {stat.change !== undefined && stat.change !== 0 && (
-                <StatChange $positive={stat.change > 0}>
-                  {formatChange(stat.change)}
-                </StatChange>
-              )}
-            </StatRow>
-          </StatItemContainer>
-        );
-      })}
-    </StatsContainer>
-  );
-};
+      return (
+        <StatItemContainer
+          key={`${stat.label}-${index}`}
+          data-testid={`stat-item-${index}`}
+          data-change={changeType}
+          $change={changeType}
+          $compact={compact}
+        >
+          <StatLabel $compact={compact}>{stat.label}</StatLabel>
+          <Stack direction="row" align="end" gap={2}>
+            <StatValue $compact={compact}>{stat.value}</StatValue>
+            {showChange && (
+              <StatChange $positive={stat.change! > 0}>
+                {formatChange(stat.change!)}
+              </StatChange>
+            )}
+          </Stack>
+        </StatItemContainer>
+      );
+    })}
+  </StatsContainer>
+);
 
 export default StatsWidget;

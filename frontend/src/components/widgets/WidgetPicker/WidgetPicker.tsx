@@ -1,63 +1,48 @@
 'use client';
 
+import { useState, useEffect, useMemo, useCallback, type FC, type ChangeEvent } from 'react';
 import styled from 'styled-components';
-import { useState, useEffect, useMemo } from 'react';
 import { BarChart3, List, TrendingUp, Search } from 'lucide-react';
-import { Input, Modal, EmptyState } from '@/components/ui';
+import { Input, Modal, Stack, SmallText, Caption, EmptyState } from '@/components/ui';
+import type { WidgetType, WidgetOption } from '../types';
+
+type SelectableWidgetType = Exclude<WidgetType, 'custom'>;
 
 interface WidgetPickerProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (type: 'stats' | 'chart' | 'list') => void;
+  onSelect: (type: SelectableWidgetType) => void;
 }
 
-interface WidgetOption {
-  type: 'stats' | 'chart' | 'list';
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  keywords: string[];
-}
+const ICON_SIZE = 24;
 
-const widgetOptions: WidgetOption[] = [
+const WIDGET_OPTIONS: readonly WidgetOption[] = [
   {
     type: 'stats',
     title: 'Stats',
     description: 'View key metrics and statistics',
-    icon: <TrendingUp size={24} />,
+    Icon: TrendingUp,
     keywords: ['stats', 'statistics', 'metrics', 'key', 'numbers'],
   },
   {
     type: 'chart',
     title: 'Graphs',
     description: 'Data chart and visualization',
-    icon: <BarChart3 size={24} />,
+    Icon: BarChart3,
     keywords: ['chart', 'visualization', 'graph', 'data', 'visual'],
   },
   {
     type: 'list',
     title: 'Feed',
     description: 'Activity list and recent items',
-    icon: <List size={24} />,
+    Icon: List,
     keywords: ['list', 'activity', 'recent', 'items', 'feed'],
   },
-];
+] as const;
 
-const SearchContainer = styled.div`
+const SearchWrapper = styled.div`
   padding: ${({ theme }) => `${theme.spacing[4]} ${theme.spacing[6]}`};
   border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
-`;
-
-const StyledSearchInput = styled(Input)`
-  & input {
-    background-color: ${({ theme }) => theme.colors.background.secondary};
-  }
-`;
-
-const OptionsGrid = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[3]};
 `;
 
 const OptionCard = styled.button`
@@ -75,7 +60,7 @@ const OptionCard = styled.button`
 
   &:hover {
     border-color: ${({ theme }) => theme.colors.primary[500]};
-    background-color: ${({ theme }) => theme.colors.primary[50]};
+    background-color: ${({ theme }) => theme.colors.surface.primary.bg};
     transform: translateY(-1px);
     box-shadow: ${({ theme }) => theme.shadows.md};
   }
@@ -94,31 +79,13 @@ const IconWrapper = styled.div`
   width: 48px;
   height: 48px;
   border-radius: ${({ theme }) => theme.borderRadius.lg};
-  background-color: ${({ theme }) => theme.colors.primary[100]};
-  color: ${({ theme }) => theme.colors.primary[600]};
+  background-color: ${({ theme }) => theme.colors.surface.primary.bg};
+  color: ${({ theme }) => theme.colors.surface.primary.text};
   flex-shrink: 0;
 `;
 
-const OptionContent = styled.div`
-  flex: 1;
-`;
 
-const OptionTitle = styled.h3`
-  font-size: ${({ theme }) => theme.fontSizes.base};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin: 0 0 ${({ theme }) => theme.spacing[1]} 0;
-`;
-
-const OptionDescription = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin: 0;
-  line-height: 1.5;
-`;
-
-
-export const WidgetPicker = ({ isOpen, onClose, onSelect }: WidgetPickerProps) => {
+export const WidgetPicker: FC<WidgetPickerProps> = ({ isOpen, onClose, onSelect }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -129,11 +96,11 @@ export const WidgetPicker = ({ isOpen, onClose, onSelect }: WidgetPickerProps) =
 
   const filteredOptions = useMemo(() => {
     if (!searchQuery.trim()) {
-      return widgetOptions;
+      return WIDGET_OPTIONS;
     }
 
     const query = searchQuery.toLowerCase();
-    return widgetOptions.filter(
+    return WIDGET_OPTIONS.filter(
       (option) =>
         option.title.toLowerCase().includes(query) ||
         option.description.toLowerCase().includes(query) ||
@@ -141,10 +108,17 @@ export const WidgetPicker = ({ isOpen, onClose, onSelect }: WidgetPickerProps) =
     );
   }, [searchQuery]);
 
-  const handleSelect = (type: 'stats' | 'chart' | 'list') => {
-    onSelect(type);
-    onClose();
-  };
+  const handleSelect = useCallback(
+    (type: SelectableWidgetType) => {
+      onSelect(type);
+      onClose();
+    },
+    [onSelect, onClose]
+  );
+
+  const handleSearchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
 
   return (
     <Modal
@@ -154,35 +128,37 @@ export const WidgetPicker = ({ isOpen, onClose, onSelect }: WidgetPickerProps) =
       size="md"
       data-testid="widget-picker"
     >
-      <SearchContainer>
-        <StyledSearchInput
+      <SearchWrapper>
+        <Input
           startIcon={<Search size={18} />}
           data-testid="widget-search"
           type="text"
           placeholder="Search widgets..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={handleSearchChange}
           autoFocus
         />
-      </SearchContainer>
+      </SearchWrapper>
 
       <div style={{ padding: '16px' }}>
         {filteredOptions.length > 0 ? (
-          <OptionsGrid>
+          <Stack gap={3}>
             {filteredOptions.map((option) => (
               <OptionCard
                 key={option.type}
                 data-testid={`widget-option-${option.type}`}
-                onClick={() => handleSelect(option.type)}
+                onClick={() => handleSelect(option.type as SelectableWidgetType)}
               >
-                <IconWrapper>{option.icon}</IconWrapper>
-                <OptionContent>
-                  <OptionTitle>{option.title}</OptionTitle>
-                  <OptionDescription>{option.description}</OptionDescription>
-                </OptionContent>
+                <IconWrapper>
+                  <option.Icon size={ICON_SIZE} />
+                </IconWrapper>
+                <Stack gap={1} style={{ flex: 1 }}>
+                  <SmallText style={{ fontWeight: 600 }}>{option.title}</SmallText>
+                  <Caption style={{ lineHeight: 1.5 }}>{option.description}</Caption>
+                </Stack>
               </OptionCard>
             ))}
-          </OptionsGrid>
+          </Stack>
         ) : (
           <EmptyState title="No widgets match your search" size="sm" />
         )}

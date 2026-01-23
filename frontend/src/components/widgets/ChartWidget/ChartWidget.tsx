@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import { memo, useMemo, type FC } from 'react';
 import styled from 'styled-components';
-import { EmptyState } from '../ui';
+import { Card, Stack, SectionTitle, Caption, EmptyState } from '../../ui';
 
 // Types
 export interface ChartDataPoint {
@@ -17,25 +17,11 @@ export interface ChartWidgetProps {
   showLegend?: boolean;
 }
 
+// Constants
+const CHART_DIMENSIONS = { width: 300, height: 150, padding: 10 } as const;
+const LEGEND_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'] as const;
+
 // Styled Components
-const WidgetContainer = styled.div`
-  background: ${({ theme }) => theme.colors.background.secondary};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  padding: ${({ theme }) => theme.spacing[4]};
-  box-shadow: ${({ theme }) => theme.shadows.sm};
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-`;
-
-const Title = styled.h3`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin: 0 0 ${({ theme }) => theme.spacing[4]};
-`;
-
 const ChartContainer = styled.div`
   flex: 1;
   display: flex;
@@ -44,21 +30,10 @@ const ChartContainer = styled.div`
   min-height: 120px;
 `;
 
-const Legend = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${({ theme }) => theme.spacing[3]};
+const LegendWrapper = styled.div`
   margin-top: ${({ theme }) => theme.spacing[4]};
   padding-top: ${({ theme }) => theme.spacing[3]};
   border-top: 1px solid ${({ theme }) => theme.colors.border.light};
-`;
-
-const LegendItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[1]};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
 const LegendDot = styled.span<{ $color: string }>`
@@ -66,6 +41,7 @@ const LegendDot = styled.span<{ $color: string }>`
   height: 8px;
   border-radius: ${({ theme }) => theme.borderRadius.full};
   background-color: ${({ $color }) => $color};
+  flex-shrink: 0;
 `;
 
 // Bar Chart Components
@@ -153,40 +129,55 @@ const calculatePath = (
 };
 
 // Subcomponents
-const BarChart: React.FC<{ data: ChartDataPoint[] }> = ({ data }) => {
-  const maxValue = Math.max(...data.map((d) => d.value));
+const BarChart: FC<{ data: ChartDataPoint[] }> = memo(({ data }) => {
+  const maxValue = useMemo(() => Math.max(...data.map((d) => d.value)), [data]);
+
+  const bars = useMemo(
+    () =>
+      data.map((point, index) => ({
+        height: (point.value / (maxValue || 1)) * 100,
+        title: `${point.label}: ${point.value}`,
+        label: point.label,
+        key: index,
+      })),
+    [data, maxValue]
+  );
 
   return (
     <ChartContainer data-testid="chart-container">
-      {data.map((point, index) => (
-        <BarGroup key={index}>
-          <Bar $height={(point.value / (maxValue || 1)) * 100} title={`${point.label}: ${point.value}`} />
-          <BarLabel>{point.label}</BarLabel>
+      {bars.map((bar) => (
+        <BarGroup key={bar.key}>
+          <Bar $height={bar.height} title={bar.title} />
+          <BarLabel>{bar.label}</BarLabel>
         </BarGroup>
       ))}
     </ChartContainer>
   );
-};
+});
+BarChart.displayName = 'BarChart';
 
-const LineChart: React.FC<{ data: ChartDataPoint[]; isArea?: boolean }> = ({ data, isArea = false }) => {
-  const width = 300;
-  const height = 150;
-  const maxValue = Math.max(...data.map((d) => d.value));
-  const padding = 10;
-  const chartWidth = width - padding * 2;
-  const chartHeight = height - padding * 2;
+const LineChart: FC<{ data: ChartDataPoint[]; isArea?: boolean }> = memo(({ data, isArea = false }) => {
+  const { width, height, padding } = CHART_DIMENSIONS;
 
-  const points = data.map((point, index) => ({
-    x: padding + (index / (data.length - 1 || 1)) * chartWidth,
-    y: padding + chartHeight - (point.value / (maxValue || 1)) * chartHeight,
-    label: point.label,
-    value: point.value,
-  }));
+  const { points, path } = useMemo(() => {
+    const maxValue = Math.max(...data.map((d) => d.value));
+    const chartWidth = width - padding * 2;
+    const chartHeight = height - padding * 2;
+
+    const pts = data.map((point, index) => ({
+      x: padding + (index / (data.length - 1 || 1)) * chartWidth,
+      y: padding + chartHeight - (point.value / (maxValue || 1)) * chartHeight,
+      label: point.label,
+      value: point.value,
+    }));
+
+    return { points: pts, path: calculatePath(data, width, height, isArea) };
+  }, [data, width, height, padding, isArea]);
 
   return (
     <ChartContainer data-testid="chart-container">
       <SvgContainer viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
-        <LinePath d={calculatePath(data, width, height, isArea)} $isArea={isArea} />
+        <LinePath d={path} $isArea={isArea} />
         {points.map((point, index) => (
           <DataPoint key={index} cx={point.x} cy={point.y} r={4}>
             <title>{`${point.label}: ${point.value}`}</title>
@@ -195,25 +186,25 @@ const LineChart: React.FC<{ data: ChartDataPoint[]; isArea?: boolean }> = ({ dat
       </SvgContainer>
     </ChartContainer>
   );
-};
+});
+LineChart.displayName = 'LineChart';
 
-const ChartLegend: React.FC<{ data: ChartDataPoint[] }> = ({ data }) => {
-  const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
-
-  return (
-    <Legend data-testid="chart-legend">
+const ChartLegend: FC<{ data: ChartDataPoint[] }> = memo(({ data }) => (
+  <LegendWrapper data-testid="chart-legend">
+    <Stack direction="row" wrap gap={3}>
       {data.map((point, index) => (
-        <LegendItem key={index}>
-          <LegendDot $color={colors[index % colors.length]} />
-          {point.label}
-        </LegendItem>
+        <Stack key={index} direction="row" align="center" gap={1}>
+          <LegendDot $color={LEGEND_COLORS[index % LEGEND_COLORS.length]} />
+          <Caption>{point.label}</Caption>
+        </Stack>
       ))}
-    </Legend>
-  );
-};
+    </Stack>
+  </LegendWrapper>
+));
+ChartLegend.displayName = 'ChartLegend';
 
 // Main Component
-export const ChartWidget: React.FC<ChartWidgetProps> = ({
+export const ChartWidget: FC<ChartWidgetProps> = ({
   data,
   title,
   chartType,
@@ -221,7 +212,7 @@ export const ChartWidget: React.FC<ChartWidgetProps> = ({
 }) => {
   const isEmpty = data.length === 0;
 
-  const renderChart = () => {
+  const chartContent = useMemo(() => {
     if (isEmpty) {
       return <EmptyState title="No data available" size="sm" data-testid="chart-empty" />;
     }
@@ -236,14 +227,21 @@ export const ChartWidget: React.FC<ChartWidgetProps> = ({
       default:
         return <BarChart data={data} />;
     }
-  };
+  }, [chartType, data, isEmpty]);
 
   return (
-    <WidgetContainer data-testid="chart-widget" data-chart-type={chartType}>
-      <Title>{title}</Title>
-      {renderChart()}
-      {showLegend && !isEmpty && <ChartLegend data={data} />}
-    </WidgetContainer>
+    <Card
+      padding="md"
+      data-testid="chart-widget"
+      data-chart-type={chartType}
+      style={{ height: '100%' }}
+    >
+      <Stack gap={4} style={{ height: '100%' }}>
+        <SectionTitle>{title}</SectionTitle>
+        {chartContent}
+        {showLegend && !isEmpty && <ChartLegend data={data} />}
+      </Stack>
+    </Card>
   );
 };
 

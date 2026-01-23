@@ -8,9 +8,10 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Twitter, Share2, FileText, Image as ImageIcon } from 'lucide-react';
-import type { MemberRole } from './MemberManagement';
-import { Button } from '../ui/Button';
-import { Modal } from '../ui/Modal';
+import type { MemberRole } from '../MemberManagement';
+import { Button } from '../../ui/Button';
+import { Modal } from '../../ui/Modal';
+import { Label } from '../../ui/Label';
 
 export type AccessLevel = 'full' | 'read_only';
 export type Platform = 'twitter' | 'bluesky' | 'mastodon' | 'instagram';
@@ -159,14 +160,6 @@ const Select = styled.select`
 
 const FormGroup = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const Label = styled.label`
-  display: block;
-  margin-bottom: ${({ theme }) => theme.spacing[2]};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
 const FormSelect = styled.select`
@@ -345,7 +338,7 @@ export function SharedCredentials({
         }
       >
         <FormGroup>
-          <Label htmlFor="credential-select">Select Credential</Label>
+          <Label htmlFor="credential-select" spacing="md">Select Credential</Label>
           <FormSelect
             id="credential-select"
             aria-label="Select Credential"
@@ -361,7 +354,7 @@ export function SharedCredentials({
           </FormSelect>
         </FormGroup>
         <FormGroup>
-          <Label htmlFor="access-level-select">Access Level</Label>
+          <Label htmlFor="access-level-select" spacing="md">Access Level</Label>
           <FormSelect
             id="access-level-select"
             aria-label="Access Level"
