@@ -67,7 +67,7 @@ const Section = styled.div`
 const SectionTitle = styled.h3`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.tertiary};
+  color: ${({ theme }) => theme.colors.text.secondary};
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: ${({ theme }) => theme.spacing[3]};
@@ -100,7 +100,7 @@ const ConditionField = styled.span`
 `;
 
 const ConditionOperator = styled.span`
-  color: ${({ theme }) => theme.colors.text.tertiary};
+  color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
 const ConditionValue = styled.span`

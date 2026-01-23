@@ -101,7 +101,7 @@ const Content = styled.div`
   min-width: 0;
 `;
 
-const Title = styled.h4<{ $status: StepStatus }>`
+const Title = styled.h3<{ $status: StepStatus }>`
   font-size: ${({ theme }) => theme.fontSizes.base};
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
   color: ${({ theme, $status }) =>

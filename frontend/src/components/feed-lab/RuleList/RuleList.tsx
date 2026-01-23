@@ -59,7 +59,7 @@ const RuleCard = styled.div<{ $enabled: boolean; $isDragging?: boolean }>`
   border-radius: ${({ theme }) => theme.borderRadius.lg};
   padding: ${({ theme }) => theme.spacing[4]};
   transition: all ${({ theme }) => theme.transitions.fast};
-  opacity: ${({ $enabled, $isDragging }) => ($isDragging ? 0.5 : $enabled ? 1 : 0.6)};
+  opacity: ${({ $enabled, $isDragging }) => ($isDragging ? 0.5 : $enabled ? 1 : 0.85)};
   cursor: ${({ $isDragging }) => ($isDragging ? 'grabbing' : 'default')};
 
   &:hover {
@@ -80,13 +80,13 @@ const DragHandle = styled.div`
   align-items: center;
   justify-content: center;
   padding: ${({ theme }) => theme.spacing[1]};
-  color: ${({ theme }) => theme.colors.text.tertiary};
+  color: ${({ theme }) => theme.colors.text.secondary};
   cursor: grab;
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   transition: all ${({ theme }) => theme.transitions.fast};
 
   &:hover {
-    color: ${({ theme }) => theme.colors.text.secondary};
+    color: ${({ theme }) => theme.colors.text.primary};
     background: ${({ theme }) => theme.colors.background.tertiary};
   }
 

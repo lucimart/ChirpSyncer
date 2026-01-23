@@ -70,6 +70,7 @@ export const ScoreExplainer: React.FC<ScoreExplainerProps> = ({ post }) => {
           aria-valuenow={totalScore}
           aria-valuemin={0}
           aria-valuemax={maxScore}
+          aria-label={`Score breakdown: ${totalScore} out of ${maxScore}`}
         >
           {/* Base score segment */}
           <div
