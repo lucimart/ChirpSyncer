@@ -135,13 +135,15 @@ class TestResponsesHelpers:
         assert _sanitize_response_data(None) is None
 
     def test_sanitize_details_non_production(self):
-        """Test _sanitize_details passes details in non-production."""
+        """Test _sanitize_details still sanitizes in non-production (security first)."""
         from app.web.api.v1.responses import _sanitize_details
 
         with patch.dict(os.environ, {"FLASK_ENV": "development"}, clear=False):
+            # _sanitize_details always filters to safe keys regardless of environment
             details = {"stack": "trace info", "extra": "data"}
             result = _sanitize_details(details)
-            assert result == details
+            # Neither 'stack' nor 'extra' are in safe_keys, so result is None
+            assert result is None
 
     def test_sanitize_details_production_filters_keys(self):
         """Test _sanitize_details filters keys in production."""

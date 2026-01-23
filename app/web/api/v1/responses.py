@@ -63,10 +63,20 @@ def _sanitize_details(details):
     return None
 
 
+def _sanitize_message(message: str) -> str:
+    """Sanitize error message to avoid exposing stack traces."""
+    if message is None:
+        return "An error occurred"
+    if _contains_stack_trace(message):
+        return "An internal error occurred"
+    return message
+
+
 def api_error(code: str, message: str, status: int = 400, details=None):
+    sanitized_message = _sanitize_message(message)
     payload = {
         "success": False,
-        "error": {"code": code, "message": message},
+        "error": {"code": code, "message": sanitized_message},
         "correlation_id": getattr(g, "correlation_id", None),
     }
     sanitized = _sanitize_details(details)

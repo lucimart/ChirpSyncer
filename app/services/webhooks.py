@@ -49,6 +49,24 @@ DEFAULT_MAX_RETRIES = 3
 BACKOFF_BASE = 2
 
 
+def _sanitize_log_value(value: Any) -> str:
+    """
+    Sanitize a value for safe logging.
+
+    Prevents log injection by removing control characters and truncating.
+    Masks potentially sensitive values.
+    """
+    if value is None:
+        return "<none>"
+    str_value = str(value)
+    # Remove newlines and control characters to prevent log injection
+    sanitized = "".join(c if c.isprintable() and c not in "\n\r\t" else "_" for c in str_value)
+    # Truncate to reasonable length
+    if len(sanitized) > 64:
+        sanitized = sanitized[:64] + "..."
+    return sanitized
+
+
 def sign_payload(payload: Dict[str, Any], secret: str) -> str:
     """
     Sign a payload with HMAC-SHA256.
@@ -627,13 +645,13 @@ class WebhookService:
                 last_error = f"HTTP {response.status_code}"
 
             except requests.exceptions.Timeout:
-                logger.warning("Webhook %s delivery timeout on attempt %d", webhook_id, attempt)
+                logger.warning("Webhook %s delivery timeout on attempt %d", _sanitize_log_value(webhook_id), attempt)
                 last_error = "Request timeout"
             except requests.exceptions.ConnectionError:
-                logger.warning("Webhook %s connection failed on attempt %d", webhook_id, attempt)
+                logger.warning("Webhook %s connection failed on attempt %d", _sanitize_log_value(webhook_id), attempt)
                 last_error = "Connection error"
             except Exception:
-                logger.exception("Webhook %s unexpected error on attempt %d", webhook_id, attempt)
+                logger.exception("Webhook %s unexpected error on attempt %d", _sanitize_log_value(webhook_id), attempt)
                 last_error = "Unexpected error"
 
             # Backoff before retry (except on last attempt)
