@@ -3,6 +3,7 @@
 import { ReactNode, ComponentType } from 'react';
 import styled from 'styled-components';
 import { Card } from '../Card';
+import { AnimatedNumber, AnimatedPercentage } from '../Motion';
 
 export interface StatCardProps {
   value: string | number;
@@ -15,6 +16,8 @@ export interface StatCardProps {
   };
   variant?: 'default' | 'centered';
   className?: string;
+  /** Animate numeric values on mount/change */
+  animated?: boolean;
 }
 
 const StyledCard = styled(Card) <{ $variant: 'default' | 'centered' }>`
@@ -76,7 +79,30 @@ export function StatCard({
   trend,
   variant = 'default',
   className,
+  animated = false,
 }: StatCardProps) {
+  const renderValue = () => {
+    if (typeof value === 'number' && animated) {
+      return <AnimatedNumber value={value} />;
+    }
+    return typeof value === 'number' ? value.toLocaleString() : value;
+  };
+
+  const renderTrend = () => {
+    if (!trend) return null;
+
+    return (
+      <TrendBadge $direction={trend.direction}>
+        {trend.direction === 'up' ? '↑' : '↓'}
+        {animated ? (
+          <AnimatedPercentage value={Math.abs(trend.value)} />
+        ) : (
+          `${Math.abs(trend.value)}%`
+        )}
+      </TrendBadge>
+    );
+  };
+
   return (
     <StyledCard
       padding="md"
@@ -91,13 +117,8 @@ export function StatCard({
       )}
       <Content>
         <Value $variant={variant}>
-          {typeof value === 'number' ? value.toLocaleString() : value}
-          {trend && (
-            <TrendBadge $direction={trend.direction}>
-              {trend.direction === 'up' ? '↑' : '↓'}
-              {Math.abs(trend.value)}%
-            </TrendBadge>
-          )}
+          {renderValue()}
+          {renderTrend()}
         </Value>
         <Label>{label}</Label>
       </Content>

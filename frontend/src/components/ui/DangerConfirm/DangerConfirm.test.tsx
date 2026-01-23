@@ -118,8 +118,10 @@ describe('DangerConfirm', () => {
     renderWithTheme(<DangerConfirm {...defaultProps} isLoading />);
 
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
-    // Confirm button is also disabled (both by loading and by invalid state)
-    expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled();
+    // Confirm button shows loading state and is disabled
+    const buttons = screen.getAllByRole('button');
+    const confirmButton = buttons.find((btn) => btn.textContent?.includes('Loading') || btn.textContent?.includes('Confirm'));
+    expect(confirmButton).toBeDisabled();
   });
 
   it('shows audit note', () => {

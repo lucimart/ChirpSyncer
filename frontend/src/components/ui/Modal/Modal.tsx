@@ -1,37 +1,14 @@
 'use client';
 
-import styled, { keyframes } from 'styled-components';
-import { ReactNode, useEffect, useCallback } from 'react';
+import styled from 'styled-components';
+import { ReactNode, useEffect, useCallback, useRef, useId, memo, FC } from 'react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X } from 'lucide-react';
+import { ModalProps, MODAL_SIZE_MAP, MODAL_ANIMATION } from './types';
+import { useFocusTrap } from './useFocusTrap';
 
-export interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title?: string;
-  children: ReactNode;
-  footer?: ReactNode;
-  size?: 'sm' | 'md' | 'lg';
-  closeOnOverlayClick?: boolean;
-  'data-testid'?: string;
-}
-
-const fadeIn = keyframes`
-  from { opacity: 0; }
-  to { opacity: 1; }
-`;
-
-const slideIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-`;
-
-const Overlay = styled.div`
+const Overlay = styled(motion.div)`
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
@@ -40,16 +17,13 @@ const Overlay = styled.div`
   justify-content: center;
   padding: ${({ theme }) => theme.spacing[4]};
   z-index: 50;
-  animation: ${fadeIn} 150ms ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
-const sizeMap = {
-  sm: '400px',
-  md: '500px',
-  lg: '700px',
-};
-
-const ModalContainer = styled.div<{ $size: string }>`
+const ModalContainer = styled(motion.div)<{ $size: string }>`
   background-color: ${({ theme }) => theme.colors.background.primary};
   border-radius: ${({ theme }) => theme.borderRadius.xl};
   box-shadow: ${({ theme }) => theme.shadows.xl};
@@ -59,7 +33,11 @@ const ModalContainer = styled.div<{ $size: string }>`
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  animation: ${slideIn} 200ms ease;
+  outline: none;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
 const Header = styled.div`
@@ -77,7 +55,13 @@ const Title = styled.h2`
   margin: 0;
 `;
 
-const CloseButton = styled.button`
+const Description = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  margin: ${({ theme }) => theme.spacing[1]} 0 0 0;
+`;
+
+const CloseButton = styled(motion.button)`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,11 +72,17 @@ const CloseButton = styled.button`
   border: none;
   border-radius: ${({ theme }) => theme.borderRadius.md};
   color: ${({ theme }) => theme.colors.text.secondary};
-  transition: all ${({ theme }) => theme.transitions.fast};
+  cursor: pointer;
+  transition: background-color 0.15s ease;
 
   &:hover {
     background-color: ${({ theme }) => theme.colors.background.secondary};
     color: ${({ theme }) => theme.colors.text.primary};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary[500]};
+    outline-offset: 2px;
   }
 `;
 
@@ -110,65 +100,176 @@ const Footer = styled.div`
   border-top: 1px solid ${({ theme }) => theme.colors.border.light};
 `;
 
-export const Modal = ({
+const VisuallyHidden = styled.span`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+`;
+
+const ModalBase: FC<ModalProps> = ({
   isOpen,
   onClose,
   title,
+  description,
   children,
   footer,
   size = 'md',
   closeOnOverlayClick = true,
+  closeOnEscape = true,
+  trapFocus = true,
+  returnFocusOnClose = true,
+  initialFocusRef,
+  finalFocusRef,
+  preserveScrollBarGap = true,
   'data-testid': testId,
-}: ModalProps) => {
+  className,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  const descriptionId = useId();
+  const shouldReduceMotion = useReducedMotion();
+
+  // Focus trap
+  useFocusTrap({
+    enabled: isOpen && trapFocus,
+    containerRef,
+    initialFocusRef,
+    finalFocusRef,
+    returnFocusOnClose,
+  });
+
+  // Escape key handler
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (closeOnEscape && e.key === 'Escape') {
+        e.stopPropagation();
         onClose();
       }
     },
-    [onClose]
+    [closeOnEscape, onClose]
   );
 
+  // Scroll lock
   useEffect(() => {
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden';
+    if (!isOpen) return;
+
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const originalOverflow = document.body.style.overflow;
+    const originalPaddingRight = document.body.style.paddingRight;
+
+    document.body.style.overflow = 'hidden';
+    if (preserveScrollBarGap && scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
     }
 
+    document.addEventListener('keydown', handleKeyDown);
+
     return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.paddingRight = originalPaddingRight;
       document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = '';
     };
-  }, [isOpen, handleKeyDown]);
+  }, [isOpen, handleKeyDown, preserveScrollBarGap]);
 
-  if (!isOpen) return null;
+  const handleOverlayClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (closeOnOverlayClick && e.target === e.currentTarget) {
+        onClose();
+      }
+    },
+    [closeOnOverlayClick, onClose]
+  );
 
-  return (
-    <Overlay onClick={closeOnOverlayClick ? onClose : undefined}>
-      <ModalContainer
-        $size={sizeMap[size]}
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={title ? 'modal-title' : undefined}
-        data-testid={testId}
-      >
-        {title && (
-          <Header>
-            <Title id="modal-title">{title}</Title>
-            <CloseButton onClick={onClose} aria-label="Close modal">
-              <X size={20} />
-            </CloseButton>
-          </Header>
-        )}
-        <Content>{children}</Content>
-        {footer && <Footer>{footer}</Footer>}
-      </ModalContainer>
-    </Overlay>
+  const animationProps = shouldReduceMotion
+    ? MODAL_ANIMATION.reducedMotion
+    : MODAL_ANIMATION.content;
+
+  const overlayProps = shouldReduceMotion
+    ? MODAL_ANIMATION.reducedMotion
+    : MODAL_ANIMATION.overlay;
+
+  // Portal rendering
+  if (typeof window === 'undefined') return null;
+
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <Overlay
+          key="modal-overlay"
+          onClick={handleOverlayClick}
+          initial={overlayProps.initial}
+          animate={overlayProps.animate}
+          exit={overlayProps.exit}
+          transition={overlayProps.transition}
+        >
+          <ModalContainer
+            ref={containerRef}
+            $size={MODAL_SIZE_MAP[size]}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? titleId : undefined}
+            aria-describedby={description ? descriptionId : undefined}
+            tabIndex={-1}
+            data-testid={testId}
+            className={className}
+            initial={animationProps.initial}
+            animate={animationProps.animate}
+            exit={animationProps.exit}
+            transition={animationProps.transition}
+          >
+            {title && (
+              <Header>
+                <div>
+                  <Title id={titleId}>{title}</Title>
+                  {description && (
+                    <Description id={descriptionId}>{description}</Description>
+                  )}
+                </div>
+                <CloseButton
+                  onClick={onClose}
+                  aria-label="Close modal"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <X size={20} aria-hidden="true" />
+                </CloseButton>
+              </Header>
+            )}
+            {!title && (
+              <VisuallyHidden>
+                <button onClick={onClose} aria-label="Close modal">
+                  Close
+                </button>
+              </VisuallyHidden>
+            )}
+            <Content>{children}</Content>
+            {footer && <Footer>{footer}</Footer>}
+          </ModalContainer>
+        </Overlay>
+      )}
+    </AnimatePresence>,
+    document.body
   );
 };
 
-// Convenience sub-components for common patterns
-const ModalFooter = ({ children }: { children: ReactNode }) => <Footer>{children}</Footer>;
+ModalBase.displayName = 'ModalBase';
+
+// Convenience sub-components
+const ModalFooter: FC<{ children: ReactNode }> = memo(({ children }) => (
+  <Footer>{children}</Footer>
+));
 ModalFooter.displayName = 'ModalFooter';
-Modal.Footer = ModalFooter;
+
+// Memoized modal with sub-component
+export const Modal = Object.assign(memo(ModalBase), {
+  Footer: ModalFooter,
+});
+
+Modal.displayName = 'Modal';

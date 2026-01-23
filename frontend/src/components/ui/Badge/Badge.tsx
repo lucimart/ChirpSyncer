@@ -1,86 +1,77 @@
 'use client';
 
+import { memo, FC, useCallback } from 'react';
 import styled, { css } from 'styled-components';
-import { HTMLAttributes, ReactNode } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { X } from 'lucide-react';
+import {
+  BadgeProps,
+  BadgeVariant,
+  BadgeSize,
+  BADGE_SIZES,
+  BADGE_ANIMATION,
+} from './types';
 
-type BadgeVariant =
-  | 'default'
-  | 'primary'
-  | 'success'
-  | 'warning'
-  | 'danger'
-  | 'info'
-  | 'neutral'
-  | 'neutral-soft'
-  | 'success-soft'
-  | 'warning-soft'
-  | 'text'
-  | 'status-success'
-  | 'status-warning'
-  | 'status-danger'
-  | 'status-primary';
-type BadgeSize = 'xs' | 'sm' | 'md' | 'lg';
-
-export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-  children: ReactNode;
-  variant?: BadgeVariant;
-  size?: BadgeSize;
-  dot?: boolean;
-  outline?: boolean;
-  dotColor?: string;
-}
-
-// Light mode variant styles
-const lightVariantStyles = {
+const variantStyles: Record<BadgeVariant, ReturnType<typeof css>> = {
   default: css`
-    background-color: ${({ theme }) => theme.colors.neutral[100]};
-    color: ${({ theme }) => theme.colors.neutral[800]};
-    border-color: ${({ theme }) => theme.colors.neutral[200]};
+    background-color: ${({ theme }) => theme.colors.background.tertiary};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    border-color: ${({ theme }) => theme.colors.border.default};
   `,
   primary: css`
-    background-color: ${({ theme }) => theme.colors.primary[50]};
-    color: ${({ theme }) => theme.colors.primary[800]};
-    border-color: ${({ theme }) => theme.colors.primary[200]};
+    background-color: ${({ theme }) => theme.colors.surface.primary.bg};
+    color: ${({ theme }) => theme.colors.surface.primary.text};
+    border-color: ${({ theme }) => theme.colors.surface.primary.border};
   `,
   success: css`
-    background-color: ${({ theme }) => theme.colors.success[50]};
-    color: ${({ theme }) => theme.colors.success[800]};
-    border-color: ${({ theme }) => theme.colors.success[100]};
+    background-color: ${({ theme }) => theme.colors.surface.success.bg};
+    color: ${({ theme }) => theme.colors.surface.success.text};
+    border-color: ${({ theme }) => theme.colors.surface.success.border};
   `,
   warning: css`
-    background-color: ${({ theme }) => theme.colors.warning[50]};
-    color: ${({ theme }) => theme.colors.warning[800]};
-    border-color: ${({ theme }) => theme.colors.warning[100]};
+    background-color: ${({ theme }) => theme.colors.surface.warning.bg};
+    color: ${({ theme }) => theme.colors.surface.warning.text};
+    border-color: ${({ theme }) => theme.colors.surface.warning.border};
   `,
   danger: css`
-    background-color: ${({ theme }) => theme.colors.danger[50]};
-    color: ${({ theme }) => theme.colors.danger[800]};
-    border-color: ${({ theme }) => theme.colors.danger[100]};
+    background-color: ${({ theme }) => theme.colors.surface.danger.bg};
+    color: ${({ theme }) => theme.colors.surface.danger.text};
+    border-color: ${({ theme }) => theme.colors.surface.danger.border};
   `,
   info: css`
-    background-color: ${({ theme }) => theme.colors.primary[50]};
-    color: ${({ theme }) => theme.colors.primary[800]};
-    border-color: ${({ theme }) => theme.colors.primary[100]};
+    background-color: ${({ theme }) => theme.colors.surface.primary.bg};
+    color: ${({ theme }) => theme.colors.surface.primary.text};
+    border-color: ${({ theme }) => theme.colors.surface.primary.border};
   `,
   neutral: css`
-    background-color: ${({ theme }) => theme.colors.neutral[200]};
-    color: ${({ theme }) => theme.colors.neutral[800]};
-    border-color: ${({ theme }) => theme.colors.neutral[200]};
+    background-color: ${({ theme }) => theme.colors.background.tertiary};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    border-color: ${({ theme }) => theme.colors.border.default};
   `,
   'neutral-soft': css`
-    background-color: ${({ theme }) => theme.colors.neutral[100]};
-    color: ${({ theme }) => theme.colors.neutral[800]};
-    border-color: ${({ theme }) => theme.colors.neutral[100]};
+    background-color: ${({ theme }) => theme.colors.background.tertiary};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    border-color: ${({ theme }) => theme.colors.background.tertiary};
   `,
   'success-soft': css`
-    background-color: ${({ theme }) => theme.colors.success[100]};
-    color: ${({ theme }) => theme.colors.success[800]};
-    border-color: ${({ theme }) => theme.colors.success[100]};
+    background-color: ${({ theme }) => theme.colors.surface.success.bg};
+    color: ${({ theme }) => theme.colors.surface.success.text};
+    border-color: ${({ theme }) => theme.colors.surface.success.bg};
   `,
   'warning-soft': css`
-    background-color: ${({ theme }) => theme.colors.warning[100]};
-    color: ${({ theme }) => theme.colors.warning[800]};
-    border-color: ${({ theme }) => theme.colors.warning[100]};
+    background-color: ${({ theme }) => theme.colors.surface.warning.bg};
+    color: ${({ theme }) => theme.colors.surface.warning.text};
+    border-color: ${({ theme }) => theme.colors.surface.warning.bg};
+  `,
+  'danger-soft': css`
+    background-color: ${({ theme }) => theme.colors.surface.danger.bg};
+    color: ${({ theme }) => theme.colors.surface.danger.text};
+    border-color: ${({ theme }) => theme.colors.surface.danger.bg};
+  `,
+  'primary-soft': css`
+    background-color: ${({ theme }) => theme.colors.surface.primary.bg};
+    color: ${({ theme }) => theme.colors.surface.primary.text};
+    border-color: ${({ theme }) => theme.colors.surface.primary.bg};
   `,
   text: css`
     background-color: transparent;
@@ -93,8 +84,8 @@ const lightVariantStyles = {
     border-color: transparent;
   `,
   'status-warning': css`
-    background-color: ${({ theme }) => theme.colors.warning[100]};
-    color: ${({ theme }) => theme.colors.warning[800]};
+    background-color: ${({ theme }) => theme.colors.surface.warning.bg};
+    color: ${({ theme }) => theme.colors.surface.warning.text};
     border-color: transparent;
   `,
   'status-danger': css`
@@ -107,107 +98,20 @@ const lightVariantStyles = {
     color: white;
     border-color: transparent;
   `,
-};
-
-// Dark mode variant styles - darker backgrounds with light text for contrast
-const darkVariantStyles = {
-  default: css`
-    background-color: ${({ theme }) => theme.colors.neutral[700]};
-    color: ${({ theme }) => theme.colors.neutral[100]};
-    border-color: ${({ theme }) => theme.colors.neutral[600]};
-  `,
-  primary: css`
-    background-color: ${({ theme }) => theme.colors.primary[900]};
-    color: ${({ theme }) => theme.colors.primary[100]};
-    border-color: ${({ theme }) => theme.colors.primary[700]};
-  `,
-  success: css`
-    background-color: ${({ theme }) => theme.colors.success[800]};
-    color: ${({ theme }) => theme.colors.success[100]};
-    border-color: ${({ theme }) => theme.colors.success[700]};
-  `,
-  warning: css`
-    background-color: ${({ theme }) => theme.colors.warning[800]};
-    color: ${({ theme }) => theme.colors.warning[100]};
-    border-color: ${({ theme }) => theme.colors.warning[700]};
-  `,
-  danger: css`
-    background-color: ${({ theme }) => theme.colors.danger[800]};
-    color: ${({ theme }) => theme.colors.danger[100]};
-    border-color: ${({ theme }) => theme.colors.danger[700]};
-  `,
-  info: css`
-    background-color: ${({ theme }) => theme.colors.primary[900]};
-    color: ${({ theme }) => theme.colors.primary[100]};
-    border-color: ${({ theme }) => theme.colors.primary[700]};
-  `,
-  neutral: css`
-    background-color: ${({ theme }) => theme.colors.neutral[600]};
-    color: ${({ theme }) => theme.colors.neutral[100]};
-    border-color: ${({ theme }) => theme.colors.neutral[500]};
-  `,
-  'neutral-soft': css`
-    background-color: ${({ theme }) => theme.colors.neutral[700]};
-    color: ${({ theme }) => theme.colors.neutral[200]};
-    border-color: ${({ theme }) => theme.colors.neutral[600]};
-  `,
-  'success-soft': css`
-    background-color: ${({ theme }) => theme.colors.success[900]};
-    color: ${({ theme }) => theme.colors.success[200]};
-    border-color: ${({ theme }) => theme.colors.success[800]};
-  `,
-  'warning-soft': css`
-    background-color: ${({ theme }) => theme.colors.warning[900]};
-    color: ${({ theme }) => theme.colors.warning[200]};
-    border-color: ${({ theme }) => theme.colors.warning[800]};
-  `,
-  text: css`
-    background-color: transparent;
-    color: ${({ theme }) => theme.colors.text.primary};
-    border-color: transparent;
-  `,
-  'status-success': css`
-    background-color: ${({ theme }) => theme.colors.success[700]};
+  twitter: css`
+    background-color: #1da1f2;
     color: white;
     border-color: transparent;
   `,
-  'status-warning': css`
-    background-color: ${({ theme }) => theme.colors.warning[700]};
+  bluesky: css`
+    background-color: #0085ff;
     color: white;
     border-color: transparent;
   `,
-  'status-danger': css`
-    background-color: ${({ theme }) => theme.colors.danger[700]};
-    color: white;
+  count: css`
+    background-color: ${({ theme }) => theme.colors.background.tertiary};
+    color: ${({ theme }) => theme.colors.text.tertiary};
     border-color: transparent;
-  `,
-  'status-primary': css`
-    background-color: ${({ theme }) => theme.colors.primary[700]};
-    color: white;
-    border-color: transparent;
-  `,
-};
-
-const sizeStyles = {
-  xs: css`
-    padding: 2px 8px;
-    font-size: ${({ theme }) => theme.fontSizes.xs};
-    gap: 4px;
-  `,
-  sm: css`
-    padding: 2px 6px;
-    font-size: ${({ theme }) => theme.fontSizes.xs};
-    gap: 4px;
-  `,
-  md: css`
-    padding: 4px 10px;
-    font-size: ${({ theme }) => theme.fontSizes.sm};
-    gap: 6px;
-  `,
-  lg: css`
-    padding: 6px 12px;
-    font-size: ${({ theme }) => theme.fontSizes.base};
-    gap: 8px;
   `,
 };
 
@@ -215,6 +119,7 @@ const StyledBadge = styled.span<{
   $variant: BadgeVariant;
   $size: BadgeSize;
   $outline: boolean;
+  $removable: boolean;
 }>`
   display: inline-flex;
   align-items: center;
@@ -224,12 +129,12 @@ const StyledBadge = styled.span<{
   white-space: nowrap;
   transition: all ${({ theme }) => theme.transitions.fast};
   border: 1px solid transparent;
+  gap: ${({ $size }) => BADGE_SIZES[$size].gap};
+  padding: ${({ $size }) => BADGE_SIZES[$size].padding};
+  font-size: ${({ theme, $size }) =>
+    theme.fontSizes[BADGE_SIZES[$size].fontSize as keyof typeof theme.fontSizes]};
 
-  ${({ $variant, theme }) =>
-    theme.mode === 'dark'
-      ? darkVariantStyles[$variant]
-      : lightVariantStyles[$variant]}
-  ${({ $size }) => sizeStyles[$size]}
+  ${({ $variant }) => variantStyles[$variant]}
 
   ${({ $outline }) =>
     $outline &&
@@ -238,30 +143,134 @@ const StyledBadge = styled.span<{
       border-width: 1px;
       border-style: solid;
     `}
+
+  ${({ $removable }) =>
+    $removable &&
+    css`
+      padding-right: 4px;
+    `}
 `;
 
-const Dot = styled.span<{ $dotColor?: string }>`
+const Dot = styled(motion.span)<{ $dotColor?: string }>`
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background-color: ${({ $dotColor }) => $dotColor ?? 'currentColor'};
+  flex-shrink: 0;
 `;
 
-export const Badge = ({
+const IconWrapper = styled.span<{ $size: BadgeSize }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: ${({ $size }) => BADGE_SIZES[$size].iconSize}px;
+    height: ${({ $size }) => BADGE_SIZES[$size].iconSize}px;
+  }
+`;
+
+const RemoveButton = styled(motion.button)<{ $size: BadgeSize }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 2px;
+  margin-left: 2px;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  color: currentColor;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity ${({ theme }) => theme.transitions.fast};
+
+  &:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 1px;
+  }
+
+  svg {
+    width: ${({ $size }) => BADGE_SIZES[$size].iconSize - 2}px;
+    height: ${({ $size }) => BADGE_SIZES[$size].iconSize - 2}px;
+  }
+`;
+
+export const Badge: FC<BadgeProps> = memo(({
   children,
   variant = 'default',
   size = 'md',
   dot = false,
   outline = false,
   dotColor,
+  leftIcon,
+  rightIcon,
+  removable = false,
+  onRemove,
+  pulse = false,
   ...props
-}: BadgeProps) => {
+}) => {
+  const prefersReducedMotion = useReducedMotion();
+
+  const handleRemove = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onRemove?.();
+    },
+    [onRemove]
+  );
+
+  const showPulseAnimation = pulse && !prefersReducedMotion;
+
   return (
-    <StyledBadge $variant={variant} $size={size} $outline={outline} {...props}>
-      {dot && <Dot $dotColor={dotColor} />}
+    <StyledBadge
+      $variant={variant}
+      $size={size}
+      $outline={outline}
+      $removable={removable}
+      {...props}
+    >
+      {dot && (
+        <Dot
+          $dotColor={dotColor}
+          animate={
+            showPulseAnimation
+              ? { scale: [...BADGE_ANIMATION.pulse.scale], opacity: [...BADGE_ANIMATION.pulse.opacity] }
+              : undefined
+          }
+          transition={showPulseAnimation ? { ...BADGE_ANIMATION.pulse.transition } : undefined}
+          aria-hidden="true"
+        />
+      )}
+      {leftIcon && (
+        <IconWrapper $size={size} aria-hidden="true">
+          {leftIcon}
+        </IconWrapper>
+      )}
       {children}
+      {rightIcon && (
+        <IconWrapper $size={size} aria-hidden="true">
+          {rightIcon}
+        </IconWrapper>
+      )}
+      {removable && (
+        <RemoveButton
+          $size={size}
+          onClick={handleRemove}
+          aria-label="Remove"
+          whileHover={prefersReducedMotion ? undefined : BADGE_ANIMATION.remove.whileHover}
+          whileTap={prefersReducedMotion ? undefined : BADGE_ANIMATION.remove.whileTap}
+        >
+          <X aria-hidden="true" />
+        </RemoveButton>
+      )}
     </StyledBadge>
   );
-};
+});
 
 Badge.displayName = 'Badge';

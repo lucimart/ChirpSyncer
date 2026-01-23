@@ -5,5 +5,6 @@ export {
   Text,
   SmallText,
   Caption,
+  TruncatedText,
 } from './Typography';
 export type { TypographyProps } from './Typography';

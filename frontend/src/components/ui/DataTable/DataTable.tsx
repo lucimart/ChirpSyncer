@@ -53,7 +53,7 @@ const Tbody = styled.tbody``;
 
 const Tr = styled.tr<{ $selectable?: boolean; $selected?: boolean }>`
   background-color: ${({ $selected, theme }) =>
-    $selected ? theme.colors.surface.primary.bg : 'transparent'};
+    $selected ? (theme.colors.surface?.primary?.bg ?? theme.colors.primary[50]) : 'transparent'};
 
   &:hover {
     background-color: ${({ theme }) => theme.colors.background.secondary};
@@ -121,9 +121,9 @@ const PageButton = styled.button<{ $active?: boolean }>`
   }
 
   &:disabled {
-    background-color: ${({ theme }) => theme.colors.neutral[100]};
-    color: ${({ theme }) => theme.colors.neutral[500]};
-    border-color: ${({ theme }) => theme.colors.neutral[200]};
+    background-color: ${({ theme }) => theme.colors.background.tertiary};
+    color: ${({ theme }) => theme.colors.text.tertiary};
+    border-color: ${({ theme }) => theme.colors.border.default};
     cursor: not-allowed;
   }
 `;

@@ -105,7 +105,11 @@ describe('Modal', () => {
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toHaveAttribute('aria-modal', 'true');
-    expect(dialog).toHaveAttribute('aria-labelledby', 'modal-title');
+    // aria-labelledby should reference the title element
+    const labelledBy = dialog.getAttribute('aria-labelledby');
+    expect(labelledBy).toBeTruthy();
+    const titleElement = document.getElementById(labelledBy!);
+    expect(titleElement).toHaveTextContent('Test Modal');
   });
 
   it('prevents body scroll when open', () => {

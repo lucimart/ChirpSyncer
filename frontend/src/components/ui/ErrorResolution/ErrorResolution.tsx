@@ -1,60 +1,39 @@
 'use client';
 
-import React, { useState } from 'react';
+/**
+ * ErrorResolution Component
+ *
+ * Displays error diagnosis with resolution options for users to fix issues.
+ */
+
+import { useState, useCallback, memo, type FC } from 'react';
 import styled, { css, keyframes } from 'styled-components';
-import { 
-  AlertTriangle, 
-  CheckCircle2, 
-  Clock, 
-  ChevronRight, 
-  RefreshCw, 
-  ExternalLink, 
-  LifeBuoy, 
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  ChevronRight,
+  RefreshCw,
+  ExternalLink,
+  LifeBuoy,
   Lightbulb,
-  XCircle
+  XCircle,
 } from 'lucide-react';
-import { Badge } from './Badge';
-import { Button } from './Button/Button';
+import { Badge } from '../Badge';
+import { Button } from '../Button/Button';
+import {
+  type ErrorResolutionProps,
+  type ResolutionOption,
+  ICON_SIZES,
+} from './types';
 
-// --- Types ---
-
-export interface ErrorDiagnosis {
-  code: string;
-  message: string;
-  details: string[];
-  timestamp: Date;
-  lastSuccess?: Date;
-}
-
-export interface ResolutionOption {
-  id: string;
-  title: string;
-  description: string;
-  recommended: boolean;
-  action: {
-    type: 'auto' | 'manual' | 'link';
-    label: string;
-    handler?: () => Promise<void>;
-    href?: string;
-  };
-}
-
-export interface ErrorResolutionProps {
-  error: ErrorDiagnosis;
-  options: ResolutionOption[];
-  tip?: string;
-  onResolve?: (optionId: string) => Promise<void>;
-  onContactSupport?: () => void;
-  className?: string;
-}
-
-// --- Styles ---
-
+// Animations
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 `;
 
+// Styled Components
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -83,13 +62,13 @@ const IconWrapper = styled.div`
   width: 48px;
   height: 48px;
   border-radius: ${({ theme }) => theme.borderRadius.full};
-  background-color: ${({ theme }) => theme.colors.danger[50]};
+  background-color: ${({ theme }) => theme.colors.surface.danger.bg};
   color: ${({ theme }) => theme.colors.danger[600]};
   flex-shrink: 0;
 
   svg {
-    width: 24px;
-    height: 24px;
+    width: ${ICON_SIZES.header}px;
+    height: ${ICON_SIZES.header}px;
   }
 `;
 
@@ -116,8 +95,8 @@ const MetaInfo = styled.div`
   align-items: center;
 
   svg {
-    width: 14px;
-    height: 14px;
+    width: ${ICON_SIZES.meta}px;
+    height: ${ICON_SIZES.meta}px;
     margin-right: ${({ theme }) => theme.spacing[1]};
   }
 `;
@@ -135,10 +114,10 @@ const SectionTitle = styled.h4`
 `;
 
 const DiagnosisBox = styled.div`
-  background-color: ${({ theme }) => theme.colors.neutral[50]};
+  background-color: ${({ theme }) => theme.colors.background.tertiary};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   padding: ${({ theme }) => theme.spacing[4]};
-  border: 1px solid ${({ theme }) => theme.colors.neutral[200]};
+  border: 1px solid ${({ theme }) => theme.colors.border.default};
 `;
 
 const DiagnosisList = styled.ul`
@@ -172,10 +151,10 @@ const OptionsGrid = styled.div`
 
 const OptionCard = styled.div<{ $recommended?: boolean }>`
   position: relative;
-  background-color: ${({ theme, $recommended }) => 
-    $recommended ? theme.colors.success[50] : theme.colors.background.primary};
-  border: 1px solid ${({ theme, $recommended }) => 
-    $recommended ? theme.colors.success[100] : theme.colors.neutral[200]};
+  background-color: ${({ theme, $recommended }) =>
+    $recommended ? theme.colors.surface.success.bg : theme.colors.background.primary};
+  border: 1px solid ${({ theme, $recommended }) =>
+    $recommended ? theme.colors.surface.success.border : theme.colors.border.default};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   padding: ${({ theme }) => theme.spacing[5]};
   transition: all ${({ theme }) => theme.transitions.default};
@@ -183,13 +162,13 @@ const OptionCard = styled.div<{ $recommended?: boolean }>`
   flex-direction: column;
 
   ${({ $recommended, theme }) => $recommended && css`
-    box-shadow: 0 0 0 1px ${theme.colors.success[100]}, ${theme.shadows.sm};
+    box-shadow: 0 0 0 1px ${theme.colors.surface.success.border}, ${theme.shadows.sm};
   `}
 
   &:hover {
     transform: translateY(-2px);
     box-shadow: ${({ theme }) => theme.shadows.md};
-    border-color: ${({ theme, $recommended }) => 
+    border-color: ${({ theme, $recommended }) =>
       $recommended ? theme.colors.success[500] : theme.colors.primary[300]};
   }
 `;
@@ -222,10 +201,10 @@ const TipSection = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.spacing[3]};
   padding: ${({ theme }) => theme.spacing[3]};
-  background-color: ${({ theme }) => theme.colors.warning[50]};
+  background-color: ${({ theme }) => theme.colors.surface.warning.bg};
   border-radius: ${({ theme }) => theme.borderRadius.md};
-  border: 1px dashed ${({ theme }) => theme.colors.warning[100]};
-  color: ${({ theme }) => theme.colors.warning[700]};
+  border: 1px dashed ${({ theme }) => theme.colors.surface.warning.border};
+  color: ${({ theme }) => theme.colors.surface.warning.text};
   font-size: ${({ theme }) => theme.fontSizes.sm};
 
   svg {
@@ -239,7 +218,7 @@ const Footer = styled.div`
   justify-content: space-between;
   align-items: center;
   padding-top: ${({ theme }) => theme.spacing[4]};
-  border-top: 1px solid ${({ theme }) => theme.colors.neutral[100]};
+  border-top: 1px solid ${({ theme }) => theme.colors.border.light};
 `;
 
 const SupportLink = styled.button`
@@ -260,19 +239,32 @@ const SupportLink = styled.button`
   }
 `;
 
-// --- Component ---
+/**
+ * Formats a date for display
+ */
+function formatDate(date: Date): string {
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+}
 
-export const ErrorResolution: React.FC<ErrorResolutionProps> = ({
+/**
+ * ErrorResolution Component
+ */
+export const ErrorResolution: FC<ErrorResolutionProps> = memo(({
   error,
   options,
   tip,
   onResolve,
   onContactSupport,
-  className
+  className,
 }) => {
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  const handleAction = async (option: ResolutionOption) => {
+  const handleAction = useCallback(async (option: ResolutionOption) => {
     if (option.action.type === 'link' && option.action.href) {
       window.open(option.action.href, '_blank', 'noopener,noreferrer');
       return;
@@ -293,16 +285,7 @@ export const ErrorResolution: React.FC<ErrorResolutionProps> = ({
         setLoadingId(null);
       }
     }
-  };
-
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    }).format(date);
-  };
+  }, [onResolve]);
 
   return (
     <Container className={className}>
@@ -330,7 +313,7 @@ export const ErrorResolution: React.FC<ErrorResolutionProps> = ({
 
       <div>
         <SectionTitle>
-          <XCircle size={16} /> Diagnosis
+          <XCircle size={ICON_SIZES.section} /> Diagnosis
         </SectionTitle>
         <DiagnosisBox>
           <DiagnosisList>
@@ -343,21 +326,21 @@ export const ErrorResolution: React.FC<ErrorResolutionProps> = ({
 
       <div>
         <SectionTitle>
-          <RefreshCw size={16} /> Resolution Options
+          <RefreshCw size={ICON_SIZES.section} /> Resolution Options
         </SectionTitle>
         <OptionsGrid>
           {options.map((option) => (
             <OptionCard key={option.id} $recommended={option.recommended}>
               {option.recommended && (
                 <PositionedBadge variant="status-success" size="sm">
-                  <Lightbulb size={12} /> Recommended
+                  <Lightbulb size={ICON_SIZES.badge} /> Recommended
                 </PositionedBadge>
               )}
               <OptionTitle>{option.title}</OptionTitle>
               <OptionDescription>{option.description}</OptionDescription>
-              <Button 
+              <Button
                 variant={
-                  option.action.type === 'auto' ? 'primary' : 
+                  option.action.type === 'auto' ? 'primary' :
                   option.action.type === 'manual' ? 'secondary' : 'dashed'
                 }
                 size="sm"
@@ -370,9 +353,9 @@ export const ErrorResolution: React.FC<ErrorResolutionProps> = ({
                   <>Processing...</>
                 ) : (
                   <>
-                    {option.action.type === 'auto' && <RefreshCw size={16} />}
-                    {option.action.type === 'manual' && <ChevronRight size={16} />}
-                    {option.action.type === 'link' && <ExternalLink size={16} />}
+                    {option.action.type === 'auto' && <RefreshCw size={ICON_SIZES.button} />}
+                    {option.action.type === 'manual' && <ChevronRight size={ICON_SIZES.button} />}
+                    {option.action.type === 'link' && <ExternalLink size={ICON_SIZES.button} />}
                     {option.action.label}
                   </>
                 )}
@@ -384,7 +367,7 @@ export const ErrorResolution: React.FC<ErrorResolutionProps> = ({
 
       {tip && (
         <TipSection>
-          <Lightbulb size={18} />
+          <Lightbulb size={ICON_SIZES.tip} />
           <span><strong>Tip:</strong> {tip}</span>
         </TipSection>
       )}
@@ -392,11 +375,13 @@ export const ErrorResolution: React.FC<ErrorResolutionProps> = ({
       {onContactSupport && (
         <Footer>
           <SupportLink onClick={onContactSupport}>
-            <LifeBuoy size={16} />
+            <LifeBuoy size={ICON_SIZES.support} />
             Still having issues? Contact Support
           </SupportLink>
         </Footer>
       )}
     </Container>
   );
-};
+});
+
+ErrorResolution.displayName = 'ErrorResolution';

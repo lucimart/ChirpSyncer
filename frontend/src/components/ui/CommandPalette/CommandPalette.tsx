@@ -1,42 +1,25 @@
 'use client';
 
-import { useEffect, useState, useCallback, useContext } from 'react';
+/**
+ * CommandPalette Component
+ *
+ * Global command palette for quick navigation and actions,
+ * triggered with Ctrl+K / Cmd+K.
+ */
+
+import { useEffect, useState, useCallback, useMemo, memo, type FC } from 'react';
 import { useRouter } from 'next/navigation';
 import { Command } from 'cmdk';
 import styled from 'styled-components';
+import { Moon, Sun } from 'lucide-react';
 import {
-  Home,
-  RefreshCw,
-  Calendar,
-  BarChart3,
-  Settings,
-  Key,
-  Plug,
-  Search,
-  Trash2,
-  Sparkles,
-  Users,
-  Bookmark,
-  Download,
-  Moon,
-  Sun,
-  SlidersHorizontal,
-  Zap,
-  Clock,
-  LucideIcon,
-} from 'lucide-react';
+  type CommandItem,
+  NAV_COMMANDS,
+  SYNC_NOW_COMMAND,
+  THEME_STORAGE_KEY,
+} from './types';
 
-interface CommandItem {
-  id: string;
-  title: string;
-  description?: string;
-  icon: LucideIcon;
-  category: 'action' | 'navigation' | 'recent';
-  keywords: string[];
-  shortcut?: string;
-  action: () => void | Promise<void>;
-}
-
+// Styled Components
 const Overlay = styled.div`
   position: fixed;
   inset: 0;
@@ -134,7 +117,7 @@ const StyledItem = styled(Command.Item)`
   transition: all ${({ theme }) => theme.transitions.fast};
 
   &[data-selected='true'] {
-    background-color: ${({ theme }) => theme.colors.primary[50]};
+    background-color: ${({ theme }) => theme.colors.surface.primary.bg};
   }
 
   &:hover {
@@ -142,7 +125,7 @@ const StyledItem = styled(Command.Item)`
   }
 
   &[data-selected='true']:hover {
-    background-color: ${({ theme }) => theme.colors.primary[100]};
+    background-color: ${({ theme }) => theme.colors.surface.primary.bg};
   }
 `;
 
@@ -224,13 +207,12 @@ const FooterHint = styled.span`
   gap: 4px;
 `;
 
-// Safe theme hook that doesn't throw
+// Hook for theme management
 function useSafeTheme() {
   const [mode, setModeState] = useState<'light' | 'dark'>('dark');
-  
+
   useEffect(() => {
-    // Check localStorage for theme preference
-    const stored = localStorage.getItem('chirpsyncer-theme-mode');
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
     if (stored === 'light' || stored === 'dark') {
       setModeState(stored);
     } else if (stored === 'system') {
@@ -242,21 +224,22 @@ function useSafeTheme() {
   const toggleMode = useCallback(() => {
     const newMode = mode === 'dark' ? 'light' : 'dark';
     setModeState(newMode);
-    localStorage.setItem('chirpsyncer-theme-mode', newMode);
-    // Trigger a page reload to apply theme change
+    localStorage.setItem(THEME_STORAGE_KEY, newMode);
     window.location.reload();
   }, [mode]);
 
   return { mode, toggleMode };
 }
 
-export function CommandPalette() {
+/**
+ * CommandPalette Component
+ */
+export const CommandPalette: FC = memo(() => {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { mode, toggleMode } = useSafeTheme();
 
-  // Only render after mount to avoid hydration issues
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -266,7 +249,7 @@ export function CommandPalette() {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((open) => !open);
+        setOpen((prev) => !prev);
       }
     };
 
@@ -279,177 +262,67 @@ export function CommandPalette() {
     command();
   }, []);
 
-  const commands: CommandItem[] = [
-    // Actions
-    {
-      id: 'sync_now',
-      title: 'Sync Now',
-      description: 'Execute sync immediately',
-      icon: Zap,
-      category: 'action',
-      keywords: ['sync', 'run', 'execute', 'now', 'sincronizar'],
-      action: () => {
-        // TODO: Implement sync action
-        console.log('Sync now');
-      },
-    },
-    {
-      id: 'toggle_theme',
-      title: mode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode',
-      description: 'Toggle between light and dark theme',
-      icon: mode === 'dark' ? Sun : Moon,
-      category: 'action',
-      keywords: ['theme', 'dark', 'light', 'mode', 'tema', 'oscuro', 'claro'],
-      action: toggleMode,
-    },
-    // Navigation
-    {
-      id: 'nav_dashboard',
-      title: 'Dashboard',
-      description: 'Go to dashboard',
-      icon: Home,
-      category: 'navigation',
-      keywords: ['dashboard', 'home', 'inicio'],
-      shortcut: 'G D',
-      action: () => router.push('/dashboard'),
-    },
-    {
-      id: 'nav_sync',
-      title: 'Sync',
-      description: 'Manage sync operations',
-      icon: RefreshCw,
-      category: 'navigation',
-      keywords: ['sync', 'sincronizar'],
-      shortcut: 'G S',
-      action: () => router.push('/dashboard/sync'),
-    },
-    {
-      id: 'nav_scheduler',
-      title: 'Scheduler',
-      description: 'Schedule posts',
-      icon: Calendar,
-      category: 'navigation',
-      keywords: ['scheduler', 'schedule', 'programar', 'calendario'],
-      action: () => router.push('/dashboard/scheduler'),
-    },
-    {
-      id: 'nav_analytics',
-      title: 'Analytics',
-      description: 'View analytics and insights',
-      icon: BarChart3,
-      category: 'navigation',
-      keywords: ['analytics', 'stats', 'estadisticas', 'metricas'],
-      shortcut: 'G A',
-      action: () => router.push('/dashboard/analytics'),
-    },
-    {
-      id: 'nav_credentials',
-      title: 'Credentials',
-      description: 'Manage API credentials',
-      icon: Key,
-      category: 'navigation',
-      keywords: ['credentials', 'api', 'keys', 'credenciales'],
-      action: () => router.push('/dashboard/credentials'),
-    },
-    {
-      id: 'nav_connectors',
-      title: 'Connectors',
-      description: 'Manage platform connections',
-      icon: Plug,
-      category: 'navigation',
-      keywords: ['connectors', 'platforms', 'conectores', 'plataformas'],
-      action: () => router.push('/dashboard/connectors'),
-    },
-    {
-      id: 'nav_search',
-      title: 'Search',
-      description: 'Search posts and content',
-      icon: Search,
-      category: 'navigation',
-      keywords: ['search', 'find', 'buscar'],
-      action: () => router.push('/dashboard/search'),
-    },
-    {
-      id: 'nav_cleanup',
-      title: 'Cleanup',
-      description: 'Manage cleanup rules',
-      icon: Trash2,
-      category: 'navigation',
-      keywords: ['cleanup', 'delete', 'limpieza', 'borrar'],
-      action: () => router.push('/dashboard/cleanup'),
-    },
-    {
-      id: 'nav_feedlab',
-      title: 'Feed Lab',
-      description: 'Customize your algorithm',
-      icon: Sparkles,
-      category: 'navigation',
-      keywords: ['feed', 'lab', 'algorithm', 'algoritmo'],
-      action: () => router.push('/dashboard/feed-lab'),
-    },
-    {
-      id: 'nav_algorithm',
-      title: 'Algorithm',
-      description: 'Configure sync algorithm',
-      icon: SlidersHorizontal,
-      category: 'navigation',
-      keywords: ['algorithm', 'rules', 'algoritmo', 'reglas'],
-      action: () => router.push('/dashboard/algorithm'),
-    },
-    {
-      id: 'nav_workspaces',
-      title: 'Workspaces',
-      description: 'Manage workspaces',
-      icon: Users,
-      category: 'navigation',
-      keywords: ['workspaces', 'teams', 'espacios'],
-      action: () => router.push('/dashboard/workspaces'),
-    },
-    {
-      id: 'nav_bookmarks',
-      title: 'Bookmarks',
-      description: 'View saved bookmarks',
-      icon: Bookmark,
-      category: 'navigation',
-      keywords: ['bookmarks', 'saved', 'guardados', 'favoritos'],
-      action: () => router.push('/dashboard/bookmarks'),
-    },
-    {
-      id: 'nav_export',
-      title: 'Export',
-      description: 'Export your data',
-      icon: Download,
-      category: 'navigation',
-      keywords: ['export', 'download', 'exportar', 'descargar'],
-      action: () => router.push('/dashboard/export'),
-    },
-    {
-      id: 'nav_settings',
-      title: 'Settings',
-      description: 'App settings and preferences',
-      icon: Settings,
-      category: 'navigation',
-      keywords: ['settings', 'preferences', 'configuracion', 'ajustes'],
-      shortcut: 'G ,',
-      action: () => router.push('/dashboard/settings'),
-    },
-  ];
+  const handleClose = useCallback(() => {
+    setOpen(false);
+  }, []);
 
-  const actionCommands = commands.filter((c) => c.category === 'action');
-  const navigationCommands = commands.filter((c) => c.category === 'navigation');
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setOpen(false);
+    }
+  }, []);
+
+  // Build commands with router
+  const commands = useMemo((): CommandItem[] => {
+    const actionCommands: CommandItem[] = [
+      {
+        ...SYNC_NOW_COMMAND,
+        category: 'action',
+        action: () => {
+          console.log('Sync now');
+        },
+      },
+      {
+        id: 'toggle_theme',
+        title: mode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+        description: 'Toggle between light and dark theme',
+        icon: mode === 'dark' ? Sun : Moon,
+        category: 'action',
+        keywords: ['theme', 'dark', 'light', 'mode', 'tema', 'oscuro', 'claro'],
+        action: toggleMode,
+      },
+    ];
+
+    const navigationCommands: CommandItem[] = NAV_COMMANDS.map((cmd) => ({
+      id: cmd.id,
+      title: cmd.title,
+      description: cmd.description,
+      icon: cmd.icon,
+      category: 'navigation' as const,
+      keywords: cmd.keywords,
+      shortcut: cmd.shortcut,
+      action: () => router.push(cmd.path),
+    }));
+
+    return [...actionCommands, ...navigationCommands];
+  }, [mode, toggleMode, router]);
+
+  const actionCommands = useMemo(
+    () => commands.filter((c) => c.category === 'action'),
+    [commands]
+  );
+
+  const navigationCommands = useMemo(
+    () => commands.filter((c) => c.category === 'navigation'),
+    [commands]
+  );
 
   if (!mounted || !open) return null;
 
   return (
     <>
-      <Overlay onClick={() => setOpen(false)} />
-      <StyledCommand
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') {
-            setOpen(false);
-          }
-        }}
-      >
+      <Overlay onClick={handleClose} />
+      <StyledCommand onKeyDown={handleKeyDown}>
         <StyledInput placeholder="Search commands, pages, or actions..." autoFocus />
         <StyledList>
           <StyledEmpty>No results found.</StyledEmpty>
@@ -532,6 +405,6 @@ export function CommandPalette() {
       </StyledCommand>
     </>
   );
-}
+});
 
 CommandPalette.displayName = 'CommandPalette';

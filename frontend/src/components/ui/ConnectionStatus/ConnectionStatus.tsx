@@ -23,39 +23,42 @@ const StatusContainer = styled.div<{ $status: ConnectionStatusType }>`
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   border: 1px solid transparent;
   background-color: ${({ $status, theme }) => {
+    const surface = theme.colors.surface;
     switch ($status) {
       case 'connected':
-        return theme.colors.surface.success.bg;
+        return surface?.success?.bg ?? theme.colors.success[50];
       case 'connecting':
-        return theme.colors.surface.warning.bg;
+        return surface?.warning?.bg ?? theme.colors.warning[50];
       case 'error':
-        return theme.colors.surface.danger.bg;
+        return surface?.danger?.bg ?? theme.colors.danger[50];
       default:
-        return theme.colors.surface.neutral.bg;
+        return surface?.neutral?.bg ?? theme.colors.neutral[100];
     }
   }};
   border-color: ${({ $status, theme }) => {
+    const surface = theme.colors.surface;
     switch ($status) {
       case 'connected':
-        return theme.colors.surface.success.border;
+        return surface?.success?.border ?? theme.colors.success[200];
       case 'connecting':
-        return theme.colors.surface.warning.border;
+        return surface?.warning?.border ?? theme.colors.warning[200];
       case 'error':
-        return theme.colors.surface.danger.border;
+        return surface?.danger?.border ?? theme.colors.danger[200];
       default:
-        return theme.colors.surface.neutral.border;
+        return surface?.neutral?.border ?? theme.colors.neutral[200];
     }
   }};
   color: ${({ $status, theme }) => {
+    const surface = theme.colors.surface;
     switch ($status) {
       case 'connected':
-        return theme.colors.surface.success.text;
+        return surface?.success?.text ?? theme.colors.success[800];
       case 'connecting':
-        return theme.colors.surface.warning.text;
+        return surface?.warning?.text ?? theme.colors.warning[800];
       case 'error':
-        return theme.colors.surface.danger.text;
+        return surface?.danger?.text ?? theme.colors.danger[800];
       default:
-        return theme.colors.surface.neutral.text;
+        return surface?.neutral?.text ?? theme.colors.neutral[800];
     }
   }};
 `;

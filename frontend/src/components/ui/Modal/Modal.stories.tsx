@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Modal } from './Modal';
 import { Button } from '../Button';
 
@@ -13,9 +13,15 @@ const meta: Meta<typeof Modal> = {
   argTypes: {
     size: {
       control: 'select',
-      options: ['sm', 'md', 'lg'],
+      options: ['sm', 'md', 'lg', 'xl', 'full'],
     },
     closeOnOverlayClick: {
+      control: 'boolean',
+    },
+    closeOnEscape: {
+      control: 'boolean',
+    },
+    trapFocus: {
       control: 'boolean',
     },
   },
@@ -48,6 +54,25 @@ export const Default: Story = {
   },
 };
 
+export const WithDescription: Story = {
+  render: (args) => <ModalDemo {...args} />,
+  args: {
+    title: 'Delete Account',
+    description: 'This action cannot be undone.',
+    children: (
+      <p>
+        Are you sure you want to delete your account? All your data will be permanently removed.
+      </p>
+    ),
+    footer: (
+      <>
+        <Button variant="ghost">Cancel</Button>
+        <Button variant="danger">Delete Account</Button>
+      </>
+    ),
+  },
+};
+
 export const WithFooter: Story = {
   render: (args) => <ModalDemo {...args} />,
   args: {
@@ -71,6 +96,15 @@ export const Small: Story = {
   },
 };
 
+export const Medium: Story = {
+  render: (args) => <ModalDemo {...args} />,
+  args: {
+    title: 'Medium Modal',
+    size: 'md',
+    children: <p>This is the default medium-sized modal.</p>,
+  },
+};
+
 export const Large: Story = {
   render: (args) => <ModalDemo {...args} />,
   args: {
@@ -86,6 +120,34 @@ export const Large: Story = {
           <li>Feature 3</li>
         </ul>
       </div>
+    ),
+  },
+};
+
+export const ExtraLarge: Story = {
+  render: (args) => <ModalDemo {...args} />,
+  args: {
+    title: 'Extra Large Modal',
+    size: 'xl',
+    children: (
+      <div>
+        <p>This extra large modal is great for displaying data tables or complex forms.</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginTop: '16px' }}>
+          <div style={{ padding: '16px', background: '#f5f5f5', borderRadius: '8px' }}>Column 1</div>
+          <div style={{ padding: '16px', background: '#f5f5f5', borderRadius: '8px' }}>Column 2</div>
+        </div>
+      </div>
+    ),
+  },
+};
+
+export const FullWidth: Story = {
+  render: (args) => <ModalDemo {...args} />,
+  args: {
+    title: 'Full Width Modal',
+    size: 'full',
+    children: (
+      <p>This modal takes up almost the full width of the screen. Useful for image galleries or wide content.</p>
     ),
   },
 };
@@ -116,14 +178,114 @@ export const NoOverlayClose: Story = {
   },
 };
 
+export const NoEscapeClose: Story = {
+  render: (args) => <ModalDemo {...args} />,
+  args: {
+    title: 'Required Action',
+    closeOnEscape: false,
+    closeOnOverlayClick: false,
+    children: (
+      <p>
+        This modal cannot be closed with Escape or by clicking outside.
+        You must use the buttons to proceed.
+      </p>
+    ),
+    footer: (
+      <>
+        <Button variant="primary">Accept and Continue</Button>
+      </>
+    ),
+  },
+};
+
+// Focus trap demo
+const FocusTrapDemo = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <Button onClick={() => setIsOpen(true)}>Open Modal</Button>
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title="Focus Trap Demo"
+        trapFocus={true}
+      >
+        <p>Try pressing Tab repeatedly. Focus will cycle through focusable elements within the modal.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
+          <input type="text" placeholder="First input" style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
+          <input type="text" placeholder="Second input" style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
+          <Button variant="secondary">A Button</Button>
+          <a href="#test" style={{ color: 'blue', textDecoration: 'underline' }}>A Link</a>
+        </div>
+      </Modal>
+    </>
+  );
+};
+
+export const FocusTrap: Story = {
+  render: () => <FocusTrapDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Focus is trapped within the modal. Tab cycles through focusable elements, and focus returns to the trigger button when the modal closes.',
+      },
+    },
+  },
+};
+
+// Initial focus demo
+const InitialFocusDemo = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <>
+      <Button onClick={() => setIsOpen(true)}>Open Modal</Button>
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title="Initial Focus"
+        initialFocusRef={inputRef}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
+            <Button variant="primary">Submit</Button>
+          </>
+        }
+      >
+        <p>When this modal opens, the input field below receives focus automatically.</p>
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="I get focused automatically"
+          style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', marginTop: '12px' }}
+        />
+      </Modal>
+    </>
+  );
+};
+
+export const InitialFocus: Story = {
+  render: () => <InitialFocusDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Use initialFocusRef to specify which element should receive focus when the modal opens.',
+      },
+    },
+  },
+};
+
 export const WithForm: Story = {
   render: (args) => <ModalDemo {...args} />,
   args: {
     title: 'Create New Item',
+    description: 'Fill out the form below to create a new item.',
     children: (
       <form style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div>
-          <label htmlFor="name" style={{ display: 'block', marginBottom: '4px' }}>
+          <label htmlFor="name" style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
             Name
           </label>
           <input
@@ -134,7 +296,7 @@ export const WithForm: Story = {
           />
         </div>
         <div>
-          <label htmlFor="desc" style={{ display: 'block', marginBottom: '4px' }}>
+          <label htmlFor="desc" style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
             Description
           </label>
           <textarea
@@ -150,6 +312,50 @@ export const WithForm: Story = {
       <>
         <Button variant="ghost">Cancel</Button>
         <Button variant="primary">Create</Button>
+      </>
+    ),
+  },
+};
+
+// Long content with scroll
+export const LongContent: Story = {
+  render: (args) => <ModalDemo {...args} />,
+  args: {
+    title: 'Terms and Conditions',
+    children: (
+      <div>
+        {Array.from({ length: 20 }, (_, i) => (
+          <p key={i} style={{ marginBottom: '12px' }}>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+          </p>
+        ))}
+      </div>
+    ),
+    footer: (
+      <>
+        <Button variant="ghost">Decline</Button>
+        <Button variant="primary">Accept</Button>
+      </>
+    ),
+  },
+};
+
+// Confirmation modal
+export const ConfirmationDialog: Story = {
+  render: (args) => <ModalDemo {...args} />,
+  args: {
+    title: 'Delete Item',
+    description: 'This action is permanent and cannot be reversed.',
+    size: 'sm',
+    children: (
+      <p>
+        Are you sure you want to delete <strong>&quot;Project Alpha&quot;</strong>? This will remove all associated data.
+      </p>
+    ),
+    footer: (
+      <>
+        <Button variant="ghost">Cancel</Button>
+        <Button variant="danger">Delete</Button>
       </>
     ),
   },

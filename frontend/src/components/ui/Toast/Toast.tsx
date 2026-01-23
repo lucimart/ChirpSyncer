@@ -1,61 +1,59 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import styled, { keyframes } from 'styled-components';
-import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react';
-
-type ToastType = 'success' | 'error' | 'warning' | 'info';
-
-interface Toast {
-  id: string;
-  type: ToastType;
-  title: string;
-  message?: string;
-  duration?: number;
-}
-
-interface ToastContextValue {
-  toasts: Toast[];
-  addToast: (toast: Omit<Toast, 'id'>) => void;
-  removeToast: (id: string) => void;
-}
+import { createContext, useContext, useState, useCallback, memo, FC, useMemo } from 'react';
+import { createPortal } from 'react-dom';
+import styled from 'styled-components';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { X } from 'lucide-react';
+import {
+  Toast,
+  ToastType,
+  ToastPosition,
+  ToastContextValue,
+  ToastProviderProps,
+  TOAST_ICONS,
+  TOAST_COLORS,
+  TOAST_ARIA_LIVE,
+  TOAST_ANIMATION,
+  POSITION_STYLES,
+  DEFAULT_TOAST_DURATION,
+  DEFAULT_TOAST_LIMIT,
+} from './types';
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
-const slideIn = keyframes`
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-`;
-
-const slideOut = keyframes`
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-`;
-
-const ToastContainer = styled.div`
+const ToastContainer = styled.div<{ $position: ToastPosition }>`
   position: fixed;
-  top: ${({ theme }) => theme.spacing[4]};
-  right: ${({ theme }) => theme.spacing[4]};
   z-index: 9999;
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing[3]};
   max-width: 400px;
+  pointer-events: none;
+
+  ${({ $position }) => {
+    const styles = POSITION_STYLES[$position];
+    return `
+      ${styles.top ? `top: ${styles.top};` : ''}
+      ${styles.bottom ? `bottom: ${styles.bottom};` : ''}
+      ${styles.left ? `left: ${styles.left};` : ''}
+      ${styles.right ? `right: ${styles.right};` : ''}
+      ${styles.transform ? `transform: ${styles.transform};` : ''}
+    `;
+  }}
+
+  ${({ $position }) =>
+    $position.includes('bottom') &&
+    `
+    flex-direction: column-reverse;
+  `}
 `;
 
-const ToastItem = styled.div<{ $type: ToastType; $exiting?: boolean }>`
+const ToastItemWrapper = styled(motion.div)`
+  pointer-events: auto;
+`;
+
+const ToastItem = styled.div<{ $type: ToastType }>`
   display: flex;
   align-items: flex-start;
   gap: ${({ theme }) => theme.spacing[3]};
@@ -65,33 +63,23 @@ const ToastItem = styled.div<{ $type: ToastType; $exiting?: boolean }>`
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   border-left: 4px solid
     ${({ $type, theme }) => {
-      switch ($type) {
-        case 'success':
-          return theme.colors.success[500];
-        case 'error':
-          return theme.colors.danger[500];
-        case 'warning':
-          return theme.colors.warning[500];
-        default:
-          return theme.colors.primary[500];
-      }
+      const colorKey = TOAST_COLORS[$type];
+      return theme.colors[colorKey as keyof typeof theme.colors]?.[500] ?? theme.colors.primary[500];
     }};
-  animation: ${({ $exiting }) => ($exiting ? slideOut : slideIn)} 0.3s ease-out forwards;
+  width: 100%;
+  max-width: 400px;
+
+  &:focus-within {
+    outline: 2px solid ${({ theme }) => theme.colors.primary[500]};
+    outline-offset: 2px;
+  }
 `;
 
 const ToastIcon = styled.div<{ $type: ToastType }>`
   flex-shrink: 0;
   color: ${({ $type, theme }) => {
-    switch ($type) {
-      case 'success':
-        return theme.colors.success[500];
-      case 'error':
-        return theme.colors.danger[500];
-      case 'warning':
-        return theme.colors.warning[500];
-      default:
-        return theme.colors.primary[500];
-    }
+    const colorKey = TOAST_COLORS[$type];
+    return theme.colors[colorKey as keyof typeof theme.colors]?.[500] ?? theme.colors.primary[500];
   }};
 `;
 
@@ -112,7 +100,36 @@ const ToastMessage = styled.div`
   margin-top: ${({ theme }) => theme.spacing[1]};
 `;
 
-const CloseButton = styled.button`
+const ToastActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+  margin-top: ${({ theme }) => theme.spacing[2]};
+`;
+
+const ActionButton = styled.button`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.primary[600]};
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary[700]};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary[500]};
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+`;
+
+const CloseButton = styled(motion.button)`
   flex-shrink: 0;
   padding: ${({ theme }) => theme.spacing[1]};
   border: none;
@@ -120,89 +137,240 @@ const CloseButton = styled.button`
   color: ${({ theme }) => theme.colors.text.tertiary};
   cursor: pointer;
   border-radius: ${({ theme }) => theme.borderRadius.sm};
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     background-color: ${({ theme }) => theme.colors.background.secondary};
     color: ${({ theme }) => theme.colors.text.primary};
   }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary[500]};
+    outline-offset: 2px;
+  }
 `;
 
-function getIcon(type: ToastType) {
-  switch (type) {
-    case 'success':
-      return <CheckCircle size={20} />;
-    case 'error':
-      return <AlertCircle size={20} />;
-    case 'warning':
-      return <AlertTriangle size={20} />;
-    default:
-      return <Info size={20} />;
-  }
+const ProgressBar = styled(motion.div)<{ $type: ToastType }>`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: ${({ $type, theme }) => {
+    const colorKey = TOAST_COLORS[$type];
+    return theme.colors[colorKey as keyof typeof theme.colors]?.[500] ?? theme.colors.primary[500];
+  }};
+  border-radius: 0 0 0 ${({ theme }) => theme.borderRadius.lg};
+`;
+
+const ToastItemContainer = styled.div`
+  position: relative;
+  overflow: hidden;
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+`;
+
+interface ToastItemComponentProps {
+  toast: Toast;
+  onRemove: (id: string) => void;
+  position: ToastPosition;
 }
 
-interface ToastProviderProps {
-  children: ReactNode;
-}
+const ToastItemComponent: FC<ToastItemComponentProps> = memo(({ toast, onRemove, position }) => {
+  const shouldReduceMotion = useReducedMotion();
+  const Icon = TOAST_ICONS[toast.type];
+  const ariaLive = TOAST_ARIA_LIVE[toast.type];
+  const dismissible = toast.dismissible ?? true;
+  const duration = toast.duration ?? DEFAULT_TOAST_DURATION;
 
-export function ToastProvider({ children }: ToastProviderProps) {
+  const animation = shouldReduceMotion
+    ? TOAST_ANIMATION.reducedMotion
+    : TOAST_ANIMATION[position];
+
+  const handleDismiss = useCallback(() => {
+    toast.onDismiss?.();
+    onRemove(toast.id);
+  }, [toast, onRemove]);
+
+  const handleAction = useCallback(() => {
+    toast.action?.onClick();
+    onRemove(toast.id);
+  }, [toast, onRemove]);
+
+  return (
+    <ToastItemWrapper
+      layout
+      initial={animation.initial}
+      animate={animation.animate}
+      exit={animation.exit}
+      transition={TOAST_ANIMATION.transition}
+    >
+      <ToastItemContainer>
+        <ToastItem
+          $type={toast.type}
+          role="alert"
+          aria-live={ariaLive}
+          aria-atomic="true"
+        >
+          <ToastIcon $type={toast.type} aria-hidden="true">
+            <Icon size={20} />
+          </ToastIcon>
+          <ToastContent>
+            <ToastTitle>{toast.title}</ToastTitle>
+            {toast.message && <ToastMessage>{toast.message}</ToastMessage>}
+            {toast.action && (
+              <ToastActions>
+                <ActionButton onClick={handleAction}>
+                  {toast.action.label}
+                </ActionButton>
+              </ToastActions>
+            )}
+          </ToastContent>
+          {dismissible && (
+            <CloseButton
+              onClick={handleDismiss}
+              aria-label="Dismiss notification"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <X size={16} aria-hidden="true" />
+            </CloseButton>
+          )}
+        </ToastItem>
+        {duration > 0 && (
+          <ProgressBar
+            $type={toast.type}
+            initial={{ width: '100%' }}
+            animate={{ width: '0%' }}
+            transition={{ duration: duration / 1000, ease: 'linear' }}
+          />
+        )}
+      </ToastItemContainer>
+    </ToastItemWrapper>
+  );
+});
+
+ToastItemComponent.displayName = 'ToastItemComponent';
+
+export const ToastProvider: FC<ToastProviderProps> = memo(({
+  children,
+  limit = DEFAULT_TOAST_LIMIT,
+  position = 'top-right',
+  defaultDuration = DEFAULT_TOAST_DURATION,
+}) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [exitingIds, setExitingIds] = useState<Set<string>>(new Set());
 
   const removeToast = useCallback((id: string) => {
-    setExitingIds((prev) => new Set(prev).add(id));
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-      setExitingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
-    }, 300);
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  const removeAllToasts = useCallback(() => {
+    setToasts([]);
+  }, []);
+
+  const updateToast = useCallback((id: string, updates: Partial<Omit<Toast, 'id'>>) => {
+    setToasts((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, ...updates } : t))
+    );
   }, []);
 
   const addToast = useCallback(
-    (toast: Omit<Toast, 'id'>) => {
+    (toast: Omit<Toast, 'id'>): string => {
       const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-      const newToast: Toast = { ...toast, id };
-      setToasts((prev) => [...prev, newToast]);
+      const newToast: Toast = {
+        ...toast,
+        id,
+        duration: toast.duration ?? defaultDuration,
+        dismissible: toast.dismissible ?? true,
+      };
 
-      const duration = toast.duration ?? 5000;
+      setToasts((prev) => {
+        const updated = [...prev, newToast];
+        // Limit number of toasts
+        if (updated.length > limit) {
+          return updated.slice(-limit);
+        }
+        return updated;
+      });
+
+      const duration = newToast.duration ?? defaultDuration;
       if (duration > 0) {
         setTimeout(() => removeToast(id), duration);
       }
+
+      return id;
     },
-    [removeToast]
+    [defaultDuration, limit, removeToast]
+  );
+
+  const contextValue = useMemo<ToastContextValue>(
+    () => ({
+      toasts,
+      addToast,
+      removeToast,
+      removeAllToasts,
+      updateToast,
+    }),
+    [toasts, addToast, removeToast, removeAllToasts, updateToast]
+  );
+
+  const portalContent = (
+    <ToastContainer
+      $position={position}
+      role="region"
+      aria-label="Notifications"
+    >
+      <AnimatePresence mode="popLayout">
+        {toasts.map((toast) => (
+          <ToastItemComponent
+            key={toast.id}
+            toast={toast}
+            onRemove={removeToast}
+            position={position}
+          />
+        ))}
+      </AnimatePresence>
+    </ToastContainer>
   );
 
   return (
-    <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
-      <ToastContainer>
-        {toasts.map((toast) => (
-          <ToastItem
-            key={toast.id}
-            $type={toast.type}
-            $exiting={exitingIds.has(toast.id)}
-          >
-            <ToastIcon $type={toast.type}>{getIcon(toast.type)}</ToastIcon>
-            <ToastContent>
-              <ToastTitle>{toast.title}</ToastTitle>
-              {toast.message && <ToastMessage>{toast.message}</ToastMessage>}
-            </ToastContent>
-            <CloseButton onClick={() => removeToast(toast.id)}>
-              <X size={16} />
-            </CloseButton>
-          </ToastItem>
-        ))}
-      </ToastContainer>
+      {typeof window !== 'undefined' && createPortal(portalContent, document.body)}
     </ToastContext.Provider>
   );
-}
+});
 
-export function useToast() {
+ToastProvider.displayName = 'ToastProvider';
+
+export function useToast(): ToastContextValue {
   const context = useContext(ToastContext);
   if (!context) {
     throw new Error('useToast must be used within a ToastProvider');
   }
   return context;
 }
+
+// Convenience functions for creating toasts
+export const toast = {
+  success: (title: string, options?: Partial<Omit<Toast, 'id' | 'type' | 'title'>>) => ({
+    type: 'success' as const,
+    title,
+    ...options,
+  }),
+  error: (title: string, options?: Partial<Omit<Toast, 'id' | 'type' | 'title'>>) => ({
+    type: 'error' as const,
+    title,
+    ...options,
+  }),
+  warning: (title: string, options?: Partial<Omit<Toast, 'id' | 'type' | 'title'>>) => ({
+    type: 'warning' as const,
+    title,
+    ...options,
+  }),
+  info: (title: string, options?: Partial<Omit<Toast, 'id' | 'type' | 'title'>>) => ({
+    type: 'info' as const,
+    title,
+    ...options,
+  }),
+};

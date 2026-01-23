@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { CSSProperties, ReactNode } from 'react';
 import styled, { css } from 'styled-components';
 
 type TypographyVariant =
@@ -21,6 +21,7 @@ export interface TypographyProps {
   as?: keyof JSX.IntrinsicElements;
   children: ReactNode;
   className?: string;
+  style?: CSSProperties;
 }
 
 const variantStyles = {
@@ -113,6 +114,7 @@ export function Typography({
   as,
   children,
   className,
+  style,
 }: TypographyProps) {
   const tag = as || defaultTags[variant];
 
@@ -122,6 +124,7 @@ export function Typography({
       $variant={variant}
       $color={color}
       className={className}
+      style={style}
       data-testid="typography"
     >
       {children}
@@ -155,3 +158,10 @@ export const Caption = styled(Typography).attrs({
   variant: 'caption' as TypographyVariant,
   color: 'tertiary' as TypographyColor,
 })``;
+
+export const TruncatedText = styled(Text)<{ $maxWidth?: string }>`
+  max-width: ${({ $maxWidth }) => $maxWidth ?? '100%'};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;

@@ -1,15 +1,15 @@
 'use client';
 
-import styled, { keyframes } from 'styled-components';
-
-const pulse = keyframes`
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
-`;
+import { memo, FC, useId } from 'react';
+import styled from 'styled-components';
+import { motion, useReducedMotion } from 'framer-motion';
+import {
+  ProgressProps,
+  ProgressVariant,
+  ProgressSize,
+  PROGRESS_SIZES,
+  PROGRESS_ANIMATION,
+} from './types';
 
 const ProgressContainer = styled.div`
   width: 100%;
@@ -33,22 +33,17 @@ const LabelValue = styled.span`
   color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
-const ProgressTrack = styled.div<{ $size: 'sm' | 'md' | 'lg' }>`
+const ProgressTrack = styled.div<{ $size: ProgressSize }>`
+  position: relative;
   width: 100%;
-  height: ${({ $size }) =>
-    $size === 'sm' ? '4px' : $size === 'md' ? '8px' : '12px'};
+  height: ${({ $size }) => PROGRESS_SIZES[$size].height}px;
   background-color: ${({ theme }) => theme.colors.neutral[200]};
   border-radius: ${({ theme }) => theme.borderRadius.full};
   overflow: hidden;
 `;
 
-const ProgressFill = styled.div<{
-  $value: number;
-  $variant: 'primary' | 'success' | 'warning' | 'danger';
-  $animated: boolean;
-}>`
+const ProgressFill = styled(motion.div)<{ $variant: ProgressVariant }>`
   height: 100%;
-  width: ${({ $value }) => `${Math.min(100, Math.max(0, $value))}%`};
   background-color: ${({ $variant, theme }) => {
     switch ($variant) {
       case 'success':
@@ -62,9 +57,25 @@ const ProgressFill = styled.div<{
     }
   }};
   border-radius: ${({ theme }) => theme.borderRadius.full};
-  transition: width ${({ theme }) => theme.transitions.normal};
-  animation: ${({ $animated }) => ($animated ? pulse : 'none')} 1.5s ease-in-out
-    infinite;
+`;
+
+const IndeterminateFill = styled(motion.div)<{ $variant: ProgressVariant }>`
+  position: absolute;
+  height: 100%;
+  width: 40%;
+  background-color: ${({ $variant, theme }) => {
+    switch ($variant) {
+      case 'success':
+        return theme.colors.success[600];
+      case 'warning':
+        return theme.colors.warning[600];
+      case 'danger':
+        return theme.colors.danger[600];
+      default:
+        return theme.colors.primary[600];
+    }
+  }};
+  border-radius: ${({ theme }) => theme.borderRadius.full};
 `;
 
 const ProgressDetails = styled.div`
@@ -88,18 +99,7 @@ const DetailLabel = styled.div`
   color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
-export interface ProgressProps {
-  value: number;
-  max?: number;
-  label?: string;
-  showValue?: boolean;
-  variant?: 'primary' | 'success' | 'warning' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
-  animated?: boolean;
-  details?: Array<{ label: string; value: string | number }>;
-}
-
-export function Progress({
+export const Progress: FC<ProgressProps> = memo(({
   value,
   max = 100,
   label,
@@ -107,29 +107,72 @@ export function Progress({
   variant = 'primary',
   size = 'md',
   animated = false,
+  indeterminate = false,
   details,
-}: ProgressProps) {
-  const percentage = (value / max) * 100;
+  className,
+  'aria-label': ariaLabel,
+}) => {
+  const id = useId();
+  const shouldReduceMotion = useReducedMotion();
+  const percentage = Math.min(100, Math.max(0, (value / max) * 100));
+
+  const fillAnimation = shouldReduceMotion
+    ? { width: `${percentage}%` }
+    : {
+        initial: PROGRESS_ANIMATION.fill.initial,
+        animate: PROGRESS_ANIMATION.fill.animate(percentage),
+        transition: PROGRESS_ANIMATION.fill.transition,
+      };
+
+  const pulseAnimation = animated && !shouldReduceMotion
+    ? {
+        animate: PROGRESS_ANIMATION.pulse.animate,
+        transition: PROGRESS_ANIMATION.pulse.transition,
+      }
+    : {};
+
+  const indeterminateAnimation = shouldReduceMotion
+    ? {}
+    : {
+        animate: PROGRESS_ANIMATION.indeterminate.animate,
+        transition: PROGRESS_ANIMATION.indeterminate.transition,
+      };
 
   return (
-    <ProgressContainer>
+    <ProgressContainer className={className}>
       {(label || showValue) && (
         <ProgressLabel>
-          {label && <LabelText>{label}</LabelText>}
-          {showValue && (
+          {label && <LabelText id={`${id}-label`}>{label}</LabelText>}
+          {showValue && !indeterminate && (
             <LabelValue>
-              {value.toLocaleString()} / {max.toLocaleString()} (
-              {Math.round(percentage)}%)
+              {value.toLocaleString()} / {max.toLocaleString()} ({Math.round(percentage)}%)
             </LabelValue>
           )}
+          {indeterminate && <LabelValue>Loading...</LabelValue>}
         </ProgressLabel>
       )}
-      <ProgressTrack $size={size}>
-        <ProgressFill
-          $value={percentage}
-          $variant={variant}
-          $animated={animated}
-        />
+      <ProgressTrack
+        $size={size}
+        role="progressbar"
+        aria-valuenow={indeterminate ? undefined : Math.round(percentage)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={ariaLabel || label}
+        aria-labelledby={label ? `${id}-label` : undefined}
+        aria-busy={indeterminate}
+      >
+        {indeterminate ? (
+          <IndeterminateFill
+            $variant={variant}
+            {...indeterminateAnimation}
+          />
+        ) : (
+          <ProgressFill
+            $variant={variant}
+            {...fillAnimation}
+            {...pulseAnimation}
+          />
+        )}
       </ProgressTrack>
       {details && details.length > 0 && (
         <ProgressDetails>
@@ -143,4 +186,6 @@ export function Progress({
       )}
     </ProgressContainer>
   );
-}
+});
+
+Progress.displayName = 'Progress';
