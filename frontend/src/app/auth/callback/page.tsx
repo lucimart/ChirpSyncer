@@ -27,42 +27,60 @@ function AuthCallbackContent() {
   const { setToken } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
+  const [processed, setProcessed] = useState(false);
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    const refreshToken = searchParams.get('refresh_token');
-    const errorParam = searchParams.get('error');
+    if (processed) return;
 
-    if (errorParam) {
-      setStatus('error');
-      const errorMessages: Record<string, string> = {
-        oauth_denied: 'Authentication was cancelled or denied.',
-        oauth_invalid: 'Invalid OAuth response. Please try again.',
-        oauth_state_invalid: 'Security verification failed. Please try again.',
-        oauth_token_error: 'Failed to authenticate with provider. Please try again.',
-        oauth_token_missing: 'Authentication token not received. Please try again.',
-        oauth_userinfo_error: 'Failed to get user information. Please try again.',
-        user_not_found: 'User account not found.',
-        user_creation_failed: 'Failed to create account. Please try again.',
-      };
-      setError(errorMessages[errorParam] || 'An error occurred during authentication.');
-      return;
-    }
+    const processAuth = async () => {
+      const token = searchParams.get('token');
+      const refreshToken = searchParams.get('refresh_token');
+      const errorParam = searchParams.get('error');
 
-    if (token) {
-      // Store the token (and refresh token if present) and redirect to dashboard
-      setToken(token, refreshToken || undefined);
-      setStatus('success');
+      if (errorParam) {
+        setStatus('error');
+        const errorMessages: Record<string, string> = {
+          oauth_denied: 'Authentication was cancelled or denied.',
+          oauth_invalid: 'Invalid OAuth response. Please try again.',
+          oauth_state_invalid: 'Security verification failed. Please try again.',
+          oauth_token_error: 'Failed to authenticate with provider. Please try again.',
+          oauth_token_missing: 'Authentication token not received. Please try again.',
+          oauth_userinfo_error: 'Failed to get user information. Please try again.',
+          user_not_found: 'User account not found.',
+          user_creation_failed: 'Failed to create account. Please try again.',
+        };
+        setError(errorMessages[errorParam] || 'An error occurred during authentication.');
+        setProcessed(true);
+        return;
+      }
 
-      // Small delay for UX before redirect
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 500);
-    } else {
-      setStatus('error');
-      setError('No authentication token received.');
-    }
-  }, [searchParams, setToken, router]);
+      if (!token) {
+        setStatus('error');
+        setError('No authentication token received.');
+        setProcessed(true);
+        return;
+      }
+
+      // Store and verify the token (waits for user verification)
+      await setToken(token, refreshToken || undefined);
+      setProcessed(true);
+
+      // Check if auth succeeded
+      const { isAuthenticated, user } = useAuth.getState();
+      if (isAuthenticated && user) {
+        setStatus('success');
+        // Small delay for UX before redirect
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 300);
+      } else {
+        setStatus('error');
+        setError('Failed to verify authentication. Please try logging in again.');
+      }
+    };
+
+    processAuth();
+  }, [searchParams, setToken, router, processed]);
 
   return (
     <Container>

@@ -127,7 +127,7 @@ const ContentWrapper = styled.div`
  */
 export const DashboardLayout: FC<DashboardLayoutProps> = memo(({ children }) => {
   const router = useRouter();
-  const { isAuthenticated, isLoading, checkAuth } = useAuth();
+  const { isAuthenticated, isLoading, checkAuth, _hasHydrated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { data: notifications = [] } = useNotifications();
   const markAsRead = useMarkNotificationRead();
@@ -159,14 +159,18 @@ export const DashboardLayout: FC<DashboardLayoutProps> = memo(({ children }) => 
   const [touchEndY, setTouchEndY] = useState<number | null>(null);
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    // Wait for hydration before checking auth
+    if (_hasHydrated) {
+      checkAuth();
+    }
+  }, [checkAuth, _hasHydrated]);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    // Wait for hydration before making redirect decisions
+    if (_hasHydrated && !isLoading && !isAuthenticated) {
       router.replace('/login');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, router, _hasHydrated]);
 
   const toggleMobileMenu = useCallback(() => {
     setIsMobileMenuOpen((prev) => !prev);
@@ -211,7 +215,8 @@ export const DashboardLayout: FC<DashboardLayoutProps> = memo(({ children }) => 
     }
   }, [touchStart, touchEnd, touchStartY, touchEndY, isMobileMenuOpen, closeMobileMenu]);
 
-  if (isLoading) {
+  // Show loading while waiting for hydration or auth check
+  if (!_hasHydrated || isLoading) {
     return (
       <LoadingContainer>
         <Spinner size="lg" />

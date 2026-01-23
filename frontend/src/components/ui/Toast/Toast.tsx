@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, memo, FC, useMemo } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, memo, FC, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
@@ -259,6 +259,11 @@ export const ToastProvider: FC<ToastProviderProps> = memo(({
   defaultDuration = DEFAULT_TOAST_DURATION,
 }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -336,7 +341,7 @@ export const ToastProvider: FC<ToastProviderProps> = memo(({
   return (
     <ToastContext.Provider value={contextValue}>
       {children}
-      {typeof window !== 'undefined' && createPortal(portalContent, document.body)}
+      {mounted && createPortal(portalContent, document.body)}
     </ToastContext.Provider>
   );
 });

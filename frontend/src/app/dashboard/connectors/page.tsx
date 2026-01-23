@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import styled from 'styled-components';
+import { useState, useMemo, useCallback } from 'react';
+import styled, { css, keyframes } from 'styled-components';
 import {
   Link2,
   Link2Off,
@@ -12,6 +12,16 @@ import {
   Settings,
   AlertCircle,
   Clock,
+  Search,
+  Grid3X3,
+  List,
+  Zap,
+  MessageSquare,
+  Video,
+  FileText,
+  Globe,
+  Rss,
+  Sparkles,
 } from 'lucide-react';
 import {
   Badge,
@@ -41,6 +51,24 @@ import {
   TwitterConnect,
   MatrixConnect,
   DiscordConnect,
+  TelegramConnect,
+  LinkedInConnect,
+  FacebookConnect,
+  RedditConnect,
+  YouTubeConnect,
+  ThreadsConnect,
+  TikTokConnect,
+  PinterestConnect,
+  TumblrConnect,
+  MediumConnect,
+  SubstackConnect,
+  DevToConnect,
+  HashnodeConnect,
+  CohostConnect,
+  LemmyConnect,
+  PixelfedConnect,
+  RSSConnect,
+  WebhookConnect,
   OAuthConnect,
   OAUTH_CONFIGS,
 } from '@/components/connectors';
@@ -58,25 +86,393 @@ import {
   PlatformType,
 } from '@/lib/connectors';
 
-const ConnectorCard = styled(Card)<{ $connected?: boolean; $comingSoon?: boolean }>`
-  position: relative;
-  opacity: ${({ $comingSoon }) => ($comingSoon ? 0.7 : 1)};
-  border: 2px solid ${({ $connected, theme }) =>
-    $connected ? theme.colors.success[200] : 'transparent'};
+// ============ Constants ============
+type Category = 'all' | 'social' | 'video' | 'blogging' | 'messaging' | 'decentralized' | 'utilities';
+type ViewMode = 'grid' | 'list';
+type TabId = 'platforms' | 'flow';
 
-  ${({ $comingSoon }) => $comingSoon && `
+const CATEGORIES: { id: Category; label: string; icon: React.ReactNode; platforms: PlatformType[] }[] = [
+  { id: 'all', label: 'All', icon: <Sparkles size={16} />, platforms: [] },
+  {
+    id: 'social',
+    label: 'Social',
+    icon: <MessageSquare size={16} />,
+    platforms: ['twitter', 'bluesky', 'mastodon', 'threads', 'facebook', 'linkedin', 'instagram', 'tumblr', 'reddit', 'cohost', 'pixelfed']
+  },
+  {
+    id: 'video',
+    label: 'Video',
+    icon: <Video size={16} />,
+    platforms: ['youtube', 'tiktok', 'pinterest']
+  },
+  {
+    id: 'blogging',
+    label: 'Blogging',
+    icon: <FileText size={16} />,
+    platforms: ['medium', 'substack', 'devto', 'hashnode']
+  },
+  {
+    id: 'messaging',
+    label: 'Messaging',
+    icon: <MessageSquare size={16} />,
+    platforms: ['discord', 'telegram', 'matrix']
+  },
+  {
+    id: 'decentralized',
+    label: 'Decentralized',
+    icon: <Globe size={16} />,
+    platforms: ['nostr', 'lemmy', 'dsnp', 'ssb']
+  },
+  {
+    id: 'utilities',
+    label: 'Utilities',
+    icon: <Rss size={16} />,
+    platforms: ['rss', 'webhooks']
+  },
+];
+
+// ============ Styled Components ============
+const PageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[4]};
+`;
+
+const TopBar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[4]};
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
+
+const SearchContainer = styled.div`
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+  }
+`;
+
+const SearchIcon = styled(Search)`
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: ${({ theme }) => theme.colors.text.tertiary};
+  pointer-events: none;
+`;
+
+const SearchInput = styled.input`
+  width: 100%;
+  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]} ${theme.spacing[2]} ${theme.spacing[10]}`};
+  border: 1px solid ${({ theme }) => theme.colors.border.light};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  background: ${({ theme }) => theme.colors.background.primary};
+  color: ${({ theme }) => theme.colors.text.primary};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary[500]};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[100]};
+  }
+
+  &::placeholder {
+    color: ${({ theme }) => theme.colors.text.tertiary};
+  }
+`;
+
+const CategoryChips = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing[2]};
+  flex-wrap: wrap;
+  flex: 1;
+`;
+
+const CategoryChip = styled.button<{ $active: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[1]};
+  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[3]}`};
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  border: 1px solid ${({ $active, theme }) => $active ? theme.colors.primary[500] : theme.colors.border.light};
+  background: ${({ $active, theme }) => $active ? theme.colors.primary[50] : 'transparent'};
+  color: ${({ $active, theme }) => $active ? theme.colors.primary[700] : theme.colors.text.secondary};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary[300]};
+    background: ${({ theme }) => theme.colors.primary[50]};
+  }
+`;
+
+const ViewToggle = styled.div`
+  display: flex;
+  border: 1px solid ${({ theme }) => theme.colors.border.light};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  overflow: hidden;
+`;
+
+const ViewButton = styled.button<{ $active: boolean }>`
+  padding: ${({ theme }) => theme.spacing[2]};
+  background: ${({ $active, theme }) => $active ? theme.colors.primary[50] : 'transparent'};
+  border: none;
+  color: ${({ $active, theme }) => $active ? theme.colors.primary[600] : theme.colors.text.tertiary};
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.background.tertiary};
+  }
+`;
+
+// Connected platforms strip
+const ConnectedStrip = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[3]};
+  padding: ${({ theme }) => theme.spacing[3]};
+  background: ${({ theme }) => theme.colors.background.primary};
+  border: 1px solid ${({ theme }) => theme.colors.border.light};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  overflow-x: auto;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => theme.colors.neutral[300]};
+    border-radius: 2px;
+  }
+`;
+
+const ConnectedLabel = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[1]};
+`;
+
+const ConnectedPlatform = styled.button<{ $color: string }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
+  background: ${({ $color }) => `${$color}15`};
+  border: 1px solid ${({ $color }) => `${$color}30`};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: ${({ $color }) => `${$color}25`};
+    transform: translateY(-1px);
+  }
+`;
+
+const ConnectedPlatformName = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.text.primary};
+  white-space: nowrap;
+`;
+
+// Compact grid
+const CompactGrid = styled.div<{ $viewMode: ViewMode }>`
+  display: ${({ $viewMode }) => $viewMode === 'grid' ? 'grid' : 'flex'};
+  ${({ $viewMode }) => $viewMode === 'grid' ? css`
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: ${({ theme }) => theme.spacing[3]};
+  ` : css`
+    flex-direction: column;
+    gap: ${({ theme }) => theme.spacing[2]};
+  `}
+`;
+
+const shimmer = keyframes`
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+`;
+
+const CompactCard = styled.div<{ $connected?: boolean; $comingSoon?: boolean; $expanded?: boolean; $viewMode: ViewMode }>`
+  position: relative;
+  background: ${({ theme }) => theme.colors.background.primary};
+  border: 2px solid ${({ $connected, theme }) => $connected ? theme.colors.success[200] : theme.colors.border.light};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  padding: ${({ $viewMode, theme }) => $viewMode === 'grid' ? theme.spacing[3] : theme.spacing[2]};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: ${({ $comingSoon }) => $comingSoon ? 0.6 : 1};
+
+  ${({ $viewMode }) => $viewMode === 'list' && css`
+    display: flex;
+    align-items: center;
+    gap: ${({ theme }) => theme.spacing[3]};
+  `}
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary[300]};
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  ${({ $comingSoon }) => $comingSoon && css`
+    pointer-events: none;
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      background-size: 200% 100%;
+      animation: ${shimmer} 2s infinite;
+      border-radius: inherit;
+    }
+  `}
+`;
+
+const CardIconWrapper = styled.div<{ $viewMode: ViewMode }>`
+  ${({ $viewMode, theme }) => $viewMode === 'grid' ? css`
+    display: flex;
+    justify-content: center;
+    margin-bottom: ${theme.spacing[2]};
+  ` : css`
+    flex-shrink: 0;
+  `}
+`;
+
+const CardContent = styled.div<{ $viewMode: ViewMode }>`
+  ${({ $viewMode }) => $viewMode === 'grid' ? css`
+    text-align: center;
+  ` : css`
+    flex: 1;
+    min-width: 0;
+  `}
+`;
+
+const CardName = styled.h4<{ $viewMode: ViewMode }>`
+  margin: 0;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  color: ${({ theme }) => theme.colors.text.primary};
+  ${({ $viewMode }) => $viewMode === 'list' && css`
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  `}
+`;
+
+const CardStatus = styled.span<{ $status: 'connected' | 'beta' | 'coming_soon' | 'available' }>`
+  font-size: 10px;
+  color: ${({ $status, theme }) => {
+    switch ($status) {
+      case 'connected': return theme.colors.success[600];
+      case 'beta': return theme.colors.warning[600];
+      case 'coming_soon': return theme.colors.text.tertiary;
+      default: return theme.colors.text.tertiary;
+    }
+  }};
+`;
+
+const CardActions = styled.div<{ $viewMode: ViewMode }>`
+  ${({ $viewMode, theme }) => $viewMode === 'grid' ? css`
+    margin-top: ${theme.spacing[2]};
+    display: flex;
+    justify-content: center;
+  ` : css`
+    flex-shrink: 0;
+  `}
+`;
+
+const ComingSoonBadge = styled.span`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 6px;
+  background: ${({ theme }) => theme.colors.warning[100]};
+  color: ${({ theme }) => theme.colors.warning[700]};
+  border-radius: 4px;
+`;
+
+const ConnectedIndicator = styled.div`
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  background: ${({ theme }) => theme.colors.success[500]};
+  border-radius: 50%;
+  border: 2px solid ${({ theme }) => theme.colors.background.primary};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+`;
+
+const EmptyState = styled.div`
+  text-align: center;
+  padding: ${({ theme }) => theme.spacing[12]};
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
+const ResultCount = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text.tertiary};
+`;
+
+// Original styled components for modals and sync config
+const DirectionButton = styled.button<{ $active: boolean; $disabled?: boolean }>`
+  flex: 1;
+  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
+  border: 1px solid ${({ $active, theme }) =>
+    $active ? theme.colors.primary[500] : theme.colors.border.default};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  background-color: ${({ $active, theme }) =>
+    $active ? theme.colors.primary[50] : 'white'};
+  color: ${({ $active, theme }) =>
+    $active ? theme.colors.primary[700] : theme.colors.text.secondary};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transitions.fast};
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary[300]};
+  }
+
+  ${({ $disabled }) => $disabled && `
+    opacity: 0.6;
+    cursor: not-allowed;
     pointer-events: none;
   `}
 `;
 
-const ConnectorStatus = styled.span<{ $status: 'connected' | 'disconnected' | 'coming_soon' }>`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ $status, theme }) =>
-    $status === 'connected'
-      ? theme.colors.success[600]
-      : $status === 'coming_soon'
-        ? theme.colors.warning[600]
-        : theme.colors.text.tertiary};
+const CapabilitySectionTitle = styled(Caption)`
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: ${({ theme }) => theme.spacing[2]};
+`;
+
+const CapabilitiesWrapper = styled.div<{ $expanded: boolean }>`
+  overflow: hidden;
+  max-height: ${({ $expanded }) => ($expanded ? '500px' : '0')};
+  opacity: ${({ $expanded }) => ($expanded ? 1 : 0)};
+  transition: max-height 0.3s ease, opacity 0.2s ease;
 `;
 
 const ExpandButton = styled.button`
@@ -105,46 +501,7 @@ const ExpandButton = styled.button`
   }
 `;
 
-const CapabilitiesWrapper = styled.div<{ $expanded: boolean }>`
-  overflow: hidden;
-  max-height: ${({ $expanded }) => ($expanded ? '500px' : '0')};
-  opacity: ${({ $expanded }) => ($expanded ? 1 : 0)};
-  transition: max-height 0.3s ease, opacity 0.2s ease;
-`;
-
-const CapabilitySectionTitle = styled(Caption)`
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: ${({ theme }) => theme.spacing[2]};
-`;
-
-const DirectionButton = styled.button<{ $active: boolean; $disabled?: boolean }>`
-  flex: 1;
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
-  border: 1px solid ${({ $active, theme }) =>
-    $active ? theme.colors.primary[500] : theme.colors.border.default};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  background-color: ${({ $active, theme }) =>
-    $active ? theme.colors.primary[50] : 'white'};
-  color: ${({ $active, theme }) =>
-    $active ? theme.colors.primary[700] : theme.colors.text.secondary};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.fast};
-
-  &:hover {
-    border-color: ${({ theme }) => theme.colors.primary[300]};
-  }
-
-  ${({ $disabled }) => $disabled && `
-    opacity: 0.6;
-    cursor: not-allowed;
-    pointer-events: none;
-  `}
-`;
-
-type TabId = 'platforms' | 'flow';
-
+// ============ Component ============
 export default function ConnectorsPage() {
   const { addToast } = useToast();
   const { data: connectors } = useConnectors();
@@ -161,6 +518,56 @@ export default function ConnectorsPage() {
   const [credentials, setCredentials] = useState<Record<string, string>>({});
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
+  // New UX state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState<Category>('all');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+
+  const connectorsList = connectors ?? AVAILABLE_CONNECTORS;
+
+  // Filtered connectors based on search and category
+  const filteredConnectors = useMemo(() => {
+    let filtered = connectorsList;
+
+    // Filter by search
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(c =>
+        c.name.toLowerCase().includes(query) ||
+        c.description.toLowerCase().includes(query) ||
+        c.platform.toLowerCase().includes(query)
+      );
+    }
+
+    // Filter by category
+    if (activeCategory !== 'all') {
+      const categoryPlatforms = CATEGORIES.find(c => c.id === activeCategory)?.platforms || [];
+      filtered = filtered.filter(c => categoryPlatforms.includes(c.platform));
+    }
+
+    // Sort: connected first, then available, then coming soon
+    return filtered.sort((a, b) => {
+      const aConnected = connections?.some(c => c.platform === a.platform && c.connected) ? 0 : 1;
+      const bConnected = connections?.some(c => c.platform === b.platform && c.connected) ? 0 : 1;
+      if (aConnected !== bConnected) return aConnected - bConnected;
+
+      const statusOrder = { available: 0, beta: 1, coming_soon: 2 };
+      return (statusOrder[a.status] || 0) - (statusOrder[b.status] || 0);
+    });
+  }, [connectorsList, searchQuery, activeCategory, connections]);
+
+  // Connected platforms
+  const connectedPlatforms = useMemo(() => {
+    if (!connections) return [];
+    return connections
+      .filter(c => c.connected)
+      .map(c => {
+        const connector = connectorsList.find(con => con.platform === c.platform);
+        return connector ? { ...connector, connection: c } : null;
+      })
+      .filter(Boolean) as (PlatformConnector & { connection: PlatformConnection })[];
+  }, [connections, connectorsList]);
+
   const toggleExpand = (id: string) => {
     setExpandedCards(prev => {
       const next = new Set(prev);
@@ -169,8 +576,6 @@ export default function ConnectorsPage() {
       return next;
     });
   };
-
-  const connectorsList = connectors ?? AVAILABLE_CONNECTORS;
 
   const flowDiagramData: FlowDiagramData = {
     platforms: (connections ?? [])
@@ -228,13 +633,8 @@ export default function ConnectorsPage() {
     });
   }
 
-  const handleNodeClick = (_platform: Platform) => {
-    // Platform node click handling - could show platform settings
-  };
-
-  const handleEdgeClick = (_connection: SyncConnection) => {
-    // Connection edge click handling - could show sync settings
-  };
+  const handleNodeClick = (_platform: Platform) => {};
+  const handleEdgeClick = (_connection: SyncConnection) => {};
 
   const getConnection = (platform: PlatformType): PlatformConnection | undefined => {
     return connections?.find((c) => c.platform === platform);
@@ -247,7 +647,6 @@ export default function ConnectorsPage() {
 
   const handleConnect = async () => {
     if (!connectModal) return;
-
     try {
       await connectMutation.mutateAsync({
         platform: connectModal.platform,
@@ -320,21 +719,9 @@ export default function ConnectorsPage() {
               {caps.read ? <Check /> : <X />}
               Read
             </Badge>
-            <Badge variant={enabledVariant(caps.edit)} size="sm">
-              {caps.edit ? <Check /> : <X />}
-              Edit
-            </Badge>
-            <Badge variant={enabledVariant(caps.delete)} size="sm">
-              {caps.delete ? <Check /> : <X />}
-              Delete
-            </Badge>
             <Badge variant={enabledVariant(caps.metrics)} size="sm">
               {caps.metrics ? <Check /> : <X />}
               Metrics
-            </Badge>
-            <Badge variant={enabledVariant(caps.schedule)} size="sm">
-              {caps.schedule ? <Check /> : <X />}
-              Schedule
             </Badge>
             <Badge variant={enabledVariant(caps.threads)} size="sm">
               {caps.threads ? <Check /> : <X />}
@@ -347,56 +734,22 @@ export default function ConnectorsPage() {
           <CapabilitySectionTitle>Media</CapabilitySectionTitle>
           <Stack direction="row" wrap gap={2}>
             <Badge variant={enabledVariant(caps.media.images)} size="sm">
-              {caps.media.images ? <Check /> : <X />}
               Images ({caps.media.maxImages})
             </Badge>
             <Badge variant={enabledVariant(caps.media.videos)} size="sm">
-              {caps.media.videos ? <Check /> : <X />}
               Videos
             </Badge>
             <Badge variant={enabledVariant(caps.media.gifs)} size="sm">
-              {caps.media.gifs ? <Check /> : <X />}
               GIFs
             </Badge>
           </Stack>
         </div>
 
-        <div style={{ marginBottom: '16px' }}>
-          <CapabilitySectionTitle>Interactions</CapabilitySectionTitle>
-          <Stack direction="row" wrap gap={2}>
-            <Badge variant={enabledVariant(caps.interactions.like)} size="sm">
-              {caps.interactions.like ? <Check /> : <X />}
-              Like
-            </Badge>
-            <Badge variant={enabledVariant(caps.interactions.repost)} size="sm">
-              {caps.interactions.repost ? <Check /> : <X />}
-              Repost
-            </Badge>
-            <Badge variant={enabledVariant(caps.interactions.reply)} size="sm">
-              {caps.interactions.reply ? <Check /> : <X />}
-              Reply
-            </Badge>
-            <Badge variant={enabledVariant(caps.interactions.quote)} size="sm">
-              {caps.interactions.quote ? <Check /> : <X />}
-              Quote
-            </Badge>
-            <Badge variant={enabledVariant(caps.interactions.bookmark)} size="sm">
-              {caps.interactions.bookmark ? <Check /> : <X />}
-              Bookmark
-            </Badge>
-          </Stack>
-        </div>
-
-        <div style={{ marginBottom: '16px' }}>
+        <div>
           <CapabilitySectionTitle>Limits</CapabilitySectionTitle>
           <Stack direction="row" wrap gap={2}>
             <Badge variant="success" size="sm">
-              <Check />
               {caps.characterLimit} chars
-            </Badge>
-            <Badge variant="success" size="sm">
-              <Check />
-              {caps.altTextLimit} alt text
             </Badge>
           </Stack>
         </div>
@@ -404,7 +757,7 @@ export default function ConnectorsPage() {
     );
   };
 
-  const renderConnectForm = () => {
+  const renderConnectForm = useCallback(() => {
     if (!connectModal) return null;
 
     switch (connectModal.auth_type) {
@@ -439,7 +792,6 @@ export default function ConnectorsPage() {
           />
         );
       case 'oauth2':
-        // Platform-specific OAuth wizards
         if (connectModal.platform === 'mastodon') {
           return (
             <MastodonConnect
@@ -450,11 +802,9 @@ export default function ConnectorsPage() {
             />
           );
         }
-        // Use OAuthConnect for platforms with configs
-        if (OAUTH_CONFIGS[connectModal.platform]) {
+        if (connectModal.platform === 'linkedin') {
           return (
-            <OAuthConnect
-              config={OAUTH_CONFIGS[connectModal.platform]}
+            <LinkedInConnect
               credentials={credentials}
               onCredentialsChange={setCredentials}
               onConnect={handleConnect}
@@ -462,7 +812,26 @@ export default function ConnectorsPage() {
             />
           );
         }
-        // Fallback for Instagram (keep simple form for now)
+        if (connectModal.platform === 'facebook') {
+          return (
+            <FacebookConnect
+              credentials={credentials}
+              onCredentialsChange={setCredentials}
+              onConnect={handleConnect}
+              isConnecting={connectMutation.isPending}
+            />
+          );
+        }
+        if (connectModal.platform === 'threads') {
+          return (
+            <ThreadsConnect
+              credentials={credentials}
+              onCredentialsChange={setCredentials}
+              onConnect={handleConnect}
+              isConnecting={connectMutation.isPending}
+            />
+          );
+        }
         if (connectModal.platform === 'instagram') {
           return (
             <Stack gap={4}>
@@ -487,6 +856,17 @@ export default function ConnectorsPage() {
                 fullWidth
               />
             </Stack>
+          );
+        }
+        if (OAUTH_CONFIGS[connectModal.platform]) {
+          return (
+            <OAuthConnect
+              config={OAUTH_CONFIGS[connectModal.platform]}
+              credentials={credentials}
+              onCredentialsChange={setCredentials}
+              onConnect={handleConnect}
+              isConnecting={connectMutation.isPending}
+            />
           );
         }
         return null;
@@ -517,67 +897,6 @@ export default function ConnectorsPage() {
             isConnecting={connectMutation.isPending}
           />
         );
-      case 'dsnp':
-        return (
-          <Stack gap={4}>
-            <SmallText>
-              DSNP (Decentralized Social Networking Protocol) runs on the Frequency blockchain.
-              You need a Frequency provider URL and optionally your MSA seed phrase for write access.
-            </SmallText>
-            <Input
-              label="Frequency Provider URL"
-              type="text"
-              value={credentials.provider_url || ''}
-              onChange={(e) => setCredentials({ ...credentials, provider_url: e.target.value })}
-              placeholder="wss://rpc.frequency.xyz"
-              hint="Frequency blockchain RPC endpoint"
-              fullWidth
-            />
-            <Input
-              label="MSA ID (optional)"
-              type="text"
-              value={credentials.msa_id || ''}
-              onChange={(e) => setCredentials({ ...credentials, msa_id: e.target.value })}
-              placeholder="123456"
-              hint="Your Message Source Account ID (if you have one)"
-              fullWidth
-            />
-            <Input
-              label="Seed Phrase (optional)"
-              type="password"
-              value={credentials.seed_phrase || ''}
-              onChange={(e) => setCredentials({ ...credentials, seed_phrase: e.target.value })}
-              hint="12-24 word seed phrase for signing transactions"
-              fullWidth
-            />
-          </Stack>
-        );
-      case 'ssb':
-        return (
-          <Stack gap={4}>
-            <SmallText>
-              SSB (Secure Scuttlebutt) is a peer-to-peer social protocol.
-              You need an SSB server running locally or accessible via RPC.
-            </SmallText>
-            <Input
-              label="SSB Server URL"
-              type="text"
-              value={credentials.ssb_server_url || ''}
-              onChange={(e) => setCredentials({ ...credentials, ssb_server_url: e.target.value })}
-              placeholder="http://localhost:8989"
-              hint="URL of your ssb-server instance"
-              fullWidth
-            />
-            <Input
-              label="Secret (optional)"
-              type="password"
-              value={credentials.secret || ''}
-              onChange={(e) => setCredentials({ ...credentials, secret: e.target.value })}
-              hint="Your SSB secret for authentication (usually in ~/.ssb/secret)"
-              fullWidth
-            />
-          </Stack>
-        );
       case 'discord':
         return (
           <DiscordConnect
@@ -588,10 +907,35 @@ export default function ConnectorsPage() {
           />
         );
       case 'reddit':
+        return (
+          <RedditConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'youtube':
+        return (
+          <YouTubeConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'telegram':
+        return (
+          <TelegramConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
       case 'tumblr':
         return (
-          <OAuthConnect
-            config={OAUTH_CONFIGS[connectModal.platform]}
+          <TumblrConnect
             credentials={credentials}
             onCredentialsChange={setCredentials}
             onConnect={handleConnect}
@@ -599,11 +943,98 @@ export default function ConnectorsPage() {
           />
         );
       case 'pinterest':
-      case 'youtube':
+        return (
+          <PinterestConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
       case 'tiktok':
         return (
-          <OAuthConnect
-            config={OAUTH_CONFIGS[connectModal.platform]}
+          <TikTokConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'medium':
+        return (
+          <MediumConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'substack':
+        return (
+          <SubstackConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'devto':
+        return (
+          <DevToConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'hashnode':
+        return (
+          <HashnodeConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'cohost':
+        return (
+          <CohostConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'lemmy':
+        return (
+          <LemmyConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'pixelfed':
+        return (
+          <PixelfedConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'rss':
+        return (
+          <RSSConnect
+            credentials={credentials}
+            onCredentialsChange={setCredentials}
+            onConnect={handleConnect}
+            isConnecting={connectMutation.isPending}
+          />
+        );
+      case 'webhooks':
+        return (
+          <WebhookConnect
             credentials={credentials}
             onCredentialsChange={setCredentials}
             onConnect={handleConnect}
@@ -613,10 +1044,10 @@ export default function ConnectorsPage() {
       default:
         return null;
     }
-  };
+  }, [connectModal, credentials, connectMutation.isPending, handleConnect]);
 
   return (
-    <div>
+    <PageContainer>
       <PageHeader
         title="Platform Connectors"
         description="Connect your social media accounts and configure sync settings"
@@ -643,211 +1074,214 @@ export default function ConnectorsPage() {
         </div>
       ) : (
         <>
-          <SectionTitle style={{ marginTop: '24px' }}>Available Platforms</SectionTitle>
-          <Grid minWidth="320px" gap={4} style={{ marginBottom: '32px' }}>
-            {connectorsList.map((connector) => {
-              const connection = getConnection(connector.platform);
-              const isConnected = connection?.connected;
-              const isComingSoon = connector.status === 'coming_soon';
-
-              return (
-                <ConnectorCard
-                  key={connector.id}
-                  padding="md"
-                  $connected={isConnected}
-                  $comingSoon={isComingSoon}
+          {/* Connected platforms strip */}
+          {connectedPlatforms.length > 0 && (
+            <ConnectedStrip>
+              <ConnectedLabel>
+                <Zap size={14} />
+                Connected ({connectedPlatforms.length})
+              </ConnectedLabel>
+              {connectedPlatforms.map((cp) => (
+                <ConnectedPlatform
+                  key={cp.id}
+                  $color={cp.color}
+                  onClick={() => setSettingsModal(cp)}
+                  title={`${cp.name} - ${cp.connection.handle || 'Connected'}`}
                 >
-                  {isComingSoon && (
-                    <div style={{ position: 'absolute', top: 16, right: 16 }}>
-                      <Badge variant="warning-soft" size="sm">
-                        Coming Soon
-                      </Badge>
-                    </div>
-                  )}
-                  <Stack direction="row" gap={3} align="center" style={{ marginBottom: '16px' }}>
-                    <PlatformIcon icon={connector.icon} color={connector.color} size="lg" />
-                    <div style={{ flex: 1 }}>
-                      <Typography variant="h4">{connector.name}</Typography>
-                      <ConnectorStatus
-                        $status={
-                          isConnected ? 'connected' : isComingSoon ? 'coming_soon' : 'disconnected'
-                        }
-                      >
-                        {isConnected
-                          ? `Connected as ${connection?.handle}`
-                          : isComingSoon
-                            ? 'Coming soon'
-                            : 'Not connected'}
-                      </ConnectorStatus>
-                    </div>
-                  </Stack>
+                  <PlatformIcon icon={cp.icon} color={cp.color} size="sm" />
+                  <ConnectedPlatformName>{cp.name}</ConnectedPlatformName>
+                </ConnectedPlatform>
+              ))}
+            </ConnectedStrip>
+          )}
 
-                  <div style={{ marginBottom: '16px' }}>
-                    <SmallText>{connector.description}</SmallText>
-                  </div>
+          {/* Search and filters */}
+          <TopBar>
+            <SearchContainer>
+              <SearchIcon size={18} />
+              <SearchInput
+                type="text"
+                placeholder="Search platforms..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </SearchContainer>
 
-                  {isConnected && connection && (
-                    <div style={{ marginBottom: '16px' }}>
-                      <DetailsList
-                        variant="compact"
-                        items={[
-                          {
-                            label: 'Last Sync',
-                            value: (
-                              <>
-                                <Clock size={14} />
-                                {connection.last_sync
-                                  ? new Date(connection.last_sync).toLocaleString()
-                                  : 'Never'}
-                              </>
-                            ),
-                          },
-                          {
-                            label: 'Sync Status',
-                            value: connection.sync_enabled ? 'Enabled' : 'Disabled',
-                          },
-                        ]}
-                      />
-                    </div>
-                  )}
+            <CategoryChips>
+              {CATEGORIES.map((cat) => (
+                <CategoryChip
+                  key={cat.id}
+                  $active={activeCategory === cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                >
+                  {cat.icon}
+                  {cat.label}
+                </CategoryChip>
+              ))}
+            </CategoryChips>
 
-                  <ExpandButton onClick={() => toggleExpand(connector.id)}>
-                    {expandedCards.has(connector.id) ? (
-                      <>
-                        Hide Details
-                        <ChevronDown style={{ transform: 'rotate(180deg)' }} />
-                      </>
-                    ) : (
-                      <>
-                        Show Details
-                        <ChevronDown />
-                      </>
-                    )}
-                  </ExpandButton>
+            <ViewToggle>
+              <ViewButton
+                $active={viewMode === 'grid'}
+                onClick={() => setViewMode('grid')}
+                title="Grid view"
+              >
+                <Grid3X3 size={18} />
+              </ViewButton>
+              <ViewButton
+                $active={viewMode === 'list'}
+                onClick={() => setViewMode('list')}
+                title="List view"
+              >
+                <List size={18} />
+              </ViewButton>
+            </ViewToggle>
 
-                  <CapabilitiesWrapper $expanded={expandedCards.has(connector.id)}>
-                    {renderCapabilities(connector)}
-                  </CapabilitiesWrapper>
+            <ResultCount>
+              {filteredConnectors.length} platform{filteredConnectors.length !== 1 ? 's' : ''}
+            </ResultCount>
+          </TopBar>
 
-                  <Stack direction="row" gap={2}>
-                    {isConnected ? (
-                      <>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleDisconnect(connector.platform)}
-                          isLoading={disconnectMutation.isPending}
-                        >
-                          <Link2Off size={16} />
-                          Disconnect
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => setSettingsModal(connector)}
-                        >
-                          <Settings size={16} />
-                          Settings
-                        </Button>
-                      </>
-                    ) : (
-                      <Button
-                        size="sm"
-                        onClick={() => setConnectModal(connector)}
-                        disabled={isComingSoon}
-                      >
-                        <Link2 size={16} />
-                        Connect
-                      </Button>
-                    )}
-                  </Stack>
-                </ConnectorCard>
-              );
-            })}
-          </Grid>
+          {/* Platform grid */}
+          {filteredConnectors.length > 0 ? (
+            <CompactGrid $viewMode={viewMode}>
+              {filteredConnectors.map((connector) => {
+                const connection = getConnection(connector.platform);
+                const isConnected = connection?.connected;
+                const isComingSoon = connector.status === 'coming_soon';
+                const isBeta = connector.status === 'beta';
 
-          <SectionTitle>Sync Configuration</SectionTitle>
-          {connections
-            ?.filter((c) => c.connected)
-            .map((connection) => {
-              const config = getSyncConfig(connection.platform);
-              const connector = connectorsList.find((c) => c.platform === connection.platform);
-
-              if (!config || !connector) return null;
-
-              return (
-                <Card key={connection.id} padding="md" style={{ marginBottom: '16px' }}>
-                  <Stack direction="row" justify="between" align="center" style={{ marginBottom: '16px' }}>
-                    <Stack direction="row" gap={3} align="center">
-                      <PlatformIcon icon={connector.icon} color={connector.color} size="lg" />
-                      <div>
-                        <Typography variant="h4">{connector.name}</Typography>
-                        <SmallText>{connection.handle}</SmallText>
-                      </div>
-                    </Stack>
-                    <Switch
-                      checked={config.enabled}
-                      onChange={() => handleToggleSync(config)}
-                      title={config.enabled ? 'Disable sync' : 'Enable sync'}
-                    />
-                  </Stack>
-
-                  <Label spacing="md">Sync Direction</Label>
-                  <Stack direction="row" gap={2} style={{ marginBottom: '16px' }}>
-                    <DirectionButton
-                      $active={config.direction === 'inbound'}
-                      $disabled={!connector.capabilities.read}
-                      title={!connector.capabilities.read ? 'Inbound sync not supported' : undefined}
-                      onClick={() => handleChangeDirection(config, 'inbound')}
-                    >
-                      {connector.name} {'\u2192'} Hub
-                    </DirectionButton>
-                    <DirectionButton
-                      $active={config.direction === 'bidirectional'}
-                      $disabled={!connector.capabilities.read || !connector.capabilities.publish}
-                      title={
-                        !connector.capabilities.read || !connector.capabilities.publish
-                          ? 'Bidirectional sync requires read + publish support'
-                          : undefined
-                      }
-                      onClick={() => handleChangeDirection(config, 'bidirectional')}
-                    >
-                      Bidirectional
-                    </DirectionButton>
-                    <DirectionButton
-                      $active={config.direction === 'outbound'}
-                      $disabled={!connector.capabilities.publish}
-                      title={!connector.capabilities.publish ? 'Outbound sync not supported' : undefined}
-                      onClick={() => handleChangeDirection(config, 'outbound')}
-                    >
-                      Hub {'\u2192'} {connector.name}
-                    </DirectionButton>
-                  </Stack>
-
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setAdvancedSettingsModal(config)}
+                return (
+                  <CompactCard
+                    key={connector.id}
+                    $connected={isConnected}
+                    $comingSoon={isComingSoon}
+                    $viewMode={viewMode}
+                    onClick={() => !isComingSoon && (isConnected ? setSettingsModal(connector) : setConnectModal(connector))}
                   >
-                    <Settings size={16} />
-                    Advanced Settings
-                    <ChevronRight size={16} />
-                  </Button>
-                </Card>
-              );
-            })}
+                    {isConnected && (
+                      <ConnectedIndicator>
+                        <Check size={10} />
+                      </ConnectedIndicator>
+                    )}
+                    {isComingSoon && <ComingSoonBadge>Soon</ComingSoonBadge>}
 
-          {connections?.filter((c) => c.connected).length === 0 && (
-            <Card padding="lg">
-              <div style={{ textAlign: 'center', color: '#666' }}>
-                <AlertCircle size={48} style={{ marginBottom: 16, opacity: 0.5 }} />
-                <p>Connect a platform above to configure sync settings</p>
-              </div>
-            </Card>
+                    <CardIconWrapper $viewMode={viewMode}>
+                      <PlatformIcon icon={connector.icon} color={connector.color} size={viewMode === 'grid' ? 'lg' : 'md'} />
+                    </CardIconWrapper>
+
+                    <CardContent $viewMode={viewMode}>
+                      <CardName $viewMode={viewMode}>{connector.name}</CardName>
+                      <CardStatus $status={isConnected ? 'connected' : isBeta ? 'beta' : isComingSoon ? 'coming_soon' : 'available'}>
+                        {isConnected ? (connection?.handle || 'Connected') : isBeta ? 'Beta' : isComingSoon ? 'Coming Soon' : 'Available'}
+                      </CardStatus>
+                    </CardContent>
+
+                    {viewMode === 'list' && !isComingSoon && (
+                      <CardActions $viewMode={viewMode}>
+                        <Button
+                          size="sm"
+                          variant={isConnected ? 'secondary' : 'primary'}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isConnected) {
+                              setSettingsModal(connector);
+                            } else {
+                              setConnectModal(connector);
+                            }
+                          }}
+                        >
+                          {isConnected ? <Settings size={14} /> : <Link2 size={14} />}
+                          {isConnected ? 'Settings' : 'Connect'}
+                        </Button>
+                      </CardActions>
+                    )}
+                  </CompactCard>
+                );
+              })}
+            </CompactGrid>
+          ) : (
+            <EmptyState>
+              <AlertCircle size={48} style={{ marginBottom: 16, opacity: 0.5 }} />
+              <p>No platforms found matching &quot;{searchQuery}&quot;</p>
+              <Button variant="secondary" size="sm" onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}>
+                Clear filters
+              </Button>
+            </EmptyState>
+          )}
+
+          {/* Sync Configuration for connected platforms */}
+          {connectedPlatforms.length > 0 && (
+            <>
+              <SectionTitle style={{ marginTop: '32px' }}>Sync Configuration</SectionTitle>
+              {connections
+                ?.filter((c) => c.connected)
+                .map((connection) => {
+                  const config = getSyncConfig(connection.platform);
+                  const connector = connectorsList.find((c) => c.platform === connection.platform);
+
+                  if (!config || !connector) return null;
+
+                  return (
+                    <Card key={connection.id} padding="md" style={{ marginBottom: '16px' }}>
+                      <Stack direction="row" justify="between" align="center" style={{ marginBottom: '16px' }}>
+                        <Stack direction="row" gap={3} align="center">
+                          <PlatformIcon icon={connector.icon} color={connector.color} size="lg" />
+                          <div>
+                            <Typography variant="h4">{connector.name}</Typography>
+                            <SmallText>{connection.handle}</SmallText>
+                          </div>
+                        </Stack>
+                        <Switch
+                          checked={config.enabled}
+                          onChange={() => handleToggleSync(config)}
+                          title={config.enabled ? 'Disable sync' : 'Enable sync'}
+                        />
+                      </Stack>
+
+                      <Label spacing="md">Sync Direction</Label>
+                      <Stack direction="row" gap={2} style={{ marginBottom: '16px' }}>
+                        <DirectionButton
+                          $active={config.direction === 'inbound'}
+                          $disabled={!connector.capabilities.read}
+                          onClick={() => handleChangeDirection(config, 'inbound')}
+                        >
+                          {connector.name} → Hub
+                        </DirectionButton>
+                        <DirectionButton
+                          $active={config.direction === 'bidirectional'}
+                          $disabled={!connector.capabilities.read || !connector.capabilities.publish}
+                          onClick={() => handleChangeDirection(config, 'bidirectional')}
+                        >
+                          Bidirectional
+                        </DirectionButton>
+                        <DirectionButton
+                          $active={config.direction === 'outbound'}
+                          $disabled={!connector.capabilities.publish}
+                          onClick={() => handleChangeDirection(config, 'outbound')}
+                        >
+                          Hub → {connector.name}
+                        </DirectionButton>
+                      </Stack>
+
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setAdvancedSettingsModal(config)}
+                      >
+                        <Settings size={16} />
+                        Advanced Settings
+                        <ChevronRight size={16} />
+                      </Button>
+                    </Card>
+                  );
+                })}
+            </>
           )}
         </>
       )}
 
+      {/* Connect Modal */}
       <Modal
         isOpen={!!connectModal}
         onClose={() => {
@@ -856,8 +1290,7 @@ export default function ConnectorsPage() {
         }}
         title={`Connect to ${connectModal?.name}`}
         footer={
-          // Hide footer for platforms with wizard components (they have their own navigation)
-          ['nostr', 'bluesky', 'mastodon', 'twitter', 'matrix', 'discord', 'linkedin', 'facebook', 'threads', 'reddit', 'tumblr', 'pinterest', 'youtube', 'tiktok'].includes(connectModal?.platform || '') ? null : (
+          ['nostr', 'bluesky', 'mastodon', 'twitter', 'matrix', 'discord', 'telegram', 'linkedin', 'facebook', 'threads', 'reddit', 'youtube', 'tumblr', 'pinterest', 'tiktok', 'medium', 'substack', 'devto', 'hashnode', 'cohost', 'lemmy', 'pixelfed', 'rss', 'webhooks'].includes(connectModal?.platform || '') ? null : (
             <Stack direction="row" justify="end" gap={2}>
               <Button
                 variant="secondary"
@@ -882,13 +1315,23 @@ export default function ConnectorsPage() {
         {renderConnectForm()}
       </Modal>
 
-      {/* Connector Settings Modal */}
+      {/* Settings Modal */}
       <Modal
         isOpen={!!settingsModal}
         onClose={() => setSettingsModal(null)}
         title={`${settingsModal?.name} Settings`}
         footer={
           <Stack direction="row" justify="end" gap={2}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                if (settingsModal) handleDisconnect(settingsModal.platform);
+                setSettingsModal(null);
+              }}
+            >
+              <Link2Off size={16} />
+              Disconnect
+            </Button>
             <Button variant="secondary" onClick={() => setSettingsModal(null)}>
               Close
             </Button>
@@ -915,12 +1358,24 @@ export default function ConnectorsPage() {
                   : 'Never'}
               </SmallText>
             </div>
-            <div>
-              <Label spacing="md">API Rate Limits</Label>
-              <SmallText>
-                {settingsModal.capabilities.characterLimit} characters per post
-              </SmallText>
-            </div>
+
+            <ExpandButton onClick={() => toggleExpand(settingsModal.id)}>
+              {expandedCards.has(settingsModal.id) ? (
+                <>
+                  Hide Capabilities
+                  <ChevronDown style={{ transform: 'rotate(180deg)' }} />
+                </>
+              ) : (
+                <>
+                  Show Capabilities
+                  <ChevronDown />
+                </>
+              )}
+            </ExpandButton>
+
+            <CapabilitiesWrapper $expanded={expandedCards.has(settingsModal.id)}>
+              {renderCapabilities(settingsModal)}
+            </CapabilitiesWrapper>
           </Stack>
         )}
       </Modal>
@@ -1001,6 +1456,6 @@ export default function ConnectorsPage() {
           </Stack>
         )}
       </Modal>
-    </div>
+    </PageContainer>
   );
 }

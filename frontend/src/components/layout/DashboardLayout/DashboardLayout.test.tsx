@@ -22,6 +22,7 @@ jest.mock('@/lib/auth', () => ({
   useAuth: () => ({
     isAuthenticated: true,
     isLoading: false,
+    _hasHydrated: true,
     user: { username: 'testuser', is_admin: false },
     checkAuth: mockCheckAuth,
     logout: mockLogout,

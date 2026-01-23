@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import type { User, Session } from '@/types';
 import { api } from './api';
 
@@ -9,6 +9,7 @@ interface AuthState {
   refreshToken: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  _hasHydrated: boolean;
 
   // Actions
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
@@ -16,16 +17,9 @@ interface AuthState {
   register: (username: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   checkAuth: () => Promise<void>;
   setUser: (user: User | null) => void;
-  setToken: (token: string, refreshToken?: string) => void;
+  setToken: (token: string, refreshToken?: string) => Promise<void>;
   refreshAccessToken: () => Promise<boolean>;
-}
-
-// Listen for token refresh events from API client
-if (typeof window !== 'undefined') {
-  window.addEventListener('auth:tokens-refreshed', ((event: CustomEvent<{ token: string; refreshToken: string }>) => {
-    const { token, refreshToken } = event.detail;
-    useAuth.setState({ token, refreshToken });
-  }) as EventListener);
+  setHasHydrated: (state: boolean) => void;
 }
 
 export const useAuth = create<AuthState>()(
@@ -36,6 +30,11 @@ export const useAuth = create<AuthState>()(
       refreshToken: null,
       isLoading: true,
       isAuthenticated: false,
+      _hasHydrated: false,
+
+      setHasHydrated: (state: boolean) => {
+        set({ _hasHydrated: state });
+      },
 
       login: async (username: string, password: string) => {
         const response = await api.login(username, password);
@@ -120,18 +119,35 @@ export const useAuth = create<AuthState>()(
         set({ user, isAuthenticated: !!user });
       },
 
-      setToken: (token: string, refreshToken?: string) => {
+      setToken: async (token: string, refreshToken?: string) => {
         const newRefreshToken = refreshToken || get().refreshToken;
         api.setToken(token);
         api.setRefreshToken(newRefreshToken);
         set({
           token,
           refreshToken: newRefreshToken,
-          isAuthenticated: true,
-          isLoading: false,
+          isAuthenticated: false,
+          isLoading: true,
         });
-        // Fetch user info after setting token
-        get().checkAuth();
+
+        const response = await api.getCurrentUser();
+        if (response.success && response.data) {
+          set({
+            user: response.data,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } else {
+          api.setToken(null);
+          api.setRefreshToken(null);
+          set({
+            user: null,
+            token: null,
+            refreshToken: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+        }
       },
 
       refreshAccessToken: async () => {
@@ -164,6 +180,9 @@ export const useAuth = create<AuthState>()(
     {
       name: 'chirpsyncer-auth',
       partialize: (state) => ({ token: state.token, refreshToken: state.refreshToken }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );
