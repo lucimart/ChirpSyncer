@@ -73,7 +73,7 @@ const variantStyles = {
   `,
   'success-soft': css`
     background-color: ${({ theme }) => theme.colors.success[100]};
-    color: ${({ theme }) => theme.colors.success[700]};
+    color: ${({ theme }) => theme.colors.success[800]};
     border-color: ${({ theme }) => theme.colors.success[100]};
   `,
   'warning-soft': css`
