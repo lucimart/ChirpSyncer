@@ -1,5 +1,9 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 import { ConditionEditor } from '../ConditionEditor';
+import { Button, Input, Select } from '@/components/ui';
 
 interface Condition {
   field: string;
@@ -28,6 +32,93 @@ interface RuleBuilderProps {
     enabled: boolean;
   };
 }
+
+const FormContainer = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[6]};
+  padding: ${({ theme }) => theme.spacing[6]};
+  background-color: ${({ theme }) => theme.colors.background.primary};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  box-shadow: ${({ theme }) => theme.shadows.md};
+`;
+
+const FormField = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[1]};
+`;
+
+const Label = styled.label`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const WeightSlider = styled.input`
+  width: 100%;
+  height: 8px;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  background: ${({ theme }) => theme.colors.background.tertiary};
+  outline: none;
+  cursor: pointer;
+
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: ${({ theme }) => theme.colors.primary[500]};
+    cursor: pointer;
+    transition: background ${({ theme }) => theme.transitions.fast};
+  }
+
+  &::-webkit-slider-thumb:hover {
+    background: ${({ theme }) => theme.colors.primary[600]};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const ConditionsHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
+`;
+
+const ConditionsTitle = styled.h3`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const ConditionsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[4]};
+`;
+
+const ErrorMessage = styled.p`
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.danger[600]};
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing[4]};
+  justify-content: flex-end;
+`;
+
+const ruleTypeOptions = [
+  { value: 'boost', label: 'Boost' },
+  { value: 'demote', label: 'Demote' },
+  { value: 'filter', label: 'Filter' },
+];
 
 export const RuleBuilder: React.FC<RuleBuilderProps> = ({
   onSubmit,
@@ -118,55 +209,29 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 p-6 bg-white rounded-lg shadow">
-      <div>
-        <label htmlFor="rule-name" className="block text-sm font-medium text-gray-700 mb-1">
-          Rule Name
-        </label>
-        <input
-          id="rule-name"
-          type="text"
-          value={ruleName}
-          onChange={(e) => setRuleName(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          aria-invalid={!!errors.name}
-        />
-        {errors.name && (
-          <p className="mt-1 text-sm text-red-600" role="alert">
-            {errors.name}
-          </p>
-        )}
-      </div>
+    <FormContainer onSubmit={handleSubmit}>
+      <Input
+        id="rule-name"
+        label="Rule Name"
+        value={ruleName}
+        onChange={(e) => setRuleName(e.target.value)}
+        error={errors.name}
+        fullWidth
+        aria-invalid={!!errors.name}
+      />
 
-      <div>
-        <label htmlFor="rule-type" className="block text-sm font-medium text-gray-700 mb-1">
-          Rule Type
-        </label>
-        <select
-          id="rule-type"
-          value={ruleType}
-          onChange={(e) => setRuleType(e.target.value as 'boost' | 'demote' | 'filter')}
-          onClick={(e) => {
-            // Workaround for userEvent.click() on options in jsdom
-            const target = e.target as HTMLElement;
-            if (target.tagName === 'OPTION') {
-              const value = (target as HTMLOptionElement).value;
-              setRuleType(value as 'boost' | 'demote' | 'filter');
-            }
-          }}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="boost">Boost</option>
-          <option value="demote">Demote</option>
-          <option value="filter">Filter</option>
-        </select>
-      </div>
+      <Select
+        id="rule-type"
+        label="Rule Type"
+        value={ruleType}
+        onChange={(e) => setRuleType(e.target.value as 'boost' | 'demote' | 'filter')}
+        options={ruleTypeOptions}
+        fullWidth
+      />
 
-      <div>
-        <label htmlFor="weight-slider" className="block text-sm font-medium text-gray-700 mb-1">
-          Weight: {weight}
-        </label>
-        <input
+      <FormField>
+        <Label htmlFor="weight-slider">Weight: {weight}</Label>
+        <WeightSlider
           id="weight-slider"
           type="range"
           min="-100"
@@ -174,30 +239,23 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
           value={weight}
           onChange={(e) => setWeight(Number(e.target.value))}
           disabled={isFilterType}
-          className="w-full"
           aria-label="Weight"
         />
-      </div>
+      </FormField>
 
       <div>
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-sm font-medium text-gray-700">Conditions</h3>
-          <button
-            type="button"
-            onClick={handleAddCondition}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
+        <ConditionsHeader>
+          <ConditionsTitle>Conditions</ConditionsTitle>
+          <Button type="button" onClick={handleAddCondition} size="sm">
             Add Condition
-          </button>
-        </div>
+          </Button>
+        </ConditionsHeader>
 
         {errors.conditions && (
-          <p className="mb-4 text-sm text-red-600" role="alert">
-            {errors.conditions}
-          </p>
+          <ErrorMessage role="alert">{errors.conditions}</ErrorMessage>
         )}
 
-        <div className="space-y-4" data-testid="conditions-container">
+        <ConditionsContainer data-testid="conditions-container">
           {conditions.map((condition) => (
             <div key={condition._id} data-testid={`condition-editor-${condition._id}`}>
               <ConditionEditor
@@ -207,24 +265,17 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
               />
             </div>
           ))}
-        </div>
+        </ConditionsContainer>
       </div>
 
-      <div className="flex gap-4 justify-end">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
-        >
+      <ButtonGroup>
+        <Button type="button" variant="secondary" onClick={onCancel}>
           Cancel
-        </button>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-        >
+        </Button>
+        <Button type="submit" variant="primary">
           {initialRule ? 'Update Rule' : 'Create Rule'}
-        </button>
-      </div>
-    </form>
+        </Button>
+      </ButtonGroup>
+    </FormContainer>
   );
 };

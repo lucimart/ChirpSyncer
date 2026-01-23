@@ -3,11 +3,14 @@
  * Explains why a post appears in the user's feed
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+'use client';
+
+import React, { useState, useCallback } from 'react';
 import styled, { css } from 'styled-components';
+import { RefreshCw, Info } from 'lucide-react';
 import { RuleContributionChart } from '../RuleContributionChart';
 import { useFeedExplanation } from '@/hooks/useFeedExplanation';
-import { Spinner } from '@/components/ui';
+import { Spinner, Modal, Button } from '@/components/ui';
 
 export interface MatchedCondition {
   field: string;
@@ -47,6 +50,10 @@ const TriggerButton = styled.button`
   gap: ${({ theme }) => theme.spacing[1]};
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.text.secondary};
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
   transition: color ${({ theme }) => theme.transitions.fast};
 
   &:hover {
@@ -64,64 +71,6 @@ const InlineLoading = styled.div`
 const InlineError = styled.div`
   color: ${({ theme }) => theme.colors.danger[600]};
   font-size: ${({ theme }) => theme.fontSizes.sm};
-`;
-
-const Overlay = styled.div`
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: ${({ theme }) => theme.spacing[4]};
-`;
-
-const ModalContainer = styled.div`
-  background-color: ${({ theme }) => theme.colors.background.primary};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  box-shadow: ${({ theme }) => theme.shadows.xl};
-  max-width: 32rem;
-  width: 100%;
-  max-height: 80vh;
-  overflow-y: auto;
-`;
-
-const ModalHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing[4]};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
-`;
-
-const ModalTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  margin: 0;
-`;
-
-const HeaderActions = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-`;
-
-const IconButton = styled.button`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: ${({ theme }) => theme.spacing[2]};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  transition: color ${({ theme }) => theme.transitions.fast};
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.text.primary};
-  }
-`;
-
-const ModalContent = styled.div`
-  padding: ${({ theme }) => theme.spacing[4]};
 `;
 
 const ContentLoading = styled.div`
@@ -272,42 +221,11 @@ const EmptyDescription = styled.p`
   margin: ${({ theme }) => theme.spacing[1]} 0 0;
 `;
 
-const InfoIcon = () => (
-  <svg
-    data-testid="info-icon"
-    width="16"
-    height="16"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
-  </svg>
-);
-
-const RefreshIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-    />
-  </svg>
-);
+const ModalHeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+`;
 
 const formatCondition = (condition: MatchedCondition): string => {
   return `${condition.field} ${condition.operator} "${condition.value}"`;
@@ -326,12 +244,8 @@ export function WhyAmISeeingThis({
   isLoading: externalLoading,
   error: externalError,
   onClose,
-  variant = 'button',
 }: WhyAmISeeingThisProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
-  const titleId = `explanation-title-${postId}`;
 
   // Use hook if no external data provided
   const hookResult = useFeedExplanation(isOpen && !externalExplanation ? postId : null);
@@ -349,34 +263,6 @@ export function WhyAmISeeingThis({
     setIsOpen(false);
     onClose?.();
   }, [onClose]);
-
-  // Focus close button when modal opens
-  useEffect(() => {
-    if (isOpen && closeButtonRef.current) {
-      closeButtonRef.current.focus();
-    }
-  }, [isOpen]);
-
-  // Handle Escape key
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        handleClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, handleClose]);
-
-  // Handle click outside
-  const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
-      handleClose();
-    }
-  };
 
   // Loading state passed as prop - show loading indicator
   if (externalLoading) {
@@ -399,6 +285,18 @@ export function WhyAmISeeingThis({
     );
   }
 
+  const modalFooter = (
+    <ModalHeaderActions>
+      <Button variant="ghost" size="sm" onClick={refetch}>
+        <RefreshCw size={16} />
+        Refresh
+      </Button>
+      <Button variant="secondary" size="sm" onClick={handleClose}>
+        Close
+      </Button>
+    </ModalHeaderActions>
+  );
+
   return (
     <div data-testid="why-seeing-this">
       {/* Trigger Button */}
@@ -407,71 +305,30 @@ export function WhyAmISeeingThis({
         onClick={handleOpen}
         aria-label="Why am I seeing this post?"
       >
-        <InfoIcon />
+        <Info size={16} data-testid="info-icon" />
         Why am I seeing this?
       </TriggerButton>
 
       {/* Modal */}
-      {isOpen && (
-          <Overlay onClick={handleBackdropClick}>
-            <ModalContainer
-              ref={modalRef}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby={titleId}
-            >
-              {/* Header */}
-              <ModalHeader>
-                <ModalTitle id={titleId}>Feed Explanation</ModalTitle>
-                <HeaderActions>
-                  <IconButton
-                    type="button"
-                    onClick={refetch}
-                    aria-label="Refresh explanation"
-                  >
-                    <RefreshIcon />
-                  </IconButton>
-                  <IconButton
-                    ref={closeButtonRef}
-                    type="button"
-                    onClick={handleClose}
-                    aria-label="Close"
-                  >
-                    <svg
-                      width="20"
-                      height="20"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </IconButton>
-                </HeaderActions>
-              </ModalHeader>
-
-            {/* Content */}
-              <ModalContent>
-                {hookIsLoading ? (
-                  <ContentLoading data-testid="explanation-loading">
-                    <Spinner size="md" />
-                  </ContentLoading>
-                ) : hookError ? (
-                  <ContentError>{hookError}</ContentError>
-                ) : explanation ? (
-                  <ExplanationContent explanation={explanation} />
-                ) : (
-                  <EmptyState />
-                )}
-              </ModalContent>
-            </ModalContainer>
-          </Overlay>
-      )}
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        title="Feed Explanation"
+        footer={modalFooter}
+        size="md"
+      >
+        {hookIsLoading ? (
+          <ContentLoading data-testid="explanation-loading">
+            <Spinner size="md" />
+          </ContentLoading>
+        ) : hookError ? (
+          <ContentError>{hookError}</ContentError>
+        ) : explanation ? (
+          <ExplanationContent explanation={explanation} />
+        ) : (
+          <EmptyStateComponent />
+        )}
+      </Modal>
     </div>
   );
 }
@@ -513,7 +370,7 @@ function ExplanationContent({ explanation }: ExplanationContentProps) {
           ))}
         </RulesSection>
       ) : (
-        <EmptyState />
+        <EmptyStateComponent />
       )}
     </ExplanationWrapper>
   );
@@ -558,7 +415,7 @@ function RuleCard({ rule }: RuleCardProps) {
   );
 }
 
-function EmptyState() {
+function EmptyStateComponent() {
   return (
     <EmptyBox>
       <EmptyTitle>Default chronological order</EmptyTitle>

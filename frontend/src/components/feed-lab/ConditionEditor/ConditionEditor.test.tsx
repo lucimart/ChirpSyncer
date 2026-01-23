@@ -1,6 +1,12 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { ThemeProvider } from 'styled-components';
+import { theme } from '@/styles/theme';
 import { ConditionEditor } from './ConditionEditor';
+
+const renderWithTheme = (ui: React.ReactElement) => {
+  return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+};
 
 describe('ConditionEditor', () => {
   const defaultCondition = {
@@ -17,7 +23,7 @@ describe('ConditionEditor', () => {
   });
 
   it('renders all form elements', () => {
-    render(
+    renderWithTheme(
       <ConditionEditor
         condition={defaultCondition}
         onChange={mockOnChange}
@@ -38,7 +44,7 @@ describe('ConditionEditor', () => {
       value: '@testuser',
     };
 
-    render(
+    renderWithTheme(
       <ConditionEditor
         condition={condition}
         onChange={mockOnChange}
@@ -52,7 +58,7 @@ describe('ConditionEditor', () => {
   });
 
   it('calls onChange when field is changed', () => {
-    render(
+    renderWithTheme(
       <ConditionEditor
         condition={defaultCondition}
         onChange={mockOnChange}
@@ -70,7 +76,7 @@ describe('ConditionEditor', () => {
   });
 
   it('calls onChange when operator is changed', () => {
-    render(
+    renderWithTheme(
       <ConditionEditor
         condition={defaultCondition}
         onChange={mockOnChange}
@@ -89,7 +95,7 @@ describe('ConditionEditor', () => {
   it('calls onChange when value is changed', async () => {
     const user = userEvent.setup();
 
-    render(
+    renderWithTheme(
       <ConditionEditor
         condition={defaultCondition}
         onChange={mockOnChange}
@@ -106,7 +112,7 @@ describe('ConditionEditor', () => {
   it('calls onRemove when remove button is clicked', async () => {
     const user = userEvent.setup();
 
-    render(
+    renderWithTheme(
       <ConditionEditor
         condition={defaultCondition}
         onChange={mockOnChange}
@@ -120,7 +126,7 @@ describe('ConditionEditor', () => {
   });
 
   it('shows text operators for text fields', () => {
-    render(
+    renderWithTheme(
       <ConditionEditor
         condition={defaultCondition}
         onChange={mockOnChange}
@@ -142,7 +148,7 @@ describe('ConditionEditor', () => {
       value: 50,
     };
 
-    render(
+    renderWithTheme(
       <ConditionEditor
         condition={numericCondition}
         onChange={mockOnChange}
@@ -163,7 +169,7 @@ describe('ConditionEditor', () => {
       value: 100,
     };
 
-    render(
+    renderWithTheme(
       <ConditionEditor
         condition={numericCondition}
         onChange={mockOnChange}
@@ -176,7 +182,7 @@ describe('ConditionEditor', () => {
   });
 
   it('shows text input for text fields', () => {
-    render(
+    renderWithTheme(
       <ConditionEditor
         condition={defaultCondition}
         onChange={mockOnChange}
@@ -195,7 +201,7 @@ describe('ConditionEditor', () => {
       value: 'test value',
     };
 
-    render(
+    renderWithTheme(
       <ConditionEditor
         condition={condition}
         onChange={mockOnChange}

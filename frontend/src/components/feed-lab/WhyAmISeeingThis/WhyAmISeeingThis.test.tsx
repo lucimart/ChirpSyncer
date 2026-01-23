@@ -21,10 +21,46 @@ jest.mock('../RuleContributionChart', () => ({
   ),
 }));
 
-// Mock Spinner
-jest.mock('@/components/ui', () => ({
-  Spinner: ({ size }: { size: string }) => <div data-testid="spinner">Loading {size}</div>,
-}));
+// Mock ui components
+jest.mock('@/components/ui', () => {
+  const React = require('react');
+  return {
+    Spinner: ({ size }: { size: string }) => <div data-testid="spinner">Loading {size}</div>,
+    Modal: ({ isOpen, onClose, title, footer, children }: {
+      isOpen: boolean;
+      onClose: () => void;
+      title: string;
+      footer?: React.ReactNode;
+      children: React.ReactNode;
+    }) => {
+      React.useEffect(() => {
+        if (!isOpen) return;
+        const handleEscape = (e: KeyboardEvent) => {
+          if (e.key === 'Escape') onClose();
+        };
+        document.addEventListener('keydown', handleEscape);
+        return () => document.removeEventListener('keydown', handleEscape);
+      }, [isOpen, onClose]);
+
+      if (!isOpen) return null;
+      return (
+        <div role="dialog" aria-label={title} onClick={(e: React.MouseEvent) => e.target === e.currentTarget && onClose()}>
+          <div>
+            <h2>{title}</h2>
+            {children}
+            {footer}
+          </div>
+        </div>
+      );
+    },
+    Button: ({ children, onClick, variant, size }: {
+      children: React.ReactNode;
+      onClick?: () => void;
+      variant?: string;
+      size?: string;
+    }) => <button onClick={onClick} data-variant={variant} data-size={size}>{children}</button>,
+  };
+});
 
 const renderWithTheme = (component: React.ReactNode) => {
   return render(<ThemeProvider theme={theme}>{component}</ThemeProvider>);
@@ -121,9 +157,9 @@ describe('WhyAmISeeingThis', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /why am i seeing this/i }));
 
-    // Click the overlay (parent of modal)
+    // Click the overlay/backdrop (the dialog element in mock, not its content)
     const dialog = screen.getByRole('dialog');
-    fireEvent.click(dialog.parentElement!);
+    fireEvent.click(dialog);
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });

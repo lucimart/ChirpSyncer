@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { Search, ChevronDown } from 'lucide-react';
 import { RecipeCard, Recipe, RecipeCondition } from '../RecipeCard';
+import { Input, Select } from '@/components/ui';
 
 export type { Recipe, RecipeCondition };
 
@@ -44,46 +45,9 @@ const FilterBar = styled.div`
 `;
 
 const SearchWrapper = styled.div`
-  position: relative;
   flex: 1;
   min-width: 200px;
   max-width: 400px;
-`;
-
-const SearchIcon = styled.span`
-  position: absolute;
-  left: ${({ theme }) => theme.spacing[3]};
-  top: 50%;
-  transform: translateY(-50%);
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  display: flex;
-  align-items: center;
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-`;
-
-const SearchInput = styled.input`
-  width: 100%;
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]} ${theme.spacing[2]} ${theme.spacing[10]}`};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  background: ${({ theme }) => theme.colors.background.primary};
-  border: 1px solid ${({ theme }) => theme.colors.border.light};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  color: ${({ theme }) => theme.colors.text.primary};
-  transition: all ${({ theme }) => theme.transitions.fast};
-
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.primary[500]};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[100]};
-  }
-
-  &::placeholder {
-    color: ${({ theme }) => theme.colors.text.tertiary};
-  }
 `;
 
 const FilterDropdown = styled.div`
@@ -103,6 +67,7 @@ const FilterButton = styled.button<{ $isOpen: boolean }>`
   color: ${({ theme }) => theme.colors.text.primary};
   cursor: pointer;
   transition: all ${({ theme }) => theme.transitions.fast};
+  height: 40px;
 
   &:hover {
     border-color: ${({ theme }) => theme.colors.border.default};
@@ -155,31 +120,11 @@ const DropdownOption = styled.div<{ $isActive: boolean }>`
   }
 `;
 
-const SortSelect = styled.select`
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  background: ${({ theme }) => theme.colors.background.primary};
-  border: 1px solid ${({ theme }) => theme.colors.border.light};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  color: ${({ theme }) => theme.colors.text.primary};
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.fast};
-
-  &:hover {
-    border-color: ${({ theme }) => theme.colors.border.default};
-  }
-
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.primary[500]};
-  }
-`;
-
 const RecipeGrid = styled.div<{ $viewMode: 'grid' | 'list' }>`
   display: grid;
   gap: ${({ theme }) => theme.spacing[4]};
 
-  ${({ $viewMode, theme }) =>
+  ${({ $viewMode }) =>
     $viewMode === 'grid'
       ? `
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -217,6 +162,12 @@ const categories: { value: CategoryFilter; label: string }[] = [
   { value: 'filtering', label: 'Filtering' },
   { value: 'discovery', label: 'Discovery' },
   { value: 'productivity', label: 'Productivity' },
+];
+
+const sortOptions = [
+  { value: 'name', label: 'Sort by Name' },
+  { value: 'popularity', label: 'Sort by Popularity' },
+  { value: 'weight', label: 'Sort by Weight' },
 ];
 
 export const RecipeGallery: React.FC<RecipeGalleryProps> = ({
@@ -297,15 +248,14 @@ export const RecipeGallery: React.FC<RecipeGalleryProps> = ({
 
         <FilterBar>
           <SearchWrapper>
-            <SearchIcon>
-              <Search />
-            </SearchIcon>
-            <SearchInput
+            <Input
               type="text"
               placeholder="Search recipes..."
               data-testid="recipe-search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              startIcon={<Search size={16} />}
+              fullWidth
             />
           </SearchWrapper>
 
@@ -332,15 +282,12 @@ export const RecipeGallery: React.FC<RecipeGalleryProps> = ({
             </DropdownMenu>
           </FilterDropdown>
 
-          <SortSelect
+          <Select
             data-testid="sort-select"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-          >
-            <option value="name">Sort by Name</option>
-            <option value="popularity">Sort by Popularity</option>
-            <option value="weight">Sort by Weight</option>
-          </SortSelect>
+            options={sortOptions}
+          />
         </FilterBar>
       </GalleryHeader>
 

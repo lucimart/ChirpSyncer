@@ -1,4 +1,8 @@
+'use client';
+
 import React from 'react';
+import styled from 'styled-components';
+import { Button, Input, Select } from '@/components/ui';
 
 interface ConditionEditorProps {
   condition: {
@@ -33,6 +37,16 @@ const NUMERIC_OPERATORS = [
   { value: 'less_than', label: 'Less Than' },
 ];
 
+const Container = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing[2]};
+  align-items: flex-end;
+`;
+
+const FieldWrapper = styled.div`
+  flex: 1;
+`;
+
 export const ConditionEditor: React.FC<ConditionEditorProps> = ({
   condition,
   onChange,
@@ -66,80 +80,50 @@ export const ConditionEditor: React.FC<ConditionEditorProps> = ({
   };
 
   return (
-    <div className="flex gap-2 items-end">
-      <div className="flex-1">
-        <label htmlFor="field-select" className="block text-sm font-medium text-gray-700 mb-1">
-          Field
-        </label>
-        <select
+    <Container>
+      <FieldWrapper>
+        <Select
           id="field-select"
+          label="Field"
           value={condition.field}
           onChange={(e) => handleFieldChange(e.target.value)}
-          onClick={(e) => {
-            // Workaround for userEvent.click() on options in jsdom
-            const target = e.target as HTMLElement;
-            if (target.tagName === 'OPTION') {
-              handleFieldChange((target as HTMLOptionElement).value);
-            }
-          }}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          {FIELD_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
+          options={FIELD_OPTIONS}
+          fullWidth
+        />
+      </FieldWrapper>
 
-      <div className="flex-1">
-        <label htmlFor="operator-select" className="block text-sm font-medium text-gray-700 mb-1">
-          Operator
-        </label>
-        <select
+      <FieldWrapper>
+        <Select
           id="operator-select"
+          label="Operator"
           value={condition.operator}
           onChange={(e) => handleOperatorChange(e.target.value)}
-          onClick={(e) => {
-            // Workaround for userEvent.click() on options in jsdom
-            const target = e.target as HTMLElement;
-            if (target.tagName === 'OPTION') {
-              handleOperatorChange((target as HTMLOptionElement).value);
-            }
-          }}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          {availableOperators.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
+          options={availableOperators}
+          fullWidth
+        />
+      </FieldWrapper>
 
-      <div className="flex-1">
-        <label htmlFor="value-input" className="block text-sm font-medium text-gray-700 mb-1">
-          Value
-        </label>
-        <input
+      <FieldWrapper>
+        <Input
           id="value-input"
+          label="Value"
           type={fieldType === 'numeric' ? 'number' : 'text'}
           value={String(condition.value)}
           onChange={(e) => handleValueChange(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          fullWidth
         />
-      </div>
+      </FieldWrapper>
 
       <div>
-        <button
+        <Button
           type="button"
+          variant="danger"
           onClick={onRemove}
           aria-label="Remove condition"
-          className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
         >
           Remove
-        </button>
+        </Button>
       </div>
-    </div>
+    </Container>
   );
 };

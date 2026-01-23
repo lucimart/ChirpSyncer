@@ -1,6 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { ThemeProvider } from 'styled-components';
+import { theme } from '@/styles/theme';
 import { RuleBuilder } from './RuleBuilder';
+
+const renderWithTheme = (ui: React.ReactElement) => {
+  return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+};
 
 describe('RuleBuilder', () => {
   const mockOnSubmit = jest.fn();
@@ -11,7 +17,7 @@ describe('RuleBuilder', () => {
   });
 
   it('renders create form when no initial rule provided', () => {
-    render(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    renderWithTheme(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     expect(screen.getByLabelText(/rule name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/rule type/i)).toBeInTheDocument();
@@ -28,7 +34,7 @@ describe('RuleBuilder', () => {
       enabled: true,
     };
 
-    render(
+    renderWithTheme(
       <RuleBuilder
         onSubmit={mockOnSubmit}
         onCancel={mockOnCancel}
@@ -41,7 +47,7 @@ describe('RuleBuilder', () => {
   });
 
   it('shows validation error when submitting empty name', async () => {
-    render(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    renderWithTheme(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     fireEvent.click(screen.getByRole('button', { name: /create rule/i }));
 
@@ -52,7 +58,7 @@ describe('RuleBuilder', () => {
   it('shows validation error when submitting without conditions', async () => {
     const user = userEvent.setup();
 
-    render(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    renderWithTheme(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     await user.type(screen.getByLabelText(/rule name/i), 'Test Rule');
     fireEvent.click(screen.getByRole('button', { name: /create rule/i }));
@@ -64,7 +70,7 @@ describe('RuleBuilder', () => {
   it('adds a condition when clicking Add Condition', async () => {
     const user = userEvent.setup();
 
-    render(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    renderWithTheme(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     await user.click(screen.getByRole('button', { name: /add condition/i }));
 
@@ -75,7 +81,7 @@ describe('RuleBuilder', () => {
   it('removes a condition when clicking Remove', async () => {
     const user = userEvent.setup();
 
-    render(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    renderWithTheme(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     // Add two conditions
     await user.click(screen.getByRole('button', { name: /add condition/i }));
@@ -95,7 +101,7 @@ describe('RuleBuilder', () => {
   it('calls onCancel when Cancel button is clicked', async () => {
     const user = userEvent.setup();
 
-    render(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    renderWithTheme(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     await user.click(screen.getByRole('button', { name: /cancel/i }));
 
@@ -105,7 +111,7 @@ describe('RuleBuilder', () => {
   it('submits valid form data', async () => {
     const user = userEvent.setup();
 
-    render(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    renderWithTheme(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     // Fill in name
     await user.type(screen.getByLabelText(/rule name/i), 'My New Rule');
@@ -130,7 +136,7 @@ describe('RuleBuilder', () => {
   });
 
   it('changes rule type correctly', async () => {
-    render(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    renderWithTheme(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     const typeSelect = screen.getByLabelText(/rule type/i);
     fireEvent.change(typeSelect, { target: { value: 'demote' } });
@@ -139,7 +145,7 @@ describe('RuleBuilder', () => {
   });
 
   it('disables weight slider for filter type', async () => {
-    render(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    renderWithTheme(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     const typeSelect = screen.getByLabelText(/rule type/i);
     fireEvent.change(typeSelect, { target: { value: 'filter' } });
@@ -149,7 +155,7 @@ describe('RuleBuilder', () => {
   });
 
   it('enables weight slider for boost type', () => {
-    render(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    renderWithTheme(<RuleBuilder onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     const weightSlider = screen.getByRole('slider', { name: /weight/i });
     expect(weightSlider).not.toBeDisabled();
@@ -168,7 +174,7 @@ describe('RuleBuilder', () => {
       enabled: true,
     };
 
-    render(
+    renderWithTheme(
       <RuleBuilder
         onSubmit={mockOnSubmit}
         onCancel={mockOnCancel}
