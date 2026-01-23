@@ -17,7 +17,7 @@ const IconCircle = styled.div`
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background-color: ${({ theme }) => theme.colors.danger[100]};
+  background-color: ${({ theme }) => theme.colors.surface.dangerSubtle.bg};
   color: ${({ theme }) => theme.colors.danger[600]};
   display: flex;
   align-items: center;
@@ -40,8 +40,8 @@ const Description = styled.p`
 `;
 
 const ConfirmBox = styled.div`
-  background-color: ${({ theme }) => theme.colors.warning[50]};
-  border: 1px solid ${({ theme }) => theme.colors.warning[200]};
+  background-color: ${({ theme }) => theme.colors.surface.warning.bg};
+  border: 1px solid ${({ theme }) => theme.colors.surface.warning.border};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   padding: ${({ theme }) => theme.spacing[4]};
   margin-bottom: ${({ theme }) => theme.spacing[4]};
@@ -49,7 +49,7 @@ const ConfirmBox = styled.div`
 
 const ConfirmText = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.primary};
+  color: ${({ theme }) => theme.colors.surface.warning.text};
   margin-bottom: ${({ theme }) => theme.spacing[2]};
 `;
 
@@ -57,8 +57,8 @@ const ConfirmPhrase = styled.code`
   display: block;
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.danger[700]};
-  background-color: ${({ theme }) => theme.colors.danger[50]};
+  color: ${({ theme }) => theme.colors.surface.danger.text};
+  background-color: ${({ theme }) => theme.colors.surface.danger.bg};
   padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   text-align: center;

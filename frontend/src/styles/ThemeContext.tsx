@@ -74,6 +74,20 @@ export interface LegacyTheme {
       default: string;
       dark: string;
     };
+    // Semantic surface colors that adapt to light/dark mode
+    surface: {
+      primary: { bg: string; text: string; border: string };
+      success: { bg: string; text: string; border: string };
+      warning: { bg: string; text: string; border: string };
+      danger: { bg: string; text: string; border: string };
+      info: { bg: string; text: string; border: string };
+      neutral: { bg: string; text: string; border: string };
+      // Subtle variants (less prominent)
+      primarySubtle: { bg: string; text: string; border: string };
+      successSubtle: { bg: string; text: string; border: string };
+      warningSubtle: { bg: string; text: string; border: string };
+      dangerSubtle: { bg: string; text: string; border: string };
+    };
   };
   spacing: typeof spacing;
   borderRadius: {
@@ -183,6 +197,34 @@ function buildTheme(resolvedMode: 'light' | 'dark'): LegacyTheme {
         light: semanticTheme.border.light,
         default: semanticTheme.border.medium,
         dark: semanticTheme.border.heavy,
+      },
+      // Semantic surface colors - adapt to light/dark mode automatically
+      surface: resolvedMode === 'dark' ? {
+        // Dark mode: darker backgrounds with light text
+        primary: { bg: colors.blue[900], text: colors.blue[100], border: colors.blue[700] },
+        success: { bg: colors.green[900], text: colors.green[100], border: colors.green[700] },
+        warning: { bg: colors.yellow[900], text: colors.yellow[100], border: colors.yellow[700] },
+        danger: { bg: colors.red[900], text: colors.red[100], border: colors.red[700] },
+        info: { bg: colors.blue[900], text: colors.blue[100], border: colors.blue[700] },
+        neutral: { bg: colors.slate[700], text: colors.slate[100], border: colors.slate[600] },
+        // Subtle variants
+        primarySubtle: { bg: colors.blue[800], text: colors.blue[200], border: colors.blue[700] },
+        successSubtle: { bg: colors.green[800], text: colors.green[200], border: colors.green[700] },
+        warningSubtle: { bg: colors.yellow[800], text: colors.yellow[200], border: colors.yellow[700] },
+        dangerSubtle: { bg: colors.red[800], text: colors.red[200], border: colors.red[700] },
+      } : {
+        // Light mode: light backgrounds with dark text
+        primary: { bg: colors.blue[50], text: colors.blue[800], border: colors.blue[200] },
+        success: { bg: colors.green[50], text: colors.green[800], border: colors.green[200] },
+        warning: { bg: colors.yellow[50], text: colors.yellow[800], border: colors.yellow[200] },
+        danger: { bg: colors.red[50], text: colors.red[800], border: colors.red[200] },
+        info: { bg: colors.blue[50], text: colors.blue[800], border: colors.blue[200] },
+        neutral: { bg: colors.slate[100], text: colors.slate[800], border: colors.slate[200] },
+        // Subtle variants
+        primarySubtle: { bg: colors.blue[100], text: colors.blue[700], border: colors.blue[200] },
+        successSubtle: { bg: colors.green[100], text: colors.green[700], border: colors.green[200] },
+        warningSubtle: { bg: colors.yellow[100], text: colors.yellow[700], border: colors.yellow[200] },
+        dangerSubtle: { bg: colors.red[100], text: colors.red[700], border: colors.red[200] },
       },
     },
     spacing,

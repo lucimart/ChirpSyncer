@@ -25,37 +25,37 @@ const StatusContainer = styled.div<{ $status: ConnectionStatusType }>`
   background-color: ${({ $status, theme }) => {
     switch ($status) {
       case 'connected':
-        return theme.colors.success[50];
+        return theme.colors.surface.success.bg;
       case 'connecting':
-        return theme.colors.warning[50];
+        return theme.colors.surface.warning.bg;
       case 'error':
-        return theme.colors.danger[50];
+        return theme.colors.surface.danger.bg;
       default:
-        return theme.colors.neutral[100];
+        return theme.colors.surface.neutral.bg;
     }
   }};
   border-color: ${({ $status, theme }) => {
     switch ($status) {
       case 'connected':
-        return theme.colors.success[200];
+        return theme.colors.surface.success.border;
       case 'connecting':
-        return theme.colors.warning[200];
+        return theme.colors.surface.warning.border;
       case 'error':
-        return theme.colors.danger[200];
+        return theme.colors.surface.danger.border;
       default:
-        return theme.colors.neutral[200];
+        return theme.colors.surface.neutral.border;
     }
   }};
   color: ${({ $status, theme }) => {
     switch ($status) {
       case 'connected':
-        return theme.colors.success[700];
+        return theme.colors.surface.success.text;
       case 'connecting':
-        return theme.colors.warning[700];
+        return theme.colors.surface.warning.text;
       case 'error':
-        return theme.colors.danger[700];
+        return theme.colors.surface.danger.text;
       default:
-        return theme.colors.neutral[600];
+        return theme.colors.surface.neutral.text;
     }
   }};
 `;

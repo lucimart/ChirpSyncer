@@ -24,23 +24,23 @@ const TabsContainer = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
   padding-bottom: ${({ theme }) => theme.spacing[1]};
   overflow-x: auto;
-  
+
   &::-webkit-scrollbar {
     display: none;
   }
 `;
 
 const softVariant = css<{ $active: boolean }>`
-  background: ${({ $active, theme }) => 
-    $active ? theme.colors.primary[50] : 'transparent'};
-  color: ${({ $active, theme }) => 
-    $active ? theme.colors.primary[700] : theme.colors.text.secondary};
+  background: ${({ $active, theme }) =>
+    $active ? theme.colors.surface.primary.bg : 'transparent'};
+  color: ${({ $active, theme }) =>
+    $active ? theme.colors.surface.primary.text : theme.colors.text.secondary};
 
   &:hover {
-    background: ${({ $active, theme }) => 
-      $active ? theme.colors.primary[100] : theme.colors.background.secondary};
-    color: ${({ $active, theme }) => 
-      $active ? theme.colors.primary[700] : theme.colors.text.primary};
+    background: ${({ $active, theme }) =>
+      $active ? theme.colors.surface.primarySubtle.bg : theme.colors.background.secondary};
+    color: ${({ $active, theme }) =>
+      $active ? theme.colors.surface.primary.text : theme.colors.text.primary};
   }
 `;
 
@@ -84,19 +84,19 @@ const TabButton = styled.button<{ $active: boolean; $variant: 'soft' | 'accent' 
   cursor: pointer;
   transition: all ${({ theme }) => theme.transitions.fast};
   white-space: nowrap;
-  
+
   ${({ $variant }) => $variant === 'soft' ? softVariant : accentVariant}
-  
+
   svg {
     width: 16px;
     height: 16px;
   }
 `;
 
-export const Tabs: React.FC<TabsProps> = ({ 
-  items, 
-  value, 
-  onChange, 
+export const Tabs: React.FC<TabsProps> = ({
+  items,
+  value,
+  onChange,
   className,
   variant = 'soft'
 }) => {
@@ -105,7 +105,7 @@ export const Tabs: React.FC<TabsProps> = ({
       {items.map((item) => {
         const Icon = item.icon;
         const isActive = value === item.id;
-        
+
         // Determine badge variant based on tab variant
         const defaultBadgeVariant = variant === 'accent' ? 'status-primary' : 'primary';
         const badgeVariant = item.badgeVariant || defaultBadgeVariant;

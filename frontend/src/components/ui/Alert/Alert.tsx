@@ -14,24 +14,24 @@ interface AlertProps {
 
 const variantStyles: Record<AlertVariant, ReturnType<typeof css>> = {
   error: css`
-    background-color: ${({ theme }) => theme.colors.danger[50]};
-    border-color: ${({ theme }) => theme.colors.danger[500]};
-    color: ${({ theme }) => theme.colors.danger[700]};
+    background-color: ${({ theme }) => theme.colors.surface.danger.bg};
+    border-color: ${({ theme }) => theme.colors.surface.danger.border};
+    color: ${({ theme }) => theme.colors.surface.danger.text};
   `,
   success: css`
-    background-color: ${({ theme }) => theme.colors.success[50]};
-    border-color: ${({ theme }) => theme.colors.success[500]};
-    color: ${({ theme }) => theme.colors.success[700]};
+    background-color: ${({ theme }) => theme.colors.surface.success.bg};
+    border-color: ${({ theme }) => theme.colors.surface.success.border};
+    color: ${({ theme }) => theme.colors.surface.success.text};
   `,
   warning: css`
-    background-color: ${({ theme }) => theme.colors.warning[50]};
-    border-color: ${({ theme }) => theme.colors.warning[500]};
-    color: ${({ theme }) => theme.colors.warning[700]};
+    background-color: ${({ theme }) => theme.colors.surface.warning.bg};
+    border-color: ${({ theme }) => theme.colors.surface.warning.border};
+    color: ${({ theme }) => theme.colors.surface.warning.text};
   `,
   info: css`
-    background-color: ${({ theme }) => theme.colors.primary[50]};
-    border-color: ${({ theme }) => theme.colors.primary[500]};
-    color: ${({ theme }) => theme.colors.primary[700]};
+    background-color: ${({ theme }) => theme.colors.surface.info.bg};
+    border-color: ${({ theme }) => theme.colors.surface.info.border};
+    color: ${({ theme }) => theme.colors.surface.info.text};
   `,
 };
 

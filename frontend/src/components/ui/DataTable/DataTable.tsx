@@ -53,7 +53,7 @@ const Tbody = styled.tbody``;
 
 const Tr = styled.tr<{ $selectable?: boolean; $selected?: boolean }>`
   background-color: ${({ $selected, theme }) =>
-    $selected ? theme.colors.primary[50] : 'transparent'};
+    $selected ? theme.colors.surface.primary.bg : 'transparent'};
 
   &:hover {
     background-color: ${({ theme }) => theme.colors.background.secondary};

@@ -3,14 +3,14 @@
 import styled, { css } from 'styled-components';
 import { forwardRef, ButtonHTMLAttributes } from 'react';
 
-type ButtonVariant = 
-  | 'primary' 
-  | 'secondary' 
-  | 'ghost' 
-  | 'danger' 
-  | 'outline' 
-  | 'soft' 
-  | 'danger-soft' 
+type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'ghost'
+  | 'danger'
+  | 'outline'
+  | 'soft'
+  | 'danger-soft'
   | 'dashed';
 
 type ButtonSize = 'sm' | 'md' | 'lg' | 'icon';
@@ -68,7 +68,7 @@ const variantStyles = {
     border: 1px solid ${({ theme }) => theme.colors.border.light};
 
     &:hover:not(:disabled) {
-      background-color: ${({ theme }) => theme.colors.primary[50]};
+      background-color: ${({ theme }) => theme.colors.surface.primary.bg};
       border-color: ${({ theme }) => theme.colors.primary[500]};
     }
   `,
@@ -83,12 +83,12 @@ const variantStyles = {
     }
   `,
   'danger-soft': css`
-    background-color: ${({ theme }) => theme.colors.danger[50]};
-    color: ${({ theme }) => theme.colors.danger[700]};
+    background-color: ${({ theme }) => theme.colors.surface.danger.bg};
+    color: ${({ theme }) => theme.colors.surface.danger.text};
     border: 1px solid transparent;
 
     &:hover:not(:disabled) {
-      background-color: ${({ theme }) => theme.colors.danger[100]};
+      background-color: ${({ theme }) => theme.colors.surface.dangerSubtle.bg};
     }
   `,
   dashed: css`
@@ -97,7 +97,7 @@ const variantStyles = {
     border: 1px dashed ${({ theme }) => theme.colors.primary[200]};
 
     &:hover:not(:disabled) {
-      background-color: ${({ theme }) => theme.colors.primary[50]};
+      background-color: ${({ theme }) => theme.colors.surface.primary.bg};
       border-color: ${({ theme }) => theme.colors.primary[400]};
     }
   `,
