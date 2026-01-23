@@ -101,7 +101,8 @@ export type PlatformType =
   | 'reddit'
   | 'discord'
   | 'dsnp'
-  | 'ssb';
+  | 'ssb'
+  | 'telegram';
 
 // Platform connector configuration
 export interface PlatformConnector {
@@ -112,7 +113,7 @@ export interface PlatformConnector {
   icon: string;
   color: string;
   capabilities: PlatformCapabilities;
-  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix' | 'dsnp' | 'ssb' | 'discord' | 'reddit' | 'tumblr' | 'pinterest' | 'youtube' | 'tiktok';
+  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix' | 'dsnp' | 'ssb' | 'discord' | 'reddit' | 'tumblr' | 'pinterest' | 'youtube' | 'tiktok' | 'mastodon' | 'telegram';
   status: 'available' | 'coming_soon' | 'beta';
 }
 
@@ -473,6 +474,19 @@ export const PLATFORM_DEFAULTS: Record<PlatformType, PlatformCapabilities> = {
     characterLimit: 8192,
     altTextLimit: 500,
   },
+  telegram: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: false, // Bot API is primarily write-focused
+    metrics: false,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: true, gifs: true, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: true, quote: false, bookmark: false },
+    characterLimit: 4096,
+    altTextLimit: 1024,
+  },
 };
 
 // Available connectors
@@ -666,6 +680,28 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     capabilities: PLATFORM_DEFAULTS.ssb,
     auth_type: 'ssb',
     status: 'beta',
+  },
+  {
+    id: 'mastodon',
+    platform: 'mastodon',
+    name: 'Mastodon',
+    description: 'Decentralized social network (ActivityPub)',
+    icon: '🐘',
+    color: '#6364FF',
+    capabilities: PLATFORM_DEFAULTS.mastodon,
+    auth_type: 'mastodon',
+    status: 'available',
+  },
+  {
+    id: 'telegram',
+    platform: 'telegram',
+    name: 'Telegram',
+    description: 'Messaging and channel broadcasting',
+    icon: '✈️',
+    color: '#0088CC',
+    capabilities: PLATFORM_DEFAULTS.telegram,
+    auth_type: 'telegram',
+    status: 'available',
   },
 ];
 

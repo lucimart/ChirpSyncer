@@ -83,6 +83,7 @@ from app.web.api.v1.tumblr import tumblr_bp  # noqa: E402
 from app.web.api.v1.pinterest import pinterest_bp  # noqa: E402
 from app.web.api.v1.youtube import youtube_bp  # noqa: E402
 from app.web.api.v1.tiktok import tiktok_bp  # noqa: E402
+from app.web.api.v1.telegram import telegram_bp  # noqa: E402
 
 api_v1.register_blueprint(auth_bp)
 api_v1.register_blueprint(dashboard_bp)
@@ -120,3 +121,4 @@ api_v1.register_blueprint(tumblr_bp)
 api_v1.register_blueprint(pinterest_bp)
 api_v1.register_blueprint(youtube_bp)
 api_v1.register_blueprint(tiktok_bp)
+api_v1.register_blueprint(telegram_bp)
