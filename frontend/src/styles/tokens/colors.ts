@@ -119,8 +119,8 @@ export const lightTheme = {
   text: {
     primary: colors.slate[900],
     secondary: colors.slate[600],
-    tertiary: colors.slate[400],
-    disabled: colors.slate[300],
+    tertiary: colors.slate[500], // Changed from 400 to 500 for better contrast (WCAG AA)
+    disabled: colors.slate[400],
     inverse: colors.white,
     link: colors.blue[600],
     linkHover: colors.blue[700],
@@ -241,9 +241,9 @@ export const darkTheme = {
   // Text
   text: {
     primary: colors.slate[100],
-    secondary: colors.slate[400],
-    tertiary: colors.slate[500],
-    disabled: colors.slate[600],
+    secondary: colors.slate[300], // Changed from 400 to 300 for better contrast on dark bg
+    tertiary: colors.slate[400], // Changed from 500 to 400 for better contrast on dark bg
+    disabled: colors.slate[500],
     inverse: colors.slate[900],
     link: colors.blue[400],
     linkHover: colors.blue[300],

@@ -242,11 +242,12 @@ export function DataTable<T extends { id: string | number }>({
         <Thead>
           <tr>
             {selectable && (
-              <Th style={{ width: '40px' }}>
+              <Th style={{ width: '40px' }} scope="col">
                 <Checkbox
                   type="checkbox"
                   checked={allPageSelected}
                   onChange={handleSelectAll}
+                  aria-label="Select all rows on this page"
                 />
               </Th>
             )}
@@ -288,6 +289,7 @@ export function DataTable<T extends { id: string | number }>({
                     type="checkbox"
                     checked={selectedIds.has(row.id)}
                     onChange={() => handleSelectRow(row.id)}
+                    aria-label={`Select row ${row.id}`}
                   />
                 </Td>
               )}
@@ -314,6 +316,7 @@ export function DataTable<T extends { id: string | number }>({
             <PageButton
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
+              aria-label="Go to previous page"
             >
               <ChevronLeft size={16} />
             </PageButton>
@@ -341,6 +344,7 @@ export function DataTable<T extends { id: string | number }>({
             <PageButton
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
+              aria-label="Go to next page"
             >
               <ChevronRight size={16} />
             </PageButton>

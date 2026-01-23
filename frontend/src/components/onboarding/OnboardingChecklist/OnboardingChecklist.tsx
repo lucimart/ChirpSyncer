@@ -99,7 +99,7 @@ const CompletionIcon = styled.div`
   color: ${({ theme }) => theme.colors.success[500]};
 `;
 
-const CompletionTitle = styled.h3`
+const CompletionTitle = styled.h2`
   font-size: ${({ theme }) => theme.fontSizes.xl};
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
   color: ${({ theme }) => theme.colors.text.primary};
@@ -151,10 +151,11 @@ export function OnboardingChecklist() {
             aria-valuenow={progress}
             aria-valuemin={0}
             aria-valuemax={100}
+            aria-label={`Onboarding progress: ${progress}% complete`}
           >
             <ProgressFill $progress={progress} />
           </ProgressTrack>
-          <ProgressText>{progress}%</ProgressText>
+          <ProgressText aria-hidden="true">{progress}%</ProgressText>
         </ProgressWrapper>
       </Header>
 
