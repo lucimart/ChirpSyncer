@@ -487,7 +487,7 @@ def create_thread_container():
                     error_data = e.response.json()
                     error_msg = error_data.get("error", {}).get("message", "Invalid request")
                     return api_error(error_msg, status=400)
-                except Exception:
+                except Exception:  # nosec B110 - intentionally ignore JSON parse errors
                     pass
         return api_error("Threads API error", status=502)
     except Exception as e:
@@ -578,7 +578,7 @@ def publish_thread():
                     {"fields": "permalink"},
                 )
                 permalink = thread_info.get("permalink")
-            except Exception:
+            except Exception:  # nosec B110 - permalink is optional, continue without it
                 pass
 
         return api_response({
@@ -597,7 +597,7 @@ def publish_thread():
                     error_data = e.response.json()
                     error_msg = error_data.get("error", {}).get("message", "Publish failed")
                     return api_error(error_msg, status=400)
-                except Exception:
+                except Exception:  # nosec B110 - intentionally ignore JSON parse errors
                     pass
         return api_error("Threads API error", status=502)
     except Exception as e:

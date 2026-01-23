@@ -90,7 +90,7 @@ def _linkedin_request(
                 error_data = response.json()
                 if "message" in error_data:
                     error_msg = error_data["message"]
-            except Exception:
+            except Exception:  # nosec B110 - intentionally ignore JSON parse errors, use default error_msg
                 pass
             raise ApiError("LINKEDIN_API_ERROR", error_msg, response.status_code)
 
