@@ -30,6 +30,8 @@ export { ConnectionStatus } from './ConnectionStatus';
 export type { ConnectionStatusProps } from './ConnectionStatus';
 export { CollapsibleMenu } from './CollapsibleMenu';
 export type { CollapsibleMenuProps } from './CollapsibleMenu';
+export { DropdownMenu } from './DropdownMenu';
+export type { DropdownMenuProps, DropdownMenuItem } from './DropdownMenu';
 
 // Layout & Page components
 export { PageHeader } from './PageHeader';
