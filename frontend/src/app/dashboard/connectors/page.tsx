@@ -441,9 +441,38 @@ export default function ConnectorsPage() {
           </Stack>
         );
       case 'oauth2':
+        // Instagram vs Mastodon OAuth handling
+        if (connectModal.platform === 'instagram') {
+          return (
+            <Stack gap={4}>
+              <SmallText>
+                Instagram requires a Business or Creator account connected to a Facebook Page.
+                You&apos;ll need to provide your access token from the Meta Developer Console.
+              </SmallText>
+              <Input
+                label="Instagram User ID"
+                type="text"
+                value={credentials.user_id || ''}
+                onChange={(e) => setCredentials({ ...credentials, user_id: e.target.value })}
+                placeholder="17841405822304"
+                hint="Your Instagram Business Account ID"
+                fullWidth
+              />
+              <Input
+                label="Access Token"
+                type="password"
+                value={credentials.access_token || ''}
+                onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
+                hint="Long-lived access token from Meta Developer Console"
+                fullWidth
+              />
+            </Stack>
+          );
+        }
+        // Mastodon OAuth
         return (
           <Input
-            label="Instance URL (for Mastodon)"
+            label="Instance URL"
             type="text"
             value={credentials.instance || ''}
             onChange={(e) => setCredentials({ ...credentials, instance: e.target.value })}

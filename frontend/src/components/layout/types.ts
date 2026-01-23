@@ -24,6 +24,7 @@ import {
   FileText,
   Lightbulb,
   FolderOpen,
+  Instagram,
 } from 'lucide-react';
 
 // Navigation Types
@@ -74,6 +75,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/dashboard/connectors', icon: Plug, label: 'Connectors' },
       { href: '/dashboard/credentials', icon: Key, label: 'Credentials' },
+      { href: '/dashboard/instagram', icon: Instagram, label: 'Instagram' },
     ],
   },
   {

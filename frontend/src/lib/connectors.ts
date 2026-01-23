@@ -271,12 +271,12 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     id: 'instagram',
     platform: 'instagram',
     name: 'Instagram',
-    description: 'Read-only access to your Instagram posts',
+    description: 'Read-only access to your Instagram posts and insights',
     icon: 'I',
     color: '#E4405F',
     capabilities: PLATFORM_DEFAULTS.instagram,
     auth_type: 'oauth2',
-    status: 'coming_soon',
+    status: 'beta',
   },
 ];
 
@@ -382,7 +382,7 @@ export function useConnectPlatform() {
       credentials: Record<string, string>;
     }) => {
       // Determine credential_type based on platform
-      const credentialType = platform === 'bluesky' ? 'api' : 'scraping';
+      const credentialType = (platform === 'bluesky' || platform === 'instagram') ? 'api' : 'scraping';
 
       const response = await api.addCredential({
         platform,
