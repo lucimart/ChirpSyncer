@@ -57,3 +57,7 @@ def setup_logger(name):
     logger.addHandler(file_handler)
 
     return logger
+
+
+# Alias for backwards compatibility
+get_logger = setup_logger
