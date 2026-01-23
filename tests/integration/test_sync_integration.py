@@ -836,7 +836,6 @@ def test_sync_with_missing_bluesky_credentials(test_db, test_user):
     assert result is None, "Bluesky credentials should not exist for test user"
 
     # Log skip in audit log
-    import json
     cursor.execute('''
         INSERT INTO audit_log (user_id, action, success, details, timestamp)
         VALUES (?, ?, ?, ?, ?)

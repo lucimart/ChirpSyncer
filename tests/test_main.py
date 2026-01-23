@@ -705,7 +705,7 @@ class TestMainMultiUserMode:
                             try:
                                 main()
                             except KeyboardInterrupt:
-                                pass
+                                pass  # Expected: test uses KeyboardInterrupt to exit main loop
 
                             mock_init.assert_called_once()
                             mock_admin.assert_called_once()

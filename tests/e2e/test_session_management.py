@@ -15,7 +15,6 @@ Tests verify:
 - Session data is properly isolated
 """
 
-import pytest
 import json
 import time
 
