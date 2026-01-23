@@ -89,6 +89,10 @@ from app.web.api.v1.substack import substack_bp  # noqa: E402
 from app.web.api.v1.devto import devto_bp  # noqa: E402
 from app.web.api.v1.hashnode import hashnode_bp  # noqa: E402
 from app.web.api.v1.cohost import cohost_bp  # noqa: E402
+from app.web.api.v1.pixelfed import pixelfed_bp  # noqa: E402
+from app.web.api.v1.lemmy import lemmy_bp  # noqa: E402
+from app.web.api.v1.rss import rss_bp  # noqa: E402
+from app.web.api.v1.outgoing_webhooks import outgoing_webhooks_bp  # noqa: E402
 
 api_v1.register_blueprint(auth_bp)
 api_v1.register_blueprint(dashboard_bp)
@@ -132,3 +136,7 @@ api_v1.register_blueprint(substack_bp)
 api_v1.register_blueprint(devto_bp)
 api_v1.register_blueprint(hashnode_bp)
 api_v1.register_blueprint(cohost_bp)
+api_v1.register_blueprint(pixelfed_bp)
+api_v1.register_blueprint(lemmy_bp)
+api_v1.register_blueprint(rss_bp)
+api_v1.register_blueprint(outgoing_webhooks_bp)

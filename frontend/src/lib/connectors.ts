@@ -107,7 +107,12 @@ export type PlatformType =
   | 'substack'
   | 'devto'
   | 'hashnode'
-  | 'cohost';
+  | 'cohost'
+  // Fediverse and utilities
+  | 'pixelfed'
+  | 'lemmy'
+  | 'rss'
+  | 'webhooks';
 
 // Platform connector configuration
 export interface PlatformConnector {
@@ -118,7 +123,7 @@ export interface PlatformConnector {
   icon: string;
   color: string;
   capabilities: PlatformCapabilities;
-  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix' | 'dsnp' | 'ssb' | 'discord' | 'reddit' | 'tumblr' | 'pinterest' | 'youtube' | 'tiktok' | 'mastodon' | 'telegram' | 'medium' | 'substack' | 'devto' | 'hashnode' | 'cohost';
+  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix' | 'dsnp' | 'ssb' | 'discord' | 'reddit' | 'tumblr' | 'pinterest' | 'youtube' | 'tiktok' | 'mastodon' | 'telegram' | 'medium' | 'substack' | 'devto' | 'hashnode' | 'cohost' | 'pixelfed' | 'lemmy' | 'rss' | 'webhooks';
   status: 'available' | 'coming_soon' | 'beta';
 }
 
@@ -558,6 +563,60 @@ export const PLATFORM_DEFAULTS: Record<PlatformType, PlatformCapabilities> = {
     characterLimit: 100000, // No hard limit
     altTextLimit: 1000,
   },
+  // Fediverse platforms
+  pixelfed: {
+    publish: true,
+    delete: true,
+    edit: false,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: true, gifs: true, maxImages: 10 },
+    interactions: { like: true, repost: true, reply: true, quote: false, bookmark: true },
+    characterLimit: 500,
+    altTextLimit: 1500,
+  },
+  lemmy: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: true, // Comment threads
+    media: { images: true, videos: true, gifs: true, maxImages: 1 },
+    interactions: { like: true, repost: false, reply: true, quote: false, bookmark: true },
+    characterLimit: 10000,
+    altTextLimit: 500,
+  },
+  // Utility integrations
+  rss: {
+    publish: false, // Read-only
+    delete: false,
+    edit: false,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: false,
+    media: { images: false, videos: false, gifs: false, maxImages: 0 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 0,
+    altTextLimit: 0,
+  },
+  webhooks: {
+    publish: true, // Send webhooks
+    delete: false,
+    edit: false,
+    read: false,
+    metrics: false,
+    schedule: false,
+    threads: false,
+    media: { images: false, videos: false, gifs: false, maxImages: 0 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 0, // JSON payload
+    altTextLimit: 0,
+  },
 };
 
 // Available connectors
@@ -830,6 +889,52 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     auth_type: 'cohost',
     status: 'available',
   },
+  // Fediverse platforms
+  {
+    id: 'pixelfed',
+    platform: 'pixelfed',
+    name: 'Pixelfed',
+    description: 'Decentralized photo sharing (ActivityPub)',
+    icon: '📷',
+    color: '#6366F1',
+    capabilities: PLATFORM_DEFAULTS.pixelfed,
+    auth_type: 'pixelfed',
+    status: 'available',
+  },
+  {
+    id: 'lemmy',
+    platform: 'lemmy',
+    name: 'Lemmy',
+    description: 'Federated link aggregator and discussion platform',
+    icon: '🐺',
+    color: '#00BC8C',
+    capabilities: PLATFORM_DEFAULTS.lemmy,
+    auth_type: 'lemmy',
+    status: 'available',
+  },
+  // Utility integrations
+  {
+    id: 'rss',
+    platform: 'rss',
+    name: 'RSS/Atom',
+    description: 'Read and import content from RSS and Atom feeds',
+    icon: '📡',
+    color: '#F26522',
+    capabilities: PLATFORM_DEFAULTS.rss,
+    auth_type: 'rss',
+    status: 'available',
+  },
+  {
+    id: 'webhooks',
+    platform: 'webhooks',
+    name: 'Webhooks',
+    description: 'Send data to external services via HTTP webhooks',
+    icon: '🔗',
+    color: '#6B7280',
+    capabilities: PLATFORM_DEFAULTS.webhooks,
+    auth_type: 'webhooks',
+    status: 'available',
+  },
 ];
 
 // Hooks
@@ -942,7 +1047,7 @@ export function useConnectPlatform() {
         // Remove internal _mode field before sending
         const { _mode, ...cleanCredentials } = credentials;
         credentials = cleanCredentials;
-      } else if (platform === 'bluesky' || platform === 'instagram' || platform === 'threads' || platform === 'linkedin' || platform === 'facebook' || platform === 'nostr' || platform === 'matrix' || platform === 'pinterest' || platform === 'youtube' || platform === 'tiktok') {
+      } else if (platform === 'bluesky' || platform === 'instagram' || platform === 'threads' || platform === 'linkedin' || platform === 'facebook' || platform === 'nostr' || platform === 'matrix' || platform === 'pinterest' || platform === 'youtube' || platform === 'tiktok' || platform === 'pixelfed' || platform === 'lemmy' || platform === 'rss' || platform === 'webhooks') {
         credentialType = 'api';
       } else {
         credentialType = 'scraping';
