@@ -16,25 +16,9 @@ const config: StorybookConfig = {
     autodocs: 'tag',
   },
   typescript: {
-    reactDocgen: 'react-docgen-typescript',
-    reactDocgenTypescriptOptions: {
-      // Skip problematic files that cause docgen parser errors
-      propFilter: (prop) => {
-        // Filter out props from node_modules
-        if (prop.parent) {
-          return !prop.parent.fileName.includes('node_modules');
-        }
-        return true;
-      },
-      // Don't include methods in props documentation
-      shouldExtractLiteralValuesFromEnum: true,
-      shouldRemoveUndefinedFromOptional: true,
-      // Exclude problematic components
-      exclude: [
-        'node_modules/**/*',
-        '**/shared/**',
-      ],
-    },
+    // Use react-docgen instead of react-docgen-typescript for stability
+    // react-docgen-typescript has parser issues with complex TypeScript patterns
+    reactDocgen: 'react-docgen',
   },
   webpackFinal: async (config) => {
     config.resolve = config.resolve ?? {};
