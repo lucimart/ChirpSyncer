@@ -90,14 +90,8 @@ class TestSendSyncNotification:
         mock_prefs.should_notify.return_value = False
         mock_prefs_manager.return_value = mock_prefs
 
-        # Call task synchronously
-        send_sync_notification(
-            None,  # self
-            user_id=1,
-            job_id="job-123",
-            status="completed",
-            details={"posts_synced": 5},
-        )
+        # Call task using .run() to bypass Celery decorator
+        send_sync_notification.run(user_id=1, job_id="job-123", status="completed", details={"posts_synced": 5})
 
         # Verify notification service was not called
         mock_notification_service.return_value.notify_task_completion.assert_not_called()
@@ -124,14 +118,8 @@ class TestSendSyncNotification:
         mock_service = MagicMock()
         mock_notification_service.return_value = mock_service
 
-        # Call task
-        send_sync_notification(
-            None,
-            user_id=1,
-            job_id="job-123",
-            status="completed",
-            details={"posts_synced": 5},
-        )
+        # Call task using .run() to bypass Celery decorator
+        send_sync_notification.run(user_id=1, job_id="job-123", status="completed", details={"posts_synced": 5})
 
         # Verify notification was sent
         mock_service.notify_task_completion.assert_called_once()
@@ -161,14 +149,8 @@ class TestSendSyncNotification:
         mock_service = MagicMock()
         mock_notification_service.return_value = mock_service
 
-        # Call task
-        send_sync_notification(
-            None,
-            user_id=1,
-            job_id="job-123",
-            status="failed",
-            details={"error": "API rate limit exceeded"},
-        )
+        # Call task using .run() to bypass Celery decorator
+        send_sync_notification.run(user_id=1, job_id="job-123", status="failed", details={"error": "API rate limit exceeded"})
 
         # Verify failure notification was sent
         mock_service.notify_task_failure.assert_called_once()
@@ -188,13 +170,8 @@ class TestSendPasswordResetEmail:
         mock_service.send_email.return_value = True
         mock_notification_service.return_value = mock_service
 
-        # Call task
-        send_password_reset_email(
-            None,
-            user_id=1,
-            token="reset-token-123",
-            email="test@example.com",
-        )
+        # Call task using .run() to bypass Celery decorator
+        send_password_reset_email.run(user_id=1, token="reset-token-123", email="test@example.com")
 
         # Verify email was sent
         mock_service.send_email.assert_called_once()
@@ -255,7 +232,7 @@ class TestSendWeeklyReports:
         mock_notification_service.return_value = mock_service
 
         # Call task
-        result = send_weekly_reports(None)
+        result = send_weekly_reports.run()
 
         # Verify reports were sent
         assert result["sent"] == 2
@@ -302,7 +279,7 @@ class TestSendWeeklyReports:
         mock_notification_service.return_value = mock_service
 
         # Call task
-        result = send_weekly_reports(None)
+        result = send_weekly_reports.run()
 
         # Verify no reports were sent
         assert result["sent"] == 0

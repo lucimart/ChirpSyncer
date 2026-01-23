@@ -19,6 +19,24 @@ sys.modules["PIL"] = MagicMock()
 sys.modules["PIL.Image"] = MagicMock()
 
 
+def _is_redis_available():
+    """Check if Redis is available for testing."""
+    try:
+        import redis
+        r = redis.Redis(host="localhost", port=6379)
+        r.ping()
+        return True
+    except Exception:
+        return False
+
+
+# Skip tests that require Redis if not available
+requires_redis = pytest.mark.skipif(
+    not _is_redis_available(),
+    reason="Redis not available"
+)
+
+
 import os
 import gc
 
@@ -153,6 +171,7 @@ class TestRecordSyncStats:
             cleanup_db(db_path)
 
 
+@requires_redis
 class TestRunSyncJob:
     """Test run_sync_job Celery task."""
 

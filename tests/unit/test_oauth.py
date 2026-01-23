@@ -113,10 +113,12 @@ class TestOAuthHandler:
         assert cursor.fetchone() is not None
         conn.close()
 
-    def test_generate_auth_url_unconfigured_provider(self, oauth_handler):
+    @patch("app.auth.oauth_handler.is_provider_configured")
+    def test_generate_auth_url_unconfigured_provider(self, mock_is_configured, oauth_handler):
         """Test auth URL generation fails for unconfigured provider."""
+        mock_is_configured.return_value = False
         url = oauth_handler.generate_auth_url("google", "http://localhost/callback")
-        # Will be None because env vars are not set
+        # Will be None because provider is not configured
         assert url is None
 
     def test_validate_state_invalid(self, oauth_handler):
@@ -126,29 +128,39 @@ class TestOAuthHandler:
 
     def test_validate_state_expired(self, oauth_handler):
         """Test state validation with expired state."""
-        # Manually add expired state
-        oauth_handler._state_store["test-state"] = {
-            "provider": "google",
-            "redirect_uri": "http://localhost/callback",
-            "created_at": time.time() - 700,  # Expired (>10 min)
-        }
+        # Insert expired state into database
+        import sqlite3
+        conn = sqlite3.connect(oauth_handler.db_path)
+        conn.execute(
+            "INSERT INTO oauth_states (state, provider, redirect_uri, code_verifier, created_at) VALUES (?, ?, ?, ?, ?)",
+            ("test-state", "google", "http://localhost/callback", None, int(time.time()) - 700),
+        )
+        conn.commit()
+        conn.close()
 
         result = oauth_handler.validate_state("test-state")
         assert result is None
 
     def test_validate_state_valid(self, oauth_handler):
         """Test state validation with valid state."""
-        oauth_handler._state_store["test-state"] = {
-            "provider": "google",
-            "redirect_uri": "http://localhost/callback",
-            "created_at": time.time(),
-        }
+        # Insert valid state into database
+        import sqlite3
+        conn = sqlite3.connect(oauth_handler.db_path)
+        conn.execute(
+            "INSERT INTO oauth_states (state, provider, redirect_uri, code_verifier, created_at) VALUES (?, ?, ?, ?, ?)",
+            ("test-state", "google", "http://localhost/callback", None, int(time.time())),
+        )
+        conn.commit()
+        conn.close()
 
         result = oauth_handler.validate_state("test-state")
         assert result is not None
         assert result["provider"] == "google"
         # State should be removed after validation
-        assert "test-state" not in oauth_handler._state_store
+        conn = sqlite3.connect(oauth_handler.db_path)
+        cursor = conn.execute("SELECT state FROM oauth_states WHERE state = ?", ("test-state",))
+        assert cursor.fetchone() is None
+        conn.close()
 
     def test_normalize_google_user_info(self, oauth_handler):
         """Test normalizing Google user info."""
