@@ -122,8 +122,8 @@ describe('OnboardingChecklist', () => {
     const context = createMockContext();
     renderWithContext(context);
 
-    const firstStep = screen.getByText('Connect your first platform').closest('[data-testid="onboarding-step"]');
-    fireEvent.click(firstStep!);
+    const firstStep = screen.getByTestId('onboarding-step-connect-platform');
+    fireEvent.click(firstStep);
 
     expect(mockPush).toHaveBeenCalledWith('/dashboard/credentials');
   });
@@ -176,7 +176,7 @@ describe('OnboardingChecklist', () => {
     });
     renderWithContext(context);
 
-    const currentStepElement = screen.getByText('Create a feed rule').closest('[data-testid="onboarding-step"]');
+    const currentStepElement = screen.getByTestId('onboarding-step-create-rule');
     expect(currentStepElement).toHaveAttribute('data-current', 'true');
   });
 });

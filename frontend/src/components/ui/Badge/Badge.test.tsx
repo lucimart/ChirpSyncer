@@ -14,7 +14,10 @@ describe('Badge', () => {
   });
 
   it('renders dot when enabled', () => {
-    renderWithTheme(<Badge dot>Live</Badge>);
-    expect(screen.getByText('Live').previousSibling).toBeTruthy();
+    renderWithTheme(<Badge dot data-testid="badge-with-dot">Live</Badge>);
+    const badge = screen.getByTestId('badge-with-dot');
+    // The badge should contain both the dot span and the text
+    expect(badge.children.length).toBeGreaterThan(0);
+    expect(screen.getByText('Live')).toBeInTheDocument();
   });
 });

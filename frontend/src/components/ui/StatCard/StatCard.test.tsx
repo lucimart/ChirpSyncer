@@ -50,7 +50,8 @@ describe('StatCard', () => {
       <StatCard value={100} label="Stats" trend={{ value: 12, direction: 'up' }} />
     );
 
-    expect(screen.getByText('↑')).toBeInTheDocument();
+    // The arrow and percentage are in the same span, so we search for text containing both
+    expect(screen.getByText(/↑/)).toBeInTheDocument();
     expect(screen.getByText(/12%/)).toBeInTheDocument();
   });
 
@@ -59,7 +60,7 @@ describe('StatCard', () => {
       <StatCard value={100} label="Stats" trend={{ value: 5, direction: 'down' }} />
     );
 
-    expect(screen.getByText('↓')).toBeInTheDocument();
+    expect(screen.getByText(/↓/)).toBeInTheDocument();
     expect(screen.getByText(/5%/)).toBeInTheDocument();
   });
 
@@ -68,8 +69,9 @@ describe('StatCard', () => {
       <StatCard value={100} label="Users" icon={Users} color="#ff0000" />
     );
 
-    const iconContainer = container.querySelector('[class*="IconContainer"]');
-    expect(iconContainer).toBeInTheDocument();
+    // styled-components generates random class names, so we check for the svg icon instead
+    const svg = container.querySelector('svg');
+    expect(svg).toBeInTheDocument();
   });
 
   it('has correct test id', () => {

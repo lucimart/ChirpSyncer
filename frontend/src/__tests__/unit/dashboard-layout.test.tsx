@@ -4,6 +4,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 // Mock next/navigation
@@ -41,6 +42,32 @@ jest.mock('@/components/layout/Sidebar', () => ({
   ),
 }));
 
+// Mock notifications hook
+jest.mock('@/lib/notifications', () => ({
+  useNotifications: () => ({
+    data: [],
+    isLoading: false,
+    error: null,
+  }),
+  useMarkNotificationRead: () => ({
+    mutate: jest.fn(),
+    isPending: false,
+  }),
+  useMarkAllNotificationsRead: () => ({
+    mutate: jest.fn(),
+    isPending: false,
+  }),
+  useDismissNotification: () => ({
+    mutate: jest.fn(),
+    isPending: false,
+  }),
+}));
+
+// Mock NotificationCenter component to avoid theme dependency issues
+jest.mock('@/components/notifications', () => ({
+  NotificationCenter: () => <div data-testid="notification-center">Notifications</div>,
+}));
+
 // Mock theme
 const mockTheme = {
   colors: {
@@ -55,11 +82,23 @@ const mockTheme = {
   borderRadius: { md: '6px' },
 };
 
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
 const renderWithTheme = (component: React.ReactElement) => {
+  const queryClient = createTestQueryClient();
   return render(
-    <ThemeProvider theme={mockTheme}>
-      {component}
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={mockTheme}>
+        {component}
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 };
 

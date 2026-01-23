@@ -111,6 +111,7 @@ export const FlowDiagram: React.FC<FlowDiagramProps> = ({
         <EmptyState
           title="No platforms connected"
           size={compact ? 'sm' : 'md'}
+          data-testid="flow-diagram-empty"
           action={
             <Button type="button" variant="primary" size="sm" aria-label="Connect Platform">
               Connect Platform
