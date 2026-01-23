@@ -5,16 +5,19 @@ import { themeInitScript } from '@/styles/ThemeContext';
 
 export const metadata: Metadata = {
   title: {
-    default: 'ChirpSyncer - Social Hub Dashboard',
-    template: '%s | ChirpSyncer',
+    default: 'Swoop - Your Social Hub',
+    template: '%s | Swoop',
   },
-  description: 'Manage your social media presence across Twitter and Bluesky',
-  applicationName: 'ChirpSyncer',
-  keywords: ['social media', 'twitter', 'bluesky', 'sync', 'dashboard', 'analytics'],
-  authors: [{ name: 'ChirpSyncer Team' }],
+  description: 'Swoop your content everywhere. Cross-post between Twitter, Bluesky, and more.',
+  applicationName: 'Swoop',
+  keywords: ['social media', 'twitter', 'bluesky', 'sync', 'dashboard', 'analytics', 'cross-post'],
+  authors: [{ name: 'Swoop Team' }],
   robots: {
     index: true,
     follow: true,
+  },
+  icons: {
+    icon: '/icon.svg',
   },
 };
 
