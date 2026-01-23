@@ -1,16 +1,32 @@
 import logging
+import os
 from datetime import datetime
 
-from flask import Blueprint, request, make_response, g, current_app
+from flask import Blueprint, request, make_response, g, current_app, redirect
 
 logger = logging.getLogger(__name__)
 
 from app.auth.api_auth import require_auth
 from app.auth.jwt_handler import create_token
 from app.auth.user_manager import UserManager
+from app.auth.oauth_handler import OAuthHandler
+from app.auth.oauth_providers import (
+    get_configured_providers,
+    is_provider_configured,
+    OAUTH_REDIRECT_BASE,
+)
 from app.web.api.v1.responses import api_error, api_response
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+
+
+def _get_oauth_handler():
+    """Get OAuth handler instance."""
+    db_path = current_app.config.get("DB_PATH", "chirpsyncer.db")
+    master_key = current_app.config.get("MASTER_KEY")
+    if master_key and isinstance(master_key, str):
+        master_key = master_key.encode("utf-8")[:32].ljust(32, b"\0")
+    return OAuthHandler(db_path, master_key)
 
 
 def _get_user_manager():
@@ -278,3 +294,196 @@ def validate_reset_token():
         return api_error("INVALID_TOKEN", "Invalid or expired reset token", status=400)
 
     return api_response({"valid": True, "email": user.email})
+
+
+# ============================================================================
+# SSO / OAuth Endpoints
+# ============================================================================
+
+
+@auth_bp.route("/sso/providers", methods=["GET"])
+def get_sso_providers():
+    """Get list of available SSO providers."""
+    providers = get_configured_providers()
+    return api_response({
+        "providers": providers,
+        "enabled": {p: is_provider_configured(p) for p in ["google", "github", "twitter"]},
+    })
+
+
+@auth_bp.route("/sso/<provider>", methods=["GET"])
+def sso_redirect(provider: str):
+    """
+    Initiate SSO authentication flow.
+
+    Redirects user to OAuth provider authorization page.
+    """
+    if provider not in ["google", "github", "twitter"]:
+        return api_error("INVALID_PROVIDER", f"Unknown provider: {provider}", status=400)
+
+    if not is_provider_configured(provider):
+        return api_error(
+            "PROVIDER_NOT_CONFIGURED",
+            f"Provider {provider} is not configured",
+            status=400,
+        )
+
+    oauth_handler = _get_oauth_handler()
+    redirect_uri = f"{OAUTH_REDIRECT_BASE}/api/v1/auth/sso/{provider}/callback"
+
+    auth_url = oauth_handler.generate_auth_url(provider, redirect_uri)
+    if not auth_url:
+        return api_error("SSO_ERROR", "Failed to generate authorization URL", status=500)
+
+    return redirect(auth_url)
+
+
+@auth_bp.route("/sso/<provider>/callback", methods=["GET"])
+def sso_callback(provider: str):
+    """
+    Handle OAuth callback from provider.
+
+    Creates or logs in user and redirects to frontend with token.
+    """
+    code = request.args.get("code")
+    state = request.args.get("state")
+    error = request.args.get("error")
+
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
+    if error:
+        logger.error(f"OAuth error from {provider}: {error}")
+        return redirect(f"{frontend_url}/login?error=oauth_denied")
+
+    if not code or not state:
+        return redirect(f"{frontend_url}/login?error=oauth_invalid")
+
+    oauth_handler = _get_oauth_handler()
+
+    # Validate state
+    state_data = oauth_handler.validate_state(state)
+    if not state_data:
+        return redirect(f"{frontend_url}/login?error=oauth_state_invalid")
+
+    redirect_uri = state_data["redirect_uri"]
+    code_verifier = state_data.get("code_verifier")
+
+    # Exchange code for tokens
+    tokens = oauth_handler.exchange_code(provider, code, redirect_uri, code_verifier)
+    if not tokens:
+        return redirect(f"{frontend_url}/login?error=oauth_token_error")
+
+    access_token = tokens.get("access_token")
+    if not access_token:
+        return redirect(f"{frontend_url}/login?error=oauth_token_missing")
+
+    # Fetch user info
+    user_info = oauth_handler.fetch_user_info(provider, access_token)
+    if not user_info:
+        return redirect(f"{frontend_url}/login?error=oauth_userinfo_error")
+
+    # Check if OAuth account exists
+    oauth_account = oauth_handler.find_oauth_account(provider, user_info.provider_user_id)
+
+    user_manager = _get_user_manager()
+
+    if oauth_account:
+        # Existing OAuth account - log in
+        user_id = oauth_account["user_id"]
+        user = user_manager.get_user_by_id(user_id)
+        if not user:
+            return redirect(f"{frontend_url}/login?error=user_not_found")
+
+        # Update tokens
+        oauth_handler.link_oauth_account(user_id, user_info, tokens)
+
+    else:
+        # New OAuth login
+        if user_info.email:
+            # Check if user with this email exists
+            existing_user = oauth_handler.find_user_by_email(user_info.email)
+            if existing_user:
+                # Link OAuth to existing user
+                user_id = existing_user["id"]
+                oauth_handler.link_oauth_account(user_id, user_info, tokens)
+                user = user_manager.get_user_by_id(user_id)
+            else:
+                # Create new user
+                user_id = oauth_handler.create_sso_user(user_info)
+                oauth_handler.link_oauth_account(user_id, user_info, tokens)
+                user = user_manager.get_user_by_id(user_id)
+        else:
+            # No email from provider - create new user
+            user_id = oauth_handler.create_sso_user(user_info)
+            oauth_handler.link_oauth_account(user_id, user_info, tokens)
+            user = user_manager.get_user_by_id(user_id)
+
+    if not user:
+        return redirect(f"{frontend_url}/login?error=user_creation_failed")
+
+    # Create JWT token
+    jwt_token = create_token(user.id, user.username, user.is_admin)
+
+    # Redirect to frontend with token
+    return redirect(f"{frontend_url}/auth/callback?token={jwt_token}")
+
+
+@auth_bp.route("/sso/link/<provider>", methods=["POST"])
+@require_auth
+def link_sso_account(provider: str):
+    """
+    Link SSO account to current user.
+
+    Returns authorization URL for linking.
+    """
+    if provider not in ["google", "github", "twitter"]:
+        return api_error("INVALID_PROVIDER", f"Unknown provider: {provider}", status=400)
+
+    if not is_provider_configured(provider):
+        return api_error(
+            "PROVIDER_NOT_CONFIGURED",
+            f"Provider {provider} is not configured",
+            status=400,
+        )
+
+    oauth_handler = _get_oauth_handler()
+    redirect_uri = f"{OAUTH_REDIRECT_BASE}/api/v1/auth/sso/{provider}/link/callback"
+
+    auth_url = oauth_handler.generate_auth_url(provider, redirect_uri)
+    if not auth_url:
+        return api_error("SSO_ERROR", "Failed to generate authorization URL", status=500)
+
+    return api_response({"auth_url": auth_url})
+
+
+@auth_bp.route("/sso/unlink/<provider>", methods=["DELETE"])
+@require_auth
+def unlink_sso_account(provider: str):
+    """Unlink SSO account from current user."""
+    if provider not in ["google", "github", "twitter"]:
+        return api_error("INVALID_PROVIDER", f"Unknown provider: {provider}", status=400)
+
+    oauth_handler = _get_oauth_handler()
+    success = oauth_handler.unlink_oauth_account(g.user.id, provider)
+
+    if not success:
+        return api_error(
+            "UNLINK_FAILED",
+            "Cannot unlink account. Ensure you have another login method.",
+            status=400,
+        )
+
+    return api_response({"success": True})
+
+
+@auth_bp.route("/sso/accounts", methods=["GET"])
+@require_auth
+def get_linked_accounts():
+    """Get SSO accounts linked to current user."""
+    oauth_handler = _get_oauth_handler()
+    accounts = oauth_handler.get_user_oauth_accounts(g.user.id)
+
+    return api_response({
+        "accounts": accounts,
+        "available_providers": get_configured_providers(),
+    })

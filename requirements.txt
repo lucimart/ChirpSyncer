@@ -32,3 +32,6 @@ celery==5.4.0
 # Sprint H Dependencies - Decentralized Protocols
 Mastodon.py==1.8.1         # Mastodon/ActivityPub client
 flask-cors==4.0.0
+
+# SSO / OAuth Dependencies
+Authlib>=1.3.0
