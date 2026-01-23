@@ -79,7 +79,10 @@ def api_error(code: str, message: str, status: int = 400, details=None):
         "error": {"code": code, "message": sanitized_message},
         "correlation_id": getattr(g, "correlation_id", None),
     }
-    sanitized = _sanitize_details(details)
-    if sanitized is not None:
-        payload["error"]["details"] = sanitized
+    # Only include details in non-production to prevent any potential
+    # information exposure from exception context (satisfies CodeQL)
+    if os.environ.get("FLASK_ENV") != "production":
+        sanitized = _sanitize_details(details)
+        if sanitized is not None:
+            payload["error"]["details"] = sanitized
     return jsonify(payload), status
