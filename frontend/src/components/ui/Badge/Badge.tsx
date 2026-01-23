@@ -33,7 +33,7 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 const variantStyles = {
   default: css`
     background-color: ${({ theme }) => theme.colors.neutral[100]};
-    color: ${({ theme }) => theme.colors.neutral[700]};
+    color: ${({ theme }) => theme.colors.neutral[800]};
     border-color: ${({ theme }) => theme.colors.neutral[200]};
   `,
   primary: css`
@@ -63,12 +63,12 @@ const variantStyles = {
   `,
   neutral: css`
     background-color: ${({ theme }) => theme.colors.neutral[200]};
-    color: ${({ theme }) => theme.colors.neutral[700]};
+    color: ${({ theme }) => theme.colors.neutral[800]};
     border-color: ${({ theme }) => theme.colors.neutral[200]};
   `,
   'neutral-soft': css`
     background-color: ${({ theme }) => theme.colors.neutral[100]};
-    color: ${({ theme }) => theme.colors.neutral[700]};
+    color: ${({ theme }) => theme.colors.neutral[800]};
     border-color: ${({ theme }) => theme.colors.neutral[100]};
   `,
   'success-soft': css`

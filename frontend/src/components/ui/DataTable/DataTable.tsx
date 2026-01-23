@@ -121,7 +121,9 @@ const PageButton = styled.button<{ $active?: boolean }>`
   }
 
   &:disabled {
-    opacity: 0.5;
+    background-color: ${({ theme }) => theme.colors.neutral[100]};
+    color: ${({ theme }) => theme.colors.neutral[500]};
+    border-color: ${({ theme }) => theme.colors.neutral[200]};
     cursor: not-allowed;
   }
 `;
