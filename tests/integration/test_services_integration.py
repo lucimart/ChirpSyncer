@@ -218,13 +218,17 @@ class TestNotificationServiceIntegration:
         mock_smtp_class.assert_not_called()
 
     @patch("app.services.notification_service.smtplib.SMTP")
-    def test_send_email_missing_credentials(self, mock_smtp_class):
-        """Test that emails fail when credentials are missing"""
+    def test_send_email_anonymous_smtp_allowed(self, mock_smtp_class):
+        """Test that anonymous SMTP (no credentials) is allowed for local dev (Mailpit)"""
+        mock_server = MagicMock()
+        mock_smtp_class.return_value.__enter__ = Mock(return_value=mock_server)
+        mock_smtp_class.return_value.__exit__ = Mock(return_value=False)
+
         config = {
-            "host": "smtp.gmail.com",
-            "port": 587,
-            "user": "",  # Empty user
-            "password": "",  # Empty password
+            "host": "localhost",
+            "port": 1025,  # Mailpit default port
+            "user": "",  # Empty user - anonymous SMTP
+            "password": "",  # Empty password - anonymous SMTP
             "from_addr": "noreply@test.com",
             "enabled": True,
         }
@@ -234,8 +238,12 @@ class TestNotificationServiceIntegration:
             to="recipient@example.com", subject="Test", body="Test body"
         )
 
-        assert result is False
-        mock_smtp_class.assert_not_called()
+        # Anonymous SMTP should succeed
+        assert result is True
+        mock_smtp_class.assert_called_once()
+        # Login should NOT be called for anonymous SMTP
+        mock_server.login.assert_not_called()
+        mock_server.send_message.assert_called_once()
 
     @patch("app.services.notification_service.smtplib.SMTP")
     def test_batch_notification_sending(self, mock_smtp_class):
