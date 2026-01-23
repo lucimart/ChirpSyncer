@@ -28,6 +28,7 @@ import {
   MetaItem,
   Grid,
 } from '@/components/ui';
+import { ConfettiCelebration } from '@/components/canvas';
 import {
   useRealtimeMessage,
   SyncProgressPayload,
@@ -85,6 +86,7 @@ export default function SyncPage() {
   const { addToast } = useToast();
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncProgress, setSyncProgress] = useState<SyncProgress | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   useRealtimeMessage(
     'sync.progress',
@@ -105,6 +107,12 @@ export default function SyncPage() {
         setSyncProgress(null);
         queryClient.invalidateQueries({ queryKey: ['sync-stats'] });
         queryClient.invalidateQueries({ queryKey: ['sync-history'] });
+
+        // Show confetti celebration for successful syncs with posts
+        if (payload.synced > 0) {
+          setShowConfetti(true);
+        }
+
         addToast({
           type: 'success',
           title: 'Sync Complete',
@@ -324,6 +332,16 @@ export default function SyncPage() {
           />
         )}
       </Card>
+
+      {/* Confetti celebration on sync success */}
+      <ConfettiCelebration
+        active={showConfetti}
+        duration={2500}
+        particleCount={80}
+        spread="fountain"
+        origin="center-top"
+        onComplete={() => setShowConfetti(false)}
+      />
     </div>
   );
 }
