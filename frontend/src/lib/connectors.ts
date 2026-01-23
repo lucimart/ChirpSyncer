@@ -102,7 +102,12 @@ export type PlatformType =
   | 'discord'
   | 'dsnp'
   | 'ssb'
-  | 'telegram';
+  | 'telegram'
+  | 'medium'
+  | 'substack'
+  | 'devto'
+  | 'hashnode'
+  | 'cohost';
 
 // Platform connector configuration
 export interface PlatformConnector {
@@ -113,7 +118,7 @@ export interface PlatformConnector {
   icon: string;
   color: string;
   capabilities: PlatformCapabilities;
-  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix' | 'dsnp' | 'ssb' | 'discord' | 'reddit' | 'tumblr' | 'pinterest' | 'youtube' | 'tiktok' | 'mastodon' | 'telegram';
+  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix' | 'dsnp' | 'ssb' | 'discord' | 'reddit' | 'tumblr' | 'pinterest' | 'youtube' | 'tiktok' | 'mastodon' | 'telegram' | 'medium' | 'substack' | 'devto' | 'hashnode' | 'cohost';
   status: 'available' | 'coming_soon' | 'beta';
 }
 
@@ -487,6 +492,72 @@ export const PLATFORM_DEFAULTS: Record<PlatformType, PlatformCapabilities> = {
     characterLimit: 4096,
     altTextLimit: 1024,
   },
+  // Blogging platforms
+  medium: {
+    publish: true,
+    delete: false, // Medium doesn't allow API deletion
+    edit: false,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: false, gifs: true, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 100000, // No hard limit
+    altTextLimit: 500,
+  },
+  substack: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: false,
+    media: { images: true, videos: true, gifs: true, maxImages: 20 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 500000, // No practical limit
+    altTextLimit: 500,
+  },
+  devto: {
+    publish: true,
+    delete: false, // Dev.to doesn't support deletion via API
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: false, gifs: true, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: true, quote: false, bookmark: true },
+    characterLimit: 100000, // No hard limit
+    altTextLimit: 500,
+  },
+  hashnode: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: false, gifs: true, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: true, quote: false, bookmark: false },
+    characterLimit: 100000, // No hard limit
+    altTextLimit: 500,
+  },
+  cohost: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: true, // Reply threads
+    media: { images: true, videos: false, gifs: true, maxImages: 10 },
+    interactions: { like: true, repost: true, reply: true, quote: false, bookmark: false },
+    characterLimit: 100000, // No hard limit
+    altTextLimit: 1000,
+  },
 };
 
 // Available connectors
@@ -701,6 +772,62 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     color: '#0088CC',
     capabilities: PLATFORM_DEFAULTS.telegram,
     auth_type: 'telegram',
+    status: 'available',
+  },
+  // Blogging platforms
+  {
+    id: 'medium',
+    platform: 'medium',
+    name: 'Medium',
+    description: 'Professional publishing platform for stories and ideas',
+    icon: 'M',
+    color: '#000000',
+    capabilities: PLATFORM_DEFAULTS.medium,
+    auth_type: 'medium',
+    status: 'available',
+  },
+  {
+    id: 'substack',
+    platform: 'substack',
+    name: 'Substack',
+    description: 'Newsletter publishing and subscription platform',
+    icon: '📧',
+    color: '#FF6719',
+    capabilities: PLATFORM_DEFAULTS.substack,
+    auth_type: 'substack',
+    status: 'available',
+  },
+  {
+    id: 'devto',
+    platform: 'devto',
+    name: 'Dev.to',
+    description: 'Developer community and blogging platform',
+    icon: 'DEV',
+    color: '#0A0A0A',
+    capabilities: PLATFORM_DEFAULTS.devto,
+    auth_type: 'devto',
+    status: 'available',
+  },
+  {
+    id: 'hashnode',
+    platform: 'hashnode',
+    name: 'Hashnode',
+    description: 'Developer blogging with custom domains',
+    icon: '#',
+    color: '#2962FF',
+    capabilities: PLATFORM_DEFAULTS.hashnode,
+    auth_type: 'hashnode',
+    status: 'available',
+  },
+  {
+    id: 'cohost',
+    platform: 'cohost',
+    name: 'Cohost',
+    description: 'Ad-free social platform with rich formatting',
+    icon: '🥚',
+    color: '#83254F',
+    capabilities: PLATFORM_DEFAULTS.cohost,
+    auth_type: 'cohost',
     status: 'available',
   },
 ];

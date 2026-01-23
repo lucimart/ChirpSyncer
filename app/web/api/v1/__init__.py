@@ -84,6 +84,11 @@ from app.web.api.v1.pinterest import pinterest_bp  # noqa: E402
 from app.web.api.v1.youtube import youtube_bp  # noqa: E402
 from app.web.api.v1.tiktok import tiktok_bp  # noqa: E402
 from app.web.api.v1.telegram import telegram_bp  # noqa: E402
+from app.web.api.v1.medium import medium_bp  # noqa: E402
+from app.web.api.v1.substack import substack_bp  # noqa: E402
+from app.web.api.v1.devto import devto_bp  # noqa: E402
+from app.web.api.v1.hashnode import hashnode_bp  # noqa: E402
+from app.web.api.v1.cohost import cohost_bp  # noqa: E402
 
 api_v1.register_blueprint(auth_bp)
 api_v1.register_blueprint(dashboard_bp)
@@ -122,3 +127,8 @@ api_v1.register_blueprint(pinterest_bp)
 api_v1.register_blueprint(youtube_bp)
 api_v1.register_blueprint(tiktok_bp)
 api_v1.register_blueprint(telegram_bp)
+api_v1.register_blueprint(medium_bp)
+api_v1.register_blueprint(substack_bp)
+api_v1.register_blueprint(devto_bp)
+api_v1.register_blueprint(hashnode_bp)
+api_v1.register_blueprint(cohost_bp)
