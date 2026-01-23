@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import {
   Calendar,
@@ -12,6 +12,7 @@ import {
   AlertCircle,
   Sparkles,
   Target,
+  Activity,
 } from 'lucide-react';
 import { Button, Card, Input, Modal, useToast, PageHeader, SectionTitle, Form, EmptyState, Spinner, Label, MetaItem, SidebarLayout, Stack, TextArea } from '@/components/ui';
 import {
@@ -24,6 +25,7 @@ import {
   TimeSlot,
 } from '@/lib/scheduling';
 import { TimingHeatmap } from '@/components/scheduler/TimingHeatmap';
+import { PostDensityMap, type PostDataPoint } from '@/components/canvas';
 
 const StyledSectionTitle = styled(SectionTitle)`
   display: flex;
@@ -75,17 +77,6 @@ const ScoreBadge = styled.span<{ $score: number }>`
         : theme.colors.neutral[700]};
 `;
 
-const ScheduledCard = styled(Card)`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[3]};
-`;
-
-const ScheduledHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-`;
 
 const ScheduledContent = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.sm};
@@ -93,13 +84,6 @@ const ScheduledContent = styled.p`
   line-height: 1.5;
 `;
 
-const ScheduledMeta = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[4]};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
 
 const PlatformBadge = styled.span<{ $platform: string }>`
   padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
@@ -142,10 +126,6 @@ const StatusBadge = styled.span<{ $status: string }>`
         : theme.colors.warning[700]};
 `;
 
-const PlatformSelect = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[2]};
-`;
 
 const PlatformOption = styled.button<{ $selected: boolean }>`
   flex: 1;
@@ -175,12 +155,6 @@ const PredictionCard = styled.div`
   margin-top: ${({ theme }) => theme.spacing[4]};
 `;
 
-const PredictionHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: ${({ theme }) => theme.spacing[3]};
-`;
 
 const PredictionTitle = styled.span`
   font-size: ${({ theme }) => theme.fontSizes.sm};
@@ -226,6 +200,32 @@ export default function SchedulerPage() {
   const engagementPrediction = useEngagementPrediction();
   const createPost = useCreateScheduledPost();
   const deletePost = useDeleteScheduledPost();
+
+  // Generate sample density map data based on typical posting patterns
+  const densityMapData: PostDataPoint[] = useMemo(() => {
+    const points: PostDataPoint[] = [];
+    // Generate 200 sample points for visualization
+    for (let i = 0; i < 200; i++) {
+      // Cluster around peak hours (9am-11am, 2pm-4pm, 7pm-9pm)
+      const hour = Math.random() < 0.6
+        ? (Math.random() < 0.5 ? 9 + Math.random() * 2 : 14 + Math.random() * 2)
+        : Math.random() * 24;
+      const x = hour / 24; // Normalize to 0-1
+
+      // Higher engagement for peak hours
+      const baseEngagement = Math.random();
+      const peakBonus = (hour >= 9 && hour <= 11) || (hour >= 14 && hour <= 16) || (hour >= 19 && hour <= 21) ? 0.3 : 0;
+      const y = Math.min(1, baseEngagement * 0.7 + peakBonus);
+
+      points.push({
+        x,
+        y,
+        weight: 0.5 + Math.random() * 0.5,
+        id: `post-${i}`,
+      });
+    }
+    return points;
+  }, []);
 
   const handleOptimalTimeSelect = (slot: TimeSlot) => {
     const now = new Date();
@@ -410,35 +410,37 @@ export default function SchedulerPage() {
         ) : pendingPosts.length > 0 ? (
           <Stack gap={3}>
             {pendingPosts.map((post) => (
-                <ScheduledCard key={post.id} padding="md">
-                  <ScheduledHeader>
-                    <PlatformBadge $platform={post.platform}>
-                      {post.platform === 'both' ? 'All Platforms' : post.platform}
-                    </PlatformBadge>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(post.id)}
-                    >
-                      <Trash2 size={16} />
-                    </Button>
-                  </ScheduledHeader>
-                  <ScheduledContent>{post.content}</ScheduledContent>
-                  <ScheduledMeta>
-                    <MetaItem>
-                      <Calendar size={14} />
-                      {formatDate(post.scheduled_at)}
-                    </MetaItem>
-                    <MetaItem>
-                      <Target size={14} />
-                      {post.predicted_engagement}% predicted
-                    </MetaItem>
-                    <StatusBadge $status={post.status}>
-                      {getStatusIcon(post.status)}
-                      {post.status}
-                    </StatusBadge>
-                  </ScheduledMeta>
-                </ScheduledCard>
+                <Card key={post.id} padding="md">
+                  <Stack gap={3}>
+                    <Stack direction="row" justify="between" align="start">
+                      <PlatformBadge $platform={post.platform}>
+                        {post.platform === 'both' ? 'All Platforms' : post.platform}
+                      </PlatformBadge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(post.id)}
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </Stack>
+                    <ScheduledContent>{post.content}</ScheduledContent>
+                    <Stack direction="row" align="center" gap={4}>
+                      <MetaItem>
+                        <Calendar size={14} />
+                        {formatDate(post.scheduled_at)}
+                      </MetaItem>
+                      <MetaItem>
+                        <Target size={14} />
+                        {post.predicted_engagement}% predicted
+                      </MetaItem>
+                      <StatusBadge $status={post.status}>
+                        {getStatusIcon(post.status)}
+                        {post.status}
+                      </StatusBadge>
+                    </Stack>
+                  </Stack>
+                </Card>
               ))}
             </Stack>
           ) : (
@@ -459,24 +461,26 @@ export default function SchedulerPage() {
               </SectionTitle>
               <Stack gap={3}>
                 {publishedPosts.map((post) => (
-                  <ScheduledCard key={post.id} padding="md">
-                    <ScheduledHeader>
-                      <PlatformBadge $platform={post.platform}>
-                        {post.platform === 'both' ? 'All Platforms' : post.platform}
-                      </PlatformBadge>
-                      <StatusBadge $status={post.status}>
-                        {getStatusIcon(post.status)}
-                        {post.status}
-                      </StatusBadge>
-                    </ScheduledHeader>
-                    <ScheduledContent>{post.content}</ScheduledContent>
-                    <ScheduledMeta>
-                      <MetaItem>
-                        <Calendar size={14} />
-                        {formatDate(post.scheduled_at)}
-                      </MetaItem>
-                    </ScheduledMeta>
-                  </ScheduledCard>
+                  <Card key={post.id} padding="md">
+                    <Stack gap={3}>
+                      <Stack direction="row" justify="between" align="start">
+                        <PlatformBadge $platform={post.platform}>
+                          {post.platform === 'both' ? 'All Platforms' : post.platform}
+                        </PlatformBadge>
+                        <StatusBadge $status={post.status}>
+                          {getStatusIcon(post.status)}
+                          {post.status}
+                        </StatusBadge>
+                      </Stack>
+                      <ScheduledContent>{post.content}</ScheduledContent>
+                      <Stack direction="row" align="center" gap={4}>
+                        <MetaItem>
+                          <Calendar size={14} />
+                          {formatDate(post.scheduled_at)}
+                        </MetaItem>
+                      </Stack>
+                    </Stack>
+                  </Card>
                 ))}
               </Stack>
             </>
@@ -492,6 +496,32 @@ export default function SchedulerPage() {
           data={heatmapData}
           onCellSelect={handleHeatmapCellSelect}
           loading={heatmapLoading}
+        />
+      </Card>
+
+      <Card padding="md" style={{ marginTop: '24px' }}>
+        <StyledSectionTitle>
+          <Activity size={20} />
+          Post Density Map
+        </StyledSectionTitle>
+        <PostDensityMap
+          data={densityMapData}
+          width={800}
+          height={300}
+          radius={25}
+          showGrid={true}
+          gridSize={80}
+          xLabel="Time of Day"
+          yLabel="Engagement"
+          onRegionClick={(x, y, points) => {
+            if (points.length > 0) {
+              addToast({
+                type: 'info',
+                title: 'Region Selected',
+                message: `${points.length} posts in this region`,
+              });
+            }
+          }}
         />
       </Card>
 
@@ -537,7 +567,7 @@ export default function SchedulerPage() {
 
           <div>
             <Label>Platform</Label>
-            <PlatformSelect>
+            <Stack direction="row" gap={2}>
               <PlatformOption
                 type="button"
                 $selected={platform === 'twitter'}
@@ -559,12 +589,12 @@ export default function SchedulerPage() {
               >
                 Both
               </PlatformOption>
-            </PlatformSelect>
+            </Stack>
           </div>
 
           {engagementPrediction.data && (
             <PredictionCard>
-              <PredictionHeader>
+              <Stack direction="row" align="center" justify="between" style={{ marginBottom: '12px' }}>
                 <PredictionTitle>
                   <TrendingUp size={16} />
                   Engagement Prediction
@@ -572,7 +602,7 @@ export default function SchedulerPage() {
                 <PredictionScore $score={engagementPrediction.data.score}>
                   {engagementPrediction.data.score}%
                 </PredictionScore>
-              </PredictionHeader>
+              </Stack>
               {engagementPrediction.data.suggested_improvements.length > 0 && (
                 <SuggestionsList>
                   {engagementPrediction.data.suggested_improvements.map((tip, i) => (

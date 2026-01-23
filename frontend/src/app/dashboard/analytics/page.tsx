@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import styled from 'styled-components';
 import {
@@ -11,10 +11,12 @@ import {
   MessageCircle,
   Eye,
   Download,
+  Share2,
 } from 'lucide-react';
-import { Button, Card, PageHeader, SectionTitle, StatsGrid, Stack, MetaItem } from '@/components/ui';
+import { Button, Card, PageHeader, SectionTitle, StatsGrid, Stack, MetaItem, SmallText } from '@/components/ui';
 import { AnimatedNumber, AnimatedCompactNumber, AnimatedPercentage } from '@/components/ui/Motion';
 import { NivoChartWidget } from '@/components/widgets';
+import { EngagementNetwork, type NetworkNode, type NetworkLink } from '@/components/canvas';
 import { api } from '@/lib/api';
 
 const PeriodSelector = styled.div`
@@ -89,6 +91,13 @@ const ChartsGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: ${({ theme }) => theme.spacing[4]};
   margin-bottom: ${({ theme }) => theme.spacing[6]};
+`;
+
+const LegendDot = styled.span<{ $color: string }>`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: ${({ $color }) => $color};
 `;
 
 const TopPostItem = styled.div`
@@ -260,6 +269,44 @@ export default function AnalyticsPage() {
     { label: 'Bluesky', value: 280 },
   ];
 
+  // Sample network data for engagement visualization
+  const networkData = useMemo(() => {
+    const nodes: NetworkNode[] = [
+      { id: 'user-1', label: 'You', size: 30, color: '#6366f1', type: 'user' },
+      { id: 'user-2', label: 'Follower A', size: 20, color: '#6366f1', type: 'user' },
+      { id: 'user-3', label: 'Follower B', size: 18, color: '#6366f1', type: 'user' },
+      { id: 'user-4', label: 'Influencer', size: 25, color: '#6366f1', type: 'user' },
+      { id: 'post-1', label: 'Post #1', size: 15, color: '#10b981', type: 'post' },
+      { id: 'post-2', label: 'Post #2', size: 18, color: '#10b981', type: 'post' },
+      { id: 'post-3', label: 'Post #3', size: 12, color: '#10b981', type: 'post' },
+      { id: 'topic-1', label: '#tech', size: 22, color: '#f59e0b', type: 'topic' },
+      { id: 'topic-2', label: '#social', size: 16, color: '#f59e0b', type: 'topic' },
+      { id: 'platform-tw', label: 'Twitter', size: 20, color: '#1DA1F2', type: 'platform' },
+      { id: 'platform-bs', label: 'Bluesky', size: 20, color: '#0085FF', type: 'platform' },
+    ];
+
+    const links: NetworkLink[] = [
+      { id: 'l1', source: 'user-1', target: 'post-1', strength: 0.9, type: 'like' },
+      { id: 'l2', source: 'user-1', target: 'post-2', strength: 0.8, type: 'like' },
+      { id: 'l3', source: 'user-2', target: 'post-1', strength: 0.7, type: 'repost' },
+      { id: 'l4', source: 'user-3', target: 'post-2', strength: 0.6, type: 'reply' },
+      { id: 'l5', source: 'user-4', target: 'post-1', strength: 0.9, type: 'mention' },
+      { id: 'l6', source: 'user-4', target: 'user-1', strength: 0.8, type: 'follow' },
+      { id: 'l7', source: 'post-1', target: 'topic-1', strength: 0.7, type: 'mention' },
+      { id: 'l8', source: 'post-2', target: 'topic-2', strength: 0.6, type: 'mention' },
+      { id: 'l9', source: 'post-1', target: 'platform-tw', strength: 0.5, type: 'like' },
+      { id: 'l10', source: 'post-2', target: 'platform-bs', strength: 0.5, type: 'like' },
+      { id: 'l11', source: 'user-2', target: 'user-1', strength: 0.6, type: 'follow' },
+      { id: 'l12', source: 'user-3', target: 'user-1', strength: 0.5, type: 'follow' },
+    ];
+
+    return { nodes, links };
+  }, []);
+
+  const handleNetworkNodeClick = (node: NetworkNode) => {
+    console.log('Clicked node:', node);
+  };
+
   const handleExportData = () => {
     const exportData = {
       period,
@@ -346,6 +393,40 @@ export default function AnalyticsPage() {
           height={250}
         />
       </ChartsGrid>
+
+      <Card padding="md" style={{ marginBottom: '24px' }}>
+        <Stack direction="row" justify="between" align="center" style={{ marginBottom: '16px' }}>
+          <SectionTitle style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+            <Share2 size={20} />
+            Engagement Network
+          </SectionTitle>
+          <Stack direction="row" gap={4}>
+            <Stack direction="row" align="center" gap={1}>
+              <LegendDot $color="#6366f1" />
+              <SmallText color="secondary">Users</SmallText>
+            </Stack>
+            <Stack direction="row" align="center" gap={1}>
+              <LegendDot $color="#10b981" />
+              <SmallText color="secondary">Posts</SmallText>
+            </Stack>
+            <Stack direction="row" align="center" gap={1}>
+              <LegendDot $color="#f59e0b" />
+              <SmallText color="secondary">Topics</SmallText>
+            </Stack>
+            <Stack direction="row" align="center" gap={1}>
+              <LegendDot $color="#ec4899" />
+              <SmallText color="secondary">Platforms</SmallText>
+            </Stack>
+          </Stack>
+        </Stack>
+        <EngagementNetwork
+          nodes={networkData.nodes}
+          links={networkData.links}
+          width={800}
+          height={400}
+          onNodeClick={handleNetworkNodeClick}
+        />
+      </Card>
 
       <SectionTitle>Top Performing Posts</SectionTitle>
       <Card padding="none">
