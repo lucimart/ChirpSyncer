@@ -10,6 +10,22 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { theme } from '@/styles/theme';
 import CredentialsPage from './page';
 
+// Mock OnboardingProvider
+jest.mock('@/components/onboarding', () => ({
+  OnboardingProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useOnboarding: () => ({
+    steps: [],
+    currentStep: null,
+    progress: 100,
+    isComplete: true,
+    showChecklist: false,
+    completeStep: jest.fn(),
+    dismissChecklist: jest.fn(),
+    resetOnboarding: jest.fn(),
+  }),
+  OnboardingChecklist: () => null,
+}));
+
 // Mock next/navigation
 const mockPush = jest.fn();
 jest.mock('next/navigation', () => ({
@@ -21,44 +37,44 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/dashboard/credentials',
 }));
 
-// Mock credentials data
-const mockCredentials = [
-  {
-    id: 1,
-    platform: 'twitter',
-    credential_type: 'scraping',
-    is_active: true,
-    created_at: '2024-01-15T10:00:00Z',
-    last_used: '2024-01-20T15:30:00Z',
-  },
-  {
-    id: 2,
-    platform: 'bluesky',
-    credential_type: 'api',
-    is_active: false,
-    created_at: '2024-01-10T08:00:00Z',
-    last_used: null,
-  },
-];
-
-// Mock API
-jest.mock('@/lib/api', () => ({
-  api: {
-    getCredentials: jest.fn().mockResolvedValue({
-      success: true,
-      data: mockCredentials,
-    }),
-    addCredential: jest.fn().mockResolvedValue({
-      success: true,
-      data: { id: 3, platform: 'twitter', credential_type: 'scraping', is_active: true },
-    }),
-    deleteCredential: jest.fn().mockResolvedValue({ success: true }),
-    testCredential: jest.fn().mockResolvedValue({
-      success: true,
-      data: { valid: true, message: 'Credential is valid' },
-    }),
-  },
-}));
+// Mock API - data inline to avoid hoisting issues
+jest.mock('@/lib/api', () => {
+  const credentials = [
+    {
+      id: 1,
+      platform: 'twitter',
+      credential_type: 'scraping',
+      is_active: true,
+      created_at: '2024-01-15T10:00:00Z',
+      last_used: '2024-01-20T15:30:00Z',
+    },
+    {
+      id: 2,
+      platform: 'bluesky',
+      credential_type: 'api',
+      is_active: false,
+      created_at: '2024-01-10T08:00:00Z',
+      last_used: null,
+    },
+  ];
+  return {
+    api: {
+      getCredentials: jest.fn().mockResolvedValue({
+        success: true,
+        data: credentials,
+      }),
+      addCredential: jest.fn().mockResolvedValue({
+        success: true,
+        data: { id: 3, platform: 'twitter', credential_type: 'scraping', is_active: true },
+      }),
+      deleteCredential: jest.fn().mockResolvedValue({ success: true }),
+      testCredential: jest.fn().mockResolvedValue({
+        success: true,
+        data: { valid: true, message: 'Credential is valid' },
+      }),
+    },
+  };
+});
 
 const createTestQueryClient = () =>
   new QueryClient({

@@ -10,6 +10,22 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { theme } from '@/styles/theme';
 import SettingsPage from './page';
 
+// Mock OnboardingProvider
+jest.mock('@/components/onboarding', () => ({
+  OnboardingProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useOnboarding: () => ({
+    steps: [],
+    currentStep: null,
+    progress: 100,
+    isComplete: true,
+    showChecklist: false,
+    completeStep: jest.fn(),
+    dismissChecklist: jest.fn(),
+    resetOnboarding: jest.fn(),
+  }),
+  OnboardingChecklist: () => null,
+}));
+
 // Mock next/navigation
 const mockPush = jest.fn();
 jest.mock('next/navigation', () => ({

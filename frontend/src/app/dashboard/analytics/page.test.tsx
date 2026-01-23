@@ -1,9 +1,25 @@
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/styles/ThemeContext';
 import AnalyticsPage from './page';
+
+// Mock OnboardingProvider
+jest.mock('@/components/onboarding', () => ({
+  OnboardingProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useOnboarding: () => ({
+    steps: [],
+    currentStep: null,
+    progress: 100,
+    isComplete: true,
+    showChecklist: false,
+    completeStep: jest.fn(),
+    dismissChecklist: jest.fn(),
+    resetOnboarding: jest.fn(),
+  }),
+  OnboardingChecklist: () => null,
+}));
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -31,6 +47,21 @@ const mockCreateObjectURL = jest.fn(() => 'blob:mock-url');
 const mockRevokeObjectURL = jest.fn();
 global.URL.createObjectURL = mockCreateObjectURL;
 global.URL.revokeObjectURL = mockRevokeObjectURL;
+
+// Mock @nivo/pie
+jest.mock('@nivo/pie', () => ({
+  ResponsivePie: () => <div data-testid="nivo-pie-chart">Pie Chart</div>,
+}));
+
+// Mock @nivo/bar
+jest.mock('@nivo/bar', () => ({
+  ResponsiveBar: () => <div data-testid="nivo-bar-chart">Bar Chart</div>,
+}));
+
+// Mock @nivo/line
+jest.mock('@nivo/line', () => ({
+  ResponsiveLine: () => <div data-testid="nivo-line-chart">Line Chart</div>,
+}));
 
 function createQueryClient() {
   return new QueryClient({
@@ -157,9 +188,8 @@ describe('AnalyticsPage', () => {
       renderWithProviders(<AnalyticsPage />);
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/just published a new update about the chirpsyncer project/i)
-        ).toBeInTheDocument();
+        const posts = screen.getAllByText(/just published a new update about the chirpsyncer project/i);
+        expect(posts.length).toBeGreaterThan(0);
       });
     });
   });
@@ -212,12 +242,18 @@ describe('AnalyticsPage', () => {
     it('exports data as JSON when export button is clicked', async () => {
       const user = userEvent.setup();
       const mockClick = jest.fn();
-      const mockAnchor = {
-        href: '',
-        download: '',
-        click: mockClick,
-      };
-      jest.spyOn(document, 'createElement').mockReturnValue(mockAnchor as unknown as HTMLAnchorElement);
+      const originalCreateElement = document.createElement.bind(document);
+
+      const createElementSpy = jest.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+        if (tagName === 'a') {
+          return {
+            href: '',
+            download: '',
+            click: mockClick,
+          } as unknown as HTMLAnchorElement;
+        }
+        return originalCreateElement(tagName);
+      });
 
       renderWithProviders(<AnalyticsPage />);
 
@@ -230,6 +266,8 @@ describe('AnalyticsPage', () => {
       expect(mockCreateObjectURL).toHaveBeenCalled();
       expect(mockClick).toHaveBeenCalled();
       expect(mockRevokeObjectURL).toHaveBeenCalled();
+
+      createElementSpy.mockRestore();
     });
   });
 

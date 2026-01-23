@@ -5,6 +5,22 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/styles/ThemeContext';
 import SyncPage from './page';
 
+// Mock OnboardingProvider
+jest.mock('@/components/onboarding', () => ({
+  OnboardingProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useOnboarding: () => ({
+    steps: [],
+    currentStep: null,
+    progress: 100,
+    isComplete: true,
+    showChecklist: false,
+    completeStep: jest.fn(),
+    dismissChecklist: jest.fn(),
+    resetOnboarding: jest.fn(),
+  }),
+  OnboardingChecklist: () => null,
+}));
+
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -20,6 +36,9 @@ jest.mock('next/navigation', () => ({
 const mockUseRealtimeMessage = jest.fn();
 jest.mock('@/providers/RealtimeProvider', () => ({
   useRealtimeMessage: (type: string, handler: () => void) => mockUseRealtimeMessage(type, handler),
+  useRealtime: () => ({ status: 'connected' }),
+  useConnectionStatus: () => 'connected',
+  RealtimeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 // Mock @/lib/api
@@ -216,7 +235,8 @@ describe('SyncPage', () => {
       renderWithProviders(<SyncPage />);
 
       await waitFor(() => {
-        expect(screen.getByText('Twitter to Bluesky')).toBeInTheDocument();
+        const items = screen.getAllByText('Twitter to Bluesky');
+        expect(items.length).toBeGreaterThan(0);
       });
     });
 
@@ -225,7 +245,8 @@ describe('SyncPage', () => {
 
       await waitFor(() => {
         // Check that success and failed items are rendered
-        expect(screen.getByText('Twitter to Bluesky')).toBeInTheDocument();
+        const items = screen.getAllByText('Twitter to Bluesky');
+        expect(items.length).toBeGreaterThan(0);
       });
     });
 
@@ -387,7 +408,8 @@ describe('SyncPage', () => {
 
       await waitFor(() => {
         // History items should be rendered
-        expect(screen.getByText('Twitter to Bluesky')).toBeInTheDocument();
+        const items = screen.getAllByText('Twitter to Bluesky');
+        expect(items.length).toBeGreaterThan(0);
       });
     });
   });

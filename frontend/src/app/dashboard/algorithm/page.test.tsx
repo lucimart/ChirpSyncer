@@ -1,8 +1,24 @@
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/styles/ThemeContext';
 import AlgorithmPage from './page';
+
+// Mock OnboardingProvider
+jest.mock('@/components/onboarding', () => ({
+  OnboardingProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useOnboarding: () => ({
+    steps: [],
+    currentStep: null,
+    progress: 100,
+    isComplete: true,
+    showChecklist: false,
+    completeStep: jest.fn(),
+    dismissChecklist: jest.fn(),
+    resetOnboarding: jest.fn(),
+  }),
+  OnboardingChecklist: () => null,
+}));
 
 // Mock next/navigation
 const mockPush = jest.fn();
@@ -25,6 +41,21 @@ jest.mock('@/hooks/useAlgorithmStats', () => ({
 // Mock fetch for settings API
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
+
+// Mock @nivo/pie
+jest.mock('@nivo/pie', () => ({
+  ResponsivePie: () => <div data-testid="nivo-pie-chart">Pie Chart</div>,
+}));
+
+// Mock @nivo/bar
+jest.mock('@nivo/bar', () => ({
+  ResponsiveBar: () => <div data-testid="nivo-bar-chart">Bar Chart</div>,
+}));
+
+// Mock @nivo/line
+jest.mock('@nivo/line', () => ({
+  ResponsiveLine: () => <div data-testid="nivo-line-chart">Line Chart</div>,
+}));
 
 function createQueryClient() {
   return new QueryClient({
@@ -94,7 +125,7 @@ describe('AlgorithmPage', () => {
       renderWithProviders(<AlgorithmPage />);
 
       await waitFor(() => {
-        expect(screen.getByText('Algorithm Dashboard')).toBeInTheDocument();
+        expect(screen.getByTestId('page-header')).toBeInTheDocument();
       });
       expect(
         screen.getByText('Review your transparency score and see how rules shape the feed.')
@@ -236,7 +267,7 @@ describe('AlgorithmPage', () => {
 
       // Should still render with default enabled state
       await waitFor(() => {
-        expect(screen.getByText('Algorithm Dashboard')).toBeInTheDocument();
+        expect(screen.getByTestId('page-header')).toBeInTheDocument();
       });
     });
   });
@@ -247,7 +278,7 @@ describe('AlgorithmPage', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByRole('heading', { name: 'Algorithm Dashboard' })
+          screen.getByRole('heading', { name: 'Algorithm Dashboard', level: 1 })
         ).toBeInTheDocument();
       });
     });

@@ -8,7 +8,7 @@
 import React, { useState, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { RefreshCw, Info } from 'lucide-react';
-import { RuleContributionChart } from '../RuleContributionChart';
+import { RuleContributionChart, NivoRuleContributionChart } from '../RuleContributionChart';
 import { useFeedExplanation } from '@/hooks/useFeedExplanation';
 import { Spinner, Modal, Button } from '@/components/ui';
 import { formatCondition, formatContribution } from '../shared';
@@ -23,6 +23,8 @@ export interface WhyAmISeeingThisProps {
   error?: string | null;
   onClose?: () => void;
   variant?: 'button' | 'inline';
+  /** Use Nivo charts for enhanced animations */
+  useNivo?: boolean;
 }
 
 const TriggerButton = styled.button`
@@ -214,6 +216,7 @@ export function WhyAmISeeingThis({
   isLoading: externalLoading,
   error: externalError,
   onClose,
+  useNivo = false,
 }: WhyAmISeeingThisProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -294,7 +297,7 @@ export function WhyAmISeeingThis({
         ) : hookError ? (
           <ContentError>{hookError}</ContentError>
         ) : explanation ? (
-          <ExplanationContent explanation={explanation} />
+          <ExplanationContent explanation={explanation} useNivo={useNivo} />
         ) : (
           <EmptyStateComponent />
         )}
@@ -305,9 +308,10 @@ export function WhyAmISeeingThis({
 
 interface ExplanationContentProps {
   explanation: FeedExplanation;
+  useNivo?: boolean;
 }
 
-function ExplanationContent({ explanation }: ExplanationContentProps) {
+function ExplanationContent({ explanation, useNivo = false }: ExplanationContentProps) {
   const { baseScore, totalScore, appliedRules, feedPosition } = explanation;
   const hasRules = appliedRules.length > 0;
 
@@ -328,7 +332,11 @@ function ExplanationContent({ explanation }: ExplanationContentProps) {
       </ScoresCard>
 
       {hasRules && (
-        <RuleContributionChart explanation={explanation} />
+        useNivo ? (
+          <NivoRuleContributionChart explanation={explanation} />
+        ) : (
+          <RuleContributionChart explanation={explanation} />
+        )
       )}
 
       {/* Rules or Empty State */}

@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useMemo, type FC, type CSSProperties } from 'react';
-import { FeedCompositionChart } from '../FeedCompositionChart';
+import { FeedCompositionChart, NivoFeedCompositionChart } from '../FeedCompositionChart';
 import { RuleImpactSummary, type RuleImpact as SummaryRuleImpact } from '../RuleImpactSummary';
 
 export interface FeedComposition {
@@ -53,6 +53,8 @@ export interface AlgorithmDashboardProps {
   onToggleAlgorithm?: (enabled: boolean) => void;
   onEditRules?: () => void;
   onViewRule?: (ruleId?: string) => void;
+  /** Use Nivo charts for enhanced animations */
+  useNivo?: boolean;
 }
 
 /** Threshold for low transparency warning */
@@ -113,6 +115,7 @@ export const AlgorithmDashboard: FC<AlgorithmDashboardProps> = ({
   onToggleAlgorithm,
   onEditRules,
   onViewRule,
+  useNivo = false,
 }) => {
   const handleToggle = useCallback(() => {
     onToggleAlgorithm?.(!algorithmEnabled);
@@ -327,11 +330,19 @@ export const AlgorithmDashboard: FC<AlgorithmDashboardProps> = ({
               Feed Composition
             </h3>
 
-            <FeedCompositionChart
-              composition={stats.feedComposition}
-              showLegend
-              showPercentages
-            />
+            {useNivo ? (
+              <NivoFeedCompositionChart
+                composition={stats.feedComposition}
+                showLegend
+                showPercentages
+              />
+            ) : (
+              <FeedCompositionChart
+                composition={stats.feedComposition}
+                showLegend
+                showPercentages
+              />
+            )}
 
             {/* Text breakdown for accessibility and test matching */}
             <div className="algorithm-dashboard__composition-breakdown" aria-live="polite">

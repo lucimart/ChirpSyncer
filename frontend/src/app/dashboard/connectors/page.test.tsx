@@ -10,6 +10,22 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { theme } from '@/styles/theme';
 import ConnectorsPage from './page';
 
+// Mock OnboardingProvider
+jest.mock('@/components/onboarding', () => ({
+  OnboardingProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useOnboarding: () => ({
+    steps: [],
+    currentStep: null,
+    progress: 100,
+    isComplete: true,
+    showChecklist: false,
+    completeStep: jest.fn(),
+    dismissChecklist: jest.fn(),
+    resetOnboarding: jest.fn(),
+  }),
+  OnboardingChecklist: () => null,
+}));
+
 // Mock next/navigation
 const mockPush = jest.fn();
 jest.mock('next/navigation', () => ({
@@ -21,99 +37,98 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/dashboard/connectors',
 }));
 
-// Mock connector data
-const mockConnectors = [
-  {
-    id: 'twitter-connector',
-    platform: 'twitter',
-    name: 'Twitter',
-    icon: 'T',
-    color: '#1DA1F2',
-    description: 'Connect your Twitter account',
-    auth_type: 'session',
-    status: 'available',
-    capabilities: {
-      publish: true,
-      read: true,
-      edit: false,
-      delete: true,
-      metrics: true,
-      schedule: true,
-      threads: true,
-      characterLimit: 280,
-      altTextLimit: 1000,
-      media: { images: true, videos: true, gifs: true, maxImages: 4 },
-      interactions: { like: true, repost: true, reply: true, quote: true, bookmark: true },
+// Mock connectors - data inline to avoid hoisting issues
+jest.mock('@/lib/connectors', () => {
+  const connectors = [
+    {
+      id: 'twitter-connector',
+      platform: 'twitter',
+      name: 'Twitter',
+      icon: 'T',
+      color: '#1DA1F2',
+      description: 'Connect your Twitter account',
+      auth_type: 'session',
+      status: 'available',
+      capabilities: {
+        publish: true,
+        read: true,
+        edit: false,
+        delete: true,
+        metrics: true,
+        schedule: true,
+        threads: true,
+        characterLimit: 280,
+        altTextLimit: 1000,
+        media: { images: true, videos: true, gifs: true, maxImages: 4 },
+        interactions: { like: true, repost: true, reply: true, quote: true, bookmark: true },
+      },
     },
-  },
-  {
-    id: 'bluesky-connector',
-    platform: 'bluesky',
-    name: 'Bluesky',
-    icon: 'B',
-    color: '#0085FF',
-    description: 'Connect your Bluesky account',
-    auth_type: 'atproto',
-    status: 'available',
-    capabilities: {
-      publish: true,
-      read: true,
-      edit: false,
-      delete: true,
-      metrics: true,
-      schedule: true,
-      threads: true,
-      characterLimit: 300,
-      altTextLimit: 2000,
-      media: { images: true, videos: false, gifs: false, maxImages: 4 },
-      interactions: { like: true, repost: true, reply: true, quote: true, bookmark: false },
+    {
+      id: 'bluesky-connector',
+      platform: 'bluesky',
+      name: 'Bluesky',
+      icon: 'B',
+      color: '#0085FF',
+      description: 'Connect your Bluesky account',
+      auth_type: 'atproto',
+      status: 'available',
+      capabilities: {
+        publish: true,
+        read: true,
+        edit: false,
+        delete: true,
+        metrics: true,
+        schedule: true,
+        threads: true,
+        characterLimit: 300,
+        altTextLimit: 2000,
+        media: { images: true, videos: false, gifs: false, maxImages: 4 },
+        interactions: { like: true, repost: true, reply: true, quote: true, bookmark: false },
+      },
     },
-  },
-];
-
-const mockConnections = [
-  {
-    id: 'conn-1',
-    platform: 'twitter',
-    connected: true,
-    sync_enabled: true,
-    handle: '@testuser',
-    last_sync: new Date().toISOString(),
-  },
-];
-
-const mockSyncConfigs = [
-  {
-    platform: 'twitter',
-    enabled: true,
-    direction: 'bidirectional',
-    filters: { include_replies: true, include_reposts: false, include_quotes: true },
-    transform: { add_source_link: false, preserve_mentions: true, preserve_hashtags: true, truncate_strategy: 'thread' },
-  },
-];
-
-jest.mock('@/lib/connectors', () => ({
-  useConnectors: () => ({ data: mockConnectors, isLoading: false }),
-  useConnections: () => ({ data: mockConnections, isLoading: false }),
-  useSyncConfigs: () => ({ data: mockSyncConfigs, isLoading: false }),
-  useConnectPlatform: () => ({
-    mutateAsync: jest.fn().mockResolvedValue({}),
-    isPending: false,
-  }),
-  useDisconnectPlatform: () => ({
-    mutateAsync: jest.fn().mockResolvedValue({}),
-    isPending: false,
-  }),
-  useUpdateSyncConfig: () => ({
-    mutateAsync: jest.fn().mockResolvedValue({}),
-    isPending: false,
-  }),
-  AVAILABLE_CONNECTORS: mockConnectors,
-  PlatformConnector: {},
-  PlatformConnection: {},
-  PlatformSyncConfig: {},
-  PlatformType: {},
-}));
+  ];
+  const connections = [
+    {
+      id: 'conn-1',
+      platform: 'twitter',
+      connected: true,
+      sync_enabled: true,
+      handle: '@testuser',
+      last_sync: new Date().toISOString(),
+    },
+  ];
+  const syncConfigs = [
+    {
+      platform: 'twitter',
+      enabled: true,
+      direction: 'bidirectional',
+      filters: { include_replies: true, include_reposts: false, include_quotes: true },
+      transform: { add_source_link: false, preserve_mentions: true, preserve_hashtags: true, truncate_strategy: 'thread' },
+    },
+  ];
+  return {
+    useConnectors: () => ({ data: connectors, isLoading: false }),
+    useConnections: () => ({ data: connections, isLoading: false }),
+    useSyncConfigs: () => ({ data: syncConfigs, isLoading: false }),
+    useConnectPlatform: () => ({
+      mutateAsync: jest.fn().mockResolvedValue({}),
+      isPending: false,
+    }),
+    useDisconnectPlatform: () => ({
+      mutateAsync: jest.fn().mockResolvedValue({}),
+      isPending: false,
+    }),
+    useUpdateSyncConfig: () => ({
+      mutateAsync: jest.fn().mockResolvedValue({}),
+      isPending: false,
+    }),
+    AVAILABLE_CONNECTORS: connectors,
+    PlatformConnector: {},
+    PlatformConnection: {},
+    PlatformSyncConfig: {},
+    PlatformType: {},
+  };
+});
 
 // Mock toast
 jest.mock('@/components/ui', () => {

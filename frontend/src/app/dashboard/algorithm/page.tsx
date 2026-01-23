@@ -82,6 +82,7 @@ export default function AlgorithmPage() {
         algorithmEnabled={algorithmEnabled}
         onToggleAlgorithm={handleToggle}
         onViewRule={handleViewRule}
+        useNivo
       />
     </Stack>
   );

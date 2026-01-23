@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider } from '@/styles/ThemeContext';
 import { NivoRuleContributionChart } from './NivoRuleContributionChart';
-import type { RuleContribution } from '../shared';
+import type { RuleContribution, FeedExplanation } from '../shared';
 
 // Mock Nivo bar chart
 jest.mock('@nivo/bar', () => ({
@@ -114,5 +114,67 @@ describe('NivoRuleContributionChart', () => {
   it('shows Score Breakdown title', () => {
     renderWithTheme(<NivoRuleContributionChart contributions={mockContributions} />);
     expect(screen.getByText('Score Breakdown')).toBeInTheDocument();
+  });
+
+  describe('explanation mode', () => {
+    const mockExplanation: FeedExplanation = {
+      postId: 'post-1',
+      baseScore: 100,
+      totalScore: 135,
+      appliedRules: [
+        {
+          ruleId: 'rule-a',
+          ruleName: 'Popular Authors',
+          type: 'boost',
+          contribution: 25,
+          percentage: 20,
+          matchedConditions: [],
+        },
+        {
+          ruleId: 'rule-b',
+          ruleName: 'Hide Spam',
+          type: 'demote',
+          contribution: -10,
+          percentage: -8,
+          matchedConditions: [],
+        },
+        {
+          ruleId: 'rule-c',
+          ruleName: 'Recent Posts',
+          type: 'boost',
+          contribution: 20,
+          percentage: 15,
+          matchedConditions: [],
+        },
+      ],
+    };
+
+    it('renders with explanation prop', () => {
+      renderWithTheme(<NivoRuleContributionChart explanation={mockExplanation} />);
+      expect(screen.getByTestId('contribution-chart')).toBeInTheDocument();
+    });
+
+    it('shows total score from explanation', () => {
+      renderWithTheme(<NivoRuleContributionChart explanation={mockExplanation} />);
+      expect(screen.getByTestId('total-score')).toHaveTextContent('135');
+    });
+
+    it('renders bars for applied rules', () => {
+      renderWithTheme(<NivoRuleContributionChart explanation={mockExplanation} />);
+      expect(screen.getByTestId('bar-rule-a')).toBeInTheDocument();
+      expect(screen.getByTestId('bar-rule-b')).toBeInTheDocument();
+      expect(screen.getByTestId('bar-rule-c')).toBeInTheDocument();
+    });
+
+    it('shows empty state when no applied rules', () => {
+      const emptyExplanation: FeedExplanation = {
+        postId: 'post-2',
+        baseScore: 100,
+        totalScore: 100,
+        appliedRules: [],
+      };
+      renderWithTheme(<NivoRuleContributionChart explanation={emptyExplanation} />);
+      expect(screen.getByText('No rules applied')).toBeInTheDocument();
+    });
   });
 });

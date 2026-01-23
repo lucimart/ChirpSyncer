@@ -142,7 +142,7 @@ export const NivoRuleContributionChart: FC<NivoRuleContributionChartProps> = mem
       .map((c) => ({
         id: c.ruleId,
         ruleName: c.ruleName,
-        ruleType: c.ruleType,
+        ruleType: c.ruleType ?? (c.contribution >= 0 ? 'boost' : 'demote'),
         contribution: c.contribution,
       }));
   }, [contributions]);
