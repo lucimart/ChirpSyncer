@@ -129,7 +129,8 @@ export const DashboardLayout: FC<DashboardLayoutProps> = memo(({ children }) => 
   const router = useRouter();
   const { isAuthenticated, isLoading, checkAuth, _hasHydrated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { data: notifications = [] } = useNotifications();
+  const { data: notificationsData } = useNotifications();
+  const notifications = notificationsData?.notifications ?? [];
   const markAsRead = useMarkNotificationRead();
   const markAllAsRead = useMarkAllNotificationsRead();
   const dismissNotification = useDismissNotification();

@@ -169,9 +169,10 @@ export function useMarkNotificationRead() {
       return { previousData };
     },
     onError: (_err, _variables, context) => {
-      if (context?.previousData) {
-        context.previousData.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data);
+      const ctx = context as { previousData: [unknown[], NotificationsResponse | undefined][] } | undefined;
+      if (ctx?.previousData) {
+        ctx.previousData.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey as string[], data);
         });
       }
     },
