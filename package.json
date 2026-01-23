@@ -51,5 +51,8 @@
     "social-media"
   ],
   "author": "lucimart",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.57.0"
+  }
 }
