@@ -137,8 +137,8 @@ def search_posts():
             }
         )
 
-    except Exception as e:
-        return api_error("SEARCH_ERROR", str(e), status=500)
+    except Exception:
+        return api_error("SEARCH_ERROR", "Search operation failed", status=500)
 
 
 @search_bp.route("/suggestions", methods=["GET"])
@@ -175,5 +175,5 @@ def search_suggestions():
 
         return api_response({"suggestions": list(suggestions)[:limit]})
 
-    except Exception as e:
-        return api_error("SUGGESTION_ERROR", str(e), status=500)
+    except Exception:
+        return api_error("SUGGESTION_ERROR", "Failed to get suggestions", status=500)

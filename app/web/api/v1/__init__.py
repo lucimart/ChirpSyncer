@@ -24,9 +24,15 @@ def add_correlation_header(response):
 
 @api_v1.errorhandler(ApiError)
 def handle_api_error(error):
-    return api_error(
-        error.code, error.message, status=error.status_code, details=error.details
-    )
+    # Details are sanitized within api_error, but we explicitly construct
+    # safe details to satisfy static analysis (CodeQL)
+    safe_details = None
+    if error.details and isinstance(error.details, dict):
+        safe_keys = {"field", "fields", "validation_errors", "constraint"}
+        safe_details = {k: v for k, v in error.details.items() if k in safe_keys}
+        if not safe_details:
+            safe_details = None
+    return api_error(error.code, error.message, status=error.status_code, details=safe_details)
 
 
 @api_v1.errorhandler(HTTPException)
@@ -37,12 +43,9 @@ def handle_http_error(error):
 
 @api_v1.errorhandler(Exception)
 def handle_unexpected_error(error):
-    # In production, hide error details to prevent information disclosure
-    if os.environ.get("FLASK_ENV") == "production":
-        message = "An unexpected error occurred"
-    else:
-        message = str(error)
-    return api_error("INTERNAL_ERROR", message, status=500)
+    # Always use generic message to prevent information disclosure
+    # Exception details should only be exposed via structured logging
+    return api_error("INTERNAL_ERROR", "An unexpected error occurred", status=500)
 
 
 from app.web.api.v1.auth import auth_bp  # noqa: E402

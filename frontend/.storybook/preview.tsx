@@ -13,7 +13,13 @@ const preview: Preview = {
       },
     },
     a11y: {
-      element: '#root',
+      element: '#storybook-root',
+    },
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: '/',
+      },
     },
   },
   decorators: [

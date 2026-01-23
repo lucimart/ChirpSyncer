@@ -218,8 +218,8 @@ def create_post():
             scheduled_time=scheduled_at,
             media=media if isinstance(media, list) else [],
         )
-    except ValueError as e:
-        return api_error("INVALID_REQUEST", str(e), status=400)
+    except ValueError:
+        return api_error("INVALID_REQUEST", "Invalid scheduling parameters", status=400)
 
     # Fetch the created post
     post = scheduler.get_scheduled_tweet(post_id)
