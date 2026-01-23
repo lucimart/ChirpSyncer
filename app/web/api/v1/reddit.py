@@ -5,6 +5,7 @@ Uses OAuth 2.0 for authentication with the Reddit API.
 Supports posting, reading, voting, and commenting.
 """
 
+import requests as http_requests
 from flask import Blueprint, request
 
 from app.auth.auth_decorators import require_auth
@@ -37,7 +38,6 @@ def get_reddit_headers(access_token: str) -> dict:
 def refresh_token_if_needed(user_id: int, creds: dict) -> dict | None:
     """Refresh access token if expired."""
     import time
-    import requests
 
     if creds.get("expires_at", 0) > time.time() + 60:
         return creds
@@ -50,7 +50,7 @@ def refresh_token_if_needed(user_id: int, creds: dict) -> dict | None:
         return None
 
     try:
-        response = requests.post(
+        response = http_requests.post(
             "https://www.reddit.com/api/v1/access_token",
             auth=(client_id, client_secret),
             data={
@@ -70,7 +70,7 @@ def refresh_token_if_needed(user_id: int, creds: dict) -> dict | None:
             credential_manager.store_credentials(user_id, "reddit", creds)
             return creds
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Reddit token refresh error: {e}")
 
     return None
@@ -93,10 +93,9 @@ def get_me(user_id: int):
     if not creds:
         return api_error("TOKEN_EXPIRED", "Failed to refresh token", status=401)
 
-    import requests
 
     try:
-        response = requests.get(
+        response = http_requests.get(
             f"{REDDIT_API_BASE}/api/v1/me",
             headers=get_reddit_headers(creds["access_token"]),
             timeout=10,
@@ -120,7 +119,7 @@ def get_me(user_id: int):
         else:
             return api_error("API_ERROR", f"Reddit API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Reddit API error: {e}")
         return api_error("API_FAILED", "Failed to connect to Reddit", status=502)
 
@@ -137,10 +136,9 @@ def get_user(user_id: int, username: str):
     if not creds:
         return api_error("TOKEN_EXPIRED", "Failed to refresh token", status=401)
 
-    import requests
 
     try:
-        response = requests.get(
+        response = http_requests.get(
             f"{REDDIT_API_BASE}/user/{username}/about",
             headers=get_reddit_headers(creds["access_token"]),
             timeout=10,
@@ -162,7 +160,7 @@ def get_user(user_id: int, username: str):
         else:
             return api_error("API_ERROR", f"Reddit API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Reddit API error: {e}")
         return api_error("API_FAILED", "Failed to fetch user", status=502)
 
@@ -187,10 +185,9 @@ def get_my_subreddits(user_id: int):
     limit = request.args.get("limit", 25, type=int)
     limit = min(limit, 100)
 
-    import requests
 
     try:
-        response = requests.get(
+        response = http_requests.get(
             f"{REDDIT_API_BASE}/subreddits/mine/subscriber",
             headers=get_reddit_headers(creds["access_token"]),
             params={"limit": limit},
@@ -218,7 +215,7 @@ def get_my_subreddits(user_id: int):
         else:
             return api_error("API_ERROR", f"Reddit API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Reddit API error: {e}")
         return api_error("API_FAILED", "Failed to fetch subreddits", status=502)
 
@@ -235,10 +232,9 @@ def get_subreddit(user_id: int, subreddit: str):
     if not creds:
         return api_error("TOKEN_EXPIRED", "Failed to refresh token", status=401)
 
-    import requests
 
     try:
-        response = requests.get(
+        response = http_requests.get(
             f"{REDDIT_API_BASE}/r/{subreddit}/about",
             headers=get_reddit_headers(creds["access_token"]),
             timeout=10,
@@ -267,7 +263,7 @@ def get_subreddit(user_id: int, subreddit: str):
         else:
             return api_error("API_ERROR", f"Reddit API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Reddit API error: {e}")
         return api_error("API_FAILED", "Failed to fetch subreddit", status=502)
 
@@ -289,14 +285,13 @@ def get_subreddit_posts(user_id: int, subreddit: str):
     limit = min(limit, 100)
     time_filter = request.args.get("t", "day")  # hour, day, week, month, year, all
 
-    import requests
 
     try:
         params = {"limit": limit}
         if sort == "top":
             params["t"] = time_filter
 
-        response = requests.get(
+        response = http_requests.get(
             f"{REDDIT_API_BASE}/r/{subreddit}/{sort}",
             headers=get_reddit_headers(creds["access_token"]),
             params=params,
@@ -333,7 +328,7 @@ def get_subreddit_posts(user_id: int, subreddit: str):
         else:
             return api_error("API_ERROR", f"Reddit API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Reddit API error: {e}")
         return api_error("API_FAILED", "Failed to fetch posts", status=502)
 
@@ -380,7 +375,6 @@ def create_post(user_id: int):
     if len(title) > 300:
         return api_error("TITLE_TOO_LONG", "Title exceeds 300 characters", status=400)
 
-    import requests
 
     post_data = {
         "sr": subreddit,
@@ -404,7 +398,7 @@ def create_post(user_id: int):
         post_data["flair_id"] = data["flair_id"]
 
     try:
-        response = requests.post(
+        response = http_requests.post(
             f"{REDDIT_API_BASE}/api/submit",
             headers=get_reddit_headers(creds["access_token"]),
             data=post_data,
@@ -431,7 +425,7 @@ def create_post(user_id: int):
         else:
             return api_error("API_ERROR", f"Reddit API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Reddit API error: {e}")
         return api_error("API_FAILED", "Failed to create post", status=502)
 
@@ -448,14 +442,13 @@ def get_post(user_id: int, post_id: str):
     if not creds:
         return api_error("TOKEN_EXPIRED", "Failed to refresh token", status=401)
 
-    import requests
 
     try:
         # Handle both formats: just ID or t3_ID
         if not post_id.startswith("t3_"):
             post_id = f"t3_{post_id}"
 
-        response = requests.get(
+        response = http_requests.get(
             f"{REDDIT_API_BASE}/api/info",
             headers=get_reddit_headers(creds["access_token"]),
             params={"id": post_id},
@@ -489,7 +482,7 @@ def get_post(user_id: int, post_id: str):
         else:
             return api_error("API_ERROR", f"Reddit API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Reddit API error: {e}")
         return api_error("API_FAILED", "Failed to fetch post", status=502)
 
@@ -506,13 +499,12 @@ def delete_post(user_id: int, post_id: str):
     if not creds:
         return api_error("TOKEN_EXPIRED", "Failed to refresh token", status=401)
 
-    import requests
 
     if not post_id.startswith("t3_"):
         post_id = f"t3_{post_id}"
 
     try:
-        response = requests.post(
+        response = http_requests.post(
             f"{REDDIT_API_BASE}/api/del",
             headers=get_reddit_headers(creds["access_token"]),
             data={"id": post_id},
@@ -526,7 +518,7 @@ def delete_post(user_id: int, post_id: str):
         else:
             return api_error("API_ERROR", f"Reddit API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Reddit API error: {e}")
         return api_error("API_FAILED", "Failed to delete post", status=502)
 
@@ -551,10 +543,9 @@ def get_comments(user_id: int, post_id: str):
     sort = request.args.get("sort", "best")  # best, top, new, controversial, old, qa
     limit = request.args.get("limit", 50, type=int)
 
-    import requests
 
     try:
-        response = requests.get(
+        response = http_requests.get(
             f"{REDDIT_API_BASE}/comments/{post_id}",
             headers=get_reddit_headers(creds["access_token"]),
             params={"sort": sort, "limit": limit},
@@ -592,7 +583,7 @@ def get_comments(user_id: int, post_id: str):
         else:
             return api_error("API_ERROR", f"Reddit API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Reddit API error: {e}")
         return api_error("API_FAILED", "Failed to fetch comments", status=502)
 
@@ -624,10 +615,9 @@ def create_comment(user_id: int):
     if not text:
         return api_error("MISSING_TEXT", "Comment text required", status=400)
 
-    import requests
 
     try:
-        response = requests.post(
+        response = http_requests.post(
             f"{REDDIT_API_BASE}/api/comment",
             headers=get_reddit_headers(creds["access_token"]),
             data={
@@ -655,7 +645,7 @@ def create_comment(user_id: int):
         else:
             return api_error("API_ERROR", f"Reddit API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Reddit API error: {e}")
         return api_error("API_FAILED", "Failed to create comment", status=502)
 
@@ -692,10 +682,9 @@ def vote(user_id: int):
     if direction not in [-1, 0, 1]:
         return api_error("INVALID_DIRECTION", "Direction must be -1, 0, or 1", status=400)
 
-    import requests
 
     try:
-        response = requests.post(
+        response = http_requests.post(
             f"{REDDIT_API_BASE}/api/vote",
             headers=get_reddit_headers(creds["access_token"]),
             data={"id": thing_id, "dir": direction},
@@ -707,7 +696,7 @@ def vote(user_id: int):
         else:
             return api_error("API_ERROR", f"Reddit API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Reddit API error: {e}")
         return api_error("API_FAILED", "Failed to vote", status=502)
 
@@ -739,7 +728,6 @@ def search(user_id: int):
     limit = request.args.get("limit", 25, type=int)
     limit = min(limit, 100)
 
-    import requests
 
     try:
         url = f"{REDDIT_API_BASE}/r/{subreddit}/search" if subreddit else f"{REDDIT_API_BASE}/search"
@@ -752,7 +740,7 @@ def search(user_id: int):
             "restrict_sr": "on" if subreddit else "off",
         }
 
-        response = requests.get(
+        response = http_requests.get(
             url,
             headers=get_reddit_headers(creds["access_token"]),
             params=params,
@@ -781,7 +769,7 @@ def search(user_id: int):
         else:
             return api_error("API_ERROR", f"Reddit API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Reddit API error: {e}")
         return api_error("API_FAILED", "Failed to search", status=502)
 
@@ -807,10 +795,9 @@ def get_feed(user_id: int):
     limit = request.args.get("limit", 25, type=int)
     limit = min(limit, 100)
 
-    import requests
 
     try:
-        response = requests.get(
+        response = http_requests.get(
             f"{REDDIT_API_BASE}/{sort}",
             headers=get_reddit_headers(creds["access_token"]),
             params={"limit": limit},
@@ -842,6 +829,6 @@ def get_feed(user_id: int):
         else:
             return api_error("API_ERROR", f"Reddit API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Reddit API error: {e}")
         return api_error("API_FAILED", "Failed to fetch feed", status=502)

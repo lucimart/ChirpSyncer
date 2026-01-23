@@ -5,6 +5,7 @@ Supports both Webhook-based notifications and Bot API for richer interactions.
 """
 
 import re
+import requests as http_requests
 from flask import Blueprint, request
 
 from app.auth.auth_decorators import require_auth
@@ -73,7 +74,6 @@ def send_webhook(user_id: int):
     if content and len(content) > 2000:
         return api_error("CONTENT_TOO_LONG", "Content exceeds 2000 characters", status=400)
 
-    import requests
 
     payload = {}
     if content:
@@ -86,7 +86,7 @@ def send_webhook(user_id: int):
         payload["embeds"] = data["embeds"][:10]  # Max 10 embeds
 
     try:
-        response = requests.post(webhook_url, json=payload, timeout=10)
+        response = http_requests.post(webhook_url, json=payload, timeout=10)
 
         if response.status_code == 204:
             return api_response({"sent": True})
@@ -96,7 +96,7 @@ def send_webhook(user_id: int):
         else:
             return api_error("WEBHOOK_ERROR", f"Webhook returned {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Discord webhook error: {e}")
         return api_error("WEBHOOK_FAILED", "Failed to send webhook", status=502)
 
@@ -116,7 +116,6 @@ def test_webhook(user_id: int):
     if not webhook_url:
         return api_error("MISSING_WEBHOOK", "Webhook URL required", status=400)
 
-    import requests
 
     payload = {
         "content": "🔔 **ChirpSyncer Test** - Webhook connection successful!",
@@ -124,14 +123,14 @@ def test_webhook(user_id: int):
     }
 
     try:
-        response = requests.post(webhook_url, json=payload, timeout=10)
+        response = http_requests.post(webhook_url, json=payload, timeout=10)
 
         return api_response({
             "success": response.status_code == 204,
             "status_code": response.status_code,
         })
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Discord webhook test error: {e}")
         return api_error("WEBHOOK_FAILED", "Failed to test webhook", status=502)
 
@@ -149,10 +148,9 @@ def get_bot_user(user_id: int):
     if not creds or not creds.get("bot_token"):
         return api_error("NOT_CONFIGURED", "Discord bot not configured", status=401)
 
-    import requests
 
     try:
-        response = requests.get(
+        response = http_requests.get(
             "https://discord.com/api/v10/users/@me",
             headers=get_bot_headers(creds["bot_token"]),
             timeout=10,
@@ -172,7 +170,7 @@ def get_bot_user(user_id: int):
         else:
             return api_error("API_ERROR", f"Discord API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Discord API error: {e}")
         return api_error("API_FAILED", "Failed to connect to Discord", status=502)
 
@@ -185,10 +183,9 @@ def get_guilds(user_id: int):
     if not creds or not creds.get("bot_token"):
         return api_error("NOT_CONFIGURED", "Discord bot not configured", status=401)
 
-    import requests
 
     try:
-        response = requests.get(
+        response = http_requests.get(
             "https://discord.com/api/v10/users/@me/guilds",
             headers=get_bot_headers(creds["bot_token"]),
             timeout=10,
@@ -212,7 +209,7 @@ def get_guilds(user_id: int):
         else:
             return api_error("API_ERROR", f"Discord API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Discord API error: {e}")
         return api_error("API_FAILED", "Failed to fetch guilds", status=502)
 
@@ -225,10 +222,9 @@ def get_guild_channels(user_id: int, guild_id: str):
     if not creds or not creds.get("bot_token"):
         return api_error("NOT_CONFIGURED", "Discord bot not configured", status=401)
 
-    import requests
 
     try:
-        response = requests.get(
+        response = http_requests.get(
             f"https://discord.com/api/v10/guilds/{guild_id}/channels",
             headers=get_bot_headers(creds["bot_token"]),
             timeout=10,
@@ -256,7 +252,7 @@ def get_guild_channels(user_id: int, guild_id: str):
         else:
             return api_error("API_ERROR", f"Discord API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Discord API error: {e}")
         return api_error("API_FAILED", "Failed to fetch channels", status=502)
 
@@ -272,10 +268,9 @@ def get_channel_messages(user_id: int, channel_id: str):
     limit = request.args.get("limit", 50, type=int)
     limit = min(limit, 100)
 
-    import requests
 
     try:
-        response = requests.get(
+        response = http_requests.get(
             f"https://discord.com/api/v10/channels/{channel_id}/messages",
             headers=get_bot_headers(creds["bot_token"]),
             params={"limit": limit},
@@ -307,7 +302,7 @@ def get_channel_messages(user_id: int, channel_id: str):
         else:
             return api_error("API_ERROR", f"Discord API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Discord API error: {e}")
         return api_error("API_FAILED", "Failed to fetch messages", status=502)
 
@@ -336,7 +331,6 @@ def send_channel_message(user_id: int, channel_id: str):
     if content and len(content) > 2000:
         return api_error("CONTENT_TOO_LONG", "Content exceeds 2000 characters", status=400)
 
-    import requests
 
     payload = {}
     if content:
@@ -347,7 +341,7 @@ def send_channel_message(user_id: int, channel_id: str):
         payload["message_reference"] = {"message_id": data["reply_to"]}
 
     try:
-        response = requests.post(
+        response = http_requests.post(
             f"https://discord.com/api/v10/channels/{channel_id}/messages",
             headers=get_bot_headers(creds["bot_token"]),
             json=payload,
@@ -369,7 +363,7 @@ def send_channel_message(user_id: int, channel_id: str):
         else:
             return api_error("API_ERROR", f"Discord API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Discord API error: {e}")
         return api_error("API_FAILED", "Failed to send message", status=502)
 
@@ -382,10 +376,9 @@ def delete_message(user_id: int, channel_id: str, message_id: str):
     if not creds or not creds.get("bot_token"):
         return api_error("NOT_CONFIGURED", "Discord bot not configured", status=401)
 
-    import requests
 
     try:
-        response = requests.delete(
+        response = http_requests.delete(
             f"https://discord.com/api/v10/channels/{channel_id}/messages/{message_id}",
             headers=get_bot_headers(creds["bot_token"]),
             timeout=10,
@@ -400,7 +393,7 @@ def delete_message(user_id: int, channel_id: str, message_id: str):
         else:
             return api_error("API_ERROR", f"Discord API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Discord API error: {e}")
         return api_error("API_FAILED", "Failed to delete message", status=502)
 
@@ -424,14 +417,13 @@ def add_reaction(user_id: int, channel_id: str, message_id: str):
     if not emoji:
         return api_error("MISSING_EMOJI", "Emoji required", status=400)
 
-    import requests
     from urllib.parse import quote
 
     # URL encode the emoji
     encoded_emoji = quote(emoji, safe="")
 
     try:
-        response = requests.put(
+        response = http_requests.put(
             f"https://discord.com/api/v10/channels/{channel_id}/messages/{message_id}/reactions/{encoded_emoji}/@me",
             headers=get_bot_headers(creds["bot_token"]),
             timeout=10,
@@ -444,7 +436,7 @@ def add_reaction(user_id: int, channel_id: str, message_id: str):
         else:
             return api_error("API_ERROR", f"Discord API error: {response.status_code}", status=502)
 
-    except requests.RequestException as e:
+    except http_requests.RequestException as e:
         logger.error(f"Discord API error: {e}")
         return api_error("API_FAILED", "Failed to add reaction", status=502)
 
@@ -527,7 +519,6 @@ def broadcast_message(user_id: int):
     if not content and not embeds:
         return api_error("MISSING_CONTENT", "Content or embeds required", status=400)
 
-    import requests
 
     results = []
 
@@ -544,14 +535,14 @@ def broadcast_message(user_id: int):
                 if embeds:
                     payload["embeds"] = embeds[:10]
 
-                response = requests.post(target_id, json=payload, timeout=10)
+                response = http_requests.post(target_id, json=payload, timeout=10)
                 results.append({
                     "target": target_id[:50] + "...",
                     "type": "webhook",
                     "success": response.status_code == 204,
                     "status": response.status_code,
                 })
-            except requests.RequestException:
+            except http_requests.RequestException:
                 results.append({
                     "target": target_id[:50] + "...",
                     "type": "webhook",
@@ -568,7 +559,7 @@ def broadcast_message(user_id: int):
                 if embeds:
                     payload["embeds"] = embeds[:10]
 
-                response = requests.post(
+                response = http_requests.post(
                     f"https://discord.com/api/v10/channels/{target_id}/messages",
                     headers=get_bot_headers(creds["bot_token"]),
                     json=payload,
@@ -581,7 +572,7 @@ def broadcast_message(user_id: int):
                     "status": response.status_code,
                     "message_id": response.json().get("id") if response.status_code == 200 else None,
                 })
-            except requests.RequestException:
+            except http_requests.RequestException:
                 results.append({
                     "target": target_id,
                     "type": "channel",

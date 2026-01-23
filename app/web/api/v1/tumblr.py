@@ -11,6 +11,7 @@ import hashlib
 import base64
 import urllib.parse
 import uuid
+import requests as http_requests
 
 from flask import Blueprint, request
 
@@ -99,7 +100,6 @@ def get_oauth1_headers(
 
 def tumblr_request(method: str, endpoint: str, creds: dict, params: dict | None = None, json_body: dict | None = None):
     """Make an authenticated request to Tumblr API."""
-    import requests
 
     url = f"{TUMBLR_API_BASE}{endpoint}"
 
@@ -116,7 +116,7 @@ def tumblr_request(method: str, endpoint: str, creds: dict, params: dict | None 
     if json_body:
         headers["Content-Type"] = "application/json"
 
-    response = requests.request(
+    response = http_requests.request(
         method,
         url,
         headers=headers,
