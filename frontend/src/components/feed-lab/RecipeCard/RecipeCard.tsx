@@ -1,26 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import styled from 'styled-components';
 import { Zap, TrendingDown, Filter, Star } from 'lucide-react';
+import { Button, Badge } from '@/components/ui';
+import { formatWeight, formatConditionCount } from '../shared';
+import type { Recipe, RuleType, Condition } from '../shared';
 
-export interface RecipeCondition {
-  field: 'author' | 'content' | 'engagement' | 'age' | 'platform' | string;
-  operator: 'contains' | 'equals' | 'gt' | 'lt' | 'regex' | string;
-  value: string | number | boolean;
-}
-
-export interface Recipe {
-  id: string;
-  name: string;
-  description: string;
-  category: 'engagement' | 'filtering' | 'discovery' | 'productivity';
-  type: 'boost' | 'demote' | 'filter';
-  conditions: RecipeCondition[];
-  weight: number;
-  popularity?: number;
-  tags?: string[];
-}
+// Re-export types for backwards compatibility
+export type RecipeCondition = Condition;
+export type { Recipe };
 
 export interface RecipeCardProps {
   recipe: Recipe;
@@ -69,7 +58,7 @@ const CardDescription = styled.p`
   line-height: 1.5;
 `;
 
-const TypeIndicator = styled.span<{ $type: 'boost' | 'demote' | 'filter' }>`
+const TypeIndicator = styled.span<{ $type: RuleType }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -81,17 +70,17 @@ const TypeIndicator = styled.span<{ $type: 'boost' | 'demote' | 'filter' }>`
     switch ($type) {
       case 'boost':
         return `
-          background: ${theme.colors.success[50]};
+          background: ${theme.colors.surface.success.bg};
           color: ${theme.colors.success[600]};
         `;
       case 'demote':
         return `
-          background: ${theme.colors.warning[50]};
+          background: ${theme.colors.surface.warning.bg};
           color: ${theme.colors.warning[600]};
         `;
       case 'filter':
         return `
-          background: ${theme.colors.danger[50]};
+          background: ${theme.colors.surface.danger.bg};
           color: ${theme.colors.danger[600]};
         `;
     }
@@ -101,18 +90,6 @@ const TypeIndicator = styled.span<{ $type: 'boost' | 'demote' | 'filter' }>`
     width: 14px;
     height: 14px;
   }
-`;
-
-const CategoryBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  text-transform: capitalize;
-  background: ${({ theme }) => theme.colors.primary[100]};
-  color: ${({ theme }) => theme.colors.primary[800]};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
 `;
 
 const ConditionsPreview = styled.div`
@@ -159,37 +136,7 @@ const TagsContainer = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing[3]};
 `;
 
-const Tag = styled.span`
-  display: inline-block;
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  background: ${({ theme }) => theme.colors.neutral[100]};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  border-radius: ${({ theme }) => theme.borderRadius.sm};
-`;
-
-const ApplyButton = styled.button`
-  width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  background: ${({ theme }) => theme.colors.primary[600]};
-  color: white;
-  border: none;
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.fast};
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.primary[700]};
-  }
-`;
-
-const getTypeIcon = (type: 'boost' | 'demote' | 'filter') => {
+const getTypeIcon = (type: RuleType) => {
   switch (type) {
     case 'boost':
       return <Zap />;
@@ -200,7 +147,7 @@ const getTypeIcon = (type: 'boost' | 'demote' | 'filter') => {
   }
 };
 
-export const RecipeCard: React.FC<RecipeCardProps> = ({
+const RecipeCardComponent: React.FC<RecipeCardProps> = ({
   recipe,
   onClick,
   onApply,
@@ -215,15 +162,6 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
   const handleApplyClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onApply(recipe);
-  };
-
-  const formatWeight = (weight: number) => {
-    return weight >= 0 ? `+${weight}` : `${weight}`;
-  };
-
-  const formatConditions = (conditions: RecipeCondition[]) => {
-    const count = conditions.length;
-    return count === 1 ? '1 condition' : `${count} conditions`;
   };
 
   return (
@@ -251,9 +189,9 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
       <CardDescription>{recipe.description}</CardDescription>
 
       <MetaRow>
-        <CategoryBadge data-testid="category-badge">
+        <Badge variant="primary" size="sm" data-testid="category-badge">
           {recipe.category.charAt(0).toUpperCase() + recipe.category.slice(1)}
-        </CategoryBadge>
+        </Badge>
         {recipe.popularity !== undefined && (
           <PopularityScore data-testid="popularity-score">
             <Star />
@@ -263,7 +201,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
       </MetaRow>
 
       <ConditionsPreview data-testid="conditions-preview">
-        <span>{formatConditions(recipe.conditions)}</span>
+        <span>{formatConditionCount(recipe.conditions.length)}</span>
         <span>|</span>
         <WeightIndicator
           $positive={recipe.weight >= 0}
@@ -276,12 +214,16 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
       {recipe.tags && recipe.tags.length > 0 && (
         <TagsContainer>
           {recipe.tags.map((tag) => (
-            <Tag key={tag}>{tag}</Tag>
+            <Badge key={tag} variant="neutral-soft" size="sm">{tag}</Badge>
           ))}
         </TagsContainer>
       )}
 
-      <ApplyButton onClick={handleApplyClick}>Apply</ApplyButton>
+      <Button variant="primary" size="sm" fullWidth onClick={handleApplyClick}>
+        Apply
+      </Button>
     </Card>
   );
 };
+
+export const RecipeCard = memo(RecipeCardComponent);
