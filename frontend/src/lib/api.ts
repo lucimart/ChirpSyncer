@@ -729,6 +729,207 @@ class ApiClient {
   async getWebhookEventTypes(): Promise<ApiResponse<{ events: string[] }>> {
     return this.request('/webhooks/events');
   }
+
+  // =========================================================================
+  // WORKFLOWS
+  // =========================================================================
+
+  async getWorkflows(): Promise<ApiResponse<Workflow[]>> {
+    return this.request('/workflows');
+  }
+
+  async getWorkflow(id: string): Promise<ApiResponse<Workflow>> {
+    return this.request(`/workflows/${id}`);
+  }
+
+  async createWorkflow(payload: CreateWorkflowPayload): Promise<ApiResponse<Workflow>> {
+    return this.request('/workflows', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async updateWorkflow(id: string, payload: Partial<CreateWorkflowPayload>): Promise<ApiResponse<Workflow>> {
+    return this.request(`/workflows/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteWorkflow(id: string): Promise<ApiResponse<void>> {
+    return this.request(`/workflows/${id}`, { method: 'DELETE' });
+  }
+
+  async toggleWorkflow(id: string): Promise<ApiResponse<Workflow>> {
+    return this.request(`/workflows/${id}/toggle`, { method: 'POST' });
+  }
+
+  async testWorkflow(id: string): Promise<ApiResponse<WorkflowTestResult>> {
+    return this.request(`/workflows/${id}/test`, { method: 'POST' });
+  }
+
+  async getWorkflowRuns(id: string, limit = 50): Promise<ApiResponse<WorkflowRun[]>> {
+    return this.request(`/workflows/${id}/runs?limit=${limit}`);
+  }
+
+  // =========================================================================
+  // ATOMIZATION
+  // =========================================================================
+
+  async createAtomizationJob(payload: CreateAtomizationJobPayload): Promise<ApiResponse<AtomizationJob>> {
+    return this.request('/atomize', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async getAtomizationJob(jobId: string): Promise<ApiResponse<AtomizationJob>> {
+    return this.request(`/atomize/${jobId}`);
+  }
+
+  async processAtomizationJob(jobId: string): Promise<ApiResponse<AtomizationJob>> {
+    return this.request(`/atomize/${jobId}/process`, { method: 'POST' });
+  }
+
+  async getAtomizationOutputs(jobId: string): Promise<ApiResponse<AtomizedContent[]>> {
+    return this.request(`/atomize/${jobId}/outputs`);
+  }
+
+  async publishAtomizationOutput(jobId: string, outputIds: string[]): Promise<ApiResponse<{ published: number }>> {
+    return this.request(`/atomize/${jobId}/publish`, {
+      method: 'POST',
+      body: JSON.stringify({ output_ids: outputIds }),
+    });
+  }
+
+  async scheduleAtomizationOutput(
+    jobId: string,
+    schedules: Array<{ output_id: string; scheduled_at: string }>
+  ): Promise<ApiResponse<{ scheduled: number }>> {
+    return this.request(`/atomize/${jobId}/schedule`, {
+      method: 'POST',
+      body: JSON.stringify({ schedules }),
+    });
+  }
+
+  async getAtomizationJobs(params?: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<ApiResponse<{ jobs: AtomizationJob[]; total: number }>> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.limit) searchParams.set('limit', String(params.limit));
+    if (params?.offset) searchParams.set('offset', String(params.offset));
+    const query = searchParams.toString();
+    return this.request(`/atomize${query ? `?${query}` : ''}`);
+  }
+
+  // =========================================================================
+  // RECYCLING (Content Library)
+  // =========================================================================
+
+  async getContentLibrary(params?: {
+    limit?: number;
+    offset?: number;
+    min_score?: number;
+  }): Promise<ApiResponse<{ items: LibraryContent[]; total: number }>> {
+    const searchParams = new URLSearchParams();
+    if (params?.limit) searchParams.set('limit', String(params.limit));
+    if (params?.offset) searchParams.set('offset', String(params.offset));
+    if (params?.min_score) searchParams.set('min_score', String(params.min_score));
+    const query = searchParams.toString();
+    return this.request(`/library${query ? `?${query}` : ''}`);
+  }
+
+  async syncContentLibrary(): Promise<ApiResponse<{ synced: number }>> {
+    return this.request('/library/sync', { method: 'POST' });
+  }
+
+  async getLibraryItem(itemId: string): Promise<ApiResponse<LibraryContent>> {
+    return this.request(`/library/${itemId}`);
+  }
+
+  async getRecycleSuggestions(itemId: string): Promise<ApiResponse<RecycleSuggestion[]>> {
+    return this.request(`/library/${itemId}/suggestions`);
+  }
+
+  async recycleContent(itemId: string, payload: {
+    platforms: string[];
+    scheduled_at?: string;
+    modifications?: string;
+  }): Promise<ApiResponse<{ recycled: boolean; post_ids: string[] }>> {
+    return this.request(`/library/${itemId}/recycle`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async updateLibraryItemScore(itemId: string): Promise<ApiResponse<LibraryContent>> {
+    return this.request(`/library/${itemId}/score`, { method: 'POST' });
+  }
+
+  // =========================================================================
+  // UNIFIED INBOX
+  // =========================================================================
+
+  async getInboxMessages(params?: {
+    platform?: string;
+    unread?: boolean;
+    starred?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<ApiResponse<{ messages: InboxMessage[]; total: number }>> {
+    const searchParams = new URLSearchParams();
+    if (params?.platform) searchParams.set('platform', params.platform);
+    if (params?.unread !== undefined) searchParams.set('unread', String(params.unread));
+    if (params?.starred !== undefined) searchParams.set('starred', String(params.starred));
+    if (params?.limit) searchParams.set('limit', String(params.limit));
+    if (params?.offset) searchParams.set('offset', String(params.offset));
+    const query = searchParams.toString();
+    return this.request(`/inbox${query ? `?${query}` : ''}`);
+  }
+
+  async markInboxMessageRead(messageId: string): Promise<ApiResponse<InboxMessage>> {
+    return this.request(`/inbox/${messageId}/read`, { method: 'POST' });
+  }
+
+  async toggleInboxMessageStar(messageId: string): Promise<ApiResponse<InboxMessage>> {
+    return this.request(`/inbox/${messageId}/star`, { method: 'POST' });
+  }
+
+  async archiveInboxMessage(messageId: string): Promise<ApiResponse<void>> {
+    return this.request(`/inbox/${messageId}/archive`, { method: 'POST' });
+  }
+
+  async getInboxStats(): Promise<ApiResponse<InboxStats>> {
+    return this.request('/inbox/stats');
+  }
+
+  async refreshInbox(): Promise<ApiResponse<{ fetched: number }>> {
+    return this.request('/inbox/refresh', { method: 'POST' });
+  }
+
+  // =========================================================================
+  // NOTIFICATIONS HUB
+  // =========================================================================
+
+  async getNotificationPreferences(): Promise<ApiResponse<NotificationPreferences>> {
+    return this.request('/notifications/preferences');
+  }
+
+  async updateNotificationPreferences(
+    preferences: Partial<NotificationPreferences>
+  ): Promise<ApiResponse<NotificationPreferences>> {
+    return this.request('/notifications/preferences', {
+      method: 'PUT',
+      body: JSON.stringify(preferences),
+    });
+  }
+
+  async testNotificationChannel(channel: 'email' | 'telegram' | 'discord'): Promise<ApiResponse<{ sent: boolean }>> {
+    return this.request(`/notifications/test/${channel}`, { method: 'POST' });
+  }
 }
 
 // SSO types
@@ -900,6 +1101,156 @@ export interface SyncPreviewData {
   items: SyncPreviewItemData[];
   totalCount: number;
   estimatedTime: number;
+}
+
+// =========================================================================
+// NEW FEATURE TYPES
+// =========================================================================
+
+// Workflow types
+export interface Workflow {
+  id: string;
+  name: string;
+  description?: string;
+  trigger: WorkflowTrigger;
+  actions: WorkflowAction[];
+  enabled: boolean;
+  created_at: string;
+  updated_at: string;
+  last_run_at?: string;
+  run_count: number;
+}
+
+export interface WorkflowTrigger {
+  type: 'new_post' | 'new_mention' | 'scheduled' | 'rss' | 'webhook' | 'viral_post';
+  config: Record<string, unknown>;
+}
+
+export interface WorkflowAction {
+  type: 'cross_post' | 'send_notification' | 'add_to_queue' | 'transform_content';
+  config: Record<string, unknown>;
+}
+
+export interface CreateWorkflowPayload {
+  name: string;
+  description?: string;
+  trigger: WorkflowTrigger;
+  actions: WorkflowAction[];
+  enabled?: boolean;
+}
+
+export interface WorkflowRun {
+  id: string;
+  workflow_id: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  started_at: string;
+  completed_at?: string;
+  trigger_data?: Record<string, unknown>;
+  error?: string;
+}
+
+export interface WorkflowTestResult {
+  success: boolean;
+  trigger_matched: boolean;
+  actions_simulated: Array<{ action: string; would_execute: boolean; reason?: string }>;
+}
+
+// Atomization types
+export interface AtomizationJob {
+  id: string;
+  source_type: 'youtube' | 'blog' | 'thread' | 'podcast';
+  source_url?: string;
+  source_content?: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  target_platforms: string[];
+  created_at: string;
+  processed_at?: string;
+  error?: string;
+}
+
+export interface AtomizedContent {
+  id: string;
+  job_id: string;
+  platform: string;
+  content_type: 'thread' | 'post' | 'carousel' | 'article';
+  content: string;
+  metadata?: Record<string, unknown>;
+  published: boolean;
+  scheduled_at?: string;
+}
+
+export interface CreateAtomizationJobPayload {
+  source_type: 'youtube' | 'blog' | 'thread' | 'podcast';
+  source_url?: string;
+  source_content?: string;
+  target_platforms: string[];
+  options?: Record<string, unknown>;
+}
+
+// Recycling types
+export interface LibraryContent {
+  id: string;
+  original_post_id: string;
+  platform: string;
+  content: string;
+  evergreen_score: number;
+  engagement_score: number;
+  last_posted_at: string;
+  recycle_count: number;
+  created_at: string;
+}
+
+export interface RecycleSuggestion {
+  id: string;
+  content_id: string;
+  suggested_platforms: string[];
+  suggested_time?: string;
+  reason: string;
+  confidence: number;
+}
+
+// Inbox types
+export interface InboxMessage {
+  id: string;
+  platform: string;
+  message_type: 'mention' | 'dm' | 'reply' | 'comment';
+  sender: {
+    id: string;
+    username: string;
+    display_name?: string;
+    avatar_url?: string;
+  };
+  content: string;
+  received_at: string;
+  read: boolean;
+  starred: boolean;
+  archived: boolean;
+  original_url?: string;
+  sentiment?: 'positive' | 'neutral' | 'negative';
+  priority?: 'high' | 'medium' | 'low';
+}
+
+export interface InboxStats {
+  total: number;
+  unread: number;
+  starred: number;
+  by_platform: Record<string, number>;
+  by_type: Record<string, number>;
+}
+
+// Notification preferences types
+export interface NotificationPreferences {
+  email_enabled: boolean;
+  email_address?: string;
+  telegram_enabled: boolean;
+  telegram_chat_id?: string;
+  discord_enabled: boolean;
+  discord_webhook_url?: string;
+  notify_on_sync_complete: boolean;
+  notify_on_sync_error: boolean;
+  notify_on_viral_post: boolean;
+  notify_on_new_follower: boolean;
+  weekly_digest: boolean;
 }
 
 export const api = new ApiClient();

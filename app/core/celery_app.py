@@ -32,6 +32,14 @@ celery_app.conf.beat_schedule = {
         "task": "app.tasks.atomization_tasks.publish_scheduled_content",
         "schedule": crontab(minute="*"),  # Every minute
     },
+    "generate-recycle-suggestions-daily": {
+        "task": "app.tasks.recycling_tasks.generate_recycle_suggestions",
+        "schedule": crontab(hour=6, minute=0),  # Daily at 6 AM UTC
+    },
+    "sync-content-library-weekly": {
+        "task": "app.tasks.recycling_tasks.sync_content_to_library",
+        "schedule": crontab(hour=3, minute=0, day_of_week=0),  # Sunday 3 AM UTC
+    },
 }
 
 celery_app.autodiscover_tasks(["app.tasks"])

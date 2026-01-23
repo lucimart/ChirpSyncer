@@ -24,6 +24,14 @@ from app.tasks.atomization_tasks import (
     batch_process_jobs,
 )
 
+# Recycling tasks
+from app.tasks.recycling_tasks import (
+    calculate_library_scores,
+    generate_recycle_suggestions,
+    sync_content_to_library,
+    auto_recycle_content,
+)
+
 __all__ = [
     # Sync
     "run_sync_job",
@@ -39,4 +47,9 @@ __all__ = [
     "process_atomization_job",
     "publish_scheduled_content",
     "batch_process_jobs",
+    # Recycling
+    "calculate_library_scores",
+    "generate_recycle_suggestions",
+    "sync_content_to_library",
+    "auto_recycle_content",
 ]
