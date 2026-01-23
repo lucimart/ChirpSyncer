@@ -107,17 +107,7 @@ export type {
   NavCommandConfig,
 } from './CommandPalette';
 
-// Error Resolution
-export { ErrorResolution } from './ErrorResolution';
-export type {
-  ErrorDiagnosis,
-  ResolutionOption,
-  ResolutionAction,
-  ActionType,
-  ErrorResolutionProps,
-} from './ErrorResolution';
-
-// Motion / Animations
+// Motion / Animations (framer-motion)
 export {
   // Variants
   fadeVariants,
@@ -151,11 +141,30 @@ export {
   AnimatedCard,
   Skeleton,
   Counter,
+  // Physics-based animations (react-spring)
+  AnimatedNumber,
+  AnimatedPercentage,
+  AnimatedCurrency,
+  AnimatedCompactNumber,
+  AnimatedProgress,
+  AnimatedCircularProgress,
   // Re-exports
   motion,
   AnimatePresence,
 } from './Motion';
 export type { Variants, Transition } from './Motion';
+
+// Lottie Animations (complex visual feedback)
+export {
+  LottieAnimation,
+  SuccessAnimation,
+  SyncCompleteAnimation,
+  EmptyStateAnimation,
+} from './Lottie';
+export type {
+  LottieAnimationProps,
+  LottieAnimationType,
+} from './Lottie';
 
 // Shared Utilities
 export {
