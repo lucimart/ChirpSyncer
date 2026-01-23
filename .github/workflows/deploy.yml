@@ -1,89 +1,221 @@
-name: Deploy to Home Server
+name: Deploy
 
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Deployment environment'
+      target:
+        description: 'What to deploy'
         required: true
-        default: 'production'
         type: choice
         options:
-          - production
+          - all
+          - backend
+          - frontend
+      environment:
+        description: 'Environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
           - staging
+          - production
   push:
-    branches:
-      - main
-    tags:
-      - 'v*'
+    branches: [main]
+    tags: ['v*']
+
+env:
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.11'
 
 jobs:
-  deploy:
+  # ============================================
+  # PREPARE
+  # ============================================
+  prepare:
+    name: Prepare Deployment
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'production' }}
-
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      deploy_backend: ${{ steps.check.outputs.backend }}
+      deploy_frontend: ${{ steps.check.outputs.frontend }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up deployment info
-      run: |
-        echo "DEPLOY_TAG=$(git describe --tags --always)" >> $GITHUB_ENV
-        echo "DEPLOY_TIME=$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_ENV
+      - name: Get version
+        id: version
+        run: echo "version=$(git describe --tags --always)" >> $GITHUB_OUTPUT
 
-    - name: Create deployment package
-      run: |
-        mkdir -p deploy
-        tar -czf deploy/chirpsyncer-${DEPLOY_TAG}.tar.gz \
-          --exclude='*.pyc' \
-          --exclude='__pycache__' \
-          --exclude='.git' \
-          --exclude='*.db' \
-          --exclude='venv' \
-          --exclude='node_modules' \
-          --exclude='.pytest_cache' \
-          --exclude='deploy' \
-          .
+      - name: Check what to deploy
+        id: check
+        run: |
+          TARGET="${{ inputs.target || 'all' }}"
+          if [[ "$TARGET" == "all" || "$TARGET" == "backend" ]]; then
+            echo "backend=true" >> $GITHUB_OUTPUT
+          else
+            echo "backend=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$TARGET" == "all" || "$TARGET" == "frontend" ]]; then
+            echo "frontend=true" >> $GITHUB_OUTPUT
+          else
+            echo "frontend=false" >> $GITHUB_OUTPUT
+          fi
 
-    - name: Generate deployment manifest
-      run: |
-        cat > deploy/manifest.json <<EOF
-        {
-          "version": "${DEPLOY_TAG}",
-          "timestamp": "${DEPLOY_TIME}",
-          "commit": "${{ github.sha }}",
-          "branch": "${{ github.ref_name }}",
-          "actor": "${{ github.actor }}"
-        }
-        EOF
+  # ============================================
+  # BACKEND
+  # ============================================
+  backend:
+    name: Build Backend Package
+    runs-on: ubuntu-latest
+    needs: prepare
+    if: needs.prepare.outputs.deploy_backend == 'true'
+    steps:
+      - uses: actions/checkout@v4
 
-    - name: Upload deployment artifacts
-      uses: actions/upload-artifact@v6
-      with:
-        name: chirpsyncer-deployment-${{ env.DEPLOY_TAG }}
-        path: deploy/
-        retention-days: 30
+      - name: Create deployment package
+        run: |
+          mkdir -p deploy
+          tar -czf deploy/chirpsyncer-backend-${{ needs.prepare.outputs.version }}.tar.gz \
+            --exclude='*.pyc' \
+            --exclude='__pycache__' \
+            --exclude='.git' \
+            --exclude='*.db' \
+            --exclude='venv' \
+            --exclude='node_modules' \
+            --exclude='.pytest_cache' \
+            --exclude='frontend' \
+            --exclude='deploy' \
+            .
 
-    # Uncomment and configure when you're ready to automate deployment
-    # - name: Deploy to home server via SSH
-    #   uses: appleboy/ssh-action@v1.0.0
-    #   with:
-    #     host: ${{ secrets.HOME_SERVER_HOST }}
-    #     username: ${{ secrets.HOME_SERVER_USER }}
-    #     key: ${{ secrets.HOME_SERVER_SSH_KEY }}
-    #     port: ${{ secrets.HOME_SERVER_PORT || 22 }}
-    #     script: |
-    #       cd /opt/chirpsyncer
-    #       ./scripts/deploy.sh ${{ env.DEPLOY_TAG }}
+      - name: Generate manifest
+        run: |
+          cat > deploy/backend-manifest.json <<EOF
+          {
+            "component": "backend",
+            "version": "${{ needs.prepare.outputs.version }}",
+            "timestamp": "$(date -u +'%Y-%m-%d %H:%M:%S UTC')",
+            "commit": "${{ github.sha }}",
+            "environment": "${{ inputs.environment || 'staging' }}"
+          }
+          EOF
 
-    - name: Deployment summary
-      run: |
-        echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "- **Version:** ${DEPLOY_TAG}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Timestamp:** ${DEPLOY_TIME}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Environment:** ${{ inputs.environment || 'production' }}" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "Deployment package created successfully!" >> $GITHUB_STEP_SUMMARY
-        echo "Download the artifact and deploy manually to your home server." >> $GITHUB_STEP_SUMMARY
+      - name: Upload backend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-${{ needs.prepare.outputs.version }}
+          path: deploy/
+          retention-days: 30
+
+  # ============================================
+  # FRONTEND
+  # ============================================
+  frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    needs: prepare
+    if: needs.prepare.outputs.deploy_frontend == 'true'
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-${{ needs.prepare.outputs.version }}
+          path: |
+            frontend/.next
+            frontend/public
+            frontend/package.json
+            frontend/package-lock.json
+            frontend/next.config.js
+          retention-days: 30
+
+  # ============================================
+  # DEPLOY STAGING
+  # ============================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [prepare, backend, frontend]
+    if: |
+      always() &&
+      (inputs.environment != 'production') &&
+      (needs.backend.result == 'success' || needs.backend.result == 'skipped') &&
+      (needs.frontend.result == 'success' || needs.frontend.result == 'skipped')
+    environment: staging
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Deploy to staging
+        run: |
+          echo "Deploying version ${{ needs.prepare.outputs.version }} to staging..."
+          ls -la artifacts/ || true
+          # Add deployment commands here:
+          # - SSH to server
+          # - Docker push
+          # - Vercel deploy
+          # etc.
+
+  # ============================================
+  # DEPLOY PRODUCTION
+  # ============================================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [prepare, backend, frontend]
+    if: |
+      always() &&
+      inputs.environment == 'production' &&
+      (needs.backend.result == 'success' || needs.backend.result == 'skipped') &&
+      (needs.frontend.result == 'success' || needs.frontend.result == 'skipped')
+    environment: production
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Deploy to production
+        run: |
+          echo "Deploying version ${{ needs.prepare.outputs.version }} to production..."
+          ls -la artifacts/ || true
+          # Add production deployment commands here
+
+  # ============================================
+  # SUMMARY
+  # ============================================
+  summary:
+    name: Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [prepare, backend, frontend, deploy-staging, deploy-production]
+    if: always()
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${{ needs.prepare.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** ${{ inputs.environment || 'staging' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backend:** ${{ needs.backend.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend:** ${{ needs.frontend.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY

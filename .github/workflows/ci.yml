@@ -140,6 +140,10 @@ jobs:
       - name: TypeScript
         run: npx tsc --noEmit
 
+      - name: Check unused code
+        continue-on-error: true
+        run: npx unimported --config .unimportedrc.json --show-unused-deps --show-unresolved-imports
+
   frontend-build:
     name: Frontend Build
     runs-on: ubuntu-latest
