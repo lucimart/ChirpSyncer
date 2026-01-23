@@ -131,6 +131,7 @@ export const Switch = memo(forwardRef<HTMLInputElement, SwitchProps>(
     id: providedId,
     'aria-label': ariaLabel,
     'aria-describedby': ariaDescribedBy,
+    'data-testid': dataTestId,
     ...props
   }, ref) => {
     const generatedId = useId();
@@ -210,6 +211,7 @@ export const Switch = memo(forwardRef<HTMLInputElement, SwitchProps>(
           $checked={!!isChecked}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
+          data-testid={dataTestId}
         >
           {(onLabel || offLabel) && size !== 'sm' && (
             <SwitchLabels $size={size} aria-hidden="true">
