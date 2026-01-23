@@ -223,7 +223,7 @@ export const ChartWidget: React.FC<ChartWidgetProps> = ({
 
   const renderChart = () => {
     if (isEmpty) {
-      return <EmptyState title="No data available" size="sm" />;
+      return <EmptyState title="No data available" size="sm" data-testid="chart-empty" />;
     }
 
     switch (chartType) {

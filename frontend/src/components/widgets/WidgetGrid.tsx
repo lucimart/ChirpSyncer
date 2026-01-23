@@ -143,6 +143,7 @@ export const WidgetGrid: React.FC<WidgetGridProps> = ({
             </Button>
           }
           size="lg"
+          data-testid="widget-grid-empty"
         />
       ) : (
         <Grid $compact={compact}>

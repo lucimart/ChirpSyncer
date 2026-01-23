@@ -152,6 +152,7 @@ export const WidgetPicker = ({ isOpen, onClose, onSelect }: WidgetPickerProps) =
       onClose={onClose}
       title="Add Widget"
       size="md"
+      data-testid="widget-picker"
     >
       <SearchContainer>
         <StyledSearchInput

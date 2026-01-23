@@ -12,6 +12,7 @@ export interface ModalProps {
   footer?: ReactNode;
   size?: 'sm' | 'md' | 'lg';
   closeOnOverlayClick?: boolean;
+  'data-testid'?: string;
 }
 
 const fadeIn = keyframes`
@@ -117,6 +118,7 @@ export const Modal = ({
   footer,
   size = 'md',
   closeOnOverlayClick = true,
+  'data-testid': testId,
 }: ModalProps) => {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -149,6 +151,7 @@ export const Modal = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}
+        data-testid={testId}
       >
         {title && (
           <Header>

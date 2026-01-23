@@ -10,6 +10,7 @@ export interface EmptyStateProps {
   description?: string;
   action?: ReactNode;
   size?: 'sm' | 'md' | 'lg';
+  'data-testid'?: string;
 }
 
 const sizeConfig = {
@@ -82,11 +83,12 @@ export const EmptyState = ({
   description,
   action,
   size = 'md',
+  'data-testid': testId,
 }: EmptyStateProps) => {
   const iconSize = sizeConfig[size].iconSize;
 
   return (
-    <Container $size={size}>
+    <Container $size={size} data-testid={testId}>
       {Icon && (
         <IconWrapper>
           <Icon size={iconSize} strokeWidth={1.5} />

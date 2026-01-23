@@ -117,7 +117,7 @@ export const ListWidget: React.FC<ListWidgetProps> = ({
   if (items.length === 0) {
     return (
       <Container data-testid="list-widget">
-        <EmptyState title="No items to display" size="sm" />
+        <EmptyState title="No items to display" size="sm" data-testid="list-empty" />
       </Container>
     );
   }
