@@ -11,9 +11,13 @@ export interface StyledComponentsRegistryProps {
 /**
  * Registry for styled-components SSR support in Next.js App Router.
  * Collects styles during server rendering and injects them into the HTML.
+ *
+ * Important: Must render the same tree structure on both server and client
+ * to avoid hydration mismatches.
  */
 const StyledComponentsRegistry: FC<StyledComponentsRegistryProps> = ({ children }) => {
   const [styleSheet] = useState(() => new ServerStyleSheet());
+  const isServerSide = typeof window === 'undefined';
 
   useServerInsertedHTML(() => {
     const styles = styleSheet.getStyleElement();
@@ -21,15 +25,18 @@ const StyledComponentsRegistry: FC<StyledComponentsRegistryProps> = ({ children 
     return <>{styles}</>;
   });
 
-  if (typeof window !== 'undefined') {
-    return <>{children}</>;
+  // Always render StyleSheetManager to maintain consistent tree structure
+  // Only pass the sheet on server side for style collection
+  if (isServerSide) {
+    return (
+      <StyleSheetManager sheet={styleSheet.instance}>
+        {children}
+      </StyleSheetManager>
+    );
   }
 
-  return (
-    <StyleSheetManager sheet={styleSheet.instance}>
-      {children}
-    </StyleSheetManager>
-  );
+  // Client side: render without sheet prop but same structure
+  return <StyleSheetManager>{children}</StyleSheetManager>;
 };
 
 export default StyledComponentsRegistry;
