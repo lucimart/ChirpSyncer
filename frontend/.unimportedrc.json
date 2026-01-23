@@ -23,7 +23,10 @@
     "zod",
     "zustand",
     "cmdk",
-    "socket.io-client"
+    "socket.io-client",
+    "@dnd-kit/sortable",
+    "@dnd-kit/utilities",
+    "framer-motion"
   ],
   "ignoreUnresolved": [],
   "respectGitignore": true,
