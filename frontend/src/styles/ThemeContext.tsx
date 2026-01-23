@@ -31,23 +31,32 @@ export interface LegacyTheme {
     success: {
       50: string;
       100: string;
+      200: string;
       500: string;
       600: string;
       700: string;
+      800: string;
+      900: string;
     };
     warning: {
       50: string;
       100: string;
+      200: string;
       500: string;
       600: string;
       700: string;
+      800: string;
+      900: string;
     };
     danger: {
       50: string;
       100: string;
+      200: string;
       500: string;
       600: string;
       700: string;
+      800: string;
+      900: string;
     };
     background: {
       primary: string;
@@ -132,23 +141,32 @@ function buildTheme(resolvedMode: 'light' | 'dark'): LegacyTheme {
       success: {
         50: colors.green[50],
         100: colors.green[100],
+        200: colors.green[200],
         500: colors.green[500],
         600: colors.green[600],
         700: colors.green[700],
+        800: colors.green[800],
+        900: colors.green[900],
       },
       warning: {
         50: colors.yellow[50],
         100: colors.yellow[100],
+        200: colors.yellow[200],
         500: colors.yellow[500],
         600: colors.yellow[600],
         700: colors.yellow[700],
+        800: colors.yellow[800],
+        900: colors.yellow[900],
       },
       danger: {
         50: colors.red[50],
         100: colors.red[100],
+        200: colors.red[200],
         500: colors.red[500],
         600: colors.red[600],
         700: colors.red[700],
+        800: colors.red[800],
+        900: colors.red[900],
       },
       background: {
         primary: semanticTheme.bg.secondary,
