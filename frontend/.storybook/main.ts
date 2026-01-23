@@ -17,6 +17,24 @@ const config: StorybookConfig = {
   },
   typescript: {
     reactDocgen: 'react-docgen-typescript',
+    reactDocgenTypescriptOptions: {
+      // Skip problematic files that cause docgen parser errors
+      propFilter: (prop) => {
+        // Filter out props from node_modules
+        if (prop.parent) {
+          return !prop.parent.fileName.includes('node_modules');
+        }
+        return true;
+      },
+      // Don't include methods in props documentation
+      shouldExtractLiteralValuesFromEnum: true,
+      shouldRemoveUndefinedFromOptional: true,
+      // Exclude problematic components
+      exclude: [
+        'node_modules/**/*',
+        '**/shared/**',
+      ],
+    },
   },
   webpackFinal: async (config) => {
     config.resolve = config.resolve ?? {};
