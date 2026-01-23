@@ -46,7 +46,7 @@ const SortIcon = styled.span<{ $active: boolean }>`
   display: flex;
   flex-direction: column;
   color: ${({ $active, theme }) =>
-    $active ? theme.colors.primary[600] : theme.colors.text.tertiary};
+    $active ? theme.colors.primary[700] : theme.colors.text.secondary};
 `;
 
 const Tbody = styled.tbody``;

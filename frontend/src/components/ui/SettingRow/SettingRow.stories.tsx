@@ -33,7 +33,7 @@ const WithSwitchDemo = () => {
         label="Email Notifications"
         hint="Receive updates about your account"
       >
-        <Switch checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
+        <Switch checked={enabled} onChange={(e) => setEnabled(e.target.checked)} aria-label="Email Notifications" />
       </SettingRow>
     </Container>
   );
@@ -50,19 +50,19 @@ const MultipleSettingsDemo = () => {
         label="Sync Completed"
         hint="Get notified when a sync completes"
       >
-        <Switch checked={syncComplete} onChange={(e) => setSyncComplete(e.target.checked)} />
+        <Switch checked={syncComplete} onChange={(e) => setSyncComplete(e.target.checked)} aria-label="Sync Completed" />
       </SettingRow>
       <SettingRow
         label="Sync Failed"
         hint="Get notified when a sync fails"
       >
-        <Switch checked={syncFailed} onChange={(e) => setSyncFailed(e.target.checked)} />
+        <Switch checked={syncFailed} onChange={(e) => setSyncFailed(e.target.checked)} aria-label="Sync Failed" />
       </SettingRow>
       <SettingRow
         label="Weekly Report"
         hint="Receive a weekly summary of your activity"
       >
-        <Switch checked={weeklyReport} onChange={(e) => setWeeklyReport(e.target.checked)} />
+        <Switch checked={weeklyReport} onChange={(e) => setWeeklyReport(e.target.checked)} aria-label="Weekly Report" />
       </SettingRow>
     </Container>
   );
@@ -73,7 +73,7 @@ const WithoutHintDemo = () => {
   return (
     <Container>
       <SettingRow label="Dark Mode">
-        <Switch checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
+        <Switch checked={enabled} onChange={(e) => setEnabled(e.target.checked)} aria-label="Dark Mode" />
       </SettingRow>
     </Container>
   );
@@ -84,7 +84,7 @@ const NoBorderDemo = () => {
   return (
     <Container>
       <SettingRow label="Single Setting" hint="This has no border" noBorder>
-        <Switch checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
+        <Switch checked={enabled} onChange={(e) => setEnabled(e.target.checked)} aria-label="Single Setting" />
       </SettingRow>
     </Container>
   );

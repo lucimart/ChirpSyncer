@@ -46,8 +46,8 @@ const softVariant = css<{ $active: boolean }>`
 
 const accentVariant = css<{ $active: boolean }>`
   background: transparent;
-  color: ${({ $active, theme }) => 
-    $active ? theme.colors.primary[600] : theme.colors.text.secondary};
+  color: ${({ $active, theme }) =>
+    $active ? theme.colors.primary[700] : theme.colors.text.secondary};
   position: relative;
   border-radius: 0;
   padding-bottom: ${({ theme }) => theme.spacing[3]};
@@ -60,13 +60,13 @@ const accentVariant = css<{ $active: boolean }>`
     left: 0;
     right: 0;
     height: 2px;
-    background-color: ${({ $active, theme }) => 
-      $active ? theme.colors.primary[600] : 'transparent'};
+    background-color: ${({ $active, theme }) =>
+      $active ? theme.colors.primary[700] : 'transparent'};
     transition: background-color ${({ theme }) => theme.transitions.fast};
   }
 
   &:hover {
-    color: ${({ $active, theme }) => 
+    color: ${({ $active, theme }) =>
       $active ? theme.colors.primary[700] : theme.colors.text.primary};
     background: ${({ theme }) => theme.colors.background.secondary};
   }
@@ -118,7 +118,6 @@ export const Tabs: React.FC<TabsProps> = ({
             onClick={() => onChange(item.id)}
             role="tab"
             aria-selected={isActive}
-            aria-controls={`panel-${item.id}`}
             id={`tab-${item.id}`}
           >
             {Icon && <Icon />}

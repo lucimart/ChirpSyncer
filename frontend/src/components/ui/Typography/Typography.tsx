@@ -77,13 +77,13 @@ const colorStyles = {
     color: ${({ theme }) => theme.colors.text.tertiary};
   `,
   success: css`
-    color: ${({ theme }) => theme.colors.success[600]};
+    color: ${({ theme }) => theme.colors.success[700]};
   `,
   danger: css`
-    color: ${({ theme }) => theme.colors.danger[600]};
+    color: ${({ theme }) => theme.colors.danger[700]};
   `,
   warning: css`
-    color: ${({ theme }) => theme.colors.warning[600]};
+    color: ${({ theme }) => theme.colors.warning[700]};
   `,
 };
 

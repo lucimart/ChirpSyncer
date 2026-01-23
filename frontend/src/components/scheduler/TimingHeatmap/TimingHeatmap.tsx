@@ -101,6 +101,11 @@ const Title = styled.h3`
 
 const GridWrapper = styled.div`
   overflow-x: auto;
+
+  &:focus {
+    outline: 2px solid ${({ theme }) => theme.colors.primary[500]};
+    outline-offset: 2px;
+  }
 `;
 
 const Grid = styled.div<{ $compact?: boolean }>`
@@ -121,7 +126,7 @@ const DayHeader = styled.div<{ $compact?: boolean }>`
 const HourLabel = styled.div<{ $compact?: boolean }>`
   text-align: right;
   font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
+  color: ${({ theme }) => theme.colors.text.secondary};
   padding-right: ${({ theme }) => theme.spacing[2]};
   display: flex;
   align-items: center;
@@ -256,7 +261,7 @@ const Footer = styled.div`
 
 const PostsCount = styled.span`
   font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
+  color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
 
@@ -336,7 +341,7 @@ export const TimingHeatmap: React.FC<TimingHeatmapProps> = ({
           <Header>
             <Title>Engagement Heatmap</Title>
           </Header>
-          <GridWrapper>
+          <GridWrapper tabIndex={0} aria-label="Scrollable engagement heatmap grid (loading)">
             <Grid $compact={compact}>
               {/* Empty corner */}
               <div />
@@ -402,7 +407,7 @@ export const TimingHeatmap: React.FC<TimingHeatmapProps> = ({
         </Legend>
       </Header>
 
-      <GridWrapper>
+      <GridWrapper tabIndex={0} aria-label="Scrollable engagement heatmap grid">
         <Grid $compact={compact}>
           {/* Empty corner */}
           <div />

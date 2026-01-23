@@ -96,7 +96,7 @@ const ConditionItem = styled.li`
 
 const ConditionField = styled.span`
   font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.primary[600]};
+  color: ${({ theme }) => theme.colors.primary[700]};
 `;
 
 const ConditionOperator = styled.span`

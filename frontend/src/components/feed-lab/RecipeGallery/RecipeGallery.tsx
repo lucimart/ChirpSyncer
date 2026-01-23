@@ -287,6 +287,7 @@ export const RecipeGallery: React.FC<RecipeGalleryProps> = ({
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
             options={sortOptions}
+            aria-label="Sort recipes"
           />
         </FilterBar>
       </GalleryHeader>

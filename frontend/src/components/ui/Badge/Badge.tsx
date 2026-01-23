@@ -63,12 +63,12 @@ const variantStyles = {
   `,
   neutral: css`
     background-color: ${({ theme }) => theme.colors.neutral[200]};
-    color: ${({ theme }) => theme.colors.neutral[600]};
+    color: ${({ theme }) => theme.colors.neutral[700]};
     border-color: ${({ theme }) => theme.colors.neutral[200]};
   `,
   'neutral-soft': css`
     background-color: ${({ theme }) => theme.colors.neutral[100]};
-    color: ${({ theme }) => theme.colors.neutral[500]};
+    color: ${({ theme }) => theme.colors.neutral[700]};
     border-color: ${({ theme }) => theme.colors.neutral[100]};
   `,
   'success-soft': css`

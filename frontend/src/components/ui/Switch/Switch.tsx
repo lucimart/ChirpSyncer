@@ -116,14 +116,18 @@ const Slider = styled.span<{ $size: 'sm' | 'md' | 'lg' }>`
 `;
 
 export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
-  ({ className, disabled, size = 'md', label, ...props }, ref) => {
+  ({ className, disabled, size = 'md', label, 'aria-label': ariaLabel, ...props }, ref) => {
+    // Ensure input always has an accessible name
+    const inputAriaLabel = ariaLabel || label;
+
     const switchComponent = (
       <SwitchContainer className={!label ? className : undefined} $disabled={disabled} $size={size}>
-        <Input 
-          type="checkbox" 
-          disabled={disabled} 
-          ref={ref} 
-          {...props} 
+        <Input
+          type="checkbox"
+          disabled={disabled}
+          ref={ref}
+          aria-label={inputAriaLabel}
+          {...props}
         />
         <Slider $size={size} />
       </SwitchContainer>

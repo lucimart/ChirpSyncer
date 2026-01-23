@@ -47,7 +47,7 @@ const Value = styled.div<{ $variant: 'default' | 'centered' }>`
     $variant === 'centered' ? theme.fontSizes['3xl'] : theme.fontSizes['2xl']};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
   color: ${({ theme, $variant }) =>
-    $variant === 'centered' ? theme.colors.primary[600] : theme.colors.text.primary};
+    $variant === 'centered' ? theme.colors.primary[700] : theme.colors.text.primary};
   line-height: 1.2;
 `;
 
@@ -64,7 +64,7 @@ const TrendBadge = styled.span<{ $direction: 'up' | 'down' }>`
   font-size: ${({ theme }) => theme.fontSizes.xs};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   color: ${({ $direction, theme }) =>
-    $direction === 'up' ? theme.colors.success[600] : theme.colors.danger[600]};
+    $direction === 'up' ? theme.colors.success[700] : theme.colors.danger[700]};
   margin-left: ${({ theme }) => theme.spacing[2]};
 `;
 
