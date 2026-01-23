@@ -87,7 +87,7 @@ const variantStyles = {
     border-color: transparent;
   `,
   'status-success': css`
-    background-color: ${({ theme }) => theme.colors.success[500]};
+    background-color: ${({ theme }) => theme.colors.success[600]};
     color: ${({ theme }) => theme.colors.text.inverse};
     border-color: transparent;
   `,
@@ -97,7 +97,7 @@ const variantStyles = {
     border-color: transparent;
   `,
   'status-danger': css`
-    background-color: ${({ theme }) => theme.colors.danger[500]};
+    background-color: ${({ theme }) => theme.colors.danger[600]};
     color: ${({ theme }) => theme.colors.text.inverse};
     border-color: transparent;
   `,
