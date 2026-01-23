@@ -250,8 +250,9 @@ export function useTikTokVideoStatus(publishId: string) {
     queryKey: ['tiktok', 'video', 'status', publishId],
     queryFn: () => tiktokClient.getVideoStatus(publishId),
     enabled: !!publishId,
-    refetchInterval: (data) => {
+    refetchInterval: (query) => {
       // Poll while processing
+      const data = query.state.data;
       if (data?.status === 'PROCESSING_UPLOAD' || data?.status === 'PROCESSING_DOWNLOAD') {
         return 5000; // 5 seconds
       }
