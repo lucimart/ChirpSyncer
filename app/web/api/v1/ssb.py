@@ -79,12 +79,15 @@ def _ssb_rpc(
 
     # Note: SSB local server typically runs on localhost without TLS
     # For local development, HTTP is acceptable; production should use secure setup
+    # nosemgrep: python.lang.security.audit.insecure-transport.requests.request-with-http.request-with-http
     url = f"http://{host}:{port}/api/{method}"  # nosec B310 - local SSB server
 
     try:
         if args:
+            # nosemgrep: python.lang.security.audit.insecure-transport.requests.request-with-http.request-with-http
             response = requests.post(url, json=args, timeout=30)
         else:
+            # nosemgrep: python.lang.security.audit.insecure-transport.requests.request-with-http.request-with-http
             response = requests.get(url, timeout=30)
 
         if response.status_code == 401:
