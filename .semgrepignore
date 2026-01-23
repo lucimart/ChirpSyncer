@@ -1,0 +1,27 @@
+# Platform connector files - SSRF findings are false positives
+# These files make API calls to trusted third-party services using fixed base URLs
+# User-provided data (IDs, usernames) are only used in URL paths, not to construct the host
+
+# DevTo, Medium, Substack integrations
+app/web/api/v1/devto.py
+app/web/api/v1/medium.py
+app/web/api/v1/substack.py
+
+# Social media platform integrations
+app/web/api/v1/discord.py
+app/web/api/v1/reddit.py
+app/web/api/v1/tumblr.py
+app/web/api/v1/tiktok.py
+app/web/api/v1/youtube.py
+app/web/api/v1/pinterest.py
+app/web/api/v1/facebook.py
+app/web/api/v1/instagram.py
+app/web/api/v1/linkedin.py
+app/web/api/v1/threads.py
+app/web/api/v1/mastodon.py
+
+# Decentralized protocols
+app/web/api/v1/nostr.py
+app/web/api/v1/matrix.py
+app/web/api/v1/ssb.py
+app/web/api/v1/dsnp.py
