@@ -38,7 +38,7 @@ const variantStyles = {
   `,
   primary: css`
     background-color: ${({ theme }) => theme.colors.primary[50]};
-    color: ${({ theme }) => theme.colors.primary[700]};
+    color: ${({ theme }) => theme.colors.primary[800]};
     border-color: ${({ theme }) => theme.colors.primary[200]};
   `,
   success: css`
@@ -53,12 +53,12 @@ const variantStyles = {
   `,
   danger: css`
     background-color: ${({ theme }) => theme.colors.danger[50]};
-    color: ${({ theme }) => theme.colors.danger[700]};
+    color: ${({ theme }) => theme.colors.danger[800]};
     border-color: ${({ theme }) => theme.colors.danger[100]};
   `,
   info: css`
     background-color: ${({ theme }) => theme.colors.primary[50]};
-    color: ${({ theme }) => theme.colors.primary[700]};
+    color: ${({ theme }) => theme.colors.primary[800]};
     border-color: ${({ theme }) => theme.colors.primary[100]};
   `,
   neutral: css`
