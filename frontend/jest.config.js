@@ -23,6 +23,7 @@ const config = {
     'src/lib/**/*.{ts,tsx}',
     'src/providers/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
+    '!src/**/*.stories.tsx',
     '!src/__tests__/**',
   ],
   coverageThreshold: {
