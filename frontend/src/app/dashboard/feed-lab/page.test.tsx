@@ -176,9 +176,9 @@ describe('FeedLabPage', () => {
 
     it('shows rule type badges', () => {
       renderWithProviders(<FeedLabPage />);
-      // Rule types may be capitalized or in badges
-      expect(screen.getByText(/boost/i)).toBeInTheDocument();
-      expect(screen.getByText(/filter/i)).toBeInTheDocument();
+      // Rule types may be capitalized or in badges - use getAllByText for potential duplicates
+      expect(screen.getAllByText(/boost/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/filter/i).length).toBeGreaterThan(0);
     });
   });
 

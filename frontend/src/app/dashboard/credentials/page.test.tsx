@@ -178,8 +178,9 @@ describe('CredentialsPage', () => {
     it('displays created and last used dates', async () => {
       renderWithProviders(<CredentialsPage />);
       await waitFor(() => {
-        expect(screen.getByText(/Added:/i)).toBeInTheDocument();
-        expect(screen.getByText(/Last used:/i)).toBeInTheDocument();
+        // Multiple credentials may show "Added:" text
+        expect(screen.getAllByText(/Added:/i).length).toBeGreaterThan(0);
+        expect(screen.getAllByText(/Last used:/i).length).toBeGreaterThan(0);
       });
     });
   });
@@ -195,7 +196,8 @@ describe('CredentialsPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /add credential/i }));
 
       await waitFor(() => {
-        expect(screen.getByText('Add Credential')).toBeInTheDocument();
+        // Modal opens - verify by checking for modal dialog
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
       });
     });
 

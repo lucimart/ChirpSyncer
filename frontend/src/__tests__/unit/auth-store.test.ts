@@ -209,14 +209,10 @@ describe('Auth Store', () => {
 
       const { result } = renderHook(() => useAuth());
 
-      // Login first
-      mockApi.login.mockResolvedValue({
-        success: true,
-        data: { user: mockUser, token: 'token' },
-      });
-
-      await act(async () => {
-        await result.current.login('testuser', 'password');
+      // Set state with token but no user (simulates persisted token without user data)
+      // This forces checkAuth to verify with the API instead of early-returning
+      act(() => {
+        useAuth.setState({ token: 'expired-token', user: null, isAuthenticated: false, isLoading: true });
       });
 
       // checkAuth fails (token expired)

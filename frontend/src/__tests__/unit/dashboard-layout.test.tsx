@@ -80,6 +80,11 @@ const mockTheme = {
   fontSizes: { lg: '18px' },
   fontWeights: { bold: 700 },
   borderRadius: { md: '6px' },
+  transitions: {
+    fast: 'all 0.15s ease',
+    default: 'all 0.2s ease',
+    slow: 'all 0.3s ease',
+  },
 };
 
 const createTestQueryClient = () =>

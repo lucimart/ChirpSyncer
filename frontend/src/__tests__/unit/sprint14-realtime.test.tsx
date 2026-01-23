@@ -574,8 +574,8 @@ describe('Sprint 14: WebSocket Real-Time', () => {
       fireEvent.click(screen.getByText('Add Toast'));
       expect(screen.getByTestId('toast-count')).toHaveTextContent('1');
 
-      // Find and click close button (X icon button)
-      const closeButton = screen.getByRole('button', { name: '' }); // X button has no text
+      // Find and click close button (X icon button with aria-label)
+      const closeButton = screen.getByRole('button', { name: /dismiss notification/i });
       fireEvent.click(closeButton);
 
       // Wait for exit animation

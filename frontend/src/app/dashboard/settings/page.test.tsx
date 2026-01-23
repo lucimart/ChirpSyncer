@@ -224,7 +224,8 @@ describe('SettingsPage', () => {
       await waitFor(() => {
         // Check form is visible by looking for the password inputs
         expect(screen.getByLabelText(/current password/i)).toBeInTheDocument();
-        expect(screen.getByLabelText(/new password/i)).toBeInTheDocument();
+        // Use exact match to distinguish from "confirm new password"
+        expect(screen.getByLabelText(/^new password$/i)).toBeInTheDocument();
         expect(screen.getByLabelText(/confirm new password/i)).toBeInTheDocument();
       });
     });
