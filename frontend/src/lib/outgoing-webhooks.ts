@@ -101,7 +101,7 @@ export function useWebhookConfigs() {
   return useQuery({
     queryKey: webhookKeys.configs(),
     queryFn: async () => {
-      const response = await api.get<{ data: { configs: WebhookConfig[] } }>(
+      const response = await api.get<{ configs: WebhookConfig[] }>(
         '/outgoing-webhooks/configs'
       );
       return response.data?.configs;

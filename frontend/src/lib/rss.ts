@@ -97,7 +97,7 @@ export function useDiscoverFeeds(pageUrl: string, enabled = true) {
   return useQuery({
     queryKey: rssKeys.discover(pageUrl),
     queryFn: async () => {
-      const response = await api.post<{ data: { feeds: DiscoveredFeed[]; source_url: string } }>(
+      const response = await api.post<{ feeds: DiscoveredFeed[]; source_url: string }>(
         '/rss/discover',
         { url: pageUrl }
       );
@@ -141,7 +141,7 @@ export function useParseFeedMutation() {
 export function useDiscoverFeedsMutation() {
   return useMutation({
     mutationFn: async (pageUrl: string) => {
-      const response = await api.post<{ data: { feeds: DiscoveredFeed[]; source_url: string } }>(
+      const response = await api.post<{ feeds: DiscoveredFeed[]; source_url: string }>(
         '/rss/discover',
         { url: pageUrl }
       );
@@ -167,11 +167,11 @@ export function useParseOPMLFile() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await api.post<{
-        data: { feeds: OPMLFeed[]; total: number; metadata: OPMLMetadata };
-      }>('/rss/opml/parse', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      // Note: FormData sets content-type automatically
+      const response = await api.post<{ feeds: OPMLFeed[]; total: number; metadata: OPMLMetadata }>(
+        '/rss/opml/parse',
+        formData
+      );
       return response.data;
     },
   });
@@ -188,7 +188,7 @@ export function useExportOPML() {
       title?: string;
       ownerName?: string;
     }) => {
-      const response = await api.post<{ data: { opml: string; feed_count: number } }>(
+      const response = await api.post<{ opml: string; feed_count: number }>(
         '/rss/opml/export',
         {
           feeds,

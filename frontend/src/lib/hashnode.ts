@@ -170,7 +170,7 @@ export function useHashnodePublications() {
   return useQuery({
     queryKey: hashnodeKeys.publications(),
     queryFn: async () => {
-      const response = await api.get<{ data: { publications: HashnodePublication[] } }>(
+      const response = await api.get<{ publications: HashnodePublication[] }>(
         '/hashnode/publications'
       );
       return response.data?.publications;
@@ -185,7 +185,7 @@ export function useHashnodePosts(
   return useQuery({
     queryKey: hashnodeKeys.posts(publicationId, params),
     queryFn: async () => {
-      const response = await api.get<{ data: { posts: HashnodePost[]; pageInfo: PageInfo } }>(
+      const response = await api.get<{ posts: HashnodePost[]; pageInfo: PageInfo }>(
         `/hashnode/publications/${publicationId}/posts`,
         { params }
       );
@@ -257,7 +257,7 @@ export function useHashnodeDrafts(
   return useQuery({
     queryKey: hashnodeKeys.drafts(publicationId, params),
     queryFn: async () => {
-      const response = await api.get<{ data: { drafts: HashnodeDraft[]; pageInfo: PageInfo } }>(
+      const response = await api.get<{ drafts: HashnodeDraft[]; pageInfo: PageInfo }>(
         `/hashnode/publications/${publicationId}/drafts`,
         { params }
       );
@@ -274,7 +274,7 @@ export function useHashnodeSeries(
   return useQuery({
     queryKey: hashnodeKeys.series(publicationId, params),
     queryFn: async () => {
-      const response = await api.get<{ data: { series: HashnodeSeries[]; pageInfo: PageInfo } }>(
+      const response = await api.get<{ series: HashnodeSeries[]; pageInfo: PageInfo }>(
         `/hashnode/publications/${publicationId}/series`,
         { params }
       );
@@ -288,7 +288,7 @@ export function useHashnodeTags(params?: { q?: string; first?: number }) {
   return useQuery({
     queryKey: hashnodeKeys.tags(params),
     queryFn: async () => {
-      const response = await api.get<{ data: { tags: HashnodeTag[] } }>('/hashnode/tags', {
+      const response = await api.get<{ tags: HashnodeTag[] }>('/hashnode/tags', {
         params,
       });
       return response.data?.tags;

@@ -112,7 +112,7 @@ export function usePixelfedAccountStatuses(
   return useQuery({
     queryKey: pixelfedKeys.accountStatuses(accountId, params),
     queryFn: async () => {
-      const response = await api.get<{ data: { statuses: PixelfedStatus[] } }>(
+      const response = await api.get<{ statuses: PixelfedStatus[] }>(
         `/pixelfed/accounts/${accountId}/statuses`,
         { params }
       );
@@ -126,7 +126,7 @@ export function usePixelfedHomeTimeline(params?: { limit?: number; max_id?: stri
   return useQuery({
     queryKey: pixelfedKeys.homeTimeline(params),
     queryFn: async () => {
-      const response = await api.get<{ data: { statuses: PixelfedStatus[] } }>(
+      const response = await api.get<{ statuses: PixelfedStatus[] }>(
         '/pixelfed/timelines/home',
         { params }
       );
@@ -139,7 +139,7 @@ export function usePixelfedPublicTimeline(params?: { limit?: number; local?: boo
   return useQuery({
     queryKey: pixelfedKeys.publicTimeline(params),
     queryFn: async () => {
-      const response = await api.get<{ data: { statuses: PixelfedStatus[] } }>(
+      const response = await api.get<{ statuses: PixelfedStatus[] }>(
         '/pixelfed/timelines/public',
         { params }
       );
@@ -243,10 +243,10 @@ export function useUploadPixelfedMedia() {
         formData.append('description', description);
       }
 
+      // Note: FormData sets content-type automatically
       const response = await api.post<PixelfedMediaAttachment>(
         '/pixelfed/media',
-        formData,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
+        formData
       );
       return response.data;
     },
@@ -287,7 +287,7 @@ export function usePixelfedDiscover() {
   return useQuery({
     queryKey: pixelfedKeys.discover(),
     queryFn: async () => {
-      const response = await api.get<{ data: { posts: PixelfedStatus[] } }>('/pixelfed/discover/posts');
+      const response = await api.get<{ posts: PixelfedStatus[] }>('/pixelfed/discover/posts');
       return response.data?.posts;
     },
   });

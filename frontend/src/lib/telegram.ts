@@ -222,8 +222,8 @@ export interface BroadcastResult {
 export function useTelegramMe() {
   return useQuery({
     queryKey: ['telegram', 'me'],
-    queryFn: async (): Promise<TelegramUser> => {
-      const response = await api.get('/api/v1/telegram/me');
+    queryFn: async () => {
+      const response = await api.get<TelegramUser>('/api/v1/telegram/me');
       return response.data;
     },
   });
@@ -237,8 +237,8 @@ export function useSendMessage() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: SendMessageParams): Promise<TelegramMessage> => {
-      const response = await api.post('/api/v1/telegram/messages', params);
+    mutationFn: async (params: SendMessageParams) => {
+      const response = await api.post<TelegramMessage>('/api/v1/telegram/messages', params);
       return response.data;
     },
     onSuccess: () => {
@@ -254,8 +254,8 @@ export function useEditMessage() {
     mutationFn: async ({
       message_id,
       ...params
-    }: { message_id: string | number; chat_id: number | string; text: string; parse_mode?: string }): Promise<TelegramMessage> => {
-      const response = await api.put(`/api/v1/telegram/messages/${message_id}`, params);
+    }: { message_id: string | number; chat_id: number | string; text: string; parse_mode?: string }) => {
+      const response = await api.put<TelegramMessage>(`/api/v1/telegram/messages/${message_id}`, params);
       return response.data;
     },
     onSuccess: () => {
@@ -269,7 +269,7 @@ export function useDeleteMessage() {
 
   return useMutation({
     mutationFn: async ({ message_id, chat_id }: { message_id: string | number; chat_id: number | string }) => {
-      const response = await api.delete(`/api/v1/telegram/messages/${message_id}?chat_id=${chat_id}`);
+      const response = await api.delete<{ success: boolean }>(`/api/v1/telegram/messages/${message_id}?chat_id=${chat_id}`);
       return response.data;
     },
     onSuccess: () => {
@@ -287,8 +287,8 @@ export function useForwardMessage() {
       from_chat_id: number | string;
       message_id: number;
       disable_notification?: boolean;
-    }): Promise<TelegramMessage> => {
-      const response = await api.post('/api/v1/telegram/messages/forward', params);
+    }) => {
+      const response = await api.post<TelegramMessage>('/api/v1/telegram/messages/forward', params);
       return response.data;
     },
     onSuccess: () => {
@@ -305,8 +305,8 @@ export function useSendPhoto() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: SendPhotoParams): Promise<TelegramMessage> => {
-      const response = await api.post('/api/v1/telegram/photos', params);
+    mutationFn: async (params: SendPhotoParams) => {
+      const response = await api.post<TelegramMessage>('/api/v1/telegram/photos', params);
       return response.data;
     },
     onSuccess: () => {
@@ -319,8 +319,8 @@ export function useSendDocument() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: SendDocumentParams): Promise<TelegramMessage> => {
-      const response = await api.post('/api/v1/telegram/documents', params);
+    mutationFn: async (params: SendDocumentParams) => {
+      const response = await api.post<TelegramMessage>('/api/v1/telegram/documents', params);
       return response.data;
     },
     onSuccess: () => {
@@ -333,8 +333,8 @@ export function useSendVideo() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: SendVideoParams): Promise<TelegramMessage> => {
-      const response = await api.post('/api/v1/telegram/videos', params);
+    mutationFn: async (params: SendVideoParams) => {
+      const response = await api.post<TelegramMessage>('/api/v1/telegram/videos', params);
       return response.data;
     },
     onSuccess: () => {
@@ -350,8 +350,8 @@ export function useSendVideo() {
 export function useTelegramChat(chatId: string | number | undefined) {
   return useQuery({
     queryKey: ['telegram', 'chat', chatId],
-    queryFn: async (): Promise<TelegramChat> => {
-      const response = await api.get(`/api/v1/telegram/chats/${chatId}`);
+    queryFn: async () => {
+      const response = await api.get<TelegramChat>(`/api/v1/telegram/chats/${chatId}`);
       return response.data;
     },
     enabled: !!chatId,
@@ -361,8 +361,8 @@ export function useTelegramChat(chatId: string | number | undefined) {
 export function useTelegramChatMemberCount(chatId: string | number | undefined) {
   return useQuery({
     queryKey: ['telegram', 'chat', chatId, 'member-count'],
-    queryFn: async (): Promise<{ count: number }> => {
-      const response = await api.get(`/api/v1/telegram/chats/${chatId}/members/count`);
+    queryFn: async () => {
+      const response = await api.get<{ count: number }>(`/api/v1/telegram/chats/${chatId}/members/count`);
       return response.data;
     },
     enabled: !!chatId,
@@ -372,8 +372,8 @@ export function useTelegramChatMemberCount(chatId: string | number | undefined) 
 export function useTelegramChatMember(chatId: string | number | undefined, userId: string | number | undefined) {
   return useQuery({
     queryKey: ['telegram', 'chat', chatId, 'member', userId],
-    queryFn: async (): Promise<TelegramChatMember> => {
-      const response = await api.get(`/api/v1/telegram/chats/${chatId}/members/${userId}`);
+    queryFn: async () => {
+      const response = await api.get<TelegramChatMember>(`/api/v1/telegram/chats/${chatId}/members/${userId}`);
       return response.data;
     },
     enabled: !!chatId && !!userId,
@@ -383,8 +383,8 @@ export function useTelegramChatMember(chatId: string | number | undefined, userI
 export function useTelegramChatAdministrators(chatId: string | number | undefined) {
   return useQuery({
     queryKey: ['telegram', 'chat', chatId, 'administrators'],
-    queryFn: async (): Promise<TelegramChatMember[]> => {
-      const response = await api.get(`/api/v1/telegram/chats/${chatId}/administrators`);
+    queryFn: async () => {
+      const response = await api.get<TelegramChatMember[]>(`/api/v1/telegram/chats/${chatId}/administrators`);
       return response.data;
     },
     enabled: !!chatId,
@@ -402,8 +402,8 @@ export function usePostToChannel() {
     mutationFn: async ({
       channel_id,
       ...params
-    }: { channel_id: string; text: string; parse_mode?: string; disable_web_page_preview?: boolean }): Promise<TelegramMessage> => {
-      const response = await api.post(`/api/v1/telegram/channels/${channel_id}/posts`, params);
+    }: { channel_id: string; text: string; parse_mode?: string; disable_web_page_preview?: boolean }) => {
+      const response = await api.post<TelegramMessage>(`/api/v1/telegram/channels/${channel_id}/posts`, params);
       return response.data;
     },
     onSuccess: () => {
@@ -420,8 +420,8 @@ export function useSendPoll() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: SendPollParams): Promise<TelegramMessage> => {
-      const response = await api.post('/api/v1/telegram/polls', params);
+    mutationFn: async (params: SendPollParams) => {
+      const response = await api.post<TelegramMessage>('/api/v1/telegram/polls', params);
       return response.data;
     },
     onSuccess: () => {
@@ -437,8 +437,8 @@ export function useSendPoll() {
 export function useTelegramWebhookInfo() {
   return useQuery({
     queryKey: ['telegram', 'webhook', 'info'],
-    queryFn: async (): Promise<TelegramWebhookInfo> => {
-      const response = await api.get('/api/v1/telegram/webhook/info');
+    queryFn: async () => {
+      const response = await api.get<TelegramWebhookInfo>('/api/v1/telegram/webhook/info');
       return response.data;
     },
   });
@@ -449,7 +449,7 @@ export function useSetWebhook() {
 
   return useMutation({
     mutationFn: async (params: { url: string; max_connections?: number; allowed_updates?: string[] }) => {
-      const response = await api.post('/api/v1/telegram/webhook', params);
+      const response = await api.post<{ success: boolean }>('/api/v1/telegram/webhook', params);
       return response.data;
     },
     onSuccess: () => {
@@ -463,7 +463,7 @@ export function useDeleteWebhook() {
 
   return useMutation({
     mutationFn: async () => {
-      const response = await api.delete('/api/v1/telegram/webhook');
+      const response = await api.delete<{ success: boolean }>('/api/v1/telegram/webhook');
       return response.data;
     },
     onSuccess: () => {
@@ -480,8 +480,8 @@ export function useBroadcastMessage() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: BroadcastParams): Promise<BroadcastResult> => {
-      const response = await api.post('/api/v1/telegram/broadcast', params);
+    mutationFn: async (params: BroadcastParams) => {
+      const response = await api.post<BroadcastResult>('/api/v1/telegram/broadcast', params);
       return response.data;
     },
     onSuccess: () => {

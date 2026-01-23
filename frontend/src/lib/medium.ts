@@ -68,7 +68,7 @@ export function useMediumPublications(userId: string) {
   return useQuery({
     queryKey: mediumKeys.publications(userId),
     queryFn: async () => {
-      const response = await api.get<{ data: { publications: MediumPublication[] } }>(
+      const response = await api.get<{ publications: MediumPublication[] }>(
         `/medium/users/${userId}/publications`
       );
       return response.data?.publications;
@@ -117,12 +117,10 @@ export function useUploadMediumImage() {
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await api.post<{ data: { url: string; md5: string } }>(
+      // Note: FormData sets content-type automatically
+      const response = await api.post<{ url: string; md5: string }>(
         '/medium/images',
-        formData,
-        {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        }
+        formData
       );
       return response.data;
     },

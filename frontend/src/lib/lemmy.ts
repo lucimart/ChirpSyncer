@@ -209,7 +209,7 @@ export function useLemmyCommunities(params?: {
   return useQuery({
     queryKey: lemmyKeys.communities(params),
     queryFn: async () => {
-      const response = await api.get<{ data: { communities: LemmyCommunityView[] } }>(
+      const response = await api.get<{ communities: LemmyCommunityView[] }>(
         '/lemmy/community/list',
         { params }
       );
@@ -222,7 +222,7 @@ export function useLemmyCommunity(id?: number, name?: string) {
   return useQuery({
     queryKey: lemmyKeys.community(id, name),
     queryFn: async () => {
-      const response = await api.get<{ data: { community_view: LemmyCommunityView } }>(
+      const response = await api.get<{ community_view: LemmyCommunityView }>(
         '/lemmy/community',
         { params: { id, name } }
       );
@@ -237,7 +237,7 @@ export function useFollowLemmyCommunity() {
 
   return useMutation({
     mutationFn: async ({ communityId, follow }: { communityId: number; follow: boolean }) => {
-      const response = await api.post<{ data: { community_view: LemmyCommunityView } }>(
+      const response = await api.post<{ community_view: LemmyCommunityView }>(
         '/lemmy/community/follow',
         { community_id: communityId, follow }
       );
@@ -260,7 +260,7 @@ export function useLemmyPosts(params?: {
   return useQuery({
     queryKey: lemmyKeys.posts(params),
     queryFn: async () => {
-      const response = await api.get<{ data: { posts: LemmyPostView[] } }>('/lemmy/post/list', {
+      const response = await api.get<{ posts: LemmyPostView[] }>('/lemmy/post/list', {
         params,
       });
       return response.data?.posts;
@@ -272,7 +272,7 @@ export function useLemmyPost(postId: number) {
   return useQuery({
     queryKey: lemmyKeys.post(postId),
     queryFn: async () => {
-      const response = await api.get<{ data: { post_view: LemmyPostView } }>('/lemmy/post', {
+      const response = await api.get<{ post_view: LemmyPostView }>('/lemmy/post', {
         params: { id: postId },
       });
       return response.data?.post_view;
@@ -286,7 +286,7 @@ export function useCreateLemmyPost() {
 
   return useMutation({
     mutationFn: async (input: CreatePostInput) => {
-      const response = await api.post<{ data: { post_view: LemmyPostView } }>('/lemmy/post', input);
+      const response = await api.post<{ post_view: LemmyPostView }>('/lemmy/post', input);
       return response.data?.post_view;
     },
     onSuccess: () => {
@@ -300,7 +300,7 @@ export function useEditLemmyPost() {
 
   return useMutation({
     mutationFn: async (input: { post_id: number; name?: string; url?: string; body?: string; nsfw?: boolean }) => {
-      const response = await api.put<{ data: { post_view: LemmyPostView } }>('/lemmy/post', input);
+      const response = await api.put<{ post_view: LemmyPostView }>('/lemmy/post', input);
       return response.data?.post_view;
     },
     onSuccess: (_, variables) => {
@@ -315,7 +315,7 @@ export function useDeleteLemmyPost() {
 
   return useMutation({
     mutationFn: async ({ postId, deleted = true }: { postId: number; deleted?: boolean }) => {
-      const response = await api.post<{ data: { post_view: LemmyPostView } }>('/lemmy/post/delete', {
+      const response = await api.post<{ post_view: LemmyPostView }>('/lemmy/post/delete', {
         post_id: postId,
         deleted,
       });
@@ -332,7 +332,7 @@ export function useVoteLemmyPost() {
 
   return useMutation({
     mutationFn: async ({ postId, score }: { postId: number; score: -1 | 0 | 1 }) => {
-      const response = await api.post<{ data: { post_view: LemmyPostView } }>('/lemmy/post/like', {
+      const response = await api.post<{ post_view: LemmyPostView }>('/lemmy/post/like', {
         post_id: postId,
         score,
       });
@@ -348,7 +348,7 @@ export function useLemmyComments(params?: { post_id?: number; sort?: string; lim
   return useQuery({
     queryKey: lemmyKeys.comments(params),
     queryFn: async () => {
-      const response = await api.get<{ data: { comments: LemmyCommentView[] } }>(
+      const response = await api.get<{ comments: LemmyCommentView[] }>(
         '/lemmy/comment/list',
         { params }
       );
@@ -362,7 +362,7 @@ export function useCreateLemmyComment() {
 
   return useMutation({
     mutationFn: async (input: CreateCommentInput) => {
-      const response = await api.post<{ data: { comment_view: LemmyCommentView } }>(
+      const response = await api.post<{ comment_view: LemmyCommentView }>(
         '/lemmy/comment',
         input
       );
@@ -379,7 +379,7 @@ export function useVoteLemmyComment() {
 
   return useMutation({
     mutationFn: async ({ commentId, score }: { commentId: number; score: -1 | 0 | 1 }) => {
-      const response = await api.post<{ data: { comment_view: LemmyCommentView } }>(
+      const response = await api.post<{ comment_view: LemmyCommentView }>(
         '/lemmy/comment/like',
         { comment_id: commentId, score }
       );
