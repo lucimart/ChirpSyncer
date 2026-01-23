@@ -238,11 +238,11 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     id: 'twitter',
     platform: 'twitter',
     name: 'Twitter / X',
-    description: 'Connect your Twitter account to sync tweets',
+    description: 'Full access with API keys, or read-only with scraper credentials',
     icon: 'T',
     color: '#1DA1F2',
     capabilities: PLATFORM_DEFAULTS.twitter,
-    auth_type: 'session',
+    auth_type: 'api_key', // Supports both API and session/scraper
     status: 'available',
   },
   {
@@ -381,8 +381,20 @@ export function useConnectPlatform() {
       platform: PlatformType;
       credentials: Record<string, string>;
     }) => {
-      // Determine credential_type based on platform
-      const credentialType = (platform === 'bluesky' || platform === 'instagram') ? 'api' : 'scraping';
+      // Determine credential_type based on platform and provided credentials
+      let credentialType: string;
+
+      if (platform === 'twitter') {
+        // Twitter: API mode if api_key provided, otherwise scraper mode
+        credentialType = credentials.api_key ? 'api' : 'scraping';
+        // Remove internal _mode field before sending
+        const { _mode, ...cleanCredentials } = credentials;
+        credentials = cleanCredentials;
+      } else if (platform === 'bluesky' || platform === 'instagram') {
+        credentialType = 'api';
+      } else {
+        credentialType = 'scraping';
+      }
 
       const response = await api.addCredential({
         platform,

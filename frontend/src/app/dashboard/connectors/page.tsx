@@ -481,6 +481,89 @@ export default function ConnectorsPage() {
             fullWidth
           />
         );
+      case 'api_key':
+        // Twitter dual-mode: API keys for full access, or scraper for read-only
+        return (
+          <Stack gap={4}>
+            <Tabs
+              items={[
+                { id: 'api', label: 'API Keys (Full Access)' },
+                { id: 'scraper', label: 'Scraper (Read-Only)' },
+              ]}
+              value={credentials._mode || 'api'}
+              onChange={(id) => setCredentials({ ...credentials, _mode: id })}
+              variant="soft"
+            />
+            {(credentials._mode || 'api') === 'api' ? (
+              <Stack gap={3}>
+                <SmallText>
+                  For full read/write access, you need Twitter API credentials.
+                  Note: Twitter API requires a paid subscription ($100+/month).
+                </SmallText>
+                <Input
+                  label="API Key (Consumer Key)"
+                  type="text"
+                  value={credentials.api_key || ''}
+                  onChange={(e) => setCredentials({ ...credentials, api_key: e.target.value })}
+                  placeholder="xxxxxxxxxxxxxxxxxxxxxxx"
+                  fullWidth
+                />
+                <Input
+                  label="API Secret (Consumer Secret)"
+                  type="password"
+                  value={credentials.api_secret || ''}
+                  onChange={(e) => setCredentials({ ...credentials, api_secret: e.target.value })}
+                  fullWidth
+                />
+                <Input
+                  label="Access Token"
+                  type="text"
+                  value={credentials.access_token || ''}
+                  onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
+                  fullWidth
+                />
+                <Input
+                  label="Access Token Secret"
+                  type="password"
+                  value={credentials.access_secret || ''}
+                  onChange={(e) => setCredentials({ ...credentials, access_secret: e.target.value })}
+                  fullWidth
+                />
+                <Input
+                  label="Bearer Token (Optional)"
+                  type="password"
+                  value={credentials.bearer_token || ''}
+                  onChange={(e) => setCredentials({ ...credentials, bearer_token: e.target.value })}
+                  hint="For faster read operations"
+                  fullWidth
+                />
+              </Stack>
+            ) : (
+              <Stack gap={3}>
+                <SmallText>
+                  Scraper mode provides read-only access without API costs.
+                  Cannot post, delete, like, or retweet.
+                </SmallText>
+                <Input
+                  label="Username"
+                  type="text"
+                  value={credentials.username || ''}
+                  onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                  placeholder="@username"
+                  fullWidth
+                />
+                <Input
+                  label="Password"
+                  type="password"
+                  value={credentials.password || ''}
+                  onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+                  hint="Used for scraping authentication"
+                  fullWidth
+                />
+              </Stack>
+            )}
+          </Stack>
+        );
       default:
         return null;
     }

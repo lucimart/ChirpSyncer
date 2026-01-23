@@ -68,6 +68,7 @@ from app.web.api.v1.notifications import notifications_bp  # noqa: E402
 from app.web.api.v1.bluesky import bluesky_bp  # noqa: E402
 from app.web.api.v1.mastodon import mastodon_bp  # noqa: E402
 from app.web.api.v1.instagram import instagram_bp  # noqa: E402
+from app.web.api.v1.twitter import twitter_bp  # noqa: E402
 
 api_v1.register_blueprint(auth_bp)
 api_v1.register_blueprint(dashboard_bp)
@@ -89,3 +90,4 @@ api_v1.register_blueprint(notifications_bp)
 api_v1.register_blueprint(bluesky_bp)
 api_v1.register_blueprint(mastodon_bp)
 api_v1.register_blueprint(instagram_bp)
+api_v1.register_blueprint(twitter_bp)
