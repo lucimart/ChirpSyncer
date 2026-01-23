@@ -1,45 +1,30 @@
 'use client';
 
+import { forwardRef, useId, memo } from 'react';
 import styled, { css } from 'styled-components';
-import { forwardRef, SelectHTMLAttributes } from 'react';
 import { ChevronDown } from 'lucide-react';
+import {
+  FormFieldWrapper,
+  FormLabel,
+  FormHelperText,
+  InputContainer,
+  focusRingInset,
+  disabledInputStyles,
+} from '../utils';
+import {
+  SelectProps,
+  SelectOption,
+  SelectOptionGroup,
+  SelectSize,
+  SELECT_SIZES,
+} from './types';
 
-interface SelectOption {
-  value: string;
-  label: string;
-}
-
-interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'children'> {
-  label?: string;
-  error?: string;
-  hint?: string;
-  fullWidth?: boolean;
-  options: SelectOption[];
-}
-
-const SelectWrapper = styled.div<{ $fullWidth: boolean }>`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[1]};
-  width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
-`;
-
-const Label = styled.label`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const SelectContainer = styled.div`
-  position: relative;
+const StyledSelect = styled.select<{ $hasError: boolean; $size: SelectSize }>`
   width: 100%;
-`;
-
-const StyledSelect = styled.select<{ $hasError: boolean }>`
-  width: 100%;
-  height: 40px;
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[10]} ${theme.spacing[2]} ${theme.spacing[3]}`};
-  font-size: ${({ theme }) => theme.fontSizes.base};
+  height: ${({ $size }) => SELECT_SIZES[$size].height}px;
+  padding: ${({ $size }) => SELECT_SIZES[$size].padding};
+  font-size: ${({ theme, $size }) =>
+    theme.fontSizes[SELECT_SIZES[$size].fontSize as keyof typeof theme.fontSizes]};
   color: ${({ theme }) => theme.colors.text.primary};
   background-color: ${({ theme }) => theme.colors.background.primary};
   border: 1px solid ${({ theme }) => theme.colors.border.default};
@@ -52,17 +37,8 @@ const StyledSelect = styled.select<{ $hasError: boolean }>`
     border-color: ${({ theme }) => theme.colors.border.dark};
   }
 
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.primary[500]};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[100]};
-  }
-
-  &:disabled {
-    background-color: ${({ theme }) => theme.colors.background.secondary};
-    cursor: not-allowed;
-    opacity: 0.7;
-  }
+  ${focusRingInset}
+  ${disabledInputStyles}
 
   ${({ $hasError, theme }) =>
     $hasError &&
@@ -76,10 +52,10 @@ const StyledSelect = styled.select<{ $hasError: boolean }>`
     `}
 `;
 
-const IconWrapper = styled.div`
+const IconWrapper = styled.div<{ $size: SelectSize }>`
   position: absolute;
   top: 50%;
-  right: ${({ theme }) => theme.spacing[3]};
+  right: ${({ $size }) => $size === 'sm' ? '8px' : $size === 'lg' ? '16px' : '12px'};
   transform: translateY(-50%);
   color: ${({ theme }) => theme.colors.text.tertiary};
   pointer-events: none;
@@ -87,40 +63,99 @@ const IconWrapper = styled.div`
   align-items: center;
 `;
 
-const HintText = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
+// Type guard to check if options are grouped
+function isOptionGroup(option: SelectOption | SelectOptionGroup): option is SelectOptionGroup {
+  return 'options' in option;
+}
 
-const ErrorText = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.danger[600]};
-`;
+function hasOptionGroups(options: SelectOption[] | SelectOptionGroup[]): options is SelectOptionGroup[] {
+  return options.length > 0 && isOptionGroup(options[0]);
+}
 
-export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, hint, fullWidth = false, options, id, className, ...props }, ref) => {
-    const selectId = id || label?.toLowerCase().replace(/\s+/g, '-');
+const SelectComponent = forwardRef<HTMLSelectElement, SelectProps>(
+  ({
+    label,
+    error,
+    hint,
+    fullWidth = false,
+    size = 'md',
+    options,
+    placeholder,
+    id: providedId,
+    className,
+    'aria-describedby': ariaDescribedBy,
+    ...props
+  }, ref) => {
+    const generatedId = useId();
+    const id = providedId || generatedId;
+    const hintId = `${id}-hint`;
+    const errorId = `${id}-error`;
+
+    const describedBy = [
+      error ? errorId : null,
+      hint && !error ? hintId : null,
+      ariaDescribedBy,
+    ].filter(Boolean).join(' ') || undefined;
+
+    const iconSize = size === 'sm' ? 14 : size === 'lg' ? 20 : 16;
 
     return (
-      <SelectWrapper $fullWidth={fullWidth} className={className}>
-        {label && <Label htmlFor={selectId}>{label}</Label>}
-        <SelectContainer>
-          <StyledSelect ref={ref} id={selectId} $hasError={!!error} {...props}>
-            {options.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
+      <FormFieldWrapper $fullWidth={fullWidth} className={className}>
+        {label && <FormLabel htmlFor={id}>{label}</FormLabel>}
+        <InputContainer>
+          <StyledSelect
+            ref={ref}
+            id={id}
+            $hasError={!!error}
+            $size={size}
+            aria-invalid={!!error}
+            aria-describedby={describedBy}
+            {...props}
+          >
+            {placeholder && (
+              <option value="" disabled>
+                {placeholder}
               </option>
-            ))}
+            )}
+            {hasOptionGroups(options)
+              ? options.map((group) => (
+                  <optgroup key={group.label} label={group.label}>
+                    {group.options.map((option) => (
+                      <option
+                        key={option.value}
+                        value={option.value}
+                        disabled={option.disabled}
+                      >
+                        {option.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))
+              : options.map((option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                    disabled={option.disabled}
+                  >
+                    {option.label}
+                  </option>
+                ))}
           </StyledSelect>
-          <IconWrapper>
-            <ChevronDown size={16} />
+          <IconWrapper $size={size}>
+            <ChevronDown size={iconSize} />
           </IconWrapper>
-        </SelectContainer>
-        {error && <ErrorText>{error}</ErrorText>}
-        {hint && !error && <HintText>{hint}</HintText>}
-      </SelectWrapper>
+        </InputContainer>
+        {error && (
+          <FormHelperText $isError id={errorId} role="alert">
+            {error}
+          </FormHelperText>
+        )}
+        {hint && !error && <FormHelperText id={hintId}>{hint}</FormHelperText>}
+      </FormFieldWrapper>
     );
   }
 );
 
-Select.displayName = 'Select';
+SelectComponent.displayName = 'Select';
+
+export const Select = memo(SelectComponent);

@@ -1,54 +1,55 @@
 'use client';
 
+import { forwardRef, useId, memo } from 'react';
 import styled, { css } from 'styled-components';
-import { forwardRef, InputHTMLAttributes } from 'react';
+import {
+  FormFieldWrapper,
+  FormLabel,
+  FormHelperText,
+  InputContainer,
+  focusRingInset,
+  disabledInputStyles,
+} from '../utils';
+import { InputProps, InputSize, INPUT_SIZES } from './types';
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-  error?: string;
-  hint?: string;
-  fullWidth?: boolean;
-  startIcon?: React.ReactNode;
-  textAlign?: 'left' | 'center' | 'right';
-}
-
-const InputWrapper = styled.div<{ $fullWidth: boolean }>`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[1]};
-  width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
-`;
-
-const Label = styled.label`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const InputContainer = styled.div`
-  position: relative;
-  width: 100%;
-`;
-
-const IconWrapper = styled.div`
+const IconWrapper = styled.span<{ $position: 'start' | 'end'; $size: InputSize }>`
   position: absolute;
   top: 50%;
-  left: ${({ theme }) => theme.spacing[3]};
   transform: translateY(-50%);
   color: ${({ theme }) => theme.colors.text.tertiary};
   pointer-events: none;
   display: flex;
   align-items: center;
+
+  ${({ $position, $size }) => {
+    const offset = $size === 'sm' ? '8px' : $size === 'lg' ? '14px' : '12px';
+    return $position === 'start' ? `left: ${offset};` : `right: ${offset};`;
+  }}
+
+  svg {
+    width: ${({ $size }) => INPUT_SIZES[$size].iconSize}px;
+    height: ${({ $size }) => INPUT_SIZES[$size].iconSize}px;
+  }
 `;
 
-const StyledInput = styled.input<{ $hasError: boolean; $hasStartIcon?: boolean; $textAlign?: string }>`
+const StyledInput = styled.input<{
+  $hasError: boolean;
+  $hasStartIcon?: boolean;
+  $hasEndIcon?: boolean;
+  $textAlign?: string;
+  $size: InputSize;
+}>`
   width: 100%;
-  height: 40px;
-  padding: ${({ theme, $hasStartIcon }) =>
-    $hasStartIcon
-      ? `${theme.spacing[2]} ${theme.spacing[3]} ${theme.spacing[2]} ${theme.spacing[10]}`
-      : `${theme.spacing[2]} ${theme.spacing[3]}`};
-  font-size: ${({ theme }) => theme.fontSizes.base};
+  height: ${({ $size }) => INPUT_SIZES[$size].height}px;
+  padding: ${({ $size, $hasStartIcon, $hasEndIcon }) => {
+    const base = INPUT_SIZES[$size].padding.split(' ');
+    const iconPadding = $size === 'sm' ? '32px' : $size === 'lg' ? '44px' : '40px';
+    const leftPadding = $hasStartIcon ? iconPadding : base[1] || base[0];
+    const rightPadding = $hasEndIcon ? iconPadding : base[1] || base[0];
+    return `${base[0]} ${rightPadding} ${base[0]} ${leftPadding}`;
+  }};
+  font-size: ${({ theme, $size }) =>
+    theme.fontSizes[INPUT_SIZES[$size].fontSize as keyof typeof theme.fontSizes]};
   color: ${({ theme }) => theme.colors.text.primary};
   background-color: ${({ theme }) => theme.colors.background.primary};
   border: 1px solid ${({ theme }) => theme.colors.border.default};
@@ -64,17 +65,8 @@ const StyledInput = styled.input<{ $hasError: boolean; $hasStartIcon?: boolean; 
     border-color: ${({ theme }) => theme.colors.border.dark};
   }
 
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.primary[500]};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[100]};
-  }
-
-  &:disabled {
-    background-color: ${({ theme }) => theme.colors.background.secondary};
-    cursor: not-allowed;
-    opacity: 0.7;
-  }
+  ${focusRingInset}
+  ${disabledInputStyles}
 
   ${({ $hasError, theme }) =>
     $hasError &&
@@ -88,39 +80,70 @@ const StyledInput = styled.input<{ $hasError: boolean; $hasStartIcon?: boolean; 
     `}
 `;
 
-const HintText = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
+const InputComponent = forwardRef<HTMLInputElement, InputProps>(
+  ({
+    label,
+    error,
+    hint,
+    fullWidth = false,
+    size = 'md',
+    startIcon,
+    endIcon,
+    textAlign,
+    id: providedId,
+    className,
+    'aria-describedby': ariaDescribedBy,
+    ...props
+  }, ref) => {
+    const generatedId = useId();
+    const id = providedId || generatedId;
+    const hintId = `${id}-hint`;
+    const errorId = `${id}-error`;
 
-const ErrorText = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.danger[600]};
-`;
-
-export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, hint, fullWidth = false, startIcon, textAlign, id, className, ...props }, ref) => {
-    const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
+    const describedBy = [
+      error ? errorId : null,
+      hint && !error ? hintId : null,
+      ariaDescribedBy,
+    ].filter(Boolean).join(' ') || undefined;
 
     return (
-      <InputWrapper $fullWidth={fullWidth} className={className}>
-        {label && <Label htmlFor={inputId}>{label}</Label>}
+      <FormFieldWrapper $fullWidth={fullWidth} className={className}>
+        {label && <FormLabel htmlFor={id}>{label}</FormLabel>}
         <InputContainer>
-          {startIcon && <IconWrapper>{startIcon}</IconWrapper>}
+          {startIcon && (
+            <IconWrapper $position="start" $size={size}>
+              {startIcon}
+            </IconWrapper>
+          )}
           <StyledInput
             ref={ref}
-            id={inputId}
+            id={id}
             $hasError={!!error}
             $hasStartIcon={!!startIcon}
+            $hasEndIcon={!!endIcon}
             $textAlign={textAlign}
+            $size={size}
+            aria-invalid={!!error}
+            aria-describedby={describedBy}
             {...props}
           />
+          {endIcon && (
+            <IconWrapper $position="end" $size={size}>
+              {endIcon}
+            </IconWrapper>
+          )}
         </InputContainer>
-        {error && <ErrorText>{error}</ErrorText>}
-        {hint && !error && <HintText>{hint}</HintText>}
-      </InputWrapper>
+        {error && (
+          <FormHelperText $isError id={errorId} role="alert">
+            {error}
+          </FormHelperText>
+        )}
+        {hint && !error && <FormHelperText id={hintId}>{hint}</FormHelperText>}
+      </FormFieldWrapper>
     );
   }
 );
 
-Input.displayName = 'Input';
+InputComponent.displayName = 'Input';
+
+export const Input = memo(InputComponent);
