@@ -54,7 +54,7 @@ describe('Sidebar', () => {
 
   it('renders the sidebar', () => {
     renderWithTheme(<Sidebar isOpen={false} onClose={mockOnClose} />);
-    expect(screen.getByText('ChirpSyncer')).toBeInTheDocument();
+    expect(screen.getByText('Swoop')).toBeInTheDocument();
   });
 
   it('renders the dashboard link', () => {

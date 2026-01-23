@@ -23,7 +23,7 @@ describe('AuthLayout', () => {
   it('displays logo and title by default', () => {
     renderWithTheme(<AuthLayout>Content</AuthLayout>);
 
-    expect(screen.getByText('ChirpSyncer')).toBeInTheDocument();
+    expect(screen.getByText('Swoop')).toBeInTheDocument();
   });
 
   it('displays custom title and subtitle', () => {
@@ -42,6 +42,6 @@ describe('AuthLayout', () => {
       <AuthLayout showLogo={false}>Content</AuthLayout>
     );
 
-    expect(screen.queryByText('ChirpSyncer')).not.toBeInTheDocument();
+    expect(screen.queryByText('Swoop')).not.toBeInTheDocument();
   });
 });

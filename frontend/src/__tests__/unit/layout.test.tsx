@@ -53,7 +53,7 @@ describe('Sidebar Component', () => {
   describe('Rendering', () => {
     it('renders logo text', () => {
       renderWithTheme(<Sidebar />);
-      expect(screen.getByText('ChirpSyncer')).toBeInTheDocument();
+      expect(screen.getByText('Swoop')).toBeInTheDocument();
     });
 
     it('renders dashboard link', () => {

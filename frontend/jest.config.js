@@ -23,7 +23,11 @@ const config = {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
       tsconfig: 'tsconfig.jest.json',
     }],
-    '^.+\\.(js|jsx)$': 'babel-jest',
+    '^.+\\.(js|jsx)$': ['babel-jest', {
+      presets: [
+        ['@babel/preset-env', { targets: { node: 'current' } }],
+      ],
+    }],
   },
   transformIgnorePatterns: [
     'node_modules/(?!(@nivo|d3|d3-.*|internmap|delaunator|robust-predicates)/)',

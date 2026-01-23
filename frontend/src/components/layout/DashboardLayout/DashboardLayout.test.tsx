@@ -69,9 +69,8 @@ describe('DashboardLayout', () => {
         <div>Content</div>
       </DashboardLayout>
     );
-    // Multiple ChirpSyncer texts (sidebar logo + mobile header)
-    const chirpSyncerElements = screen.getAllByText('ChirpSyncer');
-    expect(chirpSyncerElements.length).toBeGreaterThan(0);
+    // Sidebar shows "Swoop" logo
+    expect(screen.getByText('Swoop')).toBeInTheDocument();
   });
 
   it('renders mobile menu button', () => {
@@ -108,10 +107,9 @@ describe('DashboardLayout', () => {
         <div>Content</div>
       </DashboardLayout>
     );
-    // Mobile header contains title - check that at least 2 ChirpSyncer texts exist
-    // (sidebar logo + mobile header h1)
-    const titles = screen.getAllByText('ChirpSyncer');
-    expect(titles.length).toBeGreaterThanOrEqual(2);
+    // Mobile header shows "ChirpSyncer", sidebar shows "Swoop"
+    expect(screen.getByText('ChirpSyncer')).toBeInTheDocument();
+    expect(screen.getByText('Swoop')).toBeInTheDocument();
   });
 
   it('renders main content area', () => {
