@@ -110,8 +110,8 @@ const CategoryBadge = styled.span`
   font-size: ${({ theme }) => theme.fontSizes.xs};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   text-transform: capitalize;
-  background: ${({ theme }) => theme.colors.primary[50]};
-  color: ${({ theme }) => theme.colors.primary[700]};
+  background: ${({ theme }) => theme.colors.primary[100]};
+  color: ${({ theme }) => theme.colors.primary[800]};
   border-radius: ${({ theme }) => theme.borderRadius.md};
 `;
 

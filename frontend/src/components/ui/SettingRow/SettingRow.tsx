@@ -36,7 +36,7 @@ const Label = styled.div`
 
 const Hint = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
+  color: ${({ theme }) => theme.colors.text.secondary};
   margin-top: ${({ theme }) => theme.spacing[1]};
 `;
 

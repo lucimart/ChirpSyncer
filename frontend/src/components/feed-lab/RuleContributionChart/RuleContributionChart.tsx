@@ -235,7 +235,6 @@ export function RuleContributionChart(props: CombinedProps) {
       <svg
         width={chartWidth}
         height={chartHeight}
-        role="img"
         aria-label="Bar chart showing rule contributions"
       >
         {/* Background */}
