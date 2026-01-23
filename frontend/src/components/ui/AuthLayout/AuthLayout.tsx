@@ -2,7 +2,6 @@
 
 import styled from 'styled-components';
 import { ReactNode } from 'react';
-import { Repeat } from 'lucide-react';
 import { Card } from '../Card';
 
 export interface AuthLayoutProps {
@@ -12,9 +11,27 @@ export interface AuthLayoutProps {
   subtitle?: string;
   /** Maximum width of the card. Default: 400px */
   maxWidth?: string;
-  /** Show ChirpSyncer branding. Default: true */
+  /** Show Swoop branding. Default: true */
   showLogo?: boolean;
 }
+
+const SwoopIcon = () => (
+  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+    <defs>
+      <linearGradient id="swoop-icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#8B5CF6"/>
+        <stop offset="100%" stopColor="#34D399"/>
+      </linearGradient>
+    </defs>
+    <path
+      d="M4 22 Q16 6 28 22"
+      stroke="url(#swoop-icon-gradient)"
+      strokeWidth="4"
+      strokeLinecap="round"
+      fill="none"
+    />
+  </svg>
+);
 
 const PageContainer = styled.div`
   display: flex;
@@ -46,20 +63,17 @@ const Logo = styled.div`
 `;
 
 const LogoIcon = styled.div`
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(
-    135deg,
-    ${({ theme }) => theme.colors.primary[500]} 0%,
-    ${({ theme }) => theme.colors.primary[600]} 100%
-  );
-  color: white;
-  border-radius: ${({ theme }) => theme.borderRadius.xl};
+  width: 64px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: ${({ theme }) => theme.spacing[3]};
-  box-shadow: 0 4px 14px ${({ theme }) => theme.colors.primary[500]}40;
+
+  svg {
+    width: 64px;
+    height: 64px;
+  }
 `;
 
 const LogoText = styled.h1`
@@ -77,7 +91,7 @@ const Subtitle = styled.p`
 
 export function AuthLayout({
   children,
-  title = 'ChirpSyncer',
+  title = 'Swoop',
   subtitle,
   maxWidth = '400px',
   showLogo = true,
@@ -89,7 +103,7 @@ export function AuthLayout({
           {showLogo && (
             <Logo>
               <LogoIcon>
-                <Repeat size={28} />
+                <SwoopIcon />
               </LogoIcon>
               <LogoText>{title}</LogoText>
               {subtitle && <Subtitle>{subtitle}</Subtitle>}

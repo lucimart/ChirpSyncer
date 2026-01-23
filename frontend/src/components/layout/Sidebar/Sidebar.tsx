@@ -131,12 +131,50 @@ const Logo = styled.div`
   min-height: ${layout.headerHeight};
 `;
 
+const LogoContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+`;
+
+const LogoIcon = styled.div`
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 28px;
+    height: 28px;
+  }
+`;
+
 const LogoText = styled.span`
   font-size: ${({ theme }) => theme.fontSizes.xl};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
   color: ${({ theme }) => theme.colors.primary[600]};
   transition: opacity 0.2s ease, visibility 0.2s ease;
 `;
+
+const SwoopIcon = () => (
+  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="swoop-sidebar-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#8B5CF6"/>
+        <stop offset="100%" stopColor="#34D399"/>
+      </linearGradient>
+    </defs>
+    <path
+      d="M4 22 Q16 6 28 22"
+      stroke="url(#swoop-sidebar-gradient)"
+      strokeWidth="4"
+      strokeLinecap="round"
+      fill="none"
+    />
+  </svg>
+);
 
 const CloseButton = styled.button`
   background: none;
@@ -311,7 +349,12 @@ export const Sidebar: FC<SidebarProps> = memo(({ isOpen = false, onClose }) => {
         id="sidebar-nav"
       >
       <Logo>
-        <LogoText>ChirpSyncer</LogoText>
+        <LogoContainer>
+          <LogoIcon>
+            <SwoopIcon />
+          </LogoIcon>
+          <LogoText>Swoop</LogoText>
+        </LogoContainer>
         {onClose && (
           <CloseButton
             ref={closeButtonRef}
