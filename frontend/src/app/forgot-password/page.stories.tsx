@@ -41,9 +41,13 @@ export const FilledForm: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    await userEvent.type(canvas.getByLabelText(/email/i), 'user@example.com');
+    const emailInput = canvas.getByLabelText(/email/i);
 
-    await expect(canvas.getByLabelText(/email/i)).toHaveValue('user@example.com');
+    await userEvent.click(emailInput);
+    await userEvent.clear(emailInput);
+    await userEvent.type(emailInput, 'user@example.com', { delay: 10 });
+
+    await expect(emailInput).toHaveValue('user@example.com');
   },
 };
 

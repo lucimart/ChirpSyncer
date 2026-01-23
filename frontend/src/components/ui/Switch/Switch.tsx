@@ -185,19 +185,7 @@ export const Switch = memo(forwardRef<HTMLInputElement, SwitchProps>(
         };
 
     const switchElement = (
-      <SwitchContainer
-        type="button"
-        role="switch"
-        aria-checked={isChecked}
-        aria-label={!label ? ariaLabel : undefined}
-        aria-describedby={description ? descriptionId : ariaDescribedBy}
-        disabled={disabled}
-        $disabled={disabled}
-        $size={size}
-        $checked={!!isChecked}
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
-      >
+      <>
         <HiddenInput
           ref={ref}
           type="checkbox"
@@ -210,18 +198,33 @@ export const Switch = memo(forwardRef<HTMLInputElement, SwitchProps>(
           readOnly
           {...props}
         />
-        {(onLabel || offLabel) && size !== 'sm' && (
-          <SwitchLabels $size={size}>
-            <OnLabel $visible={!!isChecked}>{onLabel}</OnLabel>
-            <OffLabel $visible={!isChecked}>{offLabel}</OffLabel>
-          </SwitchLabels>
-        )}
-        <Knob
+        <SwitchContainer
+          type="button"
+          role="switch"
+          aria-checked={isChecked}
+          aria-label={label || ariaLabel || 'Toggle'}
+          aria-describedby={description ? descriptionId : ariaDescribedBy}
+          disabled={disabled}
+          $disabled={disabled}
           $size={size}
-          animate={knobAnimation}
-          initial={false}
-        />
-      </SwitchContainer>
+          $checked={!!isChecked}
+          onClick={handleClick}
+          onKeyDown={handleKeyDown}
+        >
+          {(onLabel || offLabel) && size !== 'sm' && (
+            <SwitchLabels $size={size} aria-hidden="true">
+              <OnLabel $visible={!!isChecked}>{onLabel}</OnLabel>
+              <OffLabel $visible={!isChecked}>{offLabel}</OffLabel>
+            </SwitchLabels>
+          )}
+          <Knob
+            $size={size}
+            animate={knobAnimation}
+            initial={false}
+            aria-hidden="true"
+          />
+        </SwitchContainer>
+      </>
     );
 
     if (label || description) {

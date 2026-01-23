@@ -84,6 +84,7 @@ const SelectComponent = forwardRef<HTMLSelectElement, SelectProps>(
     id: providedId,
     className,
     'aria-describedby': ariaDescribedBy,
+    'aria-label': ariaLabel,
     ...props
   }, ref) => {
     const generatedId = useId();
@@ -110,6 +111,7 @@ const SelectComponent = forwardRef<HTMLSelectElement, SelectProps>(
             $size={size}
             aria-invalid={!!error}
             aria-describedby={describedBy}
+            aria-label={label ? undefined : ariaLabel}
             {...props}
           >
             {placeholder && (

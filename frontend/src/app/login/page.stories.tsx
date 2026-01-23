@@ -41,10 +41,18 @@ export const FilledForm: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    await userEvent.type(canvas.getByLabelText(/username/i), 'testuser');
-    await userEvent.type(canvas.getByLabelText(/password/i), 'password123');
+    const usernameInput = canvas.getByLabelText(/username/i);
+    const passwordInput = canvas.getByLabelText(/password/i);
 
-    await expect(canvas.getByLabelText(/username/i)).toHaveValue('testuser');
+    await userEvent.click(usernameInput);
+    await userEvent.clear(usernameInput);
+    await userEvent.type(usernameInput, 'testuser', { delay: 10 });
+
+    await userEvent.click(passwordInput);
+    await userEvent.clear(passwordInput);
+    await userEvent.type(passwordInput, 'password123', { delay: 10 });
+
+    await expect(usernameInput).toHaveValue('testuser');
   },
 };
 

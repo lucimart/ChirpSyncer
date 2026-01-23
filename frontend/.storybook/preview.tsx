@@ -2,6 +2,7 @@ import type { Preview } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from '@/styles/ThemeContext';
 import { GlobalStyle } from '@/styles/GlobalStyle';
+import { ToastProvider } from '@/components/ui/Toast';
 
 const preview: Preview = {
   parameters: {
@@ -20,7 +21,9 @@ const preview: Preview = {
     (Story) => (
       <ThemeProvider>
         <GlobalStyle />
-        <Story />
+        <ToastProvider>
+          <Story />
+        </ToastProvider>
       </ThemeProvider>
     ),
   ],

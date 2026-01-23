@@ -119,7 +119,7 @@ export const lightTheme = {
   text: {
     primary: colors.slate[900],
     secondary: colors.slate[600],
-    tertiary: colors.slate[500], // Changed from 400 to 500 for better contrast (WCAG AA)
+    tertiary: colors.slate[600], // Changed from 500 to 600 for WCAG AA contrast on off-white backgrounds
     disabled: colors.slate[400],
     inverse: colors.white,
     link: colors.blue[600],

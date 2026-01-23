@@ -157,7 +157,7 @@ export const Progress: FC<ProgressProps> = memo(({
         aria-valuenow={indeterminate ? undefined : Math.round(percentage)}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label={ariaLabel || label}
+        aria-label={label ? undefined : (ariaLabel || 'Progress')}
         aria-labelledby={label ? `${id}-label` : undefined}
         aria-busy={indeterminate}
       >

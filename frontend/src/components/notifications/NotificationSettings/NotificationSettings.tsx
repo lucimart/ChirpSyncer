@@ -142,6 +142,7 @@ export const NotificationSettings: FC<NotificationSettingsProps> = memo(({
             <Switch
               id="channel-inApp"
               data-testid="channel-inApp"
+              aria-label="In-App Notifications"
               checked={formState.channels.inApp}
               onChange={() => handleChannelChange('inApp')}
             />
@@ -153,6 +154,7 @@ export const NotificationSettings: FC<NotificationSettingsProps> = memo(({
             <Switch
               id="channel-email"
               data-testid="channel-email"
+              aria-label="Email Notifications"
               checked={formState.channels.email}
               onChange={() => handleChannelChange('email')}
             />
@@ -164,6 +166,7 @@ export const NotificationSettings: FC<NotificationSettingsProps> = memo(({
             <Switch
               id="channel-push"
               data-testid="channel-push"
+              aria-label="Push Notifications"
               checked={formState.channels.push}
               onChange={() => handleChannelChange('push')}
             />
@@ -180,6 +183,7 @@ export const NotificationSettings: FC<NotificationSettingsProps> = memo(({
               <StyledNumberInput
                 type="number"
                 textAlign="center"
+                aria-label="Sync Failures threshold"
                 data-testid="threshold-syncFailures"
                 value={formState.thresholds.syncFailures}
                 onChange={(e) => handleThresholdChange('syncFailures', e.target.value)}
@@ -196,6 +200,7 @@ export const NotificationSettings: FC<NotificationSettingsProps> = memo(({
               <StyledNumberInput
                 type="number"
                 textAlign="center"
+                aria-label="Rate Limit Warning threshold percentage"
                 data-testid="threshold-rateLimitWarning"
                 value={formState.thresholds.rateLimitWarning}
                 onChange={(e) => handleThresholdChange('rateLimitWarning', e.target.value)}
@@ -213,6 +218,7 @@ export const NotificationSettings: FC<NotificationSettingsProps> = memo(({
               <StyledNumberInput
                 type="number"
                 textAlign="center"
+                aria-label="Engagement Drop threshold percentage"
                 data-testid="threshold-engagementDrop"
                 value={formState.thresholds.engagementDrop}
                 onChange={(e) => handleThresholdChange('engagementDrop', e.target.value)}
@@ -233,6 +239,7 @@ export const NotificationSettings: FC<NotificationSettingsProps> = memo(({
             <Switch
               id="quiet-hours-enabled"
               data-testid="quiet-hours-enabled"
+              aria-label="Enable Quiet Hours"
               checked={formState.quietHours.enabled}
               onChange={handleQuietHoursToggle}
             />
@@ -241,6 +248,7 @@ export const NotificationSettings: FC<NotificationSettingsProps> = memo(({
             <Stack direction="row" align="center" gap={2}>
               <Input
                 type="time"
+                aria-label="Quiet hours start time"
                 data-testid="quiet-hours-start"
                 value={formState.quietHours.start}
                 onChange={(e) => handleQuietHoursTimeChange('start', e.target.value)}
@@ -249,6 +257,7 @@ export const NotificationSettings: FC<NotificationSettingsProps> = memo(({
               <span>to</span>
               <Input
                 type="time"
+                aria-label="Quiet hours end time"
                 data-testid="quiet-hours-end"
                 value={formState.quietHours.end}
                 onChange={(e) => handleQuietHoursTimeChange('end', e.target.value)}
@@ -267,6 +276,7 @@ export const NotificationSettings: FC<NotificationSettingsProps> = memo(({
             <Switch
               id="category-sync"
               data-testid="category-sync"
+              aria-label="Sync Notifications"
               checked={formState.categories.sync}
               onChange={() => handleCategoryChange('sync')}
             />
@@ -278,6 +288,7 @@ export const NotificationSettings: FC<NotificationSettingsProps> = memo(({
             <Switch
               id="category-scheduling"
               data-testid="category-scheduling"
+              aria-label="Scheduling Notifications"
               checked={formState.categories.scheduling}
               onChange={() => handleCategoryChange('scheduling')}
             />
@@ -289,6 +300,7 @@ export const NotificationSettings: FC<NotificationSettingsProps> = memo(({
             <Switch
               id="category-engagement"
               data-testid="category-engagement"
+              aria-label="Engagement Notifications"
               checked={formState.categories.engagement}
               onChange={() => handleCategoryChange('engagement')}
             />
@@ -300,6 +312,7 @@ export const NotificationSettings: FC<NotificationSettingsProps> = memo(({
             <Switch
               id="category-security"
               data-testid="category-security"
+              aria-label="Security Notifications"
               checked={formState.categories.security}
               onChange={() => handleCategoryChange('security')}
             />

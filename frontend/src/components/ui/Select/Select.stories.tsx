@@ -41,6 +41,7 @@ type Story = StoryObj<typeof Select>;
 export const Default: Story = {
   args: {
     options,
+    'aria-label': 'Select option',
   },
 };
 

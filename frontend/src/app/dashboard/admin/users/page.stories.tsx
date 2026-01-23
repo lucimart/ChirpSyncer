@@ -49,7 +49,9 @@ export const WithSearch: Story = {
     const canvas = within(canvasElement);
 
     const searchInput = canvas.getByPlaceholderText('Search users...');
-    await userEvent.type(searchInput, 'admin');
+    await userEvent.click(searchInput);
+    await userEvent.clear(searchInput);
+    await userEvent.type(searchInput, 'admin', { delay: 10 });
 
     await expect(searchInput).toHaveValue('admin');
   },

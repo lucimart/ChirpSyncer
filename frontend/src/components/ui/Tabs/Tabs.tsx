@@ -234,7 +234,7 @@ export const Tabs: FC<TabsProps> = memo(({
                   onKeyDown={(e) => handleKeyDown(e, index)}
                   role="tab"
                   aria-selected={isActive}
-                  aria-disabled={item.disabled}
+                  aria-disabled={item.disabled ? 'true' : undefined}
                   aria-controls={`${id}-panel-${item.id}`}
                   id={`${id}-tab-${item.id}`}
                   tabIndex={isActive ? 0 : -1}
