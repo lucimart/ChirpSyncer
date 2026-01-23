@@ -18,6 +18,8 @@ import {
   SYNC_NOW_COMMAND,
   THEME_STORAGE_KEY,
 } from './types';
+import { api } from '@/lib/api';
+import { useToast } from '../Toast';
 
 // Styled Components
 const Overlay = styled.div`
@@ -239,6 +241,7 @@ export const CommandPalette: FC = memo(() => {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { mode, toggleMode } = useSafeTheme();
+  const { addToast } = useToast();
 
   useEffect(() => {
     setMounted(true);
@@ -278,8 +281,16 @@ export const CommandPalette: FC = memo(() => {
       {
         ...SYNC_NOW_COMMAND,
         category: 'action',
-        action: () => {
-          console.log('Sync now');
+        action: async () => {
+          try {
+            const response = await api.startSync();
+            if (response.data?.job_id) {
+              addToast({ type: 'success', title: 'Sync Started', message: 'Synchronization is running in background' });
+              router.push('/dashboard/sync');
+            }
+          } catch {
+            addToast({ type: 'error', title: 'Sync Failed', message: 'Could not start synchronization' });
+          }
         },
       },
       {
@@ -305,7 +316,7 @@ export const CommandPalette: FC = memo(() => {
     }));
 
     return [...actionCommands, ...navigationCommands];
-  }, [mode, toggleMode, router]);
+  }, [mode, toggleMode, router, addToast]);
 
   const actionCommands = useMemo(
     () => commands.filter((c) => c.category === 'action'),
