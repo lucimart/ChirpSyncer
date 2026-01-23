@@ -4,7 +4,7 @@ import { useEffect, useMemo, type FC } from 'react';
 import { ErrorCard } from '../ErrorCard';
 import { useApiError, createFallbackError, type ErrorDefinition } from '@/hooks/useApiError';
 
-interface ApiErrorDisplayProps {
+export interface ApiErrorDisplayProps {
   /** The error string or Error object to display */
   error: string | Error | null;
   /** Callback when retry is clicked (only shown if error is retryable) */

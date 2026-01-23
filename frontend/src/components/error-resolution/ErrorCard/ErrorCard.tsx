@@ -24,7 +24,7 @@ interface SeverityStyle {
   borderColor: ThemeColorPath;
 }
 
-interface ErrorCardProps {
+export interface ErrorCardProps {
   error: ErrorDefinition;
   originalError?: string;
   onRetry?: () => void | Promise<void>;
