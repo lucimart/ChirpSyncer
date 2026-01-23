@@ -112,7 +112,7 @@ export interface PlatformConnector {
   icon: string;
   color: string;
   capabilities: PlatformCapabilities;
-  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix' | 'dsnp' | 'ssb' | 'discord' | 'reddit' | 'tumblr';
+  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix' | 'dsnp' | 'ssb' | 'discord' | 'reddit' | 'tumblr' | 'pinterest' | 'youtube' | 'tiktok';
   status: 'available' | 'coming_soon' | 'beta';
 }
 
@@ -586,8 +586,8 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     icon: '♪',
     color: '#000000',
     capabilities: PLATFORM_DEFAULTS.tiktok,
-    auth_type: 'oauth2',
-    status: 'coming_soon',
+    auth_type: 'tiktok',
+    status: 'beta',
   },
   {
     id: 'youtube',
@@ -597,8 +597,8 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     icon: '▶',
     color: '#FF0000',
     capabilities: PLATFORM_DEFAULTS.youtube,
-    auth_type: 'oauth2',
-    status: 'coming_soon',
+    auth_type: 'youtube',
+    status: 'beta',
   },
   {
     id: 'pinterest',
@@ -608,8 +608,8 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     icon: 'P',
     color: '#E60023',
     capabilities: PLATFORM_DEFAULTS.pinterest,
-    auth_type: 'oauth2',
-    status: 'coming_soon',
+    auth_type: 'pinterest',
+    status: 'beta',
   },
   {
     id: 'tumblr',
@@ -779,7 +779,7 @@ export function useConnectPlatform() {
         // Remove internal _mode field before sending
         const { _mode, ...cleanCredentials } = credentials;
         credentials = cleanCredentials;
-      } else if (platform === 'bluesky' || platform === 'instagram' || platform === 'threads' || platform === 'linkedin' || platform === 'facebook' || platform === 'nostr' || platform === 'matrix') {
+      } else if (platform === 'bluesky' || platform === 'instagram' || platform === 'threads' || platform === 'linkedin' || platform === 'facebook' || platform === 'nostr' || platform === 'matrix' || platform === 'pinterest' || platform === 'youtube' || platform === 'tiktok') {
         credentialType = 'api';
       } else {
         credentialType = 'scraping';

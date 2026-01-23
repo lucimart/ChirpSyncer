@@ -851,6 +851,129 @@ export default function ConnectorsPage() {
             />
           </Stack>
         );
+      case 'pinterest':
+        return (
+          <Stack gap={4}>
+            <SmallText>
+              Pinterest uses OAuth 2.0 authentication. You need to create an app at
+              developers.pinterest.com to get your client ID and secret.
+            </SmallText>
+            <Input
+              label="Client ID"
+              type="text"
+              value={credentials.client_id || ''}
+              onChange={(e) => setCredentials({ ...credentials, client_id: e.target.value })}
+              placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              hint="From your Pinterest app settings"
+              fullWidth
+            />
+            <Input
+              label="Client Secret"
+              type="password"
+              value={credentials.client_secret || ''}
+              onChange={(e) => setCredentials({ ...credentials, client_secret: e.target.value })}
+              fullWidth
+            />
+            <Input
+              label="Access Token"
+              type="password"
+              value={credentials.access_token || ''}
+              onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
+              hint="OAuth 2.0 access token"
+              fullWidth
+            />
+            <Input
+              label="Refresh Token"
+              type="password"
+              value={credentials.refresh_token || ''}
+              onChange={(e) => setCredentials({ ...credentials, refresh_token: e.target.value })}
+              hint="For automatic token refresh"
+              fullWidth
+            />
+          </Stack>
+        );
+      case 'youtube':
+        return (
+          <Stack gap={4}>
+            <SmallText>
+              YouTube uses Google OAuth 2.0 authentication. You need to create a project at
+              console.cloud.google.com and enable the YouTube Data API v3.
+            </SmallText>
+            <Input
+              label="Client ID"
+              type="text"
+              value={credentials.client_id || ''}
+              onChange={(e) => setCredentials({ ...credentials, client_id: e.target.value })}
+              placeholder="xxxxx.apps.googleusercontent.com"
+              hint="From Google Cloud Console"
+              fullWidth
+            />
+            <Input
+              label="Client Secret"
+              type="password"
+              value={credentials.client_secret || ''}
+              onChange={(e) => setCredentials({ ...credentials, client_secret: e.target.value })}
+              fullWidth
+            />
+            <Input
+              label="Access Token"
+              type="password"
+              value={credentials.access_token || ''}
+              onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
+              hint="OAuth 2.0 access token"
+              fullWidth
+            />
+            <Input
+              label="Refresh Token"
+              type="password"
+              value={credentials.refresh_token || ''}
+              onChange={(e) => setCredentials({ ...credentials, refresh_token: e.target.value })}
+              hint="For automatic token refresh"
+              fullWidth
+            />
+          </Stack>
+        );
+      case 'tiktok':
+        return (
+          <Stack gap={4}>
+            <SmallText>
+              TikTok uses OAuth 2.0 authentication. You need to register an app at
+              developers.tiktok.com and get approved for the required scopes.
+            </SmallText>
+            <Input
+              label="Client Key"
+              type="text"
+              value={credentials.client_key || ''}
+              onChange={(e) => setCredentials({ ...credentials, client_key: e.target.value })}
+              placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              hint="From your TikTok developer app"
+              fullWidth
+            />
+            <Input
+              label="Client Secret"
+              type="password"
+              value={credentials.client_secret || ''}
+              onChange={(e) => setCredentials({ ...credentials, client_secret: e.target.value })}
+              fullWidth
+            />
+            <Input
+              label="Access Token"
+              type="password"
+              value={credentials.access_token || ''}
+              onChange={(e) => setCredentials({ ...credentials, access_token: e.target.value })}
+              hint="OAuth 2.0 access token"
+              fullWidth
+            />
+            <Input
+              label="Refresh Token"
+              type="password"
+              value={credentials.refresh_token || ''}
+              onChange={(e) => setCredentials({ ...credentials, refresh_token: e.target.value })}
+              hint="For automatic token refresh"
+              fullWidth
+            />
+          </Stack>
+        );
       default:
         return null;
     }

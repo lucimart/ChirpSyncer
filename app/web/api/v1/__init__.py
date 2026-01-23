@@ -80,6 +80,9 @@ from app.web.api.v1.ssb import ssb_bp  # noqa: E402
 from app.web.api.v1.discord import discord_bp  # noqa: E402
 from app.web.api.v1.reddit import reddit_bp  # noqa: E402
 from app.web.api.v1.tumblr import tumblr_bp  # noqa: E402
+from app.web.api.v1.pinterest import pinterest_bp  # noqa: E402
+from app.web.api.v1.youtube import youtube_bp  # noqa: E402
+from app.web.api.v1.tiktok import tiktok_bp  # noqa: E402
 
 api_v1.register_blueprint(auth_bp)
 api_v1.register_blueprint(dashboard_bp)
@@ -114,3 +117,6 @@ api_v1.register_blueprint(ssb_bp)
 api_v1.register_blueprint(discord_bp)
 api_v1.register_blueprint(reddit_bp)
 api_v1.register_blueprint(tumblr_bp)
+api_v1.register_blueprint(pinterest_bp)
+api_v1.register_blueprint(youtube_bp)
+api_v1.register_blueprint(tiktok_bp)
