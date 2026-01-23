@@ -95,10 +95,10 @@ describe('Sprint 16: Connector Framework', () => {
       expect(caps.interactions.quote).toBe(false); // Mastodon doesn't support quote posts
     });
 
-    it('should define capabilities for instagram (read-only)', () => {
+    it('should define capabilities for instagram', () => {
       const caps = PLATFORM_DEFAULTS.instagram;
 
-      expect(caps.publish).toBe(false); // Requires Business account
+      expect(caps.publish).toBe(true); // Now supported via Graph API
       expect(caps.delete).toBe(false);
       expect(caps.edit).toBe(false);
       expect(caps.read).toBe(true);
@@ -690,7 +690,7 @@ describe('Sprint 16: Connector Framework', () => {
     it('should check if platform supports publishing', () => {
       expect(canPublishTo('twitter')).toBe(true);
       expect(canPublishTo('bluesky')).toBe(true);
-      expect(canPublishTo('instagram')).toBe(false);
+      expect(canPublishTo('instagram')).toBe(true); // Now supported via Graph API
     });
 
     it('should get character limit for platform', () => {

@@ -166,7 +166,8 @@ describe('RegisterPage', () => {
     await user.type(screen.getByLabelText(/confirm password/i), 'password123');
     await user.click(screen.getByRole('button', { name: /create account/i }));
 
-    expect(screen.getByRole('button')).toBeDisabled();
+    // Check the submit button specifically (not social login buttons)
+    expect(screen.getByRole('button', { name: /create account/i })).toBeDisabled();
   });
 
   it('all inputs are required', () => {

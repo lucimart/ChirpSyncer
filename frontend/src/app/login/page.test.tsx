@@ -38,7 +38,8 @@ describe('LoginPage', () => {
 
     expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+    // Use exact match to avoid matching social login buttons
+    expect(screen.getByRole('button', { name: /^sign in$/i })).toBeInTheDocument();
   });
 
   it('has accessible form labels', () => {
@@ -79,7 +80,7 @@ describe('LoginPage', () => {
 
     await user.type(screen.getByLabelText(/username/i), 'testuser');
     await user.type(screen.getByLabelText(/password/i), 'password123');
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
+    await user.click(screen.getByRole('button', { name: /^sign in$/i }));
 
     await waitFor(() => {
       expect(mockLogin).toHaveBeenCalledWith('testuser', 'password123');
@@ -95,7 +96,7 @@ describe('LoginPage', () => {
 
     await user.type(screen.getByLabelText(/username/i), 'baduser');
     await user.type(screen.getByLabelText(/password/i), 'wrongpass');
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
+    await user.click(screen.getByRole('button', { name: /^sign in$/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/invalid credentials/i)).toBeInTheDocument();
@@ -112,8 +113,11 @@ describe('LoginPage', () => {
 
     await user.type(screen.getByLabelText(/username/i), 'testuser');
     await user.type(screen.getByLabelText(/password/i), 'password123');
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
 
-    expect(screen.getByRole('button')).toBeDisabled();
+    const submitButton = screen.getByRole('button', { name: /^sign in$/i });
+    await user.click(submitButton);
+
+    // Check the submit button is disabled (button shows spinner when loading)
+    expect(submitButton).toBeDisabled();
   });
 });
