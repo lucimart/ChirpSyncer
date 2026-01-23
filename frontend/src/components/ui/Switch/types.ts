@@ -16,6 +16,8 @@ export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>,
   /** Custom on/off labels inside switch */
   onLabel?: string;
   offLabel?: string;
+  /** Test ID for testing purposes */
+  'data-testid'?: string;
 }
 
 export const SWITCH_SIZES: Record<SwitchSize, { width: number; height: number; knob: number; translate: number }> = {
