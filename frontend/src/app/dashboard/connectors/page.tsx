@@ -146,6 +146,8 @@ export default function ConnectorsPage() {
 
   const [activeTab, setActiveTab] = useState<TabId>('platforms');
   const [connectModal, setConnectModal] = useState<PlatformConnector | null>(null);
+  const [settingsModal, setSettingsModal] = useState<PlatformConnector | null>(null);
+  const [advancedSettingsModal, setAdvancedSettingsModal] = useState<PlatformSyncConfig | null>(null);
   const [credentials, setCredentials] = useState<Record<string, string>>({});
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
@@ -580,7 +582,11 @@ export default function ConnectorsPage() {
                           <Link2Off size={16} />
                           Disconnect
                         </Button>
-                        <Button variant="secondary" size="sm">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setSettingsModal(connector)}
+                        >
                           <Settings size={16} />
                           Settings
                         </Button>
@@ -659,7 +665,11 @@ export default function ConnectorsPage() {
                     </DirectionButton>
                   </Stack>
 
-                  <Button variant="secondary" size="sm">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setAdvancedSettingsModal(config)}
+                  >
                     <Settings size={16} />
                     Advanced Settings
                     <ChevronRight size={16} />
@@ -708,6 +718,126 @@ export default function ConnectorsPage() {
         }
       >
         {renderConnectForm()}
+      </Modal>
+
+      {/* Connector Settings Modal */}
+      <Modal
+        isOpen={!!settingsModal}
+        onClose={() => setSettingsModal(null)}
+        title={`${settingsModal?.name} Settings`}
+        footer={
+          <Stack direction="row" justify="end" gap={2}>
+            <Button variant="secondary" onClick={() => setSettingsModal(null)}>
+              Close
+            </Button>
+          </Stack>
+        }
+      >
+        {settingsModal && (
+          <Stack gap={4}>
+            <div>
+              <Label spacing="md">Connected Account</Label>
+              <SmallText>{getConnection(settingsModal.platform)?.handle || 'N/A'}</SmallText>
+            </div>
+            <div>
+              <Label spacing="md">Connection Status</Label>
+              <Badge variant={getConnection(settingsModal.platform)?.connected ? 'success' : 'neutral'} size="sm">
+                {getConnection(settingsModal.platform)?.connected ? 'Connected' : 'Disconnected'}
+              </Badge>
+            </div>
+            <div>
+              <Label spacing="md">Last Sync</Label>
+              <SmallText>
+                {getConnection(settingsModal.platform)?.last_sync
+                  ? new Date(getConnection(settingsModal.platform)!.last_sync!).toLocaleString()
+                  : 'Never'}
+              </SmallText>
+            </div>
+            <div>
+              <Label spacing="md">API Rate Limits</Label>
+              <SmallText>
+                {settingsModal.capabilities.characterLimit} characters per post
+              </SmallText>
+            </div>
+          </Stack>
+        )}
+      </Modal>
+
+      {/* Advanced Sync Settings Modal */}
+      <Modal
+        isOpen={!!advancedSettingsModal}
+        onClose={() => setAdvancedSettingsModal(null)}
+        title="Advanced Sync Settings"
+        footer={
+          <Stack direction="row" justify="end" gap={2}>
+            <Button variant="secondary" onClick={() => setAdvancedSettingsModal(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                addToast({
+                  type: 'success',
+                  title: 'Settings Saved',
+                  message: 'Advanced sync settings have been updated.',
+                });
+                setAdvancedSettingsModal(null);
+              }}
+            >
+              Save Changes
+            </Button>
+          </Stack>
+        }
+      >
+        {advancedSettingsModal && (
+          <Stack gap={4}>
+            <div>
+              <Label spacing="md">Sync Interval</Label>
+              <Input
+                type="number"
+                defaultValue={15}
+                min={5}
+                max={60}
+                hint="Minutes between sync operations (5-60)"
+                fullWidth
+              />
+            </div>
+            <div>
+              <Label spacing="md">Content Filters</Label>
+              <Stack gap={2}>
+                <Switch
+                  checked={true}
+                  onChange={() => {}}
+                  label="Include replies"
+                />
+                <Switch
+                  checked={true}
+                  onChange={() => {}}
+                  label="Include reposts/retweets"
+                />
+                <Switch
+                  checked={false}
+                  onChange={() => {}}
+                  label="Include media-only posts"
+                />
+              </Stack>
+            </div>
+            <div>
+              <Label spacing="md">Error Handling</Label>
+              <Stack gap={2}>
+                <Switch
+                  checked={true}
+                  onChange={() => {}}
+                  label="Retry failed syncs automatically"
+                />
+                <Switch
+                  checked={false}
+                  onChange={() => {}}
+                  label="Pause sync on repeated errors"
+                />
+              </Stack>
+            </div>
+          </Stack>
+        )}
       </Modal>
     </div>
   );

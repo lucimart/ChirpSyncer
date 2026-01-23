@@ -116,6 +116,7 @@ interface SavedTweet {
   saved_at: string;
   original_date: string;
   collection_id: number | null;
+  original_url?: string;
 }
 
 const COLORS = [
@@ -165,19 +166,32 @@ export default function BookmarksPage() {
         collection_id: number | null;
         notes?: string | null;
         saved_at: number;
+        platform?: 'twitter' | 'bluesky';
+        original_url?: string;
       }>).map((item) => {
         const savedAt = new Date(item.saved_at * 1000);
+        // Build original URL based on platform
+        let originalUrl = item.original_url;
+        if (!originalUrl && item.tweet_id) {
+          if (item.platform === 'bluesky' || item.tweet_id.includes('bsky')) {
+            originalUrl = `https://bsky.app/profile/${item.tweet_id}`;
+          } else {
+            // Default to Twitter/X
+            originalUrl = `https://x.com/i/status/${item.tweet_id}`;
+          }
+        }
         return {
           id: item.id,
           content: item.notes || item.tweet_id,
           author_name: 'Saved Post',
           author_handle: item.tweet_id,
-          platform: 'unknown',
+          platform: item.platform || 'unknown',
           likes: 0,
           comments: 0,
           saved_at: savedAt.toISOString(),
           original_date: savedAt.toISOString().split('T')[0],
           collection_id: item.collection_id,
+          original_url: originalUrl,
         };
       });
     },
@@ -257,7 +271,15 @@ export default function BookmarksPage() {
                         {bookmark.platform === 'twitter' ? 'Twitter' : 'Bluesky'}
                       </Badge>
                     )}
-                    <IconButton aria-label="Open original">
+                    <IconButton
+                      aria-label="Open original"
+                      onClick={() => {
+                        if (bookmark.original_url) {
+                          window.open(bookmark.original_url, '_blank', 'noopener,noreferrer');
+                        }
+                      }}
+                      disabled={!bookmark.original_url}
+                    >
                       <ExternalLink size={16} />
                     </IconButton>
                     <IconButton

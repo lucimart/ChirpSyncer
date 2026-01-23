@@ -1,8 +1,9 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { Heart, MessageCircle, Repeat2, Quote, MoreHorizontal, ExternalLink } from 'lucide-react';
-import { ATProtoPost, getProfileUrl } from '@/lib/bluesky';
+import { Heart, MessageCircle, Repeat2, Quote, MoreHorizontal, ExternalLink, Link, Share2, Flag, Ban } from 'lucide-react';
+import { ATProtoPost, getProfileUrl, getPostUrl } from '@/lib/bluesky';
 import { Avatar } from '@/components/ui';
 
 const PostCard = styled.article`
@@ -195,8 +196,12 @@ const ActionButton = styled.button<{ $active?: boolean; $type?: 'reply' | 'repos
   }
 `;
 
-const MoreButton = styled.button`
+const MoreButtonWrapper = styled.div`
+  position: relative;
   margin-left: auto;
+`;
+
+const MoreButton = styled.button`
   padding: ${({ theme }) => theme.spacing[1]};
   background: none;
   border: none;
@@ -212,6 +217,54 @@ const MoreButton = styled.button`
   svg {
     width: 18px;
     height: 18px;
+  }
+`;
+
+const DropdownMenu = styled.div<{ $isOpen: boolean }>`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 180px;
+  background: ${({ theme }) => theme.colors.background.primary};
+  border: 1px solid ${({ theme }) => theme.colors.border.light};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  box-shadow: ${({ theme }) => theme.shadows.lg};
+  z-index: 50;
+  opacity: ${({ $isOpen }) => ($isOpen ? 1 : 0)};
+  visibility: ${({ $isOpen }) => ($isOpen ? 'visible' : 'hidden')};
+  transform: ${({ $isOpen }) => ($isOpen ? 'translateY(4px)' : 'translateY(-8px)')};
+  transition: all 0.15s ease;
+`;
+
+const DropdownItem = styled.button<{ $danger?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+  width: 100%;
+  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
+  background: none;
+  border: none;
+  color: ${({ $danger, theme }) => ($danger ? theme.colors.danger[600] : theme.colors.text.primary)};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${({ $danger, theme }) =>
+      $danger ? theme.colors.surface.danger.bg : theme.colors.background.secondary};
+  }
+
+  &:first-child {
+    border-radius: ${({ theme }) => `${theme.borderRadius.lg} ${theme.borderRadius.lg} 0 0`};
+  }
+
+  &:last-child {
+    border-radius: ${({ theme }) => `0 0 ${theme.borderRadius.lg} ${theme.borderRadius.lg}`};
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
   }
 `;
 
@@ -235,6 +288,10 @@ interface BlueskyPostProps {
   onRepost?: (post: ATProtoPost) => void;
   onLike?: (post: ATProtoPost) => void;
   onQuote?: (post: ATProtoPost) => void;
+  onCopyLink?: (post: ATProtoPost) => void;
+  onShare?: (post: ATProtoPost) => void;
+  onReport?: (post: ATProtoPost) => void;
+  onBlock?: (post: ATProtoPost) => void;
   isLiked?: boolean;
   isReposted?: boolean;
 }
@@ -245,10 +302,59 @@ export function BlueskyPost({
   onRepost,
   onLike,
   onQuote,
+  onCopyLink,
+  onShare,
+  onReport,
+  onBlock,
   isLiked,
   isReposted,
 }: BlueskyPostProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const profileUrl = getProfileUrl(post.author.handle);
+  const postUrl = getPostUrl(post.author.handle, post.uri);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMenuOpen]);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(postUrl);
+    onCopyLink?.(post);
+    setIsMenuOpen(false);
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: `Post by @${post.author.handle}`,
+        text: post.record.text,
+        url: postUrl,
+      });
+    }
+    onShare?.(post);
+    setIsMenuOpen(false);
+  };
+
+  const handleReport = () => {
+    onReport?.(post);
+    setIsMenuOpen(false);
+  };
+
+  const handleBlock = () => {
+    onBlock?.(post);
+    setIsMenuOpen(false);
+  };
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -354,9 +460,37 @@ export function BlueskyPost({
               <Quote />
               {post.quoteCount > 0 && formatNumber(post.quoteCount)}
             </ActionButton>
-            <MoreButton>
-              <MoreHorizontal />
-            </MoreButton>
+            <MoreButtonWrapper ref={menuRef}>
+              <MoreButton
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label="More options"
+                aria-expanded={isMenuOpen}
+              >
+                <MoreHorizontal />
+              </MoreButton>
+              <DropdownMenu $isOpen={isMenuOpen}>
+                <DropdownItem onClick={handleCopyLink}>
+                  <Link />
+                  Copy link
+                </DropdownItem>
+                <DropdownItem onClick={handleShare}>
+                  <Share2 />
+                  Share
+                </DropdownItem>
+                <DropdownItem onClick={() => window.open(postUrl, '_blank', 'noopener,noreferrer')}>
+                  <ExternalLink />
+                  Open on Bluesky
+                </DropdownItem>
+                <DropdownItem onClick={handleReport} $danger>
+                  <Flag />
+                  Report post
+                </DropdownItem>
+                <DropdownItem onClick={handleBlock} $danger>
+                  <Ban />
+                  Block user
+                </DropdownItem>
+              </DropdownMenu>
+            </MoreButtonWrapper>
           </Actions>
         </PostContent>
       </PostHeader>
