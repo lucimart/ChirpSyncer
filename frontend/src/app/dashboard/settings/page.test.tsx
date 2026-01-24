@@ -35,6 +35,7 @@ jest.mock('next/navigation', () => ({
     prefetch: jest.fn(),
   }),
   usePathname: () => '/dashboard/settings',
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 // Mock auth

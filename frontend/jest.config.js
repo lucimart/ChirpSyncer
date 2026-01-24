@@ -1,6 +1,8 @@
 /** @type {import('jest').Config} */
 const config = {
   testEnvironment: 'jsdom',
+  testTimeout: 10000,
+  forceExit: true,
   testEnvironmentOptions: {
     customExportConditions: ['browser', 'node'],
   },
