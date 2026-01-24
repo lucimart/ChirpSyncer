@@ -1,0 +1,18 @@
+<svg viewBox="0 0 140 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="swoop-logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#34D399"/>
+    </linearGradient>
+  </defs>
+  <!-- Swoop arc icon -->
+  <path
+    d="M4 22 Q16 6 28 22"
+    stroke="url(#swoop-logo-gradient)"
+    stroke-width="4"
+    stroke-linecap="round"
+    fill="none"
+  />
+  <!-- "Swoop" wordmark -->
+  <text x="36" y="24" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="700" fill="#8B5CF6">Swoop</text>
+</svg>

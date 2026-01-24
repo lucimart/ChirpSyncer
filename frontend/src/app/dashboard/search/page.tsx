@@ -6,30 +6,14 @@ import styled from 'styled-components';
 import {
   Search as SearchIcon,
   Filter,
-  Image,
-  Heart,
-  Repeat,
+  Image as ImageIcon,
   Download,
-  ChevronLeft,
-  ChevronRight,
+  Hash,
+  User,
 } from 'lucide-react';
-import { Button, Card, Input } from '@/components/ui';
-import type { SearchResult, SearchFilters } from '@/types';
-
-const PageHeader = styled.div`
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
+import { Button, Card, Input, PageHeader, EmptyState, Select, Pagination, MetaItem, Stack } from '@/components/ui';
+import { api, SearchResultItem } from '@/lib/api';
+import type { SearchFilters } from '@/types';
 
 const SearchContainer = styled.div`
   display: flex;
@@ -39,32 +23,6 @@ const SearchContainer = styled.div`
 
 const SearchInputWrapper = styled.div`
   flex: 1;
-  position: relative;
-`;
-
-const SearchInputIcon = styled.div`
-  position: absolute;
-  left: ${({ theme }) => theme.spacing[3]};
-  top: 50%;
-  transform: translateY(-50%);
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const StyledSearchInput = styled.input`
-  width: 100%;
-  height: 44px;
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
-  padding-left: ${({ theme }) => theme.spacing[10]};
-  font-size: ${({ theme }) => theme.fontSizes.base};
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  background-color: ${({ theme }) => theme.colors.background.primary};
-
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.primary[500]};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[100]};
-  }
 `;
 
 const FiltersCard = styled(Card)<{ $visible: boolean }>`
@@ -77,8 +35,6 @@ const FiltersGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: ${({ theme }) => theme.spacing[4]};
 `;
-
-const FilterGroup = styled.div``;
 
 const FilterLabel = styled.label`
   font-size: ${({ theme }) => theme.fontSizes.sm};
@@ -103,12 +59,6 @@ const ResultsInfo = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing[4]};
   color: ${({ theme }) => theme.colors.text.secondary};
   font-size: ${({ theme }) => theme.fontSizes.sm};
-`;
-
-const ResultsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[3]};
 `;
 
 const ResultCard = styled(Card)`
@@ -137,11 +87,6 @@ const ResultPlatform = styled.span<{ $platform: string }>`
   color: ${({ $platform }) => ($platform === 'twitter' ? '#1DA1F2' : '#0085FF')};
 `;
 
-const ResultDate = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
 const ResultContent = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.base};
   color: ${({ theme }) => theme.colors.text.primary};
@@ -163,53 +108,8 @@ const ResultMeta = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.sm};
 `;
 
-const MetaItem = styled.span`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[1]};
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: ${({ theme }) => theme.spacing[10]};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-const Pagination = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
+const PaginationWrapper = styled.div`
   margin-top: ${({ theme }) => theme.spacing[6]};
-`;
-
-const PageButton = styled.button<{ $active?: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 36px;
-  height: 36px;
-  padding: ${({ theme }) => `0 ${theme.spacing[2]}`};
-  border: 1px solid
-    ${({ $active, theme }) =>
-      $active ? theme.colors.primary[600] : theme.colors.border.default};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  background-color: ${({ $active, theme }) =>
-    $active ? theme.colors.primary[600] : 'transparent'};
-  color: ${({ $active, theme }) =>
-    $active ? 'white' : theme.colors.text.primary};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background-color: ${({ $active, theme }) =>
-      $active ? theme.colors.primary[700] : theme.colors.background.secondary};
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 `;
 
 const ResultCheckbox = styled.input`
@@ -217,15 +117,6 @@ const ResultCheckbox = styled.input`
   height: 16px;
   cursor: pointer;
   margin-right: ${({ theme }) => theme.spacing[3]};
-`;
-
-const ResultCardWrapper = styled.div`
-  display: flex;
-  align-items: flex-start;
-`;
-
-const ResultCardContent = styled.div`
-  flex: 1;
 `;
 
 // Safe text highlighting without dangerouslySetInnerHTML
@@ -249,58 +140,45 @@ function HighlightedContent({ content, query }: { content: string; query: string
 
 const PAGE_SIZE = 10;
 
+interface ExtendedFilters extends SearchFilters {
+  min_retweets?: number;
+  date_from?: string;
+  date_to?: string;
+  platform?: 'twitter' | 'bluesky';
+}
+
 export default function SearchPage() {
   const [query, setQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState<SearchFilters>({
+  const [filters, setFilters] = useState<ExtendedFilters>({
     has_media: false,
     min_likes: undefined,
+    min_retweets: undefined,
+    date_from: undefined,
+    date_to: undefined,
+    platform: undefined,
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const { data: results, isLoading } = useQuery<SearchResult[]>({
+  const { data: results, isLoading } = useQuery<SearchResultItem[]>({
     queryKey: ['search', query, filters],
     queryFn: async () => {
       if (!query.trim()) return [];
-      // Mock data
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return [
-        {
-          id: '1',
-          content:
-            'Just launched our new feature for automatic tweet cleanup! Check it out at chirpsyncer.com',
-          created_at: new Date().toISOString(),
-          platform: 'twitter',
-          likes: 42,
-          retweets: 12,
-          has_media: true,
-        },
-        {
-          id: '2',
-          content:
-            'The best way to manage your social media presence across multiple platforms.',
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-          platform: 'bluesky',
-          likes: 28,
-          retweets: 5,
-          has_media: false,
-        },
-        {
-          id: '3',
-          content:
-            'New analytics dashboard is live! Track your engagement metrics in real-time.',
-          created_at: new Date(Date.now() - 172800000).toISOString(),
-          platform: 'twitter',
-          likes: 156,
-          retweets: 34,
-          has_media: true,
-        },
-      ].filter((r) => {
-        if (filters.has_media && !r.has_media) return false;
-        if (filters.min_likes && r.likes < filters.min_likes) return false;
-        return r.content.toLowerCase().includes(query.toLowerCase());
+      const response = await api.searchPosts({
+        q: query,
+        limit: 100,
+        has_media: filters.has_media || undefined,
+        min_likes: filters.min_likes,
+        min_retweets: filters.min_retweets,
+        date_from: filters.date_from,
+        date_to: filters.date_to,
+        platform: filters.platform,
       });
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Search failed');
+      }
+      return response.data.results;
     },
     enabled: query.length > 0,
   });
@@ -341,23 +219,20 @@ export default function SearchPage() {
 
   return (
     <div>
-      <PageHeader>
-        <PageTitle>Search</PageTitle>
-        <PageDescription>
-          Search through your synced posts across all platforms
-        </PageDescription>
-      </PageHeader>
+      <PageHeader
+        title="Search"
+        description="Search through your synced posts across all platforms"
+      />
 
       <SearchContainer>
         <SearchInputWrapper>
-          <SearchInputIcon>
-            <SearchIcon size={20} />
-          </SearchInputIcon>
-          <StyledSearchInput
+          <Input
             type="text"
             placeholder="Search posts..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            startIcon={<SearchIcon size={20} />}
+            fullWidth
           />
         </SearchInputWrapper>
         <Button
@@ -371,7 +246,7 @@ export default function SearchPage() {
 
       <FiltersCard $visible={showFilters} padding="md">
         <FiltersGrid>
-          <FilterGroup>
+          <div>
             <FilterLabel>
               <Checkbox
                 type="checkbox"
@@ -380,11 +255,11 @@ export default function SearchPage() {
                   setFilters((prev) => ({ ...prev, has_media: e.target.checked }))
                 }
               />
-              <Image size={16} />
+              <ImageIcon size={16} />
               Has media
             </FilterLabel>
-          </FilterGroup>
-          <FilterGroup>
+          </div>
+          <div>
             <Input
               label="Minimum likes"
               type="number"
@@ -397,7 +272,65 @@ export default function SearchPage() {
               }
               placeholder="0"
             />
-          </FilterGroup>
+          </div>
+          <div>
+            <Input
+              label="Minimum retweets"
+              type="number"
+              value={filters.min_retweets || ''}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  min_retweets: e.target.value ? parseInt(e.target.value) : undefined,
+                }))
+              }
+              placeholder="0"
+            />
+          </div>
+          <div>
+            <Input
+              label="From date"
+              type="date"
+              value={filters.date_from || ''}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  date_from: e.target.value || undefined,
+                }))
+              }
+            />
+          </div>
+          <div>
+            <Input
+              label="To date"
+              type="date"
+              value={filters.date_to || ''}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  date_to: e.target.value || undefined,
+                }))
+              }
+            />
+          </div>
+          <div>
+            <Select
+              label="Platform"
+              value={filters.platform || ''}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  platform: (e.target.value as 'twitter' | 'bluesky') || undefined,
+                }))
+              }
+              options={[
+                { value: '', label: 'All platforms' },
+                { value: 'twitter', label: 'Twitter' },
+                { value: 'bluesky', label: 'Bluesky' },
+              ]}
+              fullWidth
+            />
+          </div>
         </FiltersGrid>
       </FiltersCard>
 
@@ -419,98 +352,68 @@ export default function SearchPage() {
 
       {!query ? (
         <Card padding="lg">
-          <EmptyState>
-            Enter a search term to find posts across your synced accounts
-          </EmptyState>
+          <EmptyState
+            icon={SearchIcon}
+            title="Search your synced posts"
+            description="Enter a search term to find posts across your synced accounts"
+          />
         </Card>
       ) : isLoading ? (
         <Card padding="lg">
-          <EmptyState>Searching...</EmptyState>
+          <EmptyState title="Searching..." />
         </Card>
       ) : paginatedResults && paginatedResults.length > 0 ? (
         <>
-          <ResultsList>
+          <Stack gap={3}>
             {paginatedResults.map((result) => (
               <ResultCard key={result.id} padding="md">
-                <ResultCardWrapper>
+                <Stack direction="row" align="start">
                   <ResultCheckbox
                     type="checkbox"
                     checked={selectedIds.has(result.id)}
                     onChange={() => handleSelectResult(result.id)}
                   />
-                  <ResultCardContent>
+                  <div style={{ flex: 1 }}>
                     <ResultHeader>
                       <ResultPlatform $platform={result.platform}>
                         {result.platform}
                       </ResultPlatform>
-                      <ResultDate>{formatDate(result.created_at)}</ResultDate>
+                      <MetaItem size="xs" color="tertiary">{formatDate(result.created_at)}</MetaItem>
                     </ResultHeader>
                     <ResultContent>
                       <HighlightedContent content={result.content} query={query} />
                     </ResultContent>
                     <ResultMeta>
-                      <MetaItem>
-                        <Heart size={14} />
-                        {result.likes}
-                      </MetaItem>
-                      <MetaItem>
-                        <Repeat size={14} />
-                        {result.retweets}
-                      </MetaItem>
-                      {result.has_media && (
+                      {result.author && (
                         <MetaItem>
-                          <Image size={14} />
-                          Media
+                          <User size={14} />
+                          @{result.author}
+                        </MetaItem>
+                      )}
+                      {result.hashtags && result.hashtags.length > 0 && (
+                        <MetaItem>
+                          <Hash size={14} />
+                          {result.hashtags.slice(0, 3).join(', ')}
                         </MetaItem>
                       )}
                     </ResultMeta>
-                  </ResultCardContent>
-                </ResultCardWrapper>
+                  </div>
+                </Stack>
               </ResultCard>
             ))}
-          </ResultsList>
+          </Stack>
 
-          {totalPages > 1 && (
-            <Pagination>
-              <PageButton
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft size={16} />
-              </PageButton>
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum: number;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
-                }
-                return (
-                  <PageButton
-                    key={pageNum}
-                    $active={currentPage === pageNum}
-                    onClick={() => setCurrentPage(pageNum)}
-                  >
-                    {pageNum}
-                  </PageButton>
-                );
-              })}
-              <PageButton
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronRight size={16} />
-              </PageButton>
-            </Pagination>
-          )}
+          <PaginationWrapper>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </PaginationWrapper>
         </>
       ) : (
         <Card padding="lg">
-          <EmptyState>No results found for &quot;{query}&quot;</EmptyState>
+          <EmptyState title={`No results found for "${query}"`} />
         </Card>
       )}
     </div>

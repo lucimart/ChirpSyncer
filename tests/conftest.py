@@ -26,3 +26,10 @@ sys.modules["atproto"] = mock_atproto
 # Mock db_handler before any imports
 mock_db_handler = MagicMock()
 sys.modules["db_handler"] = mock_db_handler
+
+# Mock twitter_scraper before any imports
+mock_twitter_scraper = MagicMock()
+mock_twitter_scraper.fetch_tweets = MagicMock(return_value=[])
+mock_twitter_scraper.is_thread = MagicMock(return_value=False)
+mock_twitter_scraper.fetch_thread = MagicMock(return_value=[])
+sys.modules["twitter_scraper"] = mock_twitter_scraper

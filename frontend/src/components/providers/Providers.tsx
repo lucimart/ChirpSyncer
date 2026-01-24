@@ -1,42 +1,54 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
-import { ThemeProvider } from 'styled-components';
+import { useState, type FC, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { theme } from '@/styles/theme';
+import dynamic from 'next/dynamic';
 import { GlobalStyle } from '@/styles/GlobalStyle';
-import StyledComponentsRegistry from './StyledComponentsRegistry';
+import { ThemeProvider } from '@/styles/ThemeContext';
 import { RealtimeProvider } from '@/providers/RealtimeProvider';
 import { ToastProvider } from '@/components/ui/Toast';
+import StyledComponentsRegistry from './StyledComponentsRegistry';
 
-interface ProvidersProps {
+const CommandPalette = dynamic(
+  () => import('@/components/ui/CommandPalette').then((mod) => mod.CommandPalette),
+  { ssr: false }
+);
+
+/** Query client configuration */
+const QUERY_CLIENT_CONFIG = {
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+} as const;
+
+export interface ProvidersProps {
   children: ReactNode;
 }
 
-export function Providers({ children }: ProvidersProps) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 60 * 1000, // 1 minute
-            retry: 1,
-            refetchOnWindowFocus: false,
-          },
-        },
-      })
-  );
+/**
+ * Root providers wrapper for the application.
+ * Provides: styled-components, react-query, theme, realtime, and toast contexts.
+ */
+export const Providers: FC<ProvidersProps> = ({ children }) => {
+  const [queryClient] = useState(() => new QueryClient(QUERY_CLIENT_CONFIG));
 
   return (
     <StyledComponentsRegistry>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={theme}>
+        <ThemeProvider>
           <GlobalStyle />
           <RealtimeProvider>
-            <ToastProvider>{children}</ToastProvider>
+            <ToastProvider>
+              {children}
+              <CommandPalette />
+            </ToastProvider>
           </RealtimeProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </StyledComponentsRegistry>
   );
-}
+};

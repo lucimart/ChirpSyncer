@@ -16,8 +16,6 @@ Tests verify:
 - Form interactions are smooth
 """
 
-import pytest
-
 
 # ============================================================================
 # TEST 1: MODAL INTERACTIONS

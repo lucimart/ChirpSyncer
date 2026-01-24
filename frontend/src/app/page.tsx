@@ -2,34 +2,13 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'styled-components';
 import { useAuth } from '@/lib/auth';
-import styled from 'styled-components';
-
-const LoadingContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background-color: ${({ theme }) => theme.colors.background.secondary};
-`;
-
-const Spinner = styled.div`
-  width: 40px;
-  height: 40px;
-  border: 3px solid ${({ theme }) => theme.colors.border.light};
-  border-top-color: ${({ theme }) => theme.colors.primary[600]};
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-`;
+import { Spinner, Stack } from '@/components/ui';
 
 export default function Home() {
   const router = useRouter();
+  const theme = useTheme();
   const { isAuthenticated, isLoading, checkAuth } = useAuth();
 
   useEffect(() => {
@@ -38,17 +17,20 @@ export default function Home() {
 
   useEffect(() => {
     if (!isLoading) {
-      if (isAuthenticated) {
-        router.replace('/dashboard');
-      } else {
-        router.replace('/login');
-      }
+      router.replace(isAuthenticated ? '/dashboard' : '/login');
     }
   }, [isAuthenticated, isLoading, router]);
 
   return (
-    <LoadingContainer>
-      <Spinner />
-    </LoadingContainer>
+    <Stack
+      align="center"
+      justify="center"
+      style={{
+        minHeight: '100vh',
+        backgroundColor: theme.colors.background.secondary,
+      }}
+    >
+      <Spinner size="lg" />
+    </Stack>
   );
 }

@@ -14,9 +14,6 @@ Tests verify:
 - Admin capabilities and restrictions
 """
 
-import pytest
-import sqlite3
-
 
 # ============================================================================
 # TEST 1: MULTI-USER CREDENTIAL ISOLATION

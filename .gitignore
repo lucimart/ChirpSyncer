@@ -21,6 +21,7 @@ docker-compose.override.yml
 logs/
 
 # SQLite Database
+data/
 data.db
 *.db
 *.db-shm
@@ -84,3 +85,14 @@ tmpclaude-*
 CLAUDE.md
 .claude/
 coverage.xml
+
+# Oh My OpenCode
+oh-my-opencode/
+
+# Local artifacts
+.playwright-mcp/
+.sisyphus/
+storybook-static/
+frontend/storybook-static/
+nul
+frontend/nul

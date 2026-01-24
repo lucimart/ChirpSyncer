@@ -9,7 +9,10 @@
     "**/__tests__/**",
     "**/*.d.ts"
   ],
-  "ignoreUnimported": [],
+  "ignoreUnimported": [
+    "src/app/**",
+    "src/components/ui/CommandPalette.tsx"
+  ],
   "ignoreUnused": [
     "next",
     "react",
@@ -18,7 +21,12 @@
     "lucide-react",
     "styled-components",
     "zod",
-    "zustand"
+    "zustand",
+    "cmdk",
+    "socket.io-client",
+    "@dnd-kit/sortable",
+    "@dnd-kit/utilities",
+    "framer-motion"
   ],
   "ignoreUnresolved": [],
   "respectGitignore": true,

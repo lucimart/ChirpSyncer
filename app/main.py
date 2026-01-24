@@ -25,6 +25,7 @@ from app.core.logger import setup_logger
 from app.auth.user_manager import UserManager
 from app.auth.credential_manager import CredentialManager
 from app.services.user_settings import UserSettings
+from app.services.notification_preferences import NotificationPreferences
 from app.auth.security_utils import log_audit
 
 logger = setup_logger(__name__)
@@ -255,6 +256,11 @@ def init_multi_user_system():
         settings_manager = UserSettings(db_path=DB_PATH)
         settings_manager.init_db()
         logger.info("✓ User settings tables initialized")
+
+        # Initialize NotificationPreferences tables
+        prefs_manager = NotificationPreferences(db_path=DB_PATH)
+        prefs_manager.init_db()
+        logger.info("✓ Notification preferences tables initialized")
 
         logger.info("Multi-user system initialized successfully")
 

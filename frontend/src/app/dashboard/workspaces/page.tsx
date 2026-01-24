@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import styled from 'styled-components';
-import { Plus } from 'lucide-react';
+import { Plus, Settings, Users, Key, Activity } from 'lucide-react';
 import {
   ActivityFeed,
   MemberManagement,
@@ -12,70 +11,38 @@ import {
   WorkspaceSettings,
   WorkspaceSwitcher,
 } from '@/components/workspace';
-import { Button, Card, Input, Modal } from '@/components/ui';
+import {
+  Button,
+  Card,
+  Input,
+  Modal,
+  Tabs,
+  PageHeader,
+  SectionTitle,
+  SmallText,
+  Select,
+  Stack,
+} from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { useActivityFeed } from '@/hooks/useActivityFeed';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { useWorkspaceMembers } from '@/hooks/useWorkspaceMembers';
 
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
+type TabType = 'settings' | 'members' | 'credentials' | 'activity';
 
-const TitleSection = styled.div``;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
-
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: ${({ theme }) => theme.spacing[6]};
-
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const Section = styled.section`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const SectionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const SectionDescription = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-const HeaderActions = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[2]};
-  align-items: center;
-`;
+const tabs: { id: TabType; label: string; icon: typeof Settings }[] = [
+  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'members', label: 'Members', icon: Users },
+  { id: 'credentials', label: 'Shared Credentials', icon: Key },
+  { id: 'activity', label: 'Activity', icon: Activity },
+];
 
 export default function WorkspacesPage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { currentWorkspace, workspaces, switchWorkspace, createWorkspace } = useWorkspace();
 
+  const [activeTab, setActiveTab] = useState<TabType>('settings');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState('');
   const [newWorkspaceType, setNewWorkspaceType] = useState<'personal' | 'team'>('team');
@@ -159,91 +126,127 @@ export default function WorkspacesPage() {
 
   return (
     <div>
-      <PageHeader>
-        <TitleSection>
-          <PageTitle>Workspaces</PageTitle>
-          <PageDescription>
-            Collaborate with your team, share credentials, and manage roles.
-          </PageDescription>
-        </TitleSection>
-        <HeaderActions>
-          {currentWorkspace && (
-            <WorkspaceSwitcher
-              workspaces={workspaces}
-              currentWorkspace={currentWorkspace}
-              onSwitch={switchWorkspace}
-              onCreateWorkspace={() => setIsCreateOpen(true)}
-            />
-          )}
-          <Button variant="secondary" onClick={() => setIsCreateOpen(true)}>
-            <Plus size={16} />
-            New Workspace
-          </Button>
-        </HeaderActions>
-      </PageHeader>
+      <PageHeader
+        title="Workspaces"
+        description="Collaborate with your team, share credentials, and manage roles."
+        actions={
+          <>
+            {currentWorkspace && (
+              <WorkspaceSwitcher
+                workspaces={workspaces}
+                currentWorkspace={currentWorkspace}
+                onSwitch={switchWorkspace}
+                onCreateWorkspace={() => setIsCreateOpen(true)}
+              />
+            )}
+            <Button variant="secondary" onClick={() => setIsCreateOpen(true)}>
+              <Plus size={16} />
+              New Workspace
+            </Button>
+          </>
+        }
+      />
 
-      <Grid>
-        <Section>
-          <SectionTitle>Workspace Settings</SectionTitle>
-          {currentWorkspace ? (
+      <div style={{ marginBottom: '24px' }}>
+        <Tabs
+          items={tabs}
+          value={activeTab}
+          onChange={(id) => setActiveTab(id as TabType)}
+          variant="soft"
+        />
+      </div>
+
+      <Stack gap={4}>
+        {activeTab === 'settings' && (
+          <>
+            <SectionTitle>Workspace Settings</SectionTitle>
+            {currentWorkspace ? (
+              <Card padding="lg">
+                <WorkspaceSettings
+                  workspace={currentWorkspace}
+                  currentUserRole={settingsRole}
+                  isOwner={String(currentWorkspace.ownerId) === String(user?.id)}
+                  onUpdate={() => {}}
+                  onDelete={() => {}}
+                  onLeave={() => {}}
+                />
+              </Card>
+            ) : (
+              <Card padding="lg">Loading workspace settings...</Card>
+            )}
+
+            <SectionTitle>Role Permissions</SectionTitle>
+            <div style={{ marginBottom: '16px' }}>
+              <SmallText>
+                View the permissions available for each role in this workspace.
+              </SmallText>
+            </div>
             <Card padding="lg">
-              <WorkspaceSettings
-                workspace={currentWorkspace}
+              <RolePermissions />
+            </Card>
+          </>
+        )}
+
+        {activeTab === 'members' && (
+          <>
+            <SectionTitle>Members</SectionTitle>
+            <div style={{ marginBottom: '16px' }}>
+              <SmallText>
+                Manage workspace members and their roles.
+              </SmallText>
+            </div>
+            <Card padding="lg">
+              <MemberManagement
+                members={membersHook.members}
+                currentUserId={String(user?.id ?? '')}
                 currentUserRole={settingsRole}
-                isOwner={String(currentWorkspace.ownerId) === String(user?.id)}
-                onUpdate={() => {}}
-                onDelete={() => {}}
-                onLeave={() => {}}
+                onInvite={handleInvite}
+                onRemove={membersHook.removeMember}
+                onUpdateRole={membersHook.updateMemberRole}
               />
             </Card>
-          ) : (
-            <Card padding="lg">Loading workspace settings...</Card>
-          )}
+          </>
+        )}
 
-          <SectionTitle>Members</SectionTitle>
-          <Card padding="lg">
-            <MemberManagement
-              members={membersHook.members}
-              currentUserId={String(user?.id ?? '')}
-              currentUserRole={settingsRole}
-              onInvite={handleInvite}
-              onRemove={membersHook.removeMember}
-              onUpdateRole={membersHook.updateMemberRole}
-            />
-          </Card>
+        {activeTab === 'credentials' && (
+          <>
+            <SectionTitle>Shared Credentials</SectionTitle>
+            <div style={{ marginBottom: '16px' }}>
+              <SmallText>
+                Share access to credentials with workspace members.
+              </SmallText>
+            </div>
+            <Card padding="none">
+              <SharedCredentials
+                credentials={sharedCredentials}
+                currentUserRole={settingsRole}
+                onShare={handleShareCredential}
+                onRevoke={handleRevokeCredential}
+                onUpdateAccess={handleUpdateAccess}
+              />
+            </Card>
+          </>
+        )}
 
-          <SectionTitle>Role Permissions</SectionTitle>
-          <Card padding="lg">
-            <RolePermissions />
-          </Card>
-        </Section>
-
-        <Section>
-          <SectionTitle>Shared Credentials</SectionTitle>
-          <SectionDescription>
-            Share access to credentials with workspace members.
-          </SectionDescription>
-          <Card padding="none">
-            <SharedCredentials
-              credentials={sharedCredentials}
-              currentUserRole={settingsRole}
-              onShare={handleShareCredential}
-              onRevoke={handleRevokeCredential}
-              onUpdateAccess={handleUpdateAccess}
-            />
-          </Card>
-
-          <SectionTitle>Activity Feed</SectionTitle>
-          <Card padding="none">
-            <ActivityFeed
-              activities={activityHook.activities}
-              isLoading={activityHook.loading}
-              hasMore={activityHook.hasMore}
-              onLoadMore={activityHook.loadMore}
-            />
-          </Card>
-        </Section>
-      </Grid>
+        {activeTab === 'activity' && (
+          <>
+            <SectionTitle>Activity Feed</SectionTitle>
+            <div style={{ marginBottom: '16px' }}>
+              <SmallText>
+                Recent activity in this workspace.
+              </SmallText>
+            </div>
+            <Card padding="none">
+              <ActivityFeed
+                activities={activityHook.activities}
+                isLoading={activityHook.loading}
+                hasMore={activityHook.hasMore}
+                onLoadMore={activityHook.loadMore}
+              />
+            </Card>
+          </>
+        )}
+      </Stack>
 
       <Modal
         isOpen={isCreateOpen}
@@ -264,7 +267,7 @@ export default function WorkspacesPage() {
           </>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <Stack gap={4}>
           <Input
             label="Workspace Name"
             value={newWorkspaceName}
@@ -272,21 +275,18 @@ export default function WorkspacesPage() {
             placeholder="e.g., Marketing Team"
             fullWidth
           />
-          <div>
-            <label htmlFor="workspace-type" style={{ fontSize: '14px', fontWeight: 500 }}>
-              Workspace Type
-            </label>
-            <select
-              id="workspace-type"
-              value={newWorkspaceType}
-              onChange={(e) => setNewWorkspaceType(e.target.value as 'personal' | 'team')}
-              style={{ width: '100%', marginTop: '8px', height: '40px' }}
-            >
-              <option value="team">Team</option>
-              <option value="personal">Personal</option>
-            </select>
-          </div>
-        </div>
+          <Select
+            label="Workspace Type"
+            id="workspace-type"
+            value={newWorkspaceType}
+            onChange={(e) => setNewWorkspaceType(e.target.value as 'personal' | 'team')}
+            options={[
+              { value: 'team', label: 'Team' },
+              { value: 'personal', label: 'Personal' },
+            ]}
+            fullWidth
+          />
+        </Stack>
       </Modal>
     </div>
   );

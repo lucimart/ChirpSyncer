@@ -8,6 +8,8 @@ from app.auth.api_auth import require_auth
 from app.auth.credential_manager import CredentialManager
 from app.features.cleanup_engine import CleanupEngine
 from app.web.api.v1.responses import api_error, api_response
+from app.core.events import cleanup_progress_message
+from app.web.websocket import emit_cleanup_progress
 
 cleanup_bp = Blueprint("cleanup", __name__, url_prefix="/cleanup")
 
@@ -36,7 +38,9 @@ def _get_rule(rule_id: int, user_id: int):
         conn.close()
 
 
-def _format_rule(row: dict):
+def _format_rule(row: dict | None):
+    if not row:
+        return None
     last_run = None
     if row["last_run"]:
         last_run = datetime.utcfromtimestamp(row["last_run"]).isoformat()
@@ -76,6 +80,8 @@ def create_rule():
     if not enabled:
         engine.disable_rule(rule_id, g.user.id)
     rule = _get_rule(rule_id, g.user.id)
+    if not rule:
+        return api_error("NOT_FOUND", "Rule not found", status=404)
     return api_response(_format_rule(rule), status=201)
 
 
@@ -145,5 +151,17 @@ def execute_rule(rule_id: int):
             status=403,
         )
     engine = _get_engine()
+    emit_cleanup_progress(
+        g.user.id,
+        cleanup_progress_message(rule_id, deleted=0),
+    )
     result = engine.execute_cleanup(g.user.id, rule_id, dry_run=False)
+    emit_cleanup_progress(
+        g.user.id,
+        cleanup_progress_message(
+            rule_id,
+            deleted=result.get("deleted", 0),
+            total=result.get("deleted", 0),
+        ),
+    )
     return api_response(result)

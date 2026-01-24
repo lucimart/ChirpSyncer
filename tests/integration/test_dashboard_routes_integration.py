@@ -34,7 +34,6 @@ import os
 from unittest.mock import patch, MagicMock, Mock
 from app.auth.user_manager import UserManager
 from app.auth.credential_manager import CredentialManager
-from app.features.analytics_tracker import AnalyticsTracker
 
 
 # =============================================================================

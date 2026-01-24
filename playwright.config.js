@@ -70,7 +70,8 @@ module.exports = defineConfig({
   ],
 
   // Web server configuration for running app
-  webServer: {
+  // Skip if USE_EXISTING_SERVER is set (e.g. when testing against Docker)
+  webServer: process.env.USE_EXISTING_SERVER ? undefined : {
     command: process.env.CI
       ? 'python app/web/dashboard.py'
       : 'python -m flask --app app.web.dashboard run --port 5000',

@@ -36,39 +36,43 @@ Bidirectional synchronization platform for Twitter and Bluesky with analytics, s
 
 ## Quick Start
 
-### Docker (Recommended)
+### Development (Docker)
 
 ```bash
 git clone https://github.com/lucimart/ChirpSyncer.git
 cd ChirpSyncer
 cp .env.example .env
-# Edit .env with your credentials
-docker-compose up -d
+make setup    # Install dependencies
+make seed     # Create sample data
+make dev      # Start all services
 ```
 
-Access dashboard at http://localhost:5000
+**URLs:**
+- Frontend: http://localhost:3000
+- API: http://localhost:5000
 
-### Manual Installation
+**Test credentials:** `admin` / `AdminPass123!`
+
+### Development (Local)
 
 ```bash
-git clone https://github.com/lucimart/ChirpSyncer.git
-cd ChirpSyncer
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-# Edit .env with your credentials
-python app/main.py
+# Terminal 1: Redis
+make redis
+
+# Terminal 2: API
+make api
+
+# Terminal 3: Frontend  
+make frontend
 ```
 
-### System Service (Linux)
+### Production
 
 ```bash
-sudo ./scripts/install.sh
-sudo systemctl start chirpsyncer
+docker compose up -d
 ```
 
-See [deployment guides](docs/) for detailed instructions.
+See [Development Guide](docs/DEVELOPMENT.md) for more options.
 
 ## Configuration
 
@@ -224,10 +228,10 @@ ChirpSyncer/
 ## Documentation
 
 - [Architecture Overview](docs/architecture/ARCHITECTURE.md)
-- [Deployment Guides](docs/)
+- [Master Roadmap](docs/MASTER_ROADMAP.md)
+- [Deployment Guides](docs/NAS_DEPLOYMENT_GUIDE.md)
 - [API Reference](docs/API.md)
 - [Database Schema](docs/DATABASE.md)
-- [Sprint Summaries](docs/sprints/summaries/)
 
 ## Deployment
 

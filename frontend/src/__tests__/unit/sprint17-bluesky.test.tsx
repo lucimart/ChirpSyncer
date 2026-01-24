@@ -41,13 +41,27 @@ const createTestQueryClient = () =>
 
 const createWrapper = () => {
   const queryClient = createTestQueryClient();
-  return ({ children }: { children: ReactNode }) => (
+  const Wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  Wrapper.displayName = 'QueryClientWrapper';
+  return Wrapper;
 };
 
 describe('Sprint 17: Bluesky AT Protocol', () => {
   describe('US-085: DID Resolution', () => {
+    const mockFetch = jest.fn();
+    const originalFetch = global.fetch;
+
+    beforeEach(() => {
+      global.fetch = mockFetch;
+    });
+
+    afterEach(() => {
+      global.fetch = originalFetch;
+      mockFetch.mockReset();
+    });
+
     it('should identify did:plc method', () => {
       expect(getDIDMethod('did:plc:z72i7hdynmk6r22z27h6tvur')).toBe('plc');
     });
@@ -62,6 +76,17 @@ describe('Sprint 17: Bluesky AT Protocol', () => {
     });
 
     it('should resolve handle to DID', async () => {
+      const mockResolved = {
+        did: 'did:plc:abc123xyz',
+        handle: 'user.bsky.social',
+        pds: 'https://bsky.social',
+        resolved_at: new Date().toISOString(),
+      };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: mockResolved }),
+      });
+
       const { result } = renderHook(() => useResolveDID(), {
         wrapper: createWrapper(),
       });
@@ -82,6 +107,17 @@ describe('Sprint 17: Bluesky AT Protocol', () => {
     });
 
     it('should resolve DID to handle', async () => {
+      const mockResolved = {
+        did: 'did:plc:example123',
+        handle: 'resolved.bsky.social',
+        pds: 'https://bsky.social',
+        resolved_at: new Date().toISOString(),
+      };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: mockResolved }),
+      });
+
       const { result } = renderHook(() => useResolveDID(), {
         wrapper: createWrapper(),
       });
@@ -349,7 +385,33 @@ describe('Sprint 17: Bluesky AT Protocol', () => {
   });
 
   describe('US-085: Bluesky API Hooks', () => {
+    const mockFetch = jest.fn();
+    const originalFetch = global.fetch;
+
+    beforeEach(() => {
+      global.fetch = mockFetch;
+    });
+
+    afterEach(() => {
+      global.fetch = originalFetch;
+      mockFetch.mockReset();
+    });
+
     it('should fetch profile by handle', async () => {
+      const mockProfile = {
+        did: 'did:plc:abc123',
+        handle: 'user.bsky.social',
+        displayName: 'Test User',
+        followersCount: 100,
+        followsCount: 50,
+        postsCount: 200,
+        indexedAt: new Date().toISOString(),
+      };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: mockProfile }),
+      });
+
       const { result } = renderHook(() => useBlueskyProfile('user.bsky.social'), {
         wrapper: createWrapper(),
       });
@@ -367,6 +429,24 @@ describe('Sprint 17: Bluesky AT Protocol', () => {
     });
 
     it('should fetch timeline', async () => {
+      const mockTimeline = {
+        feed: [
+          {
+            post: {
+              uri: 'at://did:plc:user/app.bsky.feed.post/123',
+              cid: 'bafyrei...',
+              author: { did: 'did:plc:user', handle: 'user.bsky.social' },
+              record: { text: 'Test post', createdAt: new Date().toISOString() },
+            },
+          },
+        ],
+        cursor: 'cursor123',
+      };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: mockTimeline }),
+      });
+
       const { result } = renderHook(() => useBlueskyTimeline(), {
         wrapper: createWrapper(),
       });
@@ -383,6 +463,22 @@ describe('Sprint 17: Bluesky AT Protocol', () => {
     });
 
     it('should fetch single post by URI', async () => {
+      const mockPost = {
+        uri: 'at://did:plc:example/app.bsky.feed.post/123',
+        cid: 'bafyrei...',
+        author: { did: 'did:plc:example', handle: 'example.bsky.social' },
+        record: { $type: 'app.bsky.feed.post', text: 'Test post content', createdAt: new Date().toISOString() },
+        replyCount: 0,
+        repostCount: 0,
+        likeCount: 0,
+        quoteCount: 0,
+        indexedAt: new Date().toISOString(),
+      };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: mockPost }),
+      });
+
       const { result } = renderHook(
         () => useBlueskyPost('at://did:plc:example/app.bsky.feed.post/123'),
         { wrapper: createWrapper() }
@@ -398,6 +494,15 @@ describe('Sprint 17: Bluesky AT Protocol', () => {
     });
 
     it('should create a new post', async () => {
+      const mockCreated = {
+        uri: 'at://did:plc:user/app.bsky.feed.post/newpost123',
+        cid: 'bafyrei...',
+      };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: mockCreated }),
+      });
+
       const { result } = renderHook(() => useCreateBlueskyPost(), {
         wrapper: createWrapper(),
       });
@@ -418,6 +523,11 @@ describe('Sprint 17: Bluesky AT Protocol', () => {
     });
 
     it('should delete a post', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: { deleted: true } }),
+      });
+
       const { result } = renderHook(() => useDeleteBlueskyPost(), {
         wrapper: createWrapper(),
       });
@@ -430,10 +540,15 @@ describe('Sprint 17: Bluesky AT Protocol', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data).toEqual({ success: true });
+      expect(result.current.data).toEqual({ deleted: true });
     });
 
     it('should like a post', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: { uri: 'at://did:plc:user/app.bsky.feed.like/abc' } }),
+      });
+
       const { result } = renderHook(() => useLikeBlueskyPost(), {
         wrapper: createWrapper(),
       });
@@ -451,6 +566,11 @@ describe('Sprint 17: Bluesky AT Protocol', () => {
     });
 
     it('should repost', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: { uri: 'at://did:plc:user/app.bsky.feed.repost/abc' } }),
+      });
+
       const { result } = renderHook(() => useRepostBluesky(), {
         wrapper: createWrapper(),
       });
@@ -468,6 +588,15 @@ describe('Sprint 17: Bluesky AT Protocol', () => {
     });
 
     it('should fetch custom feeds', async () => {
+      const mockFeeds = [
+        { uri: 'at://did:plc:feed/app.bsky.feed.generator/feed1', displayName: 'Popular', likeCount: 1000 },
+        { uri: 'at://did:plc:feed/app.bsky.feed.generator/feed2', displayName: "What's Hot", likeCount: 500 },
+      ];
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: { feeds: mockFeeds } }),
+      });
+
       const { result } = renderHook(() => useBlueskyFeeds(), {
         wrapper: createWrapper(),
       });

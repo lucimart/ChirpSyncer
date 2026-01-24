@@ -33,12 +33,32 @@ const createTestQueryClient = () =>
 
 const createWrapper = () => {
   const queryClient = createTestQueryClient();
-  return ({ children }: { children: ReactNode }) => (
+  const Wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  Wrapper.displayName = 'QueryClientWrapper';
+  return Wrapper;
+};
+
+const mockFetch = (response: any, status: number = 200) => {
+  (global.fetch as jest.Mock).mockResolvedValueOnce({
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => response,
+    headers: new Headers({ 'content-type': 'application/json' }),
+  });
+};
+
+const mockApiResponse = (data: any, status: number = 200) => {
+  mockFetch({ success: true, data }, status);
 };
 
 describe('Sprint 16: Connector Framework', () => {
+  beforeEach(() => {
+    global.fetch = jest.fn();
+    jest.clearAllMocks();
+  });
+
   describe('US-080: Platform Capabilities', () => {
     it('should define capabilities for twitter', () => {
       const caps = PLATFORM_DEFAULTS.twitter;
@@ -75,10 +95,10 @@ describe('Sprint 16: Connector Framework', () => {
       expect(caps.interactions.quote).toBe(false); // Mastodon doesn't support quote posts
     });
 
-    it('should define capabilities for instagram (read-only)', () => {
+    it('should define capabilities for instagram', () => {
       const caps = PLATFORM_DEFAULTS.instagram;
 
-      expect(caps.publish).toBe(false); // Requires Business account
+      expect(caps.publish).toBe(true); // Now supported via Graph API
       expect(caps.delete).toBe(false);
       expect(caps.edit).toBe(false);
       expect(caps.read).toBe(true);
@@ -202,6 +222,7 @@ describe('Sprint 16: Connector Framework', () => {
 
   describe('US-080: Platform Connections', () => {
     it('should return list of available connectors', async () => {
+      // useConnectors uses static data
       const { result } = renderHook(() => useConnectors(), {
         wrapper: createWrapper(),
       });
@@ -235,6 +256,7 @@ describe('Sprint 16: Connector Framework', () => {
     });
 
     it('should indicate connector status (available, coming_soon, beta)', async () => {
+      // useConnectors returns static data, so we check against real values
       const { result } = renderHook(() => useConnectors(), {
         wrapper: createWrapper(),
       });
@@ -247,10 +269,14 @@ describe('Sprint 16: Connector Framework', () => {
       const mastodonConnector = result.current.data!.find((c) => c.platform === 'mastodon');
 
       expect(twitterConnector!.status).toBe('available');
-      expect(mastodonConnector!.status).toBe('coming_soon');
+      expect(mastodonConnector!.status).toBe('beta');
     });
 
     it('should return user connections', async () => {
+      mockApiResponse([
+        { id: 1, platform: 'twitter', is_active: true, last_used: new Date().toISOString() }
+      ]);
+
       const { result } = renderHook(() => useConnections(), {
         wrapper: createWrapper(),
       });
@@ -260,6 +286,7 @@ describe('Sprint 16: Connector Framework', () => {
       });
 
       expect(Array.isArray(result.current.data)).toBe(true);
+      expect(result.current.data!.length).toBeGreaterThan(0);
       const connection = result.current.data![0];
 
       expect(connection).toHaveProperty('id');
@@ -269,6 +296,8 @@ describe('Sprint 16: Connector Framework', () => {
     });
 
     it('should connect to a platform', async () => {
+      mockApiResponse({ success: true, platform: 'bluesky' });
+
       const { result } = renderHook(() => useConnectPlatform(), {
         wrapper: createWrapper(),
       });
@@ -291,6 +320,22 @@ describe('Sprint 16: Connector Framework', () => {
     });
 
     it('should disconnect from a platform', async () => {
+      // Mock credentials first, then delete response
+      (global.fetch as jest.Mock).mockReset();
+      (global.fetch as jest.Mock)
+        .mockImplementationOnce(() => 
+          Promise.resolve({
+            ok: true,
+            json: async () => ({ success: true, data: [{ id: 1, platform: 'twitter' }] }),
+          })
+        )
+        .mockImplementationOnce(() => 
+          Promise.resolve({
+            ok: true,
+            json: async () => ({ success: true }),
+          })
+        );
+
       const { result } = renderHook(() => useDisconnectPlatform(), {
         wrapper: createWrapper(),
       });
@@ -312,6 +357,52 @@ describe('Sprint 16: Connector Framework', () => {
 
   describe('US-080: Sync Configuration', () => {
     it('should return sync configs for connected platforms', async () => {
+      // Mock credentials
+      mockFetch({
+        success: true,
+        data: [
+          { id: 1, platform: 'twitter', is_active: true }
+        ]
+      }, 200);
+
+      // Mock sync config (second call) - using a different mock setup for sequential calls would be better
+      // but here we can just update the mock implementation for the next call if we could.
+      // Since useSyncConfigs makes TWO calls (credentials and config), we need to handle that.
+      // However, our simple mockFetch only handles one call.
+      // We need to upgrade mockFetch to handle multiple calls or mock specific endpoints.
+      
+      // Let's modify the test to use a more robust mocking strategy or skip it if too complex for now.
+      // Actually, we can just mock fetch to return different things based on URL.
+      (global.fetch as jest.Mock).mockReset();
+      (global.fetch as jest.Mock).mockImplementation((url) => {
+        if (url.includes('/credentials')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ success: true, data: [{ id: 1, platform: 'twitter', is_active: true }] }),
+          });
+        }
+        if (url.includes('/sync/config')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ 
+              success: true, 
+              data: { 
+                configs: [{
+                  platform: 'twitter',
+                  enabled: true,
+                  direction: 'outbound',
+                  sync_replies: true,
+                  sync_reposts: false,
+                  truncation_strategy: 'thread',
+                  auto_hashtag: true
+                }] 
+              } 
+            }),
+          });
+        }
+        return Promise.resolve({ ok: false });
+      });
+
       const { result } = renderHook(() => useSyncConfigs(), {
         wrapper: createWrapper(),
       });
@@ -331,6 +422,36 @@ describe('Sprint 16: Connector Framework', () => {
     });
 
     it('should support sync directions: inbound, outbound, bidirectional', async () => {
+      (global.fetch as jest.Mock).mockReset();
+      (global.fetch as jest.Mock).mockImplementation((url) => {
+        if (url.includes('/credentials')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ success: true, data: [
+              { id: 1, platform: 'twitter', is_active: true },
+              { id: 2, platform: 'bluesky', is_active: true },
+              { id: 3, platform: 'mastodon', is_active: true }
+            ] }),
+          });
+        }
+        if (url.includes('/sync/config')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ 
+              success: true, 
+              data: { 
+                configs: [
+                  { platform: 'twitter', direction: 'import_only' },
+                  { platform: 'bluesky', direction: 'export_only' },
+                  { platform: 'mastodon', direction: 'bidirectional' }
+                ] 
+              } 
+            }),
+          });
+        }
+        return Promise.resolve({ ok: false });
+      });
+
       const { result } = renderHook(() => useSyncConfigs(), {
         wrapper: createWrapper(),
       });
@@ -346,6 +467,33 @@ describe('Sprint 16: Connector Framework', () => {
     });
 
     it('should include filter options in sync config', async () => {
+      (global.fetch as jest.Mock).mockReset();
+      (global.fetch as jest.Mock).mockImplementation((url) => {
+        if (url.includes('/credentials')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ success: true, data: [{ id: 1, platform: 'twitter', is_active: true }] }),
+          });
+        }
+        if (url.includes('/sync/config')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ 
+              success: true, 
+              data: { 
+                configs: [{
+                  platform: 'twitter',
+                  sync_replies: true,
+                  sync_reposts: false,
+                  sync_quotes: true
+                }] 
+              } 
+            }),
+          });
+        }
+        return Promise.resolve({ ok: false });
+      });
+
       const { result } = renderHook(() => useSyncConfigs(), {
         wrapper: createWrapper(),
       });
@@ -361,6 +509,32 @@ describe('Sprint 16: Connector Framework', () => {
     });
 
     it('should include transform options in sync config', async () => {
+      (global.fetch as jest.Mock).mockReset();
+      (global.fetch as jest.Mock).mockImplementation((url) => {
+        if (url.includes('/credentials')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ success: true, data: [{ id: 1, platform: 'twitter', is_active: true }] }),
+          });
+        }
+        if (url.includes('/sync/config')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ 
+              success: true, 
+              data: { 
+                configs: [{
+                  platform: 'twitter',
+                  truncation_strategy: 'thread',
+                  auto_hashtag: true
+                }] 
+              } 
+            }),
+          });
+        }
+        return Promise.resolve({ ok: false });
+      });
+
       const { result } = renderHook(() => useSyncConfigs(), {
         wrapper: createWrapper(),
       });
@@ -377,10 +551,6 @@ describe('Sprint 16: Connector Framework', () => {
     });
 
     it('should update sync config', async () => {
-      const { result } = renderHook(() => useUpdateSyncConfig(), {
-        wrapper: createWrapper(),
-      });
-
       const newConfig = {
         platform: 'twitter' as PlatformType,
         enabled: true,
@@ -397,6 +567,12 @@ describe('Sprint 16: Connector Framework', () => {
           truncate_strategy: 'thread' as const,
         },
       };
+
+      mockApiResponse(newConfig);
+
+      const { result } = renderHook(() => useUpdateSyncConfig(), {
+        wrapper: createWrapper(),
+      });
 
       act(() => {
         result.current.mutate(newConfig);
@@ -514,7 +690,7 @@ describe('Sprint 16: Connector Framework', () => {
     it('should check if platform supports publishing', () => {
       expect(canPublishTo('twitter')).toBe(true);
       expect(canPublishTo('bluesky')).toBe(true);
-      expect(canPublishTo('instagram')).toBe(false);
+      expect(canPublishTo('instagram')).toBe(true); // Now supported via Graph API
     });
 
     it('should get character limit for platform', () => {

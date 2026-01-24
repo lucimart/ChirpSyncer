@@ -8,7 +8,7 @@ import { api } from '@/lib/api';
 export interface FeedCondition {
   field: 'author' | 'content' | 'engagement' | 'age' | 'platform' | string;
   operator: 'contains' | 'equals' | 'gt' | 'lt' | 'regex' | string;
-  value: string | number;
+  value: string | number | boolean;
 }
 
 export interface FeedRule {
@@ -18,6 +18,7 @@ export interface FeedRule {
   conditions: FeedCondition[];
   weight: number; // -100 to +100
   enabled: boolean;
+  position?: number | null;
 }
 
 export interface ValidationResult {
@@ -37,6 +38,7 @@ function normalizeFeedRule(raw: any): FeedRule {
     conditions: Array.isArray(raw.conditions) ? raw.conditions : [],
     weight: typeof raw.weight === 'number' ? raw.weight : 0,
     enabled: Boolean(raw.enabled),
+    position: typeof raw.position === 'number' ? raw.position : null,
   };
 }
 
@@ -232,6 +234,43 @@ export function useToggleFeedRule() {
       return normalizeFeedRule(response.data);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['feed-rules'] });
+    },
+  });
+}
+
+export function useReorderFeedRules() {
+  const queryClient = useQueryClient();
+
+  return useMutation<FeedRule[], Error, FeedRule[], { previousRules: FeedRule[] | undefined }>({
+    mutationFn: async (reorderedRules) => {
+      const response = await api.reorderFeedRules(
+        reorderedRules.map((rule) => Number(rule.id))
+      );
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to reorder feed rules');
+      }
+      return (response.data as any[]).map(normalizeFeedRule);
+    },
+    onMutate: async (reorderedRules) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['feed-rules'] });
+
+      // Snapshot previous value
+      const previousRules = queryClient.getQueryData<FeedRule[]>(['feed-rules']);
+
+      // Optimistically update cache
+      queryClient.setQueryData(['feed-rules'], reorderedRules);
+
+      return { previousRules };
+    },
+    onError: (_err, _variables, context) => {
+      // Rollback on error
+      if (context?.previousRules) {
+        queryClient.setQueryData(['feed-rules'], context.previousRules);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['feed-rules'] });
     },
   });

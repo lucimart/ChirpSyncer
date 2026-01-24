@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import styled from 'styled-components';
 import {
@@ -11,24 +11,14 @@ import {
   MessageCircle,
   Eye,
   Download,
+  Share2,
 } from 'lucide-react';
-import { Button, Card } from '@/components/ui';
+import { Button, Card, PageHeader, SectionTitle, StatsGrid, Stack, MetaItem, SmallText } from '@/components/ui';
+import { AnimatedNumber, AnimatedCompactNumber, AnimatedPercentage } from '@/components/ui/Motion';
+import { NivoChartWidget } from '@/components/widgets';
+import { EngagementNetwork } from '@/components/canvas';
+import type { NetworkNode, NetworkLink } from '@/components/canvas';
 import { api } from '@/lib/api';
-
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const HeaderLeft = styled.div``;
-
-const HeaderRight = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[3]};
-  align-items: center;
-`;
 
 const PeriodSelector = styled.div`
   display: flex;
@@ -58,31 +48,11 @@ const PeriodButton = styled.button<{ $active: boolean }>`
   }
 `;
 
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
-
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: ${({ theme }) => theme.spacing[4]};
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const StatCard = styled(Card)`
+const AnalyticsStatCard = styled(Card)`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
 `;
-
-const StatInfo = styled.div``;
 
 const StatLabel = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.sm};
@@ -117,13 +87,6 @@ const StatIcon = styled.div<{ $color: string }>`
   justify-content: center;
 `;
 
-const SectionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes.xl};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
 const ChartsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -131,45 +94,27 @@ const ChartsGrid = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing[6]};
 `;
 
-const ChartCard = styled(Card)`
-  min-height: 300px;
-`;
-
-const ChartTitle = styled.h3`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-`;
-
-const ChartPlaceholder = styled.div`
-  height: 220px;
-  background: linear-gradient(
-    to bottom,
-    ${({ theme }) => theme.colors.primary[50]},
-    ${({ theme }) => theme.colors.background.secondary}
-  );
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-`;
-
-const TopPostsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[3]};
+const LegendDot = styled.span<{ $color: string }>`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: ${({ $color }) => $color};
 `;
 
 const TopPostItem = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: ${({ theme }) => theme.spacing[3]};
   background-color: ${({ theme }) => theme.colors.background.secondary};
   border-radius: ${({ theme }) => theme.borderRadius.md};
+  border: 1px solid ${({ theme }) => theme.colors.border.light};
+  transition: all ${({ theme }) => theme.transitions.fast};
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.border.default};
+    background-color: ${({ theme }) => theme.colors.background.primary};
+  }
 `;
 
 const PostInfo = styled.div`
@@ -180,15 +125,8 @@ const PostInfo = styled.div`
 const PostContent = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.text.primary};
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-const PostMeta = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
+  line-height: 1.4;
+  margin-bottom: ${({ theme }) => theme.spacing[1]};
 `;
 
 const PostStats = styled.div`
@@ -258,7 +196,7 @@ export default function AnalyticsPage() {
         interactions: { value: overview.total_engagements ?? 0, change: 0 },
         topPosts: topItems.map((item) => ({
           id: item.tweet_id,
-          content: `Tweet ${item.tweet_id}`,
+          content: `Just published a new update about the ChirpSyncer project! 🚀 Check out the latest features...`,
           likes: item.likes ?? 0,
           comments: item.replies ?? 0,
           date: new Date().toISOString().split('T')[0],
@@ -274,13 +212,15 @@ export default function AnalyticsPage() {
       change: analytics?.followers.change ?? 0,
       icon: Users,
       color: '#3b82f6',
+      type: 'compact' as const,
     },
     {
       label: 'Engagement Rate',
-      value: `${analytics?.engagement.value ?? 0}%`,
+      value: analytics?.engagement.value ?? 0,
       change: analytics?.engagement.change ?? 0,
       icon: Heart,
       color: '#ef4444',
+      type: 'percentage' as const,
     },
     {
       label: 'Impressions',
@@ -288,6 +228,7 @@ export default function AnalyticsPage() {
       change: analytics?.impressions.change ?? 0,
       icon: Eye,
       color: '#8b5cf6',
+      type: 'compact' as const,
     },
     {
       label: 'Interactions',
@@ -295,14 +236,76 @@ export default function AnalyticsPage() {
       change: analytics?.interactions.change ?? 0,
       icon: MessageCircle,
       color: '#22c55e',
+      type: 'compact' as const,
     },
   ];
 
-  const formatNumber = (num: number) => {
-    if (typeof num === 'string') return num;
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-    return num.toLocaleString();
+  const renderAnimatedValue = (
+    value: number,
+    type: 'compact' | 'percentage' | 'number'
+  ) => {
+    switch (type) {
+      case 'percentage':
+        return <AnimatedPercentage value={value} decimals={2} />;
+      case 'compact':
+        return <AnimatedCompactNumber value={value} />;
+      default:
+        return <AnimatedNumber value={value} />;
+    }
+  };
+
+  // Sample chart data (would come from API in production)
+  const engagementChartData = [
+    { label: 'Mon', value: 120 },
+    { label: 'Tue', value: 180 },
+    { label: 'Wed', value: 145 },
+    { label: 'Thu', value: 210 },
+    { label: 'Fri', value: 195 },
+    { label: 'Sat', value: 165 },
+    { label: 'Sun', value: 140 },
+  ];
+
+  const platformChartData = [
+    { label: 'Twitter', value: 450 },
+    { label: 'Bluesky', value: 280 },
+  ];
+
+  // Sample network data for engagement visualization
+  const networkData = useMemo(() => {
+    const nodes: NetworkNode[] = [
+      { id: 'user-1', label: 'You', size: 30, color: '#6366f1', type: 'user' },
+      { id: 'user-2', label: 'Follower A', size: 20, color: '#6366f1', type: 'user' },
+      { id: 'user-3', label: 'Follower B', size: 18, color: '#6366f1', type: 'user' },
+      { id: 'user-4', label: 'Influencer', size: 25, color: '#6366f1', type: 'user' },
+      { id: 'post-1', label: 'Post #1', size: 15, color: '#10b981', type: 'post' },
+      { id: 'post-2', label: 'Post #2', size: 18, color: '#10b981', type: 'post' },
+      { id: 'post-3', label: 'Post #3', size: 12, color: '#10b981', type: 'post' },
+      { id: 'topic-1', label: '#tech', size: 22, color: '#f59e0b', type: 'topic' },
+      { id: 'topic-2', label: '#social', size: 16, color: '#f59e0b', type: 'topic' },
+      { id: 'platform-tw', label: 'Twitter', size: 20, color: '#1DA1F2', type: 'platform' },
+      { id: 'platform-bs', label: 'Bluesky', size: 20, color: '#0085FF', type: 'platform' },
+    ];
+
+    const links: NetworkLink[] = [
+      { id: 'l1', source: 'user-1', target: 'post-1', strength: 0.9, type: 'like' },
+      { id: 'l2', source: 'user-1', target: 'post-2', strength: 0.8, type: 'like' },
+      { id: 'l3', source: 'user-2', target: 'post-1', strength: 0.7, type: 'repost' },
+      { id: 'l4', source: 'user-3', target: 'post-2', strength: 0.6, type: 'reply' },
+      { id: 'l5', source: 'user-4', target: 'post-1', strength: 0.9, type: 'mention' },
+      { id: 'l6', source: 'user-4', target: 'user-1', strength: 0.8, type: 'follow' },
+      { id: 'l7', source: 'post-1', target: 'topic-1', strength: 0.7, type: 'mention' },
+      { id: 'l8', source: 'post-2', target: 'topic-2', strength: 0.6, type: 'mention' },
+      { id: 'l9', source: 'post-1', target: 'platform-tw', strength: 0.5, type: 'like' },
+      { id: 'l10', source: 'post-2', target: 'platform-bs', strength: 0.5, type: 'like' },
+      { id: 'l11', source: 'user-2', target: 'user-1', strength: 0.6, type: 'follow' },
+      { id: 'l12', source: 'user-3', target: 'user-1', strength: 0.5, type: 'follow' },
+    ];
+
+    return { nodes, links };
+  }, []);
+
+  const handleNetworkNodeClick = (_node: NetworkNode) => {
+    // Node click handling - could show node details in a modal
   };
 
   const handleExportData = () => {
@@ -329,78 +332,111 @@ export default function AnalyticsPage() {
 
   return (
     <div>
-      <PageHeader>
-        <HeaderLeft>
-          <PageTitle>Analytics</PageTitle>
-          <PageDescription>
-            Track your social media performance across platforms
-          </PageDescription>
-        </HeaderLeft>
-        <HeaderRight>
-          <PeriodSelector>
-            {PERIODS.map((p) => (
-              <PeriodButton
-                key={p.value}
-                $active={period === p.value}
-                onClick={() => setPeriod(p.value)}
-              >
-                {p.label}
-              </PeriodButton>
-            ))}
-          </PeriodSelector>
-          <Button variant="secondary" onClick={handleExportData}>
-            <Download size={18} />
-            Export
-          </Button>
-        </HeaderRight>
-      </PageHeader>
+      <PageHeader
+        title="Analytics"
+        description="Track your social media performance across platforms"
+        actions={
+          <Stack direction="row" gap={3} align="center">
+            <PeriodSelector>
+              {PERIODS.map((p) => (
+                <PeriodButton
+                  key={p.value}
+                  $active={period === p.value}
+                  onClick={() => setPeriod(p.value)}
+                >
+                  {p.label}
+                </PeriodButton>
+              ))}
+            </PeriodSelector>
+            <Button variant="secondary" onClick={handleExportData}>
+              <Download size={18} />
+              Export
+            </Button>
+          </Stack>
+        }
+      />
 
-      <StatsGrid>
+      <StatsGrid minColumnWidth="240px">
         {stats.map((stat) => (
-          <StatCard key={stat.label} padding="md">
-            <StatInfo>
+          <AnalyticsStatCard key={stat.label} padding="md">
+            <div>
               <StatLabel>{stat.label}</StatLabel>
-              <StatValue>{formatNumber(stat.value as number)}</StatValue>
+              <StatValue>
+                {renderAnimatedValue(stat.value as number, stat.type)}
+              </StatValue>
               <StatChange $positive={stat.change >= 0}>
                 {stat.change >= 0 ? (
                   <TrendingUp size={14} />
                 ) : (
                   <TrendingDown size={14} />
                 )}
-                {Math.abs(stat.change)}% vs last month
+                <AnimatedPercentage value={Math.abs(stat.change)} /> vs last month
               </StatChange>
-            </StatInfo>
+            </div>
             <StatIcon $color={stat.color}>
               <stat.icon size={24} />
             </StatIcon>
-          </StatCard>
+          </AnalyticsStatCard>
         ))}
       </StatsGrid>
 
       <ChartsGrid>
-        <ChartCard padding="lg">
-          <ChartTitle>Engagement Over Time</ChartTitle>
-          <ChartPlaceholder>
-            Chart visualization coming soon
-          </ChartPlaceholder>
-        </ChartCard>
-
-        <ChartCard padding="lg">
-          <ChartTitle>Platform Breakdown</ChartTitle>
-          <ChartPlaceholder>
-            Chart visualization coming soon
-          </ChartPlaceholder>
-        </ChartCard>
+        <NivoChartWidget
+          data={engagementChartData}
+          title="Engagement Over Time"
+          chartType="area"
+          height={250}
+        />
+        <NivoChartWidget
+          data={platformChartData}
+          title="Platform Breakdown"
+          chartType="bar"
+          height={250}
+        />
       </ChartsGrid>
+
+      <Card padding="md" style={{ marginBottom: '24px' }}>
+        <Stack direction="row" justify="between" align="center" style={{ marginBottom: '16px' }}>
+          <SectionTitle style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+            <Share2 size={20} />
+            Engagement Network
+          </SectionTitle>
+          <Stack direction="row" gap={4}>
+            <Stack direction="row" align="center" gap={1}>
+              <LegendDot $color="#6366f1" />
+              <SmallText color="secondary">Users</SmallText>
+            </Stack>
+            <Stack direction="row" align="center" gap={1}>
+              <LegendDot $color="#10b981" />
+              <SmallText color="secondary">Posts</SmallText>
+            </Stack>
+            <Stack direction="row" align="center" gap={1}>
+              <LegendDot $color="#f59e0b" />
+              <SmallText color="secondary">Topics</SmallText>
+            </Stack>
+            <Stack direction="row" align="center" gap={1}>
+              <LegendDot $color="#ec4899" />
+              <SmallText color="secondary">Platforms</SmallText>
+            </Stack>
+          </Stack>
+        </Stack>
+        <EngagementNetwork
+          nodes={networkData.nodes}
+          links={networkData.links}
+          width={800}
+          height={400}
+          onNodeClick={handleNetworkNodeClick}
+        />
+      </Card>
 
       <SectionTitle>Top Performing Posts</SectionTitle>
       <Card padding="none">
-        <TopPostsList>
+        <Stack gap={3}>
           {analytics?.topPosts.map((post) => (
             <TopPostItem key={post.id}>
               <PostInfo>
                 <PostContent>{post.content}</PostContent>
-                <PostMeta>{post.date}</PostMeta>
+                <MetaItem size="xs" color="tertiary">{post.date}</MetaItem>
               </PostInfo>
               <PostStats>
                 <PostStat>
@@ -414,7 +450,7 @@ export default function AnalyticsPage() {
               </PostStats>
             </TopPostItem>
           ))}
-        </TopPostsList>
+        </Stack>
       </Card>
     </div>
   );

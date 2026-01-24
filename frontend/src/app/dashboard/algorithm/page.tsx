@@ -1,38 +1,20 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import styled from 'styled-components';
 import { useRouter } from 'next/navigation';
+import { PageHeader, Stack } from '@/components/ui';
 import { AlgorithmDashboard } from '@/components/algorithm-dashboard/AlgorithmDashboard';
 import { useAlgorithmStats } from '@/hooks/useAlgorithmStats';
 
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const HeaderLeft = styled.div``;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
+const QUERY_KEY = ['algorithm-settings'] as const;
 
 export default function AlgorithmPage() {
   const router = useRouter();
   const { data, loading, error } = useAlgorithmStats();
 
   const { data: settings } = useQuery({
-    queryKey: ['algorithm-settings'],
+    queryKey: QUERY_KEY,
     queryFn: async () => {
       const response = await fetch('/api/v1/algorithm/settings');
       const payload = await response.json();
@@ -43,7 +25,7 @@ export default function AlgorithmPage() {
     },
   });
 
-  const [algorithmEnabled, setAlgorithmEnabled] = useState<boolean>(true);
+  const [algorithmEnabled, setAlgorithmEnabled] = useState(true);
 
   useEffect(() => {
     if (typeof settings?.algorithm_enabled === 'boolean') {
@@ -77,25 +59,31 @@ export default function AlgorithmPage() {
     [updateSettings]
   );
 
+  const handleViewRule = useCallback(() => {
+    router.push('/dashboard/feed-lab');
+  }, [router]);
+
+  const errorObj = useMemo(
+    () => (error ? new Error(error) : null),
+    [error]
+  );
+
   return (
-    <div>
-      <PageHeader>
-        <HeaderLeft>
-          <PageTitle>Algorithm Dashboard</PageTitle>
-          <PageDescription>
-            Review your transparency score and see how rules shape the feed.
-          </PageDescription>
-        </HeaderLeft>
-      </PageHeader>
+    <Stack>
+      <PageHeader
+        title="Algorithm Dashboard"
+        description="Review your transparency score and see how rules shape the feed."
+      />
 
       <AlgorithmDashboard
         stats={data ?? undefined}
         isLoading={loading}
-        error={error ? new Error(error) : null}
+        error={errorObj}
         algorithmEnabled={algorithmEnabled}
         onToggleAlgorithm={handleToggle}
-        onViewRule={() => router.push('/dashboard/feed-lab')}
+        onViewRule={handleViewRule}
+        useNivo
       />
-    </div>
+    </Stack>
   );
 }

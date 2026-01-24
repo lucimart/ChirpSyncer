@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from './api';
 
 // Platform capability flags - what each platform can do
 export interface PlatformCapabilities {
@@ -82,7 +83,51 @@ export interface PlatformMapping {
 }
 
 // Supported platforms
-export type PlatformType = 'twitter' | 'bluesky' | 'mastodon' | 'instagram';
+export type PlatformType =
+  | 'twitter'
+  | 'bluesky'
+  | 'mastodon'
+  | 'instagram'
+  | 'threads'
+  | 'linkedin'
+  | 'facebook'
+  | 'nostr'
+  | 'matrix'
+  // Coming soon platforms
+  | 'tiktok'
+  | 'youtube'
+  | 'pinterest'
+  | 'tumblr'
+  | 'reddit'
+  | 'discord'
+  | 'dsnp'
+  | 'ssb'
+  | 'telegram'
+  | 'medium'
+  | 'substack'
+  | 'devto'
+  | 'hashnode'
+  | 'cohost'
+  // Fediverse and utilities
+  | 'pixelfed'
+  | 'lemmy'
+  | 'misskey'
+  | 'peertube'
+  | 'bookwyrm'
+  // Blog/CMS
+  | 'wordpress'
+  | 'ghost'
+  | 'writeas'
+  | 'microblog'
+  // Newsletters
+  | 'buttondown'
+  | 'convertkit'
+  | 'beehiiv'
+  // Web3
+  | 'lens'
+  // Utilities
+  | 'rss'
+  | 'webhooks';
 
 // Platform connector configuration
 export interface PlatformConnector {
@@ -93,7 +138,7 @@ export interface PlatformConnector {
   icon: string;
   color: string;
   capabilities: PlatformCapabilities;
-  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto';
+  auth_type: 'oauth2' | 'api_key' | 'session' | 'atproto' | 'nostr' | 'matrix' | 'dsnp' | 'ssb' | 'discord' | 'reddit' | 'tumblr' | 'pinterest' | 'youtube' | 'tiktok' | 'mastodon' | 'telegram' | 'medium' | 'substack' | 'devto' | 'hashnode' | 'cohost' | 'pixelfed' | 'lemmy' | 'misskey' | 'peertube' | 'bookwyrm' | 'wordpress' | 'ghost' | 'writeas' | 'microblog' | 'buttondown' | 'convertkit' | 'beehiiv' | 'lens' | 'rss' | 'webhooks';
   status: 'available' | 'coming_soon' | 'beta';
 }
 
@@ -206,7 +251,7 @@ export const PLATFORM_DEFAULTS: Record<PlatformType, PlatformCapabilities> = {
     altTextLimit: 1500,
   },
   instagram: {
-    publish: false, // Requires Business account
+    publish: true, // Requires Content Publishing API approval from Meta
     delete: false,
     edit: false,
     read: true,
@@ -222,12 +267,517 @@ export const PLATFORM_DEFAULTS: Record<PlatformType, PlatformCapabilities> = {
     interactions: {
       like: false,
       repost: false,
-      reply: false,
+      reply: true, // Comments supported with instagram_manage_comments
       quote: false,
       bookmark: false,
     },
     characterLimit: 2200,
     altTextLimit: 100,
+  },
+  threads: {
+    publish: true,
+    delete: false,
+    edit: false,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: true, // Native thread support
+    media: {
+      images: true,
+      videos: true,
+      gifs: false,
+      maxImages: 10, // Carousel support
+    },
+    interactions: {
+      like: false, // API doesn't support liking
+      repost: false, // API doesn't support reposting
+      reply: true,
+      quote: true,
+      bookmark: false,
+    },
+    characterLimit: 500,
+    altTextLimit: 1000,
+  },
+  linkedin: {
+    publish: true,
+    delete: true,
+    edit: false,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: false,
+    media: {
+      images: true,
+      videos: true,
+      gifs: true,
+      maxImages: 20,
+    },
+    interactions: {
+      like: true,
+      repost: false, // No native repost
+      reply: true,
+      quote: false,
+      bookmark: false,
+    },
+    characterLimit: 3000,
+    altTextLimit: 300,
+  },
+  facebook: {
+    publish: true,
+    delete: true,
+    edit: false,
+    read: true,
+    metrics: true,
+    schedule: true, // Native scheduling support
+    threads: false,
+    media: {
+      images: true,
+      videos: true,
+      gifs: true,
+      maxImages: 10,
+    },
+    interactions: {
+      like: true,
+      repost: false, // No native share via API
+      reply: true,
+      quote: false,
+      bookmark: false,
+    },
+    characterLimit: 63206,
+    altTextLimit: 100,
+  },
+  nostr: {
+    publish: true,
+    delete: true, // Via deletion events
+    edit: false,
+    read: true,
+    metrics: false, // Decentralized, no central metrics
+    schedule: false,
+    threads: true, // Reply threads
+    media: {
+      images: true, // Via URLs
+      videos: true,
+      gifs: true,
+      maxImages: 10,
+    },
+    interactions: {
+      like: true, // Reactions (kind 7)
+      repost: true, // Reposts (kind 6)
+      reply: true,
+      quote: false,
+      bookmark: false,
+    },
+    characterLimit: 10000, // No hard limit, recommended
+    altTextLimit: 1000,
+  },
+  matrix: {
+    publish: true, // Send messages
+    delete: false, // Redaction requires special permissions
+    edit: true, // Message editing supported
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: true, // Reply threads
+    media: {
+      images: true,
+      videos: true,
+      gifs: true,
+      maxImages: 1, // Per message
+    },
+    interactions: {
+      like: true, // Reactions
+      repost: false,
+      reply: true,
+      quote: false,
+      bookmark: false,
+    },
+    characterLimit: 65535,
+    altTextLimit: 500,
+  },
+  // Coming soon platforms - placeholder capabilities
+  tiktok: {
+    publish: true,
+    delete: true,
+    edit: false,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: false,
+    media: { images: false, videos: true, gifs: false, maxImages: 0 },
+    interactions: { like: false, repost: false, reply: true, quote: false, bookmark: false },
+    characterLimit: 2200,
+    altTextLimit: 150,
+  },
+  youtube: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: false,
+    media: { images: false, videos: true, gifs: false, maxImages: 0 },
+    interactions: { like: false, repost: false, reply: true, quote: false, bookmark: false },
+    characterLimit: 5000,
+    altTextLimit: 0,
+  },
+  pinterest: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: true, gifs: false, maxImages: 1 },
+    interactions: { like: false, repost: true, reply: false, quote: false, bookmark: true },
+    characterLimit: 500,
+    altTextLimit: 500,
+  },
+  tumblr: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: false,
+    media: { images: true, videos: true, gifs: true, maxImages: 10 },
+    interactions: { like: true, repost: true, reply: true, quote: false, bookmark: false },
+    characterLimit: 4096,
+    altTextLimit: 1000,
+  },
+  reddit: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: true,
+    media: { images: true, videos: true, gifs: true, maxImages: 20 },
+    interactions: { like: true, repost: false, reply: true, quote: false, bookmark: true },
+    characterLimit: 40000,
+    altTextLimit: 0,
+  },
+  discord: {
+    publish: true, // Webhooks
+    delete: false,
+    edit: false,
+    read: false, // Webhooks are write-only
+    metrics: false,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: true, gifs: true, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 2000,
+    altTextLimit: 0,
+  },
+  dsnp: {
+    publish: true,
+    delete: true,
+    edit: false,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: true,
+    media: { images: true, videos: true, gifs: true, maxImages: 4 },
+    interactions: { like: true, repost: true, reply: true, quote: false, bookmark: false },
+    characterLimit: 5000,
+    altTextLimit: 1000,
+  },
+  ssb: {
+    publish: true,
+    delete: false, // Append-only
+    edit: false,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: true,
+    media: { images: true, videos: false, gifs: false, maxImages: 4 },
+    interactions: { like: true, repost: false, reply: true, quote: false, bookmark: false },
+    characterLimit: 8192,
+    altTextLimit: 500,
+  },
+  telegram: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: false, // Bot API is primarily write-focused
+    metrics: false,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: true, gifs: true, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: true, quote: false, bookmark: false },
+    characterLimit: 4096,
+    altTextLimit: 1024,
+  },
+  // Blogging platforms
+  medium: {
+    publish: true,
+    delete: false, // Medium doesn't allow API deletion
+    edit: false,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: false, gifs: true, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 100000, // No hard limit
+    altTextLimit: 500,
+  },
+  substack: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: false,
+    media: { images: true, videos: true, gifs: true, maxImages: 20 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 500000, // No practical limit
+    altTextLimit: 500,
+  },
+  devto: {
+    publish: true,
+    delete: false, // Dev.to doesn't support deletion via API
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: false, gifs: true, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: true, quote: false, bookmark: true },
+    characterLimit: 100000, // No hard limit
+    altTextLimit: 500,
+  },
+  hashnode: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: false, gifs: true, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: true, quote: false, bookmark: false },
+    characterLimit: 100000, // No hard limit
+    altTextLimit: 500,
+  },
+  cohost: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: true, // Reply threads
+    media: { images: true, videos: false, gifs: true, maxImages: 10 },
+    interactions: { like: true, repost: true, reply: true, quote: false, bookmark: false },
+    characterLimit: 100000, // No hard limit
+    altTextLimit: 1000,
+  },
+  // Fediverse platforms
+  pixelfed: {
+    publish: true,
+    delete: true,
+    edit: false,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: true, gifs: true, maxImages: 10 },
+    interactions: { like: true, repost: true, reply: true, quote: false, bookmark: true },
+    characterLimit: 500,
+    altTextLimit: 1500,
+  },
+  lemmy: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: true, // Comment threads
+    media: { images: true, videos: true, gifs: true, maxImages: 1 },
+    interactions: { like: true, repost: false, reply: true, quote: false, bookmark: true },
+    characterLimit: 10000,
+    altTextLimit: 500,
+  },
+  // Utility integrations
+  rss: {
+    publish: false, // Read-only
+    delete: false,
+    edit: false,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: false,
+    media: { images: false, videos: false, gifs: false, maxImages: 0 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 0,
+    altTextLimit: 0,
+  },
+  webhooks: {
+    publish: true, // Send webhooks
+    delete: false,
+    edit: false,
+    read: false,
+    metrics: false,
+    schedule: false,
+    threads: false,
+    media: { images: false, videos: false, gifs: false, maxImages: 0 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 0, // JSON payload
+    altTextLimit: 0,
+  },
+  // Additional Fediverse platforms
+  misskey: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: true,
+    media: { images: true, videos: true, gifs: true, maxImages: 16 },
+    interactions: { like: true, repost: true, reply: true, quote: true, bookmark: true },
+    characterLimit: 3000,
+    altTextLimit: 1500,
+  },
+  peertube: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: true, // Comments
+    media: { images: true, videos: true, gifs: false, maxImages: 1 },
+    interactions: { like: true, repost: false, reply: true, quote: false, bookmark: false },
+    characterLimit: 10000,
+    altTextLimit: 500,
+  },
+  bookwyrm: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: true,
+    media: { images: true, videos: false, gifs: false, maxImages: 4 },
+    interactions: { like: true, repost: true, reply: true, quote: false, bookmark: true },
+    characterLimit: 5000,
+    altTextLimit: 500,
+  },
+  // Blog/CMS platforms
+  wordpress: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: false,
+    schedule: true,
+    threads: true, // Comments
+    media: { images: true, videos: true, gifs: true, maxImages: 50 },
+    interactions: { like: false, repost: false, reply: true, quote: false, bookmark: false },
+    characterLimit: 0, // No limit
+    altTextLimit: 500,
+  },
+  ghost: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: false,
+    media: { images: true, videos: true, gifs: true, maxImages: 50 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 0, // No limit
+    altTextLimit: 500,
+  },
+  writeas: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: false,
+    media: { images: true, videos: false, gifs: false, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 0, // No limit
+    altTextLimit: 0,
+  },
+  microblog: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: false,
+    schedule: false,
+    threads: true,
+    media: { images: true, videos: false, gifs: true, maxImages: 4 },
+    interactions: { like: true, repost: true, reply: true, quote: false, bookmark: true },
+    characterLimit: 10000,
+    altTextLimit: 500,
+  },
+  // Newsletter platforms
+  buttondown: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: false,
+    media: { images: true, videos: false, gifs: true, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 0, // No limit
+    altTextLimit: 500,
+  },
+  convertkit: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: false,
+    media: { images: true, videos: false, gifs: true, maxImages: 10 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 0, // No limit
+    altTextLimit: 500,
+  },
+  beehiiv: {
+    publish: true,
+    delete: true,
+    edit: true,
+    read: true,
+    metrics: true,
+    schedule: true,
+    threads: false,
+    media: { images: true, videos: false, gifs: true, maxImages: 20 },
+    interactions: { like: false, repost: false, reply: false, quote: false, bookmark: false },
+    characterLimit: 0, // No limit
+    altTextLimit: 500,
+  },
+  // Web3
+  lens: {
+    publish: true,
+    delete: false, // Blockchain - immutable
+    edit: false,
+    read: true,
+    metrics: true,
+    schedule: false,
+    threads: true,
+    media: { images: true, videos: true, gifs: true, maxImages: 10 },
+    interactions: { like: true, repost: true, reply: true, quote: true, bookmark: true },
+    characterLimit: 30000,
+    altTextLimit: 500,
   },
 };
 
@@ -237,11 +787,11 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     id: 'twitter',
     platform: 'twitter',
     name: 'Twitter / X',
-    description: 'Connect your Twitter account to sync tweets',
+    description: 'Full access with API keys, or read-only with scraper credentials',
     icon: 'T',
     color: '#1DA1F2',
     capabilities: PLATFORM_DEFAULTS.twitter,
-    auth_type: 'session',
+    auth_type: 'api_key', // Supports both API and session/scraper
     status: 'available',
   },
   {
@@ -259,23 +809,418 @@ export const AVAILABLE_CONNECTORS: PlatformConnector[] = [
     id: 'mastodon',
     platform: 'mastodon',
     name: 'Mastodon',
-    description: 'Connect to any Mastodon instance',
+    description: 'Connect to any Mastodon/ActivityPub instance',
     icon: 'M',
     color: '#6364FF',
     capabilities: PLATFORM_DEFAULTS.mastodon,
     auth_type: 'oauth2',
-    status: 'coming_soon',
+    status: 'beta',
   },
   {
     id: 'instagram',
     platform: 'instagram',
     name: 'Instagram',
-    description: 'Read-only access to your Instagram posts',
+    description: 'Read-only access to your Instagram posts and insights',
     icon: 'I',
     color: '#E4405F',
     capabilities: PLATFORM_DEFAULTS.instagram,
     auth_type: 'oauth2',
-    status: 'coming_soon',
+    status: 'beta',
+  },
+  {
+    id: 'threads',
+    platform: 'threads',
+    name: 'Threads',
+    description: 'Publish and read posts on Meta Threads',
+    icon: '@',
+    color: '#000000',
+    capabilities: PLATFORM_DEFAULTS.threads,
+    auth_type: 'oauth2',
+    status: 'beta',
+  },
+  {
+    id: 'linkedin',
+    platform: 'linkedin',
+    name: 'LinkedIn',
+    description: 'Professional networking with posts and company pages',
+    icon: 'in',
+    color: '#0A66C2',
+    capabilities: PLATFORM_DEFAULTS.linkedin,
+    auth_type: 'oauth2',
+    status: 'beta',
+  },
+  {
+    id: 'facebook',
+    platform: 'facebook',
+    name: 'Facebook',
+    description: 'Manage Facebook Pages with posts, comments and insights',
+    icon: 'f',
+    color: '#1877F2',
+    capabilities: PLATFORM_DEFAULTS.facebook,
+    auth_type: 'oauth2',
+    status: 'beta',
+  },
+  // Decentralized protocols
+  {
+    id: 'nostr',
+    platform: 'nostr',
+    name: 'Nostr',
+    description: 'Decentralized social protocol with cryptographic identity',
+    icon: '⚡',
+    color: '#8B5CF6',
+    capabilities: PLATFORM_DEFAULTS.nostr,
+    auth_type: 'nostr',
+    status: 'beta',
+  },
+  {
+    id: 'matrix',
+    platform: 'matrix',
+    name: 'Matrix',
+    description: 'Federated messaging with bridges to other platforms',
+    icon: '[m]',
+    color: '#0DBD8B',
+    capabilities: PLATFORM_DEFAULTS.matrix,
+    auth_type: 'matrix',
+    status: 'beta',
+  },
+  // Coming soon platforms
+  {
+    id: 'tiktok',
+    platform: 'tiktok',
+    name: 'TikTok',
+    description: 'Short-form video platform (requires Business account)',
+    icon: '♪',
+    color: '#000000',
+    capabilities: PLATFORM_DEFAULTS.tiktok,
+    auth_type: 'tiktok',
+    status: 'beta',
+  },
+  {
+    id: 'youtube',
+    platform: 'youtube',
+    name: 'YouTube',
+    description: 'Video platform with Shorts support',
+    icon: '▶',
+    color: '#FF0000',
+    capabilities: PLATFORM_DEFAULTS.youtube,
+    auth_type: 'youtube',
+    status: 'beta',
+  },
+  {
+    id: 'pinterest',
+    platform: 'pinterest',
+    name: 'Pinterest',
+    description: 'Visual discovery and bookmarking platform',
+    icon: 'P',
+    color: '#E60023',
+    capabilities: PLATFORM_DEFAULTS.pinterest,
+    auth_type: 'pinterest',
+    status: 'beta',
+  },
+  {
+    id: 'tumblr',
+    platform: 'tumblr',
+    name: 'Tumblr',
+    description: 'Microblogging with multimedia posts',
+    icon: 't',
+    color: '#36465D',
+    capabilities: PLATFORM_DEFAULTS.tumblr,
+    auth_type: 'tumblr',
+    status: 'beta',
+  },
+  {
+    id: 'reddit',
+    platform: 'reddit',
+    name: 'Reddit',
+    description: 'Community-driven discussions and content',
+    icon: '®',
+    color: '#FF4500',
+    capabilities: PLATFORM_DEFAULTS.reddit,
+    auth_type: 'reddit',
+    status: 'beta',
+  },
+  {
+    id: 'discord',
+    platform: 'discord',
+    name: 'Discord',
+    description: 'Webhook notifications to Discord channels',
+    icon: 'D',
+    color: '#5865F2',
+    capabilities: PLATFORM_DEFAULTS.discord,
+    auth_type: 'discord',
+    status: 'beta',
+  },
+  // Experimental decentralized protocols
+  {
+    id: 'dsnp',
+    platform: 'dsnp',
+    name: 'DSNP',
+    description: 'Decentralized Social Networking Protocol (Frequency)',
+    icon: '◈',
+    color: '#6366F1',
+    capabilities: PLATFORM_DEFAULTS.dsnp,
+    auth_type: 'dsnp',
+    status: 'beta',
+  },
+  {
+    id: 'ssb',
+    platform: 'ssb',
+    name: 'Scuttlebutt',
+    description: 'P2P offline-first social protocol',
+    icon: '🦀',
+    color: '#FF6B6B',
+    capabilities: PLATFORM_DEFAULTS.ssb,
+    auth_type: 'ssb',
+    status: 'beta',
+  },
+  {
+    id: 'mastodon',
+    platform: 'mastodon',
+    name: 'Mastodon',
+    description: 'Decentralized social network (ActivityPub)',
+    icon: '🐘',
+    color: '#6364FF',
+    capabilities: PLATFORM_DEFAULTS.mastodon,
+    auth_type: 'mastodon',
+    status: 'available',
+  },
+  {
+    id: 'telegram',
+    platform: 'telegram',
+    name: 'Telegram',
+    description: 'Messaging and channel broadcasting',
+    icon: '✈️',
+    color: '#0088CC',
+    capabilities: PLATFORM_DEFAULTS.telegram,
+    auth_type: 'telegram',
+    status: 'available',
+  },
+  // Blogging platforms
+  {
+    id: 'medium',
+    platform: 'medium',
+    name: 'Medium',
+    description: 'Professional publishing platform for stories and ideas',
+    icon: 'M',
+    color: '#000000',
+    capabilities: PLATFORM_DEFAULTS.medium,
+    auth_type: 'medium',
+    status: 'available',
+  },
+  {
+    id: 'substack',
+    platform: 'substack',
+    name: 'Substack',
+    description: 'Newsletter publishing and subscription platform',
+    icon: '📧',
+    color: '#FF6719',
+    capabilities: PLATFORM_DEFAULTS.substack,
+    auth_type: 'substack',
+    status: 'available',
+  },
+  {
+    id: 'devto',
+    platform: 'devto',
+    name: 'Dev.to',
+    description: 'Developer community and blogging platform',
+    icon: 'DEV',
+    color: '#0A0A0A',
+    capabilities: PLATFORM_DEFAULTS.devto,
+    auth_type: 'devto',
+    status: 'available',
+  },
+  {
+    id: 'hashnode',
+    platform: 'hashnode',
+    name: 'Hashnode',
+    description: 'Developer blogging with custom domains',
+    icon: '#',
+    color: '#2962FF',
+    capabilities: PLATFORM_DEFAULTS.hashnode,
+    auth_type: 'hashnode',
+    status: 'available',
+  },
+  {
+    id: 'cohost',
+    platform: 'cohost',
+    name: 'Cohost',
+    description: 'Ad-free social platform with rich formatting',
+    icon: '🥚',
+    color: '#83254F',
+    capabilities: PLATFORM_DEFAULTS.cohost,
+    auth_type: 'cohost',
+    status: 'available',
+  },
+  // Fediverse platforms
+  {
+    id: 'pixelfed',
+    platform: 'pixelfed',
+    name: 'Pixelfed',
+    description: 'Decentralized photo sharing (ActivityPub)',
+    icon: '📷',
+    color: '#6366F1',
+    capabilities: PLATFORM_DEFAULTS.pixelfed,
+    auth_type: 'pixelfed',
+    status: 'available',
+  },
+  {
+    id: 'lemmy',
+    platform: 'lemmy',
+    name: 'Lemmy',
+    description: 'Federated link aggregator and discussion platform',
+    icon: '🐺',
+    color: '#00BC8C',
+    capabilities: PLATFORM_DEFAULTS.lemmy,
+    auth_type: 'lemmy',
+    status: 'available',
+  },
+  // Utility integrations
+  {
+    id: 'rss',
+    platform: 'rss',
+    name: 'RSS/Atom',
+    description: 'Read and import content from RSS and Atom feeds',
+    icon: '📡',
+    color: '#F26522',
+    capabilities: PLATFORM_DEFAULTS.rss,
+    auth_type: 'rss',
+    status: 'available',
+  },
+  {
+    id: 'webhooks',
+    platform: 'webhooks',
+    name: 'Webhooks',
+    description: 'Send data to external services via HTTP webhooks',
+    icon: '🔗',
+    color: '#6B7280',
+    capabilities: PLATFORM_DEFAULTS.webhooks,
+    auth_type: 'webhooks',
+    status: 'available',
+  },
+  // Additional Fediverse platforms
+  {
+    id: 'misskey',
+    platform: 'misskey',
+    name: 'Misskey / Firefish',
+    description: 'Federated microblogging with custom reactions and MFM',
+    icon: '🌟',
+    color: '#86B300',
+    capabilities: PLATFORM_DEFAULTS.misskey,
+    auth_type: 'misskey',
+    status: 'available',
+  },
+  {
+    id: 'peertube',
+    platform: 'peertube',
+    name: 'PeerTube',
+    description: 'Decentralized video platform with P2P streaming',
+    icon: '▶️',
+    color: '#F1680D',
+    capabilities: PLATFORM_DEFAULTS.peertube,
+    auth_type: 'peertube',
+    status: 'available',
+  },
+  {
+    id: 'bookwyrm',
+    platform: 'bookwyrm',
+    name: 'BookWyrm',
+    description: 'Social reading in the fediverse',
+    icon: '📚',
+    color: '#002549',
+    capabilities: PLATFORM_DEFAULTS.bookwyrm,
+    auth_type: 'bookwyrm',
+    status: 'available',
+  },
+  // Blog/CMS platforms
+  {
+    id: 'wordpress',
+    platform: 'wordpress',
+    name: 'WordPress',
+    description: 'Self-hosted or WordPress.com blogging platform',
+    icon: 'W',
+    color: '#21759B',
+    capabilities: PLATFORM_DEFAULTS.wordpress,
+    auth_type: 'wordpress',
+    status: 'available',
+  },
+  {
+    id: 'ghost',
+    platform: 'ghost',
+    name: 'Ghost',
+    description: 'Modern publishing platform for creators',
+    icon: '👻',
+    color: '#15171A',
+    capabilities: PLATFORM_DEFAULTS.ghost,
+    auth_type: 'ghost',
+    status: 'available',
+  },
+  {
+    id: 'writeas',
+    platform: 'writeas',
+    name: 'Write.as',
+    description: 'Minimalist, privacy-focused blogging',
+    icon: '✍️',
+    color: '#5A5A5A',
+    capabilities: PLATFORM_DEFAULTS.writeas,
+    auth_type: 'writeas',
+    status: 'available',
+  },
+  {
+    id: 'microblog',
+    platform: 'microblog',
+    name: 'Micro.blog',
+    description: 'Independent microblogging and IndieWeb publishing',
+    icon: 'μ',
+    color: '#FF8C00',
+    capabilities: PLATFORM_DEFAULTS.microblog,
+    auth_type: 'microblog',
+    status: 'available',
+  },
+  // Newsletter platforms
+  {
+    id: 'buttondown',
+    platform: 'buttondown',
+    name: 'Buttondown',
+    description: 'Simple, elegant newsletter service',
+    icon: '📧',
+    color: '#0069FF',
+    capabilities: PLATFORM_DEFAULTS.buttondown,
+    auth_type: 'buttondown',
+    status: 'available',
+  },
+  {
+    id: 'convertkit',
+    platform: 'convertkit',
+    name: 'ConvertKit',
+    description: 'Email marketing for creators',
+    icon: '📬',
+    color: '#FB6970',
+    capabilities: PLATFORM_DEFAULTS.convertkit,
+    auth_type: 'convertkit',
+    status: 'available',
+  },
+  {
+    id: 'beehiiv',
+    platform: 'beehiiv',
+    name: 'Beehiiv',
+    description: 'Newsletter platform built for growth',
+    icon: '🐝',
+    color: '#F7C948',
+    capabilities: PLATFORM_DEFAULTS.beehiiv,
+    auth_type: 'beehiiv',
+    status: 'available',
+  },
+  // Web3
+  {
+    id: 'lens',
+    platform: 'lens',
+    name: 'Lens Protocol',
+    description: 'Decentralized social graph on Polygon blockchain',
+    icon: '🌿',
+    color: '#00501E',
+    capabilities: PLATFORM_DEFAULTS.lens,
+    auth_type: 'lens',
+    status: 'available',
   },
 ];
 
@@ -296,31 +1241,23 @@ export function useConnections() {
   return useQuery<PlatformConnection[]>({
     queryKey: ['connections'],
     queryFn: async () => {
-      // Mock connected platforms
-      return [
-        {
-          id: 'conn-1',
-          platform: 'twitter' as PlatformType,
-          connected: true,
-          handle: '@chirpsyncer',
-          display_name: 'ChirpSyncer',
-          avatar: undefined,
-          last_sync: new Date().toISOString(),
-          sync_enabled: true,
-          capabilities_used: ['publish', 'delete', 'read', 'metrics'],
-        },
-        {
-          id: 'conn-2',
-          platform: 'bluesky' as PlatformType,
-          connected: true,
-          handle: 'chirpsyncer.bsky.social',
-          display_name: 'ChirpSyncer',
-          avatar: undefined,
-          last_sync: new Date(Date.now() - 3600000).toISOString(),
-          sync_enabled: true,
-          capabilities_used: ['publish', 'delete', 'read'],
-        },
-      ];
+      const response = await api.getCredentials();
+      if (!response.success || !response.data) {
+        return [];
+      }
+
+      // Map credentials to platform connections
+      return response.data.map((cred) => ({
+        id: `conn-${cred.id}`,
+        platform: cred.platform as PlatformType,
+        connected: cred.is_active,
+        handle: undefined, // Credential API doesn't expose handle
+        display_name: undefined,
+        avatar: undefined,
+        last_sync: cred.last_used || undefined,
+        sync_enabled: cred.is_active,
+        capabilities_used: ['publish', 'delete', 'read'] as (keyof PlatformCapabilities)[],
+      }));
     },
   });
 }
@@ -329,40 +1266,53 @@ export function useSyncConfigs() {
   return useQuery<PlatformSyncConfig[]>({
     queryKey: ['sync-configs'],
     queryFn: async () => {
-      return [
-        {
-          platform: 'twitter' as PlatformType,
-          enabled: true,
-          direction: 'bidirectional',
-          filters: {
-            include_replies: false,
-            include_reposts: false,
-            include_quotes: true,
-          },
-          transform: {
-            add_source_link: true,
-            preserve_mentions: true,
-            preserve_hashtags: true,
-            truncate_strategy: 'smart',
-          },
-        },
-        {
-          platform: 'bluesky' as PlatformType,
-          enabled: true,
-          direction: 'bidirectional',
-          filters: {
-            include_replies: false,
-            include_reposts: false,
-            include_quotes: true,
-          },
-          transform: {
-            add_source_link: true,
-            preserve_mentions: true,
-            preserve_hashtags: true,
-            truncate_strategy: 'thread',
-          },
-        },
-      ];
+      // Get saved sync configs from backend
+      const configResponse = await api.getSyncConfig();
+      const credResponse = await api.getCredentials();
+
+      if (!credResponse.success || !credResponse.data) {
+        return [];
+      }
+
+      const savedConfigs = configResponse.success && configResponse.data
+        ? configResponse.data.configs
+        : [];
+
+      // Map credentials to sync configs, using saved config if available
+      // Map backend direction values to frontend interface values
+      const mapDirection = (dir?: string): 'bidirectional' | 'inbound' | 'outbound' => {
+        if (dir === 'import_only') return 'inbound';
+        if (dir === 'export_only') return 'outbound';
+        return 'bidirectional';
+      };
+
+      const mapTruncateStrategy = (strategy?: string): 'smart' | 'cut' | 'thread' => {
+        if (strategy === 'truncate') return 'cut';
+        if (strategy === 'skip') return 'smart';
+        return strategy as 'smart' | 'cut' | 'thread' || 'smart';
+      };
+
+      return credResponse.data
+        .filter((cred) => cred.is_active)
+        .map((cred) => {
+          const saved = savedConfigs.find((c) => c.platform === cred.platform);
+          return {
+            platform: cred.platform as PlatformType,
+            enabled: saved ? saved.enabled : true,
+            direction: mapDirection(saved?.direction),
+            filters: {
+              include_replies: saved ? saved.sync_replies : false,
+              include_reposts: saved ? saved.sync_reposts : false,
+              include_quotes: true,
+            },
+            transform: {
+              add_source_link: true,
+              preserve_mentions: true,
+              preserve_hashtags: saved ? saved.auto_hashtag : true,
+              truncate_strategy: mapTruncateStrategy(saved?.truncation_strategy) || (cred.platform === 'bluesky' ? 'thread' : 'smart'),
+            },
+          };
+        });
     },
   });
 }
@@ -375,12 +1325,37 @@ export function useConnectPlatform() {
       platform: PlatformType;
       credentials: Record<string, string>;
     }) => {
-      // Mock connection
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Determine credential_type based on platform and provided credentials
+      let credentialType: string;
+
+      if (platform === 'twitter') {
+        // Twitter: API mode if api_key provided, otherwise scraper mode
+        credentialType = credentials.api_key ? 'api' : 'scraping';
+        // Remove internal _mode field before sending
+        const { _mode, ...cleanCredentials } = credentials;
+        credentials = cleanCredentials;
+      } else if (platform === 'bluesky' || platform === 'instagram' || platform === 'threads' || platform === 'linkedin' || platform === 'facebook' || platform === 'nostr' || platform === 'matrix' || platform === 'pinterest' || platform === 'youtube' || platform === 'tiktok' || platform === 'pixelfed' || platform === 'lemmy' || platform === 'rss' || platform === 'webhooks') {
+        credentialType = 'api';
+      } else {
+        credentialType = 'scraping';
+      }
+
+      const response = await api.addCredential({
+        platform,
+        credential_type: credentialType,
+        credentials,
+      });
+
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to connect platform');
+      }
+
       return { success: true, platform };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['connections'] });
+      queryClient.invalidateQueries({ queryKey: ['sync-configs'] });
+      queryClient.invalidateQueries({ queryKey: ['credentials'] });
     },
   });
 }
@@ -390,11 +1365,28 @@ export function useDisconnectPlatform() {
 
   return useMutation({
     mutationFn: async (platform: PlatformType) => {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // First get the credential ID for this platform
+      const credResponse = await api.getCredentials();
+      if (!credResponse.success || !credResponse.data) {
+        throw new Error('Failed to get credentials');
+      }
+
+      const credential = credResponse.data.find((c) => c.platform === platform);
+      if (!credential) {
+        throw new Error('No credential found for platform');
+      }
+
+      const response = await api.deleteCredential(credential.id);
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to disconnect platform');
+      }
+
       return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['connections'] });
+      queryClient.invalidateQueries({ queryKey: ['sync-configs'] });
+      queryClient.invalidateQueries({ queryKey: ['credentials'] });
     },
   });
 }
@@ -404,7 +1396,33 @@ export function useUpdateSyncConfig() {
 
   return useMutation({
     mutationFn: async (config: PlatformSyncConfig) => {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Map frontend direction values to backend values
+      const mapDirectionToBackend = (dir: 'bidirectional' | 'inbound' | 'outbound'): 'bidirectional' | 'import_only' | 'export_only' => {
+        if (dir === 'inbound') return 'import_only';
+        if (dir === 'outbound') return 'export_only';
+        return 'bidirectional';
+      };
+
+      const mapTruncateToBackend = (strategy: 'smart' | 'cut' | 'thread'): 'smart' | 'truncate' | 'skip' => {
+        if (strategy === 'cut') return 'truncate';
+        if (strategy === 'thread') return 'smart';
+        return strategy;
+      };
+
+      const response = await api.saveSyncConfig({
+        platform: config.platform,
+        enabled: config.enabled,
+        direction: mapDirectionToBackend(config.direction),
+        sync_replies: config.filters.include_replies,
+        sync_reposts: config.filters.include_reposts,
+        truncation_strategy: mapTruncateToBackend(config.transform.truncate_strategy),
+        auto_hashtag: config.transform.preserve_hashtags,
+      });
+
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to save sync config');
+      }
+
       return config;
     },
     onSuccess: () => {

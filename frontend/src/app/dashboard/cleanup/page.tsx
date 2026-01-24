@@ -14,71 +14,28 @@ import {
   ThumbsUp,
   Eye,
 } from 'lucide-react';
-import { Button, Card, Modal, Input } from '@/components/ui';
+import {
+  Button,
+  Card,
+  Modal,
+  Input,
+  Select,
+  Badge,
+  PageHeader,
+  StatCard,
+  StatsGrid,
+  EmptyState,
+  Form,
+  Stack,
+  Typography,
+  MetaItem,
+} from '@/components/ui';
 import { api } from '@/lib/api';
-
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const PageTitle = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const PageDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing[1]};
-`;
-
-const StatsRow = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: ${({ theme }) => theme.spacing[4]};
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-`;
-
-const StatCard = styled(Card)`
-  text-align: center;
-`;
-
-const StatValue = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.danger[600]};
-`;
-
-const StatLabel = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-const RulesList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
 
 const RuleCard = styled(Card)`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const RuleHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-`;
-
-const RuleInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[3]};
 `;
 
 const RuleIcon = styled.div<{ $type: string }>`
@@ -102,86 +59,12 @@ const RuleIcon = styled.div<{ $type: string }>`
         : theme.colors.primary[600]};
 `;
 
-const RuleDetails = styled.div``;
-
-const RuleName = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const RuleType = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  text-transform: capitalize;
-`;
-
-const RuleActions = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[2]};
-`;
-
 const RuleStats = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing[6]};
   padding: ${({ theme }) => theme.spacing[3]} 0;
   border-top: 1px solid ${({ theme }) => theme.colors.border.light};
 `;
-
-const RuleStat = styled.div``;
-
-const RuleStatValue = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const RuleStatLabel = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const StatusBadge = styled.span<{ $enabled: boolean }>`
-  padding: ${({ theme }) => `${theme.spacing[1]} ${theme.spacing[2]}`};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  background-color: ${({ $enabled, theme }) =>
-    $enabled ? theme.colors.success[100] : theme.colors.neutral[200]};
-  color: ${({ $enabled, theme }) =>
-    $enabled ? theme.colors.success[700] : theme.colors.neutral[600]};
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: ${({ theme }) => theme.spacing[10]};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing[4]};
-`;
-
-const Label = styled.label`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.text.primary};
-  display: block;
-  margin-bottom: ${({ theme }) => theme.spacing[1]};
-`;
-
-const Select = styled.select`
-  width: 100%;
-  height: 40px;
-  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
-  font-size: ${({ theme }) => theme.fontSizes.base};
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-`;
-
-const FieldGroup = styled.div``;
 
 interface CleanupRule {
   id: number;
@@ -276,56 +159,59 @@ export default function CleanupPage() {
 
   return (
     <div>
-      <PageHeader>
-        <div>
-          <PageTitle>Cleanup Rules</PageTitle>
-          <PageDescription>
-            Automatically delete old or low-engagement posts
-          </PageDescription>
-        </div>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus size={18} />
-          Create Rule
-        </Button>
-      </PageHeader>
+      <PageHeader
+        title="Cleanup Rules"
+        description="Automatically delete old or low-engagement posts"
+        actions={
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus size={18} />
+            Create Rule
+          </Button>
+        }
+      />
 
-      <StatsRow>
-        <StatCard padding="md">
-          <StatValue>{totalDeleted.toLocaleString()}</StatValue>
-          <StatLabel>Total Deleted</StatLabel>
-        </StatCard>
-        <StatCard padding="md">
-          <StatValue>{rules?.length ?? 0}</StatValue>
-          <StatLabel>Active Rules</StatLabel>
-        </StatCard>
-        <StatCard padding="md">
-          <StatValue>{rules?.filter((r) => r.is_enabled).length ?? 0}</StatValue>
-          <StatLabel>Enabled</StatLabel>
-        </StatCard>
-      </StatsRow>
+      <StatsGrid>
+        <StatCard
+          value={totalDeleted.toLocaleString()}
+          label="Total Deleted"
+          variant="centered"
+        />
+        <StatCard
+          value={rules?.length ?? 0}
+          label="Active Rules"
+          variant="centered"
+        />
+        <StatCard
+          value={rules?.filter((r) => r.is_enabled).length ?? 0}
+          label="Enabled"
+          variant="centered"
+        />
+      </StatsGrid>
 
       {isLoading ? (
         <Card padding="lg">
-          <EmptyState>Loading rules...</EmptyState>
+          <EmptyState title="Loading rules..." />
         </Card>
       ) : rules && rules.length > 0 ? (
-        <RulesList>
+        <Stack gap={4}>
           {rules.map((rule) => (
             <RuleCard key={rule.id} padding="md">
-              <RuleHeader>
-                <RuleInfo>
+              <Stack direction="row" justify="between" align="start">
+                <Stack direction="row" align="center" gap={3}>
                   <RuleIcon $type={rule.rule_type}>
                     {getRuleIcon(rule.rule_type)}
                   </RuleIcon>
-                  <RuleDetails>
-                    <RuleName>{rule.name}</RuleName>
-                    <RuleType>{rule.rule_type} based</RuleType>
-                  </RuleDetails>
-                </RuleInfo>
-                <RuleActions>
-                  <StatusBadge $enabled={rule.is_enabled}>
+                  <div>
+                    <Typography variant="h3">{rule.name}</Typography>
+                    <MetaItem size="sm" color="secondary" style={{ textTransform: 'capitalize' }}>
+                      {rule.rule_type} based
+                    </MetaItem>
+                  </div>
+                </Stack>
+                <Stack direction="row" gap={2}>
+                  <Badge variant={rule.is_enabled ? 'success-soft' : 'neutral'} size="sm">
                     {rule.is_enabled ? 'Enabled' : 'Disabled'}
-                  </StatusBadge>
+                  </Badge>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -352,26 +238,28 @@ export default function CleanupPage() {
                   >
                     <Trash2 size={16} />
                   </Button>
-                </RuleActions>
-              </RuleHeader>
+                </Stack>
+              </Stack>
               <RuleStats>
-                <RuleStat>
-                  <RuleStatValue>{rule.total_deleted}</RuleStatValue>
-                  <RuleStatLabel>Deleted</RuleStatLabel>
-                </RuleStat>
-                <RuleStat>
-                  <RuleStatValue>{formatDate(rule.last_run)}</RuleStatValue>
-                  <RuleStatLabel>Last Run</RuleStatLabel>
-                </RuleStat>
+                <div>
+                  <Typography variant="h3">{rule.total_deleted}</Typography>
+                  <MetaItem size="xs" color="tertiary">Deleted</MetaItem>
+                </div>
+                <div>
+                  <Typography variant="h3">{formatDate(rule.last_run)}</Typography>
+                  <MetaItem size="xs" color="tertiary">Last Run</MetaItem>
+                </div>
               </RuleStats>
             </RuleCard>
           ))}
-        </RulesList>
+        </Stack>
       ) : (
         <Card padding="lg">
-          <EmptyState>
-            No cleanup rules yet. Create your first rule to start cleaning.
-          </EmptyState>
+          <EmptyState
+            icon={Trash2}
+            title="No cleanup rules yet"
+            description="Create your first rule to start cleaning."
+          />
         </Card>
       )}
 
@@ -399,14 +287,17 @@ export default function CleanupPage() {
             fullWidth
           />
 
-          <FieldGroup>
-            <Label>Rule Type</Label>
-            <Select value={ruleType} onChange={(e) => setRuleType(e.target.value)}>
-              <option value="age">Age Based</option>
-              <option value="engagement">Engagement Based</option>
-              <option value="pattern">Pattern Match</option>
-            </Select>
-          </FieldGroup>
+          <Select
+            label="Rule Type"
+            value={ruleType}
+            onChange={(e) => setRuleType(e.target.value)}
+            options={[
+              { value: 'age', label: 'Age Based' },
+              { value: 'engagement', label: 'Engagement Based' },
+              { value: 'pattern', label: 'Pattern Match' },
+            ]}
+            fullWidth
+          />
 
           {ruleType === 'age' && (
             <Input

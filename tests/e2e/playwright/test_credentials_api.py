@@ -212,6 +212,7 @@ class TestCredentialsApiE2E:
             'access_token': 'token',
             'access_secret': 'token_secret'
         }, follow_redirects=True)
+        assert response.status_code == 200
 
         # Query raw database
         cursor = test_db.cursor()

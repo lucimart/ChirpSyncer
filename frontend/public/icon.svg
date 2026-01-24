@@ -1,0 +1,15 @@
+<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="swoop-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#34D399"/>
+    </linearGradient>
+  </defs>
+  <path
+    d="M4 22 Q16 6 28 22"
+    stroke="url(#swoop-gradient)"
+    stroke-width="4"
+    stroke-linecap="round"
+    fill="none"
+  />
+</svg>

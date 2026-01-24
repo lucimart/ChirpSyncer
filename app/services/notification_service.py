@@ -68,16 +68,15 @@ class NotificationService:
             logger.warning("SMTP is disabled, skipping connection test")
             return False
 
-        if not self.smtp_config["user"] or not self.smtp_config["password"]:
-            logger.error("SMTP credentials not configured")
-            return False
+        requires_auth = bool(self.smtp_config["user"] and self.smtp_config["password"])
 
         try:
             with smtplib.SMTP(
                 self.smtp_config["host"], self.smtp_config["port"]
             ) as server:
-                server.starttls()
-                server.login(self.smtp_config["user"], self.smtp_config["password"])
+                if requires_auth:
+                    server.starttls()
+                    server.login(self.smtp_config["user"], self.smtp_config["password"])
                 logger.info("SMTP connection test successful")
                 return True
         except smtplib.SMTPException as e:
@@ -104,9 +103,8 @@ class NotificationService:
             logger.info(f"SMTP disabled, skipping email to {to}")
             return False
 
-        if not self.smtp_config["user"] or not self.smtp_config["password"]:
-            logger.error("SMTP credentials not configured")
-            return False
+        # Auth is optional (for local dev with Mailpit)
+        requires_auth = bool(self.smtp_config["user"] and self.smtp_config["password"])
 
         try:
             # Create message
@@ -129,8 +127,11 @@ class NotificationService:
             with smtplib.SMTP(
                 self.smtp_config["host"], self.smtp_config["port"]
             ) as server:
-                server.starttls()
-                server.login(self.smtp_config["user"], self.smtp_config["password"])
+                # Only use TLS and auth if credentials are configured
+                # (Mailpit and other local dev servers don't need it)
+                if requires_auth:
+                    server.starttls()
+                    server.login(self.smtp_config["user"], self.smtp_config["password"])
                 server.send_message(msg)
 
             logger.info(f"Email sent successfully to {to}: {subject}")

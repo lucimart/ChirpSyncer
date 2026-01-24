@@ -26,14 +26,46 @@ const createTestQueryClient = () =>
 
 const createWrapper = () => {
   const queryClient = createTestQueryClient();
-  return ({ children }: { children: ReactNode }) => (
+  const Wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  Wrapper.displayName = 'QueryClientWrapper';
+  return Wrapper;
+};
+
+const mockFetch = (response: any, status: number = 200) => {
+  (global.fetch as jest.Mock).mockResolvedValueOnce({
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => response,
+    headers: new Headers({ 'content-type': 'application/json' }),
+  });
+};
+
+const mockApiResponse = (data: any, status: number = 200) => {
+  mockFetch({ success: true, data }, status);
 };
 
 describe('Sprint 15: ML Scheduling', () => {
+  beforeEach(() => {
+    global.fetch = jest.fn();
+    jest.clearAllMocks();
+  });
+
   describe('US-075: Optimal Time Suggestions', () => {
     it('should return top 5 optimal time slots ordered by engagement score', async () => {
+      mockApiResponse({
+        best_times: [
+          { hour: 10, day: 1, score: 95, label: 'Mon 10am' },
+          { hour: 14, day: 2, score: 90, label: 'Tue 2pm' },
+          { hour: 9, day: 3, score: 85, label: 'Wed 9am' },
+          { hour: 16, day: 4, score: 80, label: 'Thu 4pm' },
+          { hour: 11, day: 5, score: 75, label: 'Fri 11am' },
+        ],
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        based_on_posts: 50
+      });
+
       const { result } = renderHook(() => useOptimalTimes(), {
         wrapper: createWrapper(),
       });
@@ -52,6 +84,14 @@ describe('Sprint 15: ML Scheduling', () => {
     });
 
     it('should include hour, day, score, and label for each time slot', async () => {
+      mockApiResponse({
+        best_times: [
+          { hour: 10, day: 1, score: 95, label: 'Mon 10am' },
+        ],
+        timezone: 'UTC',
+        based_on_posts: 50
+      });
+
       const { result } = renderHook(() => useOptimalTimes(), {
         wrapper: createWrapper(),
       });
@@ -83,6 +123,12 @@ describe('Sprint 15: ML Scheduling', () => {
     });
 
     it('should include timezone and based_on_posts count', async () => {
+      mockApiResponse({
+        best_times: [],
+        timezone: 'UTC',
+        based_on_posts: 10
+      });
+
       const { result } = renderHook(() => useOptimalTimes(), {
         wrapper: createWrapper(),
       });
@@ -101,6 +147,13 @@ describe('Sprint 15: ML Scheduling', () => {
     });
 
     it('should use local timezone for suggestions', async () => {
+      const expectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      mockApiResponse({
+        best_times: [],
+        timezone: expectedTimezone,
+        based_on_posts: 10
+      });
+
       const { result } = renderHook(() => useOptimalTimes(), {
         wrapper: createWrapper(),
       });
@@ -109,13 +162,19 @@ describe('Sprint 15: ML Scheduling', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      const expectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       expect(result.current.data!.timezone).toBe(expectedTimezone);
     });
   });
 
   describe('US-075: Engagement Prediction', () => {
     it('should return engagement score between 0-100', async () => {
+      mockApiResponse({
+        score: 85,
+        confidence: 0.9,
+        factors: { time_of_day: 0.8, day_of_week: 0.7, content_length: 0.6, has_media: 0, historical_performance: 0.5 },
+        suggested_improvements: []
+      });
+
       const { result } = renderHook(() => useEngagementPrediction(), {
         wrapper: createWrapper(),
       });
@@ -138,6 +197,13 @@ describe('Sprint 15: ML Scheduling', () => {
     });
 
     it('should include confidence score', async () => {
+      mockApiResponse({
+        score: 85,
+        confidence: 0.9,
+        factors: {},
+        suggested_improvements: []
+      });
+
       const { result } = renderHook(() => useEngagementPrediction(), {
         wrapper: createWrapper(),
       });
@@ -161,6 +227,19 @@ describe('Sprint 15: ML Scheduling', () => {
     });
 
     it('should include factor breakdown', async () => {
+      mockApiResponse({
+        score: 85,
+        confidence: 0.9,
+        factors: {
+          time_of_day: 0.8,
+          day_of_week: 0.7,
+          content_length: 0.6,
+          has_media: 1.0,
+          historical_performance: 0.5
+        },
+        suggested_improvements: []
+      });
+
       const { result } = renderHook(() => useEngagementPrediction(), {
         wrapper: createWrapper(),
       });
@@ -193,6 +272,13 @@ describe('Sprint 15: ML Scheduling', () => {
     });
 
     it('should return suggested improvements when score is low', async () => {
+      mockApiResponse({
+        score: 30,
+        confidence: 0.8,
+        factors: {},
+        suggested_improvements: ['Post at a better time', 'Add media']
+      });
+
       const { result } = renderHook(() => useEngagementPrediction(), {
         wrapper: createWrapper(),
       });
@@ -221,9 +307,27 @@ describe('Sprint 15: ML Scheduling', () => {
     });
 
     it('should consider media presence as engagement factor', async () => {
+      mockApiResponse({
+        score: 80,
+        confidence: 0.9,
+        factors: { has_media: 0.8 },
+        suggested_improvements: []
+      }); // Response for withMedia
+
       const { result: withMedia } = renderHook(() => useEngagementPrediction(), {
         wrapper: createWrapper(),
       });
+
+      // We need to re-mock for the second call
+      // Note: mockResolvedValueOnce handles one call. We need two.
+      // But we can't easily interleave mocking between renders here without more complex setup.
+      // Instead, we'll queue up TWO responses.
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ success: true, data: { score: 60, confidence: 0.9, factors: { has_media: 0.2 }, suggested_improvements: [] } }),
+      });
+
       const { result: withoutMedia } = renderHook(() => useEngagementPrediction(), {
         wrapper: createWrapper(),
       });
@@ -257,6 +361,18 @@ describe('Sprint 15: ML Scheduling', () => {
 
   describe('US-075: Scheduled Posts Management', () => {
     it('should return list of scheduled posts', async () => {
+      mockApiResponse([
+        {
+          id: 'post-1',
+          content: 'Scheduled content',
+          scheduled_at: new Date().toISOString(),
+          platform: 'twitter',
+          status: 'pending',
+          predicted_engagement: 80,
+          created_at: new Date().toISOString()
+        }
+      ]);
+
       const { result } = renderHook(() => useScheduledPosts(), {
         wrapper: createWrapper(),
       });
@@ -270,6 +386,18 @@ describe('Sprint 15: ML Scheduling', () => {
     });
 
     it('should include required fields for each scheduled post', async () => {
+      mockApiResponse([
+        {
+          id: 'post-1',
+          content: 'Scheduled content',
+          scheduled_at: new Date().toISOString(),
+          platform: 'twitter',
+          status: 'pending',
+          predicted_engagement: 80,
+          created_at: new Date().toISOString()
+        }
+      ]);
+
       const { result } = renderHook(() => useScheduledPosts(), {
         wrapper: createWrapper(),
       });
@@ -290,6 +418,12 @@ describe('Sprint 15: ML Scheduling', () => {
     });
 
     it('should support platform values: twitter, bluesky, both', async () => {
+      mockApiResponse([
+        { id: '1', platform: 'twitter', status: 'pending', scheduled_at: new Date().toISOString() },
+        { id: '2', platform: 'bluesky', status: 'pending', scheduled_at: new Date().toISOString() },
+        { id: '3', platform: 'both', status: 'pending', scheduled_at: new Date().toISOString() }
+      ]);
+
       const { result } = renderHook(() => useScheduledPosts(), {
         wrapper: createWrapper(),
       });
@@ -307,6 +441,12 @@ describe('Sprint 15: ML Scheduling', () => {
     });
 
     it('should support status values: pending, published, failed', async () => {
+      mockApiResponse([
+        { id: '1', platform: 'twitter', status: 'pending', scheduled_at: new Date().toISOString() },
+        { id: '2', platform: 'twitter', status: 'published', scheduled_at: new Date().toISOString() },
+        { id: '3', platform: 'twitter', status: 'failed', scheduled_at: new Date().toISOString() }
+      ]);
+
       const { result } = renderHook(() => useScheduledPosts(), {
         wrapper: createWrapper(),
       });
@@ -324,15 +464,24 @@ describe('Sprint 15: ML Scheduling', () => {
     });
 
     it('should create a new scheduled post', async () => {
-      const { result } = renderHook(() => useCreateScheduledPost(), {
-        wrapper: createWrapper(),
-      });
-
       const newPost = {
         content: 'New scheduled post for testing',
         scheduledAt: new Date(Date.now() + 3600000).toISOString(),
         platform: 'both' as const,
       };
+
+      mockApiResponse({
+        id: 'new-id',
+        content: newPost.content,
+        scheduled_at: newPost.scheduledAt,
+        platform: newPost.platform,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      });
+
+      const { result } = renderHook(() => useCreateScheduledPost(), {
+        wrapper: createWrapper(),
+      });
 
       act(() => {
         result.current.mutate(newPost);
@@ -352,6 +501,8 @@ describe('Sprint 15: ML Scheduling', () => {
     });
 
     it('should delete a scheduled post', async () => {
+      mockApiResponse({ success: true });
+
       const { result } = renderHook(() => useDeleteScheduledPost(), {
         wrapper: createWrapper(),
       });
@@ -371,6 +522,10 @@ describe('Sprint 15: ML Scheduling', () => {
 
   describe('US-075: Scheduler UI Behavior', () => {
     it('should have predicted_engagement for pending posts', async () => {
+      mockApiResponse([
+        { id: '1', status: 'pending', predicted_engagement: 75, scheduled_at: new Date().toISOString() }
+      ]);
+
       const { result } = renderHook(() => useScheduledPosts(), {
         wrapper: createWrapper(),
       });
@@ -389,6 +544,11 @@ describe('Sprint 15: ML Scheduling', () => {
     });
 
     it('should have scheduled_at as valid ISO date string', async () => {
+      const now = new Date().toISOString();
+      mockApiResponse([
+        { id: '1', scheduled_at: now, status: 'pending' }
+      ]);
+
       const { result } = renderHook(() => useScheduledPosts(), {
         wrapper: createWrapper(),
       });
@@ -405,6 +565,8 @@ describe('Sprint 15: ML Scheduling', () => {
 
     it('should cache optimal times for 5 minutes', async () => {
       const wrapper = createWrapper();
+      mockApiResponse({ best_times: [], timezone: 'UTC', based_on_posts: 10 });
+
       const { result: result1 } = renderHook(() => useOptimalTimes(), { wrapper });
 
       await waitFor(() => {
