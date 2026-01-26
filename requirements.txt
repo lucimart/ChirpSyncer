@@ -17,7 +17,7 @@ Flask-Limiter==4.1.1       # Rate limiting
 Flask-WTF==1.2.2           # Forms with CSRF protection
 email-validator==2.3.0     # Email validation
 python-dotenv==1.2.1
-PyJWT==2.8.0               # JWT auth for API
+PyJWT==2.10.1               # JWT auth for API
 
 # Sprint 7 Dependencies - Cron/Scheduled Tasks
 APScheduler==3.11.2        # Task scheduling
