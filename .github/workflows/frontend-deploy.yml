@@ -78,7 +78,7 @@ jobs:
 
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: frontend-build-${{ needs.build.outputs.version }}
           path: frontend
@@ -101,7 +101,7 @@ jobs:
 
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: frontend-build-${{ needs.build.outputs.version }}
           path: frontend
