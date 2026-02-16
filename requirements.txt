@@ -1,23 +1,23 @@
 atproto==0.0.65
-tenacity==9.1.2
+tenacity==9.1.4
 tweepy==4.16.0
 twscrape==0.17.0
 
 # Sprint 5 Dependencies
 Flask==3.1.2
 aiohttp==3.13.3
-Pillow==12.1.0
+Pillow==12.1.1
 requests==2.32.5
 
 # Sprint 6 Dependencies - Multi-User Support
 bcrypt==5.0.0              # Password hashing
-cryptography==46.0.3       # AES encryption for credentials
+cryptography==46.0.5       # AES encryption for credentials
 Flask-Session==0.8.0       # Server-side sessions
 Flask-Limiter==4.1.1       # Rate limiting
 Flask-WTF==1.2.2           # Forms with CSRF protection
 email-validator==2.3.0     # Email validation
 python-dotenv==1.2.1
-PyJWT==2.8.0               # JWT auth for API
+PyJWT==2.11.0               # JWT auth for API
 
 # Sprint 7 Dependencies - Cron/Scheduled Tasks
 APScheduler==3.11.2        # Task scheduling
