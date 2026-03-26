@@ -7,7 +7,7 @@ twscrape==0.17.0
 Flask==3.1.2
 aiohttp==3.13.3
 Pillow==12.1.0
-requests==2.32.5
+requests==2.33.0
 
 # Sprint 6 Dependencies - Multi-User Support
 bcrypt==5.0.0              # Password hashing
