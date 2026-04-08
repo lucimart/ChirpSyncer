@@ -11,7 +11,7 @@ requests==2.32.5
 
 # Sprint 6 Dependencies - Multi-User Support
 bcrypt==5.0.0              # Password hashing
-cryptography==46.0.3       # AES encryption for credentials
+cryptography==46.0.7       # AES encryption for credentials
 Flask-Session==0.8.0       # Server-side sessions
 Flask-Limiter==4.1.1       # Rate limiting
 Flask-WTF==1.2.2           # Forms with CSRF protection
