@@ -16,7 +16,7 @@ Flask-Session==0.8.0       # Server-side sessions
 Flask-Limiter==4.1.1       # Rate limiting
 Flask-WTF==1.2.2           # Forms with CSRF protection
 email-validator==2.3.0     # Email validation
-python-dotenv==1.2.1
+python-dotenv==1.2.2
 PyJWT==2.8.0               # JWT auth for API
 
 # Sprint 7 Dependencies - Cron/Scheduled Tasks
